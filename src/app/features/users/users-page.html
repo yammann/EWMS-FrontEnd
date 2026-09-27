@@ -1,0 +1,549 @@
+<section class="users-page" dir="rtl">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="page-title">
+      <span class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        إدارة المستخدمين
+      </span>
+      <h1>المستخدمون</h1>
+      <p>إدارة حسابات المستخدمين وتوزيعهم على الأقسام والفروع.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="refresh-btn" (click)="load()" [disabled]="loading()">
+        <svg class="icon" [class.spin]="loading()" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"></path>
+          <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"></path>
+        </svg>
+        <span>{{ loading() ? 'جاري التحديث...' : 'تحديث' }}</span>
+      </button>
+
+      @if (canManage()) {
+        <button type="button" class="new-btn" (click)="openCreate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+          <span>مستخدم جديد</span>
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="stats-grid">
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <span class="stat-label">إجمالي المستخدمين</span>
+      </div>
+      <div class="stat-value">{{ stats().total }}</div>
+      <div class="stat-footer">
+        <span class="stat-description">جميع الحسابات المسجلة</span>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <path d="m9 11 3 3L22 4"></path>
+          </svg>
+        </div>
+        <span class="stat-label">الحسابات النشطة</span>
+      </div>
+      <div class="stat-value">{{ stats().active }}</div>
+      <div class="stat-footer">
+        <span class="live-dot"></span>
+        <span class="stat-description">قادرة على تسجيل الدخول</span>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 8v4M12 16h.01"></path>
+          </svg>
+        </div>
+        <span class="stat-label">الحسابات المعطّلة</span>
+      </div>
+      <div class="stat-value">{{ stats().inactive }}</div>
+      <div class="stat-footer">
+        <span class="stat-description">موقوفة مؤقتاً</span>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+        </div>
+        <span class="stat-label">الأدوار</span>
+      </div>
+      <div class="stat-value">{{ stats().roles }}</div>
+      <div class="stat-footer">
+        <span class="stat-description">متاحة للتعيين</span>
+      </div>
+    </article>
+  </section>
+
+  <!-- Users List -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-kicker">السجل</span>
+        <h2>قائمة المستخدمين</h2>
+        <p>اضغط أيقونة التعديل لتحديث بيانات مستخدم، أو الحذف لإزالته.</p>
+      </div>
+      <span class="pill">{{ users().length }} مستخدم</span>
+    </div>
+
+    @if (loading()) {
+      <div class="skeleton-list">
+        @for (item of [1,2,3,4,5]; track item) {
+          <div class="skeleton-row users-skeleton">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        }
+      </div>
+    } @else if (users().length) {
+      <div class="table-wrap">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>المستخدم</th>
+              <th>الدور</th>
+              <th>المكتب</th><th>القسم</th>
+              <th>الفرع</th>
+              <th>الحالة</th>
+              <th class="actions-th">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr [class.selected]="selectedUser()?.id === user.id">
+                <td>
+                  <div class="user-cell-name">
+                    <div class="user-avatar">{{ (user.fullName || 'م').charAt(0) }}</div>
+                    <div class="user-details">
+                      <strong>{{ user.fullName || 'مستخدم بدون اسم' }}</strong>
+                      <small>{{ user.email }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="role-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                      <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
+                    </svg>
+                    {{ user.roleName || '—' }}
+                  </span>
+                </td>
+                <td>{{ user.officeName || '—' }}</td>
+<td>
+                  <span class="department-cell-text">{{ user.departmentName || '—' }}</span>
+                </td>
+                <td>
+                  <span class="branch-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                      <path d="M3 21h18"></path>
+                      <path d="M5 21V5l7-3 7 3v16"></path>
+                    </svg>
+                    {{ user.branchName || '—' }}
+                  </span>
+                </td>
+                <td>
+                  @if (user.isActive) {
+                    <span class="status-badge status-active">
+                      <span class="status-badge-dot"></span>
+                      نشط
+                    </span>
+                  } @else {
+                    <span class="status-badge status-archived">
+                      <span class="status-badge-dot"></span>
+                      معطّل
+                    </span>
+                  }
+                </td>
+                <td>
+                  <div class="row-actions">
+                    @if (canManage()) {
+                      <button type="button" class="icon-btn edit" title="تعديل"
+                              (click)="openEdit(user)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                        </svg>
+                      </button>
+                    }
+
+                    @if (canManage()) {
+                      <button type="button" class="icon-btn danger" title="حذف"
+                              (click)="deleteUser(user)"
+                              [disabled]="saving() === 'delete-' + user.id">
+                        @if (saving() === 'delete-' + user.id) {
+                          <span class="button-spinner dark"></span>
+                        } @else {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"></path>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                          </svg>
+                        }
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h3>لا يوجد مستخدمون</h3>
+        <p>ابدأ بالضغط على زر "مستخدم جديد" في الأعلى.</p>
+      </div>
+    }
+  </section>
+
+  <!-- ============================================================
+       Modals
+       ============================================================ -->
+  @if (activeModal(); as modal) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+
+        <header class="modal-header">
+          <div>
+            <span class="panel-kicker">إجراء</span>
+            <h2>{{ modalTitle(modal) }}</h2>
+          </div>
+
+          <button type="button" class="modal-close" (click)="closeModal()" aria-label="إغلاق">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6 6 18M6 6l12 12"></path>
+            </svg>
+          </button>
+        </header>
+
+        <div class="modal-body">
+
+          @switch (modal) {
+
+            <!-- CREATE -->
+            @case ('create') {
+              <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
+                <div class="form-grid">
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-fullname">الاسم الكامل</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      <input id="create-fullname" type="text" formControlName="fullName"
+                             placeholder="مثال: محمد الأحمد" autocomplete="off" />
+                    </div>
+                    @if (createForm.controls.fullName.touched && createForm.controls.fullName.invalid) {
+                      <small class="form-error">أدخل اسماً لا يقل عن 3 أحرف.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-email">البريد الإلكتروني</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                        <path d="m22 6-10 7L2 6"></path>
+                      </svg>
+                      <input id="create-email" type="email" formControlName="email"
+                             placeholder="user@example.com" autocomplete="off" dir="ltr" />
+                    </div>
+                    @if (createForm.controls.email.touched && createForm.controls.email.invalid) {
+                      <small class="form-error">أدخل بريداً إلكترونياً صحيحاً.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-password">كلمة المرور</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                      <input id="create-password" type="password" formControlName="password"
+                             placeholder="6 أحرف على الأقل" autocomplete="new-password" />
+                    </div>
+                    @if (createForm.controls.password.touched && createForm.controls.password.invalid) {
+                      <small class="form-error">كلمة المرور مطلوبة (6 أحرف على الأقل).</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-role">الدور</label>
+                    <select id="create-role" formControlName="roleId">
+                      <option value="">اختر الدور</option>
+                      @for (role of roles(); track role.id) {
+                        <option [value]="role.id">{{ role.name }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  @if (placement().needsBranch) {
+                  <div class="form-field">
+                    <label class="form-label" for="create-branch">الفرع</label>
+                    <select id="create-branch" formControlName="branchId" (change)="branchChanged()">
+                      <option value="">اختر الفرع</option>
+                      @for (branch of branches(); track branch.id) {
+                        <option [value]="branch.id">{{ branch.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+
+                  @if (placement().needsDepartment) {
+                  <div class="form-field">
+                    <label class="form-label" for="create-dept">القسم</label>
+                    <select id="create-dept" formControlName="departmentId" (change)="departmentChanged()">
+                      <option value="">اختر القسم</option>
+                      @for (department of filteredDepartments(); track department.id) {
+                        <option [value]="department.id">{{ department.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+                  @if (placement().needsOffice) {
+                  <div class="form-field">
+                    <label class="form-label" for="create-office">المكتب</label>
+                    <select id="create-office" formControlName="officeId">
+                      <option value="">اختر المكتب</option>
+                      @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
+                    </select>
+                    <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
+                  </div>
+                  }
+
+
+                </div>
+
+                <div class="modal-actions">
+                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
+                  <button type="submit" [disabled]="createForm.invalid || saving() === 'create'">
+                    @if (saving() === 'create') {
+                      <span class="button-spinner"></span>
+                      <span>جاري الإنشاء...</span>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M12 5v14M5 12h14"></path>
+                      </svg>
+                      <span>إنشاء المستخدم</span>
+                    }
+                  </button>
+                </div>
+              </form>
+            }
+
+            <!-- EDIT -->
+            @case ('edit') {
+              <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
+                <div class="form-grid">
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-fullname">الاسم الكامل</label>
+                    <input id="edit-fullname" type="text" formControlName="fullName" />
+                    @if (editForm.controls.fullName.touched && editForm.controls.fullName.invalid) {
+                      <small class="form-error">أدخل اسماً لا يقل عن 3 أحرف.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-email">البريد الإلكتروني</label>
+                    <input id="edit-email" type="email" formControlName="email" dir="ltr" />
+                    @if (editForm.controls.email.touched && editForm.controls.email.invalid) {
+                      <small class="form-error">أدخل بريداً إلكترونياً صحيحاً.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-password">كلمة المرور الجديدة</label>
+                    <input id="edit-password" type="password" formControlName="password"
+                           placeholder="اتركها فارغة لعدم التغيير" autocomplete="new-password" />
+                    <small class="form-hint">اترك الحقل فارغاً إن لم ترغب بتغيير كلمة المرور.</small>
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-role">الدور</label>
+                    <select id="edit-role" formControlName="roleId">
+                      <option value="">اختر الدور</option>
+                      @for (role of roles(); track role.id) {
+                        <option [value]="role.id">{{ role.name }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  @if (placement().needsBranch) {
+                  <div class="form-field">
+                    <label class="form-label" for="edit-branch">الفرع</label>
+                    <select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
+                      <option value="">اختر الفرع</option>
+                      @for (branch of branches(); track branch.id) {
+                        <option [value]="branch.id">{{ branch.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+
+                  @if (placement().needsDepartment) {
+                  <div class="form-field">
+                    <label class="form-label" for="edit-dept">القسم</label>
+                    <select id="edit-dept" formControlName="departmentId" (change)="departmentChanged()">
+                      <option value="">اختر القسم</option>
+                      @for (department of filteredDepartments(); track department.id) {
+                        <option [value]="department.id">{{ department.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+                  @if (placement().needsOffice) {
+                  <div class="form-field">
+                    <label class="form-label" for="edit-office">المكتب</label>
+                    <select id="edit-office" formControlName="officeId">
+                      <option value="">اختر المكتب</option>
+                      @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
+                    </select>
+                    <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
+                  </div>
+                  }
+
+
+                </div>
+
+                <label class="toggle-row">
+                  <input type="checkbox" formControlName="isActive" />
+                  <span class="toggle-text">
+                    <strong>حساب نشط</strong>
+                    <small>الحساب المعطّل لا يستطيع تسجيل الدخول</small>
+                  </span>
+                </label>
+
+                <div class="modal-actions">
+                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
+                  <button type="submit" [disabled]="editForm.invalid || saving() === 'edit'">
+                    @if (saving() === 'edit') {
+                      <span class="button-spinner"></span>
+                      <span>جاري الحفظ...</span>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M20 6 9 17l-5-5"></path>
+                      </svg>
+                      <span>حفظ التعديل</span>
+                    }
+                  </button>
+                </div>
+              </form>
+            }
+          }
+
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================
+       Confirm Dialog
+       ============================================================ -->
+  @if (confirmDialog(); as confirm) {
+    <div class="modal-backdrop confirm-backdrop" (click)="confirmNo()">
+      <div class="confirm-dialog" (click)="$event.stopPropagation()" role="alertdialog" aria-modal="true">
+
+        <div class="confirm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 9v4"></path>
+            <path d="M12 17h.01"></path>
+            <path d="M10.3 3.6 2.4 17a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"></path>
+          </svg>
+        </div>
+
+        <h3>تأكيد الإجراء</h3>
+        <p>{{ confirm.message }}</p>
+
+        <div class="confirm-actions">
+          <button type="button" class="ghost" (click)="confirmNo()">إلغاء</button>
+          <button type="button" class="danger" (click)="confirmYes()">
+            {{ confirm.confirmLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================
+       Toasts
+       ============================================================ -->
+  <div class="toast-container" aria-live="polite">
+    @for (toast of toasts(); track toast.id) {
+      <div class="toast"
+           [class.toast-success]="toast.type === 'success'"
+           [class.toast-error]="toast.type === 'error'"
+           [class.toast-info]="toast.type === 'info'"
+           (click)="dismissToast(toast.id)">
+
+        <div class="toast-icon">
+          @switch (toast.type) {
+            @case ('success') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5"></path>
+              </svg>
+            }
+            @case ('error') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 8v4M12 16h.01"></path>
+              </svg>
+            }
+            @case ('info') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4M12 8h.01"></path>
+              </svg>
+            }
+          }
+        </div>
+
+        <span class="toast-message">{{ toast.message }}</span>
+
+        <button type="button" class="toast-close" aria-label="إغلاق"
+                (click)="dismissToast(toast.id); $event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    }
+  </div>
+
+</section>

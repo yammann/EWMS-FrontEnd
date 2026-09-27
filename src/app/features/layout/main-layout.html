@@ -1,0 +1,64 @@
+<main class="shell">
+  <aside class="sidebar">
+    <div class="flag-strip" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="brand">
+      <span class="brand-mark">★ ★ ★</span>
+      <div>
+        <strong>EWMS</strong>
+        <small>نظام إدارة سير العمل</small>
+      </div>
+    </div>
+
+    <nav aria-label="التنقل الرئيسي">
+
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          لوحة المتابعة
+        </a>
+      <a routerLink="/profile" routerLinkActive="active">ملفي وإجازاتي</a>
+      <a routerLink="/notifications" routerLinkActive="active" class="nav-notifications">
+        الإشعارات
+        @if (unreadCount() > 0) { <span class="nav-badge" aria-label="إشعارات غير مقروءة">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span> }
+      </a>
+      @if (canReviewVacations()) { <a routerLink="/vacations/review" routerLinkActive="active">مراجعة الإجازات</a> }
+      @if (canManageVacationTypes()) { <a routerLink="/vacation-types" routerLinkActive="active">أنواع الإجازات</a> }
+      @if (canManageOffices()) { <a routerLink="/offices" routerLinkActive="active">المكاتب</a> }
+
+      @if (canManageDepartments()) {
+        <a routerLink="/departments" routerLinkActive="active">الأقسام</a>
+      }
+
+      @if (canManageBranches()) {
+        <a routerLink="/branches" routerLinkActive="active">الفروع</a>
+      }
+
+      @if (canManageUsers()) {
+        <a routerLink="/users" routerLinkActive="active">الموظفون</a>
+      }
+
+      @if (canManageRoles()) {
+        <a routerLink="/roles" routerLinkActive="active">الأدوار</a>
+      }
+
+    </nav>
+
+    @if (user()) {
+      <section class="profile">
+        <small>المستخدم الحالي</small>
+        <strong>{{ user()?.fullName || user()?.email }}</strong>
+        <span>{{ user()?.role }}</span>
+      </section>
+    }
+
+    <button class="logout" type="button" (click)="logout()">تسجيل الخروج</button>
+  </aside>
+
+  <section class="workspace">
+    <router-outlet />
+  </section>
+</main>
+
+<!-- خارج .shell: الـ shell عبارة عن grid بعمودين، وأي عنصر إضافي داخله يأخذ خلية ويكسر التخطيط -->
+<app-notification-toasts />
