@@ -63,6 +63,10 @@ export class EwmsService {
     return this.api.get<User[]>('/Users/GetAll');
   }
 
+  getUsersByBranch(branchId: number) {
+    return this.api.get<User[]>(`/Users/Branch/${branchId}`);
+  }
+
   createUser(form: FormData) {
     return this.api.post<User>('/Users/Create', form);
   }

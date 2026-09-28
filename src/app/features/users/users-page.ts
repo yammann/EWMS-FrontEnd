@@ -311,7 +311,9 @@ export class UsersPage {
   }
 
   private placementOf(form: FormGroup): UserPlacement {
-    const role = this.roles().find(r => String(r.id) === String(form.value.roleId));
+    // قيمة الحقل نفسه وليس form.value: داخل valueChanges للدور لم تُحدَّث قيمة النموذج بعد،
+    // فكان التحقق يُحسب على الدور السابق (المكتب يبقى إجبارياً وهو مخفي → زر الإضافة معطّل)
+    const role = this.roles().find(r => String(r.id) === String(form.get('roleId')?.value));
     return placementForRole(role?.name);
   }
 

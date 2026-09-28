@@ -121,6 +121,6 @@ export class NotificationsPage {
   }
 
   open(n: AppNotification) {
-    this.markRead(n, () => this.router.navigate([notificationRoute(n, this.auth.canReviewVacations())]));
+    this.markRead(n, () => this.router.navigateByUrl(notificationRoute(n, this.auth.canReviewVacations())));
   }
 }

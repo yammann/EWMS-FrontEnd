@@ -36,6 +36,12 @@ describe('Permission guard', () => {
     login('Custom', ['ManageOffices']); expect(run('ManageOffices')).toBe(true);
   });
   it('matches backend approval policy', () => { login('BranchManager', ['ApproveVacation']); expect(run('ApproveVacation')).toBe(true); });
+  it('restricts role-based pages (vacation stats) to leaders', () => {
+    const byRoles = () => TestBed.runInInjectionContext(() =>
+      permissionGuard({ data: { roles: ['SuperAdmin', 'BranchManager', 'Manager', 'OfficeManager'] } } as unknown as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
+    login('OfficeManager'); expect(byRoles()).toBe(true);
+    login('Emp'); expect(TestBed.inject(Router).serializeUrl(byRoles() as any)).toBe('/profile');
+  });
   it('rejects expired sessions', () => {
     login('SuperAdmin', ['ManageUsers']);
     TestBed.inject(AuthService).currentUser.update(u => ({ ...u!, expiresAt: '2000-01-01T00:00:00Z' }));

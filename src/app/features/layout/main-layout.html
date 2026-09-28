@@ -18,12 +18,15 @@
           لوحة المتابعة
         </a>
       <a routerLink="/profile" routerLinkActive="active">ملفي وإجازاتي</a>
+      <a routerLink="/task-board" routerLinkActive="active">لوحة المهام</a>
       <a routerLink="/notifications" routerLinkActive="active" class="nav-notifications">
         الإشعارات
         @if (unreadCount() > 0) { <span class="nav-badge" aria-label="إشعارات غير مقروءة">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span> }
       </a>
       @if (canReviewVacations()) { <a routerLink="/vacations/review" routerLinkActive="active">مراجعة الإجازات</a> }
+      @if (canViewVacationStats()) { <a routerLink="/vacations/stats" routerLinkActive="active">إحصائيات الإجازات</a> }
       @if (canManageVacationTypes()) { <a routerLink="/vacation-types" routerLinkActive="active">أنواع الإجازات</a> }
+      @if (canManageWorkTasks()) { <a routerLink="/work-tasks" routerLinkActive="active">مهام العمل</a> }
       @if (canManageOffices()) { <a routerLink="/offices" routerLinkActive="active">المكاتب</a> }
 
       @if (canManageDepartments()) {
@@ -48,7 +51,7 @@
       <section class="profile">
         <small>المستخدم الحالي</small>
         <strong>{{ user()?.fullName || user()?.email }}</strong>
-        <span>{{ user()?.role }}</span>
+        <span>{{ roleLabel(user()?.role) }}</span>
       </section>
     }
 

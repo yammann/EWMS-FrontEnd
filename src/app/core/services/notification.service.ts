@@ -150,6 +150,8 @@ export class NotificationService {
 
 /** الوجهة عند فتح الإشعار: طلبات تنتظر قرار المدير → المراجعة، وغيرها → ملف الموظف */
 export function notificationRoute(n: AppNotification, canReview: boolean): string {
+  if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
+  if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   const reviewTypes = ['VacationSubmitted', 'VacationForwardedToBranchManager', 'VacationCancelled'];
   return n.relatedEntityType === 'Vacation' && reviewTypes.includes(n.type) && canReview
     ? '/vacations/review' : '/profile';

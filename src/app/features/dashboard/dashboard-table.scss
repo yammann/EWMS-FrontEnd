@@ -1,0 +1,13 @@
+/* جداول الداشبورد: مضغوطة (الجدول العام له min-width: 700px) */
+:host { display: block; min-width: 0; }
+/* تتسع في نصف عرض الشاشة (لوحتان جنباً إلى جنب) دون شريط تمرير أفقي */
+table.compact { min-width: 400px; }
+.cell-strong { color: var(--ink-900); font-weight: 700; }
+.nowrap { white-space: nowrap; }
+.wrap-cell { white-space: normal; line-height: 1.7; }
+small.now { color: var(--brand-700); font-weight: 700; }
+.cell-link { color: var(--ink-900); font-weight: 700; text-decoration: none; }
+.cell-link:hover { color: var(--brand-700); text-decoration: underline; }
+.status-rejected { color: var(--danger-700); background: var(--danger-50); border-color: var(--danger-100); }
+.status-rejected .status-badge-dot { background: var(--danger-500); }
+.empty-inline { margin: 0; padding: 18px; text-align: center; color: var(--ink-400); font-size: 13px; border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
