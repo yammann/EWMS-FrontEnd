@@ -1,3 +1,4 @@
+import { DeviceShortcuts } from '../devices/device-shortcuts';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,7 +15,7 @@ import { StatTile, TaskCards } from './dashboard-widgets';
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه وآخر إشعاراته */
 @Component({
   selector: 'app-employee-dashboard', standalone: true,
-  imports: [CommonModule, RouterLink, StatTile, TaskCards],
+  imports: [CommonModule, RouterLink, StatTile, TaskCards, DeviceShortcuts],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -46,6 +47,8 @@ import { StatTile, TaskCards } from './dashboard-widgets';
           <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام الموكلة إليك</h2><p>اضغط على المهمة لفتح صفحتها</p></div></div>
           <app-task-cards [tasks]="tasks()" emptyText="لا توجد مهام موكلة إليك بعد" />
         </section>
+
+        <app-device-shortcuts />
 
         <section class="panel">
           <div class="panel-heading"><div><h2>فريقي</h2>@if (d.teamName) { <p>زملاؤك في {{ d.teamName }}</p> }</div></div>

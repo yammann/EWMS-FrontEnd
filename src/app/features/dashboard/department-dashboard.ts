@@ -1,3 +1,4 @@
+import { DeviceShortcuts } from '../devices/device-shortcuts';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -12,7 +13,7 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
   selector: 'app-department-dashboard', standalone: true,
-  imports: [RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
+  imports: [RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, DeviceShortcuts],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -47,6 +48,7 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
             <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام المسنَدة إليك</h2></div></div>
             <app-task-cards [tasks]="myTasks()" emptyText="لا توجد مهام مسنَدة إليك" />
           </section>
+          <app-device-shortcuts />
         }
 
         <section class="panel">

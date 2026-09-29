@@ -141,103 +141,6 @@ nav a.active::after {
 }
 
 /* =========================================================
-   Profile
-   ========================================================= */
-.profile {
-  margin-top: auto;
-
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  padding: 14px;
-  border-radius: 12px;
-
-  background: rgba(255, 255, 255, .05);
-  border: 1px solid rgba(255, 255, 255, .06);
-}
-
-.profile small {
-  color: rgba(255, 255, 255, .45);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-}
-
-.profile strong {
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profile span {
-  margin-top: 2px;
-
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-
-  padding: 3px 9px;
-
-  border-radius: 999px;
-
-  background: rgba(0, 122, 61, .22);
-  color: var(--brand-300);
-
-  font-size: 10px;
-  font-weight: 800;
-}
-
-/* =========================================================
-   Logout
-   ========================================================= */
-.logout {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 100%;
-  min-height: 42px;
-
-  padding: 0 16px;
-
-  border: 1px solid rgba(206, 17, 38, .28);
-  border-radius: 10px;
-
-  background: rgba(206, 17, 38, .12);
-  color: #fca5a5;
-
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 800;
-
-  cursor: pointer;
-
-  transition:
-    background .15s ease,
-    border-color .15s ease,
-    color .15s ease,
-    transform .15s ease;
-}
-
-.logout:hover {
-  background: var(--danger-600);
-  border-color: var(--danger-600);
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(206, 17, 38, .25);
-  transform: translateY(-1px);
-}
-
-.logout:active {
-  transform: translateY(0);
-}
-
-/* =========================================================
    Workspace
    ========================================================= */
 .workspace {
@@ -286,9 +189,6 @@ nav a.active::after {
     transform: none;
   }
 
-  .profile {
-    margin-top: 0;
-  }
 }
 
 @media (max-width: 480px) {
@@ -310,9 +210,118 @@ nav a.active::after {
   .brand strong { font-size: 14px; }
   .brand small  { font-size: 10px; }
 }
-.nav-notifications { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.nav-badge {
-  min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px;
-  display: inline-grid; place-items: center;
-  background: #dc2626; color: #fff; font-size: 11px; font-weight: 800; line-height: 1;
+
+/* =========================================================
+   Topbar (النافبار) — الإشعارات والملف الشخصي وتسجيل الخروج
+   ========================================================= */
+.workspace { --topbar-h: 64px; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 28px;
+  background: rgba(255, 255, 255, .88);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.greeting { font-size: 14px; color: var(--ink-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.greeting strong { color: var(--ink-900); font-weight: 800; }
+
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.top-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-600);
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.top-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.top-btn:hover, .top-btn.active { background: var(--brand-50); color: var(--brand-700); border-color: var(--brand-200, var(--border-strong)); }
+.top-btn .badge {
+  position: absolute;
+  top: -6px;
+  inset-inline-end: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 4px 14px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  color: inherit;
+  text-decoration: none;
+  transition: background .15s ease, border-color .15s ease;
+}
+.me:hover, .me.active { background: var(--surface); border-color: var(--border); }
+.avatar {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+.me-text { display: grid; min-width: 0; max-width: 200px; }
+.me-text strong { font-size: 13px; font-weight: 800; color: var(--ink-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.me-text small { font-size: 11px; font-weight: 700; color: var(--brand-700); }
+
+.logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(206, 17, 38, .25);
+  border-radius: 12px;
+  background: rgba(206, 17, 38, .06);
+  color: var(--danger-600, #ce1126);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.logout svg { width: 18px; height: 18px; fill: currentColor; }
+.logout:hover { background: var(--danger-600, #ce1126); border-color: var(--danger-600, #ce1126); color: #fff; box-shadow: none; transform: none; }
+
+@media (max-width: 860px) {
+  .topbar { padding: 0 16px; }
+  .greeting { display: none; }
+  .topbar-actions { width: 100%; justify-content: flex-end; }
+}
+@media (max-width: 560px) {
+  .me-text, .logout span { display: none; }
+  .me { padding: 2px; }
+  .logout { padding: 0 11px; }
 }

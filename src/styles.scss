@@ -982,10 +982,20 @@ td small {
 .modal-close:hover { background: var(--ink-200); color: var(--ink-900); box-shadow: none; transform: none; }
 .modal-close svg { width: 16px; height: 16px; }
 
+/* عندما يلفّ <form> جسم النافذة يجب أن يكون هو أيضاً flex حتى يعمل السكرول داخل .modal-body */
+.modal > form {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .modal-body {
   flex: 1;
+  min-height: 0;
   padding: 22px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modal-actions {
@@ -995,6 +1005,15 @@ td small {
   margin-top: 8px;
 }
 .modal-actions .ghost { min-width: 90px; }
+/* أزرار النافذة خارج الجسم: شريط ثابت أسفلها بينما يتمرر المحتوى */
+.modal > .modal-actions,
+.modal > form > .modal-actions {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
 
 /* =========================================================
    Confirm dialog

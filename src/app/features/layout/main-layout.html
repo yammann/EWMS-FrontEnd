@@ -17,12 +17,7 @@
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           لوحة المتابعة
         </a>
-      <a routerLink="/profile" routerLinkActive="active">ملفي وإجازاتي</a>
       <a routerLink="/task-board" routerLinkActive="active">لوحة المهام</a>
-      <a routerLink="/notifications" routerLinkActive="active" class="nav-notifications">
-        الإشعارات
-        @if (unreadCount() > 0) { <span class="nav-badge" aria-label="إشعارات غير مقروءة">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span> }
-      </a>
       @if (canReviewVacations()) { <a routerLink="/vacations/review" routerLinkActive="active">مراجعة الإجازات</a> }
       @if (canViewVacationStats()) { <a routerLink="/vacations/stats" routerLinkActive="active">إحصائيات الإجازات</a> }
       @if (canManageVacationTypes()) { <a routerLink="/vacation-types" routerLinkActive="active">أنواع الإجازات</a> }
@@ -47,18 +42,30 @@
 
     </nav>
 
-    @if (user()) {
-      <section class="profile">
-        <small>المستخدم الحالي</small>
-        <strong>{{ user()?.fullName || user()?.email }}</strong>
-        <span>{{ roleLabel(user()?.role) }}</span>
-      </section>
-    }
-
-    <button class="logout" type="button" (click)="logout()">تسجيل الخروج</button>
   </aside>
 
   <section class="workspace">
+    <!-- النافبار: الإشعارات والملف الشخصي وتسجيل الخروج -->
+    <header class="topbar">
+      <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
+      <div class="topbar-actions">
+        <a class="top-btn bell" routerLink="/notifications" routerLinkActive="active"
+           [attr.aria-label]="unreadCount() ? 'الإشعارات — ' + unreadCount() + ' غير مقروء' : 'الإشعارات'" title="الإشعارات">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-1.7 1.7A1 1 0 0 0 4 19.4h16a1 1 0 0 0 .7-1.7Z"/></svg>
+          @if (unreadCount() > 0) { <span class="badge">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span> }
+        </a>
+        @if (user()) {
+          <a class="me" routerLink="/profile" routerLinkActive="active" title="ملفي وإجازاتي">
+            <span class="avatar" aria-hidden="true">{{ initial() }}</span>
+            <span class="me-text"><strong>{{ user()?.fullName || user()?.email }}</strong><small>{{ roleLabel(user()?.role) }}</small></span>
+          </a>
+        }
+        <button class="logout" type="button" (click)="logout()" title="تسجيل الخروج">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5v-2H6V6h4Zm4.3 3.3-1.4 1.4 2.3 2.3H8v2h7.2l-2.3 2.3 1.4 1.4L19 12Z" transform="scale(-1 1) translate(-24 0)"/></svg>
+          <span>تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
     <router-outlet />
   </section>
 </main>

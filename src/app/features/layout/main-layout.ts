@@ -19,6 +19,10 @@ export class MainLayout {
   user = this.auth.currentUser;
   unreadCount = this.notifications.unreadCount;
   roleLabel = roleLabel;
+  /** للنافبار: الاسم الأول والحرف الأول للصورة الرمزية */
+  private displayName = computed(() => (this.user()?.fullName || this.user()?.email || '').trim());
+  firstName = computed(() => this.displayName().split(/\s+/)[0] ?? '');
+  initial = computed(() => this.displayName().charAt(0).toUpperCase() || '؟');
 
   constructor() {
     // اتصال لحظي (SignalR) لاستقبال الإشعارات فور حدوثها

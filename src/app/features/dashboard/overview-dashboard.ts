@@ -1,3 +1,4 @@
+import { BranchMapComponent } from '../map/branch-map';
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -11,14 +12,18 @@ import { ActivityList, CountBars, StatTile } from './dashboard-widgets';
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع + صفحات الإدارة */
 @Component({
   selector: 'app-overview-dashboard', standalone: true,
-  imports: [RouterLink, StatTile, ActivityList, CountBars],
+  imports: [RouterLink, StatTile, ActivityList, CountBars, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">مدير النظام</span><h1>نظرة عامة على المؤسسة</h1><p class="header-sub">الهيكل التنظيمي والكادر ومهام العمل في كل الفروع</p></div>
-        <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
-      </header>
+      <!-- خريطة سوريا مثبّتة في رأس الصفحة (بلا إطار) — يتصفح السوبر ادمن بيانات أي فرع (حالياً: الفرع التقني).
+           محتوى اللوحة داخلها (ng-content) هو الصفحة التي تنزلق فوق الخريطة أثناء السكرول فتنغلق؛
+           رأس الصفحة (.page-header) يُعرض أولاً مباشرة بعد الخريطة -->
+      <app-branch-map>
+        <header class="page-header">
+          <div><span class="eyebrow">مدير النظام</span><h1>نظرة عامة على المؤسسة</h1><p class="header-sub">الهيكل التنظيمي والكادر ومهام العمل في كل الفروع</p></div>
+          <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
+        </header>
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
@@ -79,6 +84,7 @@ import { ActivityList, CountBars, StatTile } from './dashboard-widgets';
           }
         </div>
       </section>
+      </app-branch-map>
     </div>`,
   styles: [`
     .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }

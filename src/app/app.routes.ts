@@ -14,6 +14,12 @@ import { VacationTypesPage } from './features/vacations/vacation-types-page';
 import { VacationStatsPage } from './features/vacations/vacation-stats-page';
 import { LEADER_ROLES } from './core/utils/roles';
 import { TaskBoardPage } from './features/task-board/task-board-page';
+import { deviceGuard } from './core/guards/device.guard';
+import { RegionsPage } from './features/devices/regions-page';
+import { SitesPage } from './features/devices/sites-page';
+import { SiteDetailsPage } from './features/devices/site-details-page';
+import { DevicesCatalogPage } from './features/devices/devices-catalog-page';
+import { InstallationsPage } from './features/devices/installations-page';
 import { OfficesPage } from './features/offices/offices-page';
 import { permissionGuard } from './core/guards/permission.guard';
 import { DepartmentsPage } from './features/departments/departments-page';
@@ -42,6 +48,13 @@ export const routes: Routes = [
       { path: 'notifications', component: NotificationsPage },
       // لوحة المهام المُسندة (لكل المستخدمين: الموظف يستقبل، والرؤساء يُسندون ويتابعون)
       { path: 'task-board', component: TaskBoardPage },
+      // توثيق الأجهزة — قسم العمليات في الفرع التقني (المشاهدة لموظفيه، الإدارة لرئيسه)
+      { path: 'devices', pathMatch: 'full', redirectTo: 'devices/installations' },
+      { path: 'devices/installations', component: InstallationsPage, canActivate: [deviceGuard] },
+      { path: 'devices/regions', component: RegionsPage, canActivate: [deviceGuard] },
+      { path: 'devices/sites', component: SitesPage, canActivate: [deviceGuard] },
+      { path: 'devices/sites/:id', component: SiteDetailsPage, canActivate: [deviceGuard] },
+      { path: 'devices/catalog', component: DevicesCatalogPage, canActivate: [deviceGuard] },
       { path: 'vacations/review', component: VacationReviewPage, canActivate: [permissionGuard], data: { permission: 'ApproveVacation' } },
       { path: 'vacations/stats', component: VacationStatsPage, canActivate: [permissionGuard], data: { roles: LEADER_ROLES } },
       { path: 'vacation-types', component: VacationTypesPage, canActivate: [permissionGuard], data: { permission: 'ManageVacationTypes' } },

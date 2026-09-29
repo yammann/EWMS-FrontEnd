@@ -1,3 +1,4 @@
+import { DeviceShortcuts } from '../devices/device-shortcuts';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,7 +15,7 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
 /** لوحة رئيس المكتب */
 @Component({
   selector: 'app-office-dashboard', standalone: true,
-  imports: [CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
+  imports: [CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, DeviceShortcuts],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -51,6 +52,7 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
             <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام المسنَدة إليك</h2></div></div>
             <app-task-cards [tasks]="myTasks()" emptyText="لا توجد مهام مسنَدة إليك" />
           </section>
+          <app-device-shortcuts />
         }
 
         <section class="panel">

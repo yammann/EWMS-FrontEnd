@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
+import { DeviceService } from './device.service';
 import { LoginRequest } from '../models/login-request.model';
 import { AuthResponse, AuthUser } from '../models/auth-response.model';
 
@@ -14,12 +15,15 @@ export class AuthService {
   private api = inject(ApiService);
   private router = inject(Router);
   private notifications = inject(NotificationService);
+  private devices = inject(DeviceService);
 
   currentUser = signal<AuthUser | null>(this.loadUser());
 
   login(request: LoginRequest) {
     return this.api.post<AuthResponse>('/Auth/login', request).pipe(
       tap(response => {
+        // صلاحيات توثيق الأجهزة تخص المستخدم — تُعاد قراءتها للمستخدم الجديد
+        this.devices.resetAccess();
         if (response.token) {
           localStorage.setItem(TOKEN_KEY, response.token);
         }
@@ -47,6 +51,7 @@ export class AuthService {
 
   clearSession() {
     this.notifications.stop();
+    this.devices.resetAccess();
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     this.currentUser.set(null);

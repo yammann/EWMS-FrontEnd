@@ -1,0 +1,54 @@
+<div #stage class="stage" (mouseleave)="unhover()" (contextmenu)="goBack($event)" (keydown.escape)="goBack($event)">
+  @if (projection()) {
+    <svg #svg [attr.viewBox]="viewBox()" preserveAspectRatio="xMidYMid meet" [style.height]="height()"
+         [class.country]="!focus()" [class.zoomed]="!!focus()" [class.pickable]="pickable() && !!focus()"
+         (click)="svgClick($event)" role="group" aria-label="خريطة سوريا — المحافظات">
+
+      <!-- القطع (المحافظات) -->
+      @for (g of govs(); track g.code) {
+        <path class="piece" [attr.d]="g.path" [attr.fill]="fillFor()(g.code)"
+              [class.hovered]="hovered() === g.code" [class.focused]="focus() === g.code" [class.faded]="!!focus() && focus() !== g.code"
+              [attr.tabindex]="focus() ? -1 : 0" role="button" [attr.aria-label]="'محافظة ' + g.nameAr + (subFor()(g.code) ? ' — ' + subFor()(g.code) : '')"
+              (mouseenter)="hover(g, $event)" (mousemove)="moveTip($event)" (mouseleave)="unhover()"
+              (click)="selectGovernorate(g, $event)" (keydown.enter)="selectGovernorate(g, $event)" (keydown.space)="selectGovernorate(g, $event)" />
+      }
+
+      <!-- القطعة المرفوعة عند المرور (نسخة فوق الجميع؛ يبقى مكانها ظاهراً تحتها) -->
+      @if (hoveredGov(); as h) {
+        <path class="lifted" [attr.d]="h.path" [attr.fill]="fillFor()(h.code)" pointer-events="none" />
+      }
+
+      <!-- أسماء المحافظات والشارات (عرض سوريا فقط) -->
+      @if (!focus()) {
+        @for (g of govs(); track g.code) {
+          <g class="label" [class.up]="hovered() === g.code" pointer-events="none">
+            <text [attr.x]="g.label[0]" [attr.y]="g.label[1]" text-anchor="middle" dominant-baseline="middle">{{ g.nameAr }}</text>
+            @if (badgeFor()(g.code); as n) {
+              <circle [attr.cx]="g.label[0]" [attr.cy]="g.label[1] + 24" r="13" class="badge" />
+              <text class="badge-text" [attr.x]="g.label[0]" [attr.y]="g.label[1] + 24" text-anchor="middle" dominant-baseline="central">{{ n }}</text>
+            }
+          </g>
+        }
+      }
+
+      <!-- نقاط المواقع (عرض المحافظة) -->
+      @for (p of projectedPoints(); track p.id) {
+        <g class="point" [class.selected]="p.selected" tabindex="0" role="button" [attr.aria-label]="p.label + (p.sub ? ' — ' + p.sub : '')"
+           (click)="selectPoint(p.id, $event)" (keydown.enter)="selectPoint(p.id, $event)"
+           (mouseenter)="moveTip($event, p.label, p.sub ?? '')" (mousemove)="moveTip($event)" (mouseleave)="tip.set(null)">
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" [attr.r]="(p.selected ? 10 : 7.5) * z()" />
+          @if (showPointLabels()) {
+            <text [attr.x]="p.x" [attr.y]="p.y - 14 * z()" [attr.font-size]="12 * z()" text-anchor="middle">{{ p.label }}</text>
+          }
+        </g>
+      }
+    </svg>
+  } @else {
+    <div class="loading" [style.height]="height()" role="status">جارٍ تحميل الخريطة…</div>
+  }
+
+  @if (tip(); as t) {
+    <div class="tip" [style.left.px]="t.x" [style.top.px]="t.y" role="tooltip"><strong>{{ t.title }}</strong>@if (t.sub) { <span>{{ t.sub }}</span> }</div>
+  }
+  <small class="attribution">{{ attribution }}</small>
+</div>
