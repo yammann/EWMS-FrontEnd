@@ -1,0 +1,226 @@
+/* =========================================================
+   EWMS — Design tokens
+   الهوية البصرية السورية: خط قمرة (Qomra Arabic) + أربع لوحات ألوان يختارها المستخدم،
+   كل لوحة بوضع فاتح وداكن. الواجهة بأسلوب Apple: أسطح هادئة، مواد شفافة، زوايا واسعة.
+
+   الاستخدام: لا ألوان مباشرة في المكوّنات — فقط هذه المتغيرات، حتى تعمل كل الثيمات والوضع الليلي.
+   - --brand-600: لون الإجراء الأساسي (زر، رابط، العنصر النشط) — خلفية نصّها --on-brand
+   - --brand-700/800: نص بلون الثيم فوق خلفية فاتحة من نفس اللون (--brand-50/100)
+   - --brand-50..300: درجات شفافة من لون الثيم (تعمل فوق أي سطح، فاتح أو داكن)
+   - --accent: الذهبي (لون الشعار) — ثابت في كل الثيمات
+   ========================================================= */
+
+/* ---------- الخط ---------- */
+@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-light.otf") format("opentype"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-regular.otf") format("opentype"); font-weight: 400 500; font-display: swap; }
+@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-bold.otf") format("opentype"); font-weight: 600 900; font-display: swap; }
+
+:root {
+  --font-sans: "Qomra Arabic", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Tahoma, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* الهوية: لون الشعار */
+  --accent: #988561;
+  --accent-soft: #edebe0;
+
+  /* ---------- الأسطح والنصوص (الوضع الفاتح — نظام ألوان Apple) ---------- */
+  --page-bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-alt: #fbfbfd;
+  --surface-raised: #ffffff;
+  --fill: rgba(118, 118, 128, .12);          /* حقول الإدخال والأزرار الرمادية */
+  --fill-strong: rgba(118, 118, 128, .2);
+  --border: rgba(0, 0, 0, .08);
+  --border-strong: rgba(0, 0, 0, .14);
+  --separator: rgba(60, 60, 67, .12);
+
+  --ink-900: #1d1d1f;
+  --ink-800: #2c2c2e;
+  --ink-700: #3a3a3c;
+  --ink-600: #515154;
+  --ink-500: #6e6e73;
+  --ink-400: #86868b;
+  --ink-300: #c7c7cc;
+  --ink-200: #e5e5ea;
+  --ink-100: #f2f2f7;
+  --ink-50: #f9f9fb;
+
+  /* المواد الشفافة (النافبار، السايدبار، النوافذ) */
+  --material: rgba(255, 255, 255, .72);
+  --material-sidebar: rgba(246, 246, 248, .78);
+  --material-blur: saturate(180%) blur(20px);
+  --backdrop: rgba(0, 0, 0, .28);
+
+  /* ---------- الألوان الدلالية (درجاتها الفاتحة شفافة فتعمل في الوضعين) ---------- */
+  --danger-500: #e5484d;
+  --danger-600: #c0283a;
+  --danger-700: #8e1b29;
+  --warning-500: #ff9f0a;
+  --warning-700: #a15c00;
+  --info-500: #0071e3;
+  --info-700: #0058b0;
+  --purple-500: #8944ab;
+  --purple-700: #6b2f8a;
+  --success-500: #248a3d;
+
+  --danger-50: color-mix(in srgb, var(--danger-500) 9%, transparent);
+  --danger-100: color-mix(in srgb, var(--danger-500) 15%, transparent);
+  --warning-50: color-mix(in srgb, var(--warning-500) 11%, transparent);
+  --warning-100: color-mix(in srgb, var(--warning-500) 18%, transparent);
+  --warning-300: color-mix(in srgb, var(--warning-500) 38%, transparent);
+  --info-50: color-mix(in srgb, var(--info-500) 9%, transparent);
+  --info-100: color-mix(in srgb, var(--info-500) 15%, transparent);
+  --info-300: color-mix(in srgb, var(--info-500) 32%, transparent);
+  --purple-50: color-mix(in srgb, var(--purple-500) 9%, transparent);
+  --purple-100: color-mix(in srgb, var(--purple-500) 15%, transparent);
+  --purple-300: color-mix(in srgb, var(--purple-500) 32%, transparent);
+
+  /* ---------- الظلال والزوايا ---------- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .04);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, .03), 0 6px 20px rgba(0, 0, 0, .05);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, .04), 0 16px 40px rgba(0, 0, 0, .09);
+  --shadow-xl: 0 24px 70px rgba(0, 0, 0, .18);
+
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  --ease: cubic-bezier(.25, .1, .25, 1);
+  --ease-spring: cubic-bezier(.32, .72, 0, 1);
+
+  color-scheme: light;
+}
+
+/* ---------- الوضع الداكن (نظام ألوان Apple الداكن) ---------- */
+@mixin dark-surfaces {
+  --page-bg: #000000;
+  --surface: #1c1c1e;
+  --surface-alt: #232325;
+  --surface-raised: #2c2c2e;
+  --fill: rgba(118, 118, 128, .24);
+  --fill-strong: rgba(118, 118, 128, .36);
+  --border: rgba(255, 255, 255, .08);
+  --border-strong: rgba(255, 255, 255, .16);
+  --separator: rgba(84, 84, 88, .6);
+
+  --ink-900: #f5f5f7;
+  --ink-800: #e5e5ea;
+  --ink-700: #d1d1d6;
+  --ink-600: #aeaeb2;
+  --ink-500: #8e8e93;
+  --ink-400: #6e6e73;
+  --ink-300: #48484a;
+  --ink-200: #3a3a3c;
+  --ink-100: #2c2c2e;
+  --ink-50: #1f1f21;
+
+  --material: rgba(28, 28, 30, .72);
+  --material-sidebar: rgba(22, 22, 24, .78);
+  --backdrop: rgba(0, 0, 0, .55);
+
+  --accent: #b9a779;
+  --accent-soft: #2e2a20;
+
+  --danger-500: #ff453a;
+  --danger-600: #ff6961;
+  --danger-700: #ff8a84;
+  --warning-500: #ffb340;
+  --warning-700: #ffc766;
+  --info-500: #0a84ff;
+  --info-700: #64b5ff;
+  --purple-500: #bf5af2;
+  --purple-700: #d59bf6;
+  --success-500: #30d158;
+
+  --shadow-sm: none;
+  --shadow-md: 0 0 0 1px rgba(255, 255, 255, .04);
+  --shadow-lg: 0 0 0 1px rgba(255, 255, 255, .06), 0 16px 40px rgba(0, 0, 0, .5);
+  --shadow-xl: 0 0 0 1px rgba(255, 255, 255, .08), 0 24px 70px rgba(0, 0, 0, .7);
+
+  color-scheme: dark;
+}
+
+:root[data-mode="dark"] { @include dark-surfaces; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode="light"]):not([data-mode="dark"]) { @include dark-surfaces; }
+}
+
+/* =========================================================
+   اللوحات (data-theme على <html>) — كل لوحة: فاتح ثم داكن
+   ========================================================= */
+@mixin palette($p600, $p700, $p800, $p500, $p400, $on-brand) {
+  --brand-600: #{$p600};
+  --brand-700: #{$p700};
+  --brand-800: #{$p800};
+  --brand-900: #{$p800};
+  --brand-500: #{$p500};
+  --brand-400: #{$p400};
+  --on-brand: #{$on-brand};
+}
+
+@mixin palette-tints {
+  --brand-50: color-mix(in srgb, var(--brand-500) 10%, transparent);
+  --brand-100: color-mix(in srgb, var(--brand-500) 16%, transparent);
+  --brand-200: color-mix(in srgb, var(--brand-500) 26%, transparent);
+  --brand-300: color-mix(in srgb, var(--brand-500) 42%, transparent);
+  --focus-ring: color-mix(in srgb, var(--brand-500) 35%, transparent);
+}
+
+@mixin theme($name, $light, $dark) {
+  :root[data-theme="#{$name}"] { @include palette($light...); }
+  :root[data-theme="#{$name}"][data-mode="dark"] { @include palette($dark...); }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="#{$name}"]:not([data-mode="light"]):not([data-mode="dark"]) { @include palette($dark...); }
+  }
+}
+
+:root { @include palette-tints; }
+
+// Forest (الافتراضي)
+:root { @include palette(#054239, #002623, #001a18, #428177, #6aa197, #fff); }
+@include theme("forest",
+  (#054239, #002623, #001a18, #428177, #6aa197, #fff),
+  (#3d8a7e, #8fcbbf, #b5e0d7, #428177, #6aa197, #fff));
+
+// Golden Wheat — الذهبي المُعتم قليلاً للنص الأبيض على الأزرار
+@include theme("wheat",
+  (#7a6a47, #5e5236, #463d28, #988561, #b9a779, #fff),
+  (#b9a779, #d8c9a0, #ece2c4, #988561, #7a6a47, #1d1d1f));
+
+// Charcoal — أسود Apple، وفي الداكن أبيض بنص داكن
+@include theme("charcoal",
+  (#1d1d1f, #000000, #000000, #3d3a3b, #6b6768, #fff),
+  (#f5f5f7, #ffffff, #ffffff, #8e8e93, #636366, #1d1d1f));
+
+// Deep Umber
+@include theme("umber",
+  (#6b1f2a, #4a151e, #260f14, #8a3441, #b05a66, #fff),
+  (#c2566a, #eba2ae, #f5c9d0, #a8404f, #8a3441, #fff));
+
+/* ---------- الخريطة: تدرّج واحد من لون الثيم لعدد المواقع في المحافظة ---------- */
+:root {
+  --map-empty: var(--ink-200);
+  --map-slot: var(--ink-300);
+  --map-focus: color-mix(in srgb, var(--brand-500) 12%, var(--surface));
+  --map-1: color-mix(in srgb, var(--brand-500) 30%, var(--map-empty));
+  --map-2: color-mix(in srgb, var(--brand-500) 55%, var(--map-empty));
+  --map-3: color-mix(in srgb, var(--brand-500) 80%, var(--map-empty));
+  --map-4: var(--brand-500);
+}
+
+/* توافق مع أسماء قديمة */
+:root {
+  --ewms-green: var(--brand-600);
+  --ewms-red: var(--danger-600);
+  --ewms-ink: var(--ink-900);
+  --ewms-muted: var(--ink-500);
+  --ewms-line: var(--border);
+  --ewms-page: var(--page-bg);
+  --ewms-card: var(--surface);
+  --ewms-soft-green: var(--brand-50);
+  --ewms-soft-red: var(--danger-50);
+  --ewms-shadow: var(--shadow-md);
+}

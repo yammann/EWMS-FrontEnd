@@ -1,0 +1,280 @@
+/* =========================================================
+   الأزرار والنماذج — بأسلوب Apple: أزرار ممتلئة/ملوّنة خفيفة/رمادية، حقول ممتلئة بلا إطار
+   ========================================================= */
+
+/* ---------- الأزرار ---------- */
+button,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--brand-600);
+  color: var(--on-brand);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--ease), filter .2s var(--ease), transform .15s var(--ease), opacity .2s var(--ease), box-shadow .2s var(--ease);
+}
+
+button:hover:not(:disabled),
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+
+button:active:not(:disabled),
+.btn:active:not(:disabled) { transform: scale(.97); filter: brightness(.95); }
+
+button:disabled,
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+/* رمادي (Gray) — الإجراء الثانوي */
+button.ghost,
+.btn-ghost,
+.ghost {
+  background: var(--fill);
+  color: var(--ink-900);
+}
+button.ghost:hover:not(:disabled),
+.btn-ghost:hover:not(:disabled),
+.ghost:hover:not(:disabled) { background: var(--fill-strong); filter: none; }
+
+/* ملوّن خفيف (Tinted) */
+.btn-tinted,
+button.tinted {
+  background: var(--brand-100);
+  color: var(--brand-700);
+}
+.btn-tinted:hover:not(:disabled),
+button.tinted:hover:not(:disabled) { background: var(--brand-200); filter: none; }
+
+button.danger,
+.btn-danger,
+.danger {
+  background: var(--danger-600);
+  color: #fff;
+}
+
+.btn-sm,
+button.btn-sm {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+
+/* زر صغير ملوّن خفيف */
+.btn-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--brand-100);
+  color: var(--brand-700);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-mini:hover { background: var(--brand-200); filter: none; }
+.btn-mini.ghost { background: var(--fill); color: var(--ink-700); }
+.btn-mini.ghost:hover { background: var(--fill-strong); }
+
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--fill);
+  color: var(--ink-900);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.refresh-btn:hover:not(:disabled) { background: var(--fill-strong); filter: none; }
+.refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
+.refresh-btn .icon { width: 17px; height: 17px; }
+
+/* أزرار أيقونة في صفوف الجداول */
+.row-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--fill);
+  color: var(--ink-600);
+  cursor: pointer;
+}
+.icon-btn svg { width: 15px; height: 15px; }
+.icon-btn:hover:not(:disabled) { filter: none; }
+
+.icon-btn.edit:hover     { background: var(--info-100);   color: var(--info-500); }
+.icon-btn.assign:hover   { background: var(--purple-100); color: var(--purple-500); }
+.icon-btn.transfer:hover { background: var(--warning-100); color: var(--warning-700); }
+.icon-btn.upload:hover   { background: var(--brand-100);  color: var(--brand-600); }
+.icon-btn.files:hover    { background: var(--fill-strong); color: var(--ink-800); }
+.icon-btn.danger         { background: var(--fill); color: var(--ink-600); }
+.icon-btn.danger:hover   { background: var(--danger-100); color: var(--danger-600); }
+
+.icon-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+.button-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.button-spinner.dark { border-color: color-mix(in srgb, currentColor 20%, transparent); border-top-color: currentColor; }
+
+/* ---------- النماذج ---------- */
+.form-stack { display: flex; flex-direction: column; gap: 16px; }
+
+.form-field { display: flex; flex-direction: column; gap: 7px; }
+
+.form-label,
+.form-label-block {
+  color: var(--ink-700);
+  font-size: 13px;
+  font-weight: 700;
+}
+.form-label-block { display: grid; gap: 7px; }
+
+.form-hint {
+  color: var(--ink-400);
+  font-size: 11px;
+}
+
+.input-wrapper { position: relative; }
+.input-wrapper > svg {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 17px;
+  height: 17px;
+  color: var(--ink-400);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+input,
+textarea,
+select,
+.input,
+.textarea,
+.select {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--fill);
+  color: var(--ink-900);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: background-color .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand-600);
+  background: none;
+}
+
+input,
+select,
+.input,
+.select { height: 42px; padding: 0 14px; }
+
+select {
+  appearance: none;
+  padding-left: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  background-size: 15px;
+  cursor: pointer;
+}
+
+.input-wrapper input,
+.input-wrapper select { padding-right: 40px; }
+
+textarea,
+.textarea {
+  min-height: 84px;
+  padding: 12px 14px;
+  resize: vertical;
+  line-height: 1.7;
+}
+.input-wrapper textarea { padding-right: 40px; }
+
+input::placeholder,
+textarea::placeholder { color: var(--ink-400); }
+
+input:hover:not(:focus):not(:disabled),
+textarea:hover:not(:focus):not(:disabled),
+select:hover:not(:focus):not(:disabled) { background-color: var(--fill-strong); }
+
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: var(--surface);
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled { opacity: .55; cursor: not-allowed; }
+
+select[multiple] {
+  height: auto;
+  min-height: 118px;
+  padding: 8px;
+  background-image: none;
+}
+select[multiple] option { padding: 6px 8px; border-radius: var(--radius-xs); }
+
+.form-error {
+  color: var(--danger-600);
+  font-size: 12px;
+}
+
+/* شريط بحث بأسلوب Apple */
+input[type="search"] {
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 16px;
+}

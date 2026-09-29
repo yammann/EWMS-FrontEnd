@@ -11,6 +11,7 @@ import { OfficeDashboard } from '../../core/models/dashboard.models';
 import { WorkTaskCard } from '../../core/models/work-task.models';
 import { roleLabel } from '../../core/utils/roles';
 import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
+import { AppRole } from '../../core/constants/access';
 
 /** لوحة رئيس المكتب */
 @Component({
@@ -20,11 +21,11 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
   template: `
     <div class="page">
       @if (data(); as d) {
-        @if (role() === 'SuperAdmin') {
+        @if (role() === AppRole.SuperAdmin) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">المؤسسة</a><span>/</span><a [routerLink]="['/dashboard/branch', d.branchId]">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
-        } @else if (role() === 'BranchManager') {
+        } @else if (role() === AppRole.BranchManager) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
-        } @else if (role() === 'Manager') {
+        } @else if (role() === AppRole.Manager) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
         }
       }
@@ -109,7 +110,8 @@ export class OfficeDashboardPage {
   myTasks = signal<WorkTaskCard[]>([]);
   loading = signal(false);
   error = signal('');
-  role = computed(() => this.auth.currentUser()?.role ?? '');
+  role = this.auth.role;
+  protected readonly AppRole = AppRole;
   isOwn = signal(true);
   label = roleLabel;
   private id: number | null = null;

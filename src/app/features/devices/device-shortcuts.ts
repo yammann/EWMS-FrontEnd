@@ -42,13 +42,13 @@ interface Shortcut { path: string; icon: string; title: string; description: str
     /* إطار خاص بتوثيق الأجهزة يميّزه عن باقي أقسام اللوحة */
     .device-frame { padding: 20px; border: 1px solid var(--brand-200); border-radius: var(--radius-xl); background: linear-gradient(180deg, var(--brand-50) 0%, var(--surface) 140px); box-shadow: var(--shadow-md); }
     .frame-head { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px dashed var(--brand-200); }
-    .frame-icon { flex: none; width: 48px; height: 48px; border-radius: var(--radius-lg); display: grid; place-items: center; background: var(--brand-600); color: #fff; font-size: 22px; box-shadow: 0 6px 16px rgba(0, 122, 61, .25); }
+    .frame-icon { flex: none; width: 48px; height: 48px; border-radius: var(--radius-lg); display: grid; place-items: center; background: var(--brand-600); color: var(--on-brand); font-size: 22px; box-shadow: 0 6px 16px var(--brand-300); }
     .frame-title { flex: 1; min-width: 0; }
     .frame-title .kicker { font-size: 11px; font-weight: 800; color: var(--brand-700); }
     .frame-title h2 { margin: 2px 0 0; font-size: 18px; }
     .frame-title p { margin: 4px 0 0; font-size: 12px; color: var(--ink-500); }
     .mode { flex: none; padding: 4px 12px; border-radius: var(--radius-full); background: var(--info-50); color: var(--info-700); font-size: 11px; font-weight: 800; border: 1px solid var(--info-300); }
-    .mode.manage { background: var(--brand-600); color: #fff; border-color: transparent; }
+    .mode.manage { background: var(--brand-600); color: var(--on-brand); border-color: transparent; }
     .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
     .card { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: inherit; text-decoration: none; transition: border-color .15s ease, box-shadow .15s ease; }
     .card:hover { border-color: var(--brand-500); box-shadow: var(--shadow-md); }

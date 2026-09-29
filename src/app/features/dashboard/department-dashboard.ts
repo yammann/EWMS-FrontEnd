@@ -9,6 +9,7 @@ import { WorkTaskService } from '../../core/services/work-task.service';
 import { DepartmentDashboard } from '../../core/models/dashboard.models';
 import { WorkTaskCard } from '../../core/models/work-task.models';
 import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
+import { AppRole } from '../../core/constants/access';
 
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
@@ -18,9 +19,9 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
   template: `
     <div class="page">
       @if (data(); as d) {
-        @if (role() === 'SuperAdmin') {
+        @if (role() === AppRole.SuperAdmin) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">المؤسسة</a><span>/</span><a [routerLink]="['/dashboard/branch', d.branchId]">{{ d.branchName }}</a><span>/</span><span>{{ d.departmentName }}</span></nav>
-        } @else if (role() === 'BranchManager') {
+        } @else if (role() === AppRole.BranchManager) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.branchName }}</a><span>/</span><span>{{ d.departmentName }}</span></nav>
         }
       }
@@ -101,7 +102,8 @@ export class DepartmentDashboardPage {
   myTasks = signal<WorkTaskCard[]>([]);
   loading = signal(false);
   error = signal('');
-  role = computed(() => this.auth.currentUser()?.role ?? '');
+  role = this.auth.role;
+  protected readonly AppRole = AppRole;
   /** لوحتي أنا (الصفحة الرئيسية) وليست قسماً أتصفحه */
   isOwn = signal(true);
   private id: number | null = null;

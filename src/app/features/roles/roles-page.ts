@@ -1,30 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Permission, Role } from '../../core/models/ewms.models';
 import { EwmsService } from '../../core/services/ewms.service';
 import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
+import { Modal } from '../../shared/ui/modal';
+import { ToastService } from '../../shared/ui/toast.service';
+import { ConfirmService } from '../../shared/ui/confirm.service';
+import { PageActions } from '../../shared/ui/page-actions';
 
 type ModalType = 'create' | 'edit';
-type ToastType = 'success' | 'error' | 'info';
-
-interface Toast {
-  id: number;
-  type: ToastType;
-  message: string;
-}
-
-interface ConfirmState {
-  message: string;
-  confirmLabel: string;
-  onConfirm: () => void;
-}
 
 @Component({
   selector: 'app-roles-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Modal],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss'
 })
@@ -32,17 +24,16 @@ export class RolesPage {
   private ewms = inject(EwmsService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
   roles = signal<Role[]>([]);
   permissions = signal<Permission[]>([]);
   selectedRole = signal<Role | null>(null);
   activeModal = signal<ModalType | null>(null);
-  toasts = signal<Toast[]>([]);
-  confirmDialog = signal<ConfirmState | null>(null);
   loading = signal(true);
-  saving = signal<string | null>(null);
-
-  private toastSeq = 0;
+  private actions = new PageActions(() => this.load());
+  saving = this.actions.saving;
 
   createForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -54,7 +45,7 @@ export class RolesPage {
     permissionIds: [[] as number[]]
   });
 
-  canManage = computed(() => this.auth.hasPermission('ManageRoles'));
+  canManage = computed(() => this.auth.hasPermission(AppPermission.ManageRoles));
 
   stats = computed(() => {
     const roles = this.roles();
@@ -100,41 +91,8 @@ export class RolesPage {
         this.permissions.set(result.permissions);
         this.loading.set(false);
       },
-      error: error => this.fail(error)
+      error: error => { this.loading.set(false); this.actions.loadFailed(error); }
     });
-  }
-
-  /* =====================================================
-   * Toast system
-   * ===================================================== */
-  showToast(message: string, type: ToastType = 'success') {
-    const id = ++this.toastSeq;
-    this.toasts.update(list => [...list, { id, type, message }]);
-
-    const duration = type === 'error' ? 6000 : 4000;
-    setTimeout(() => this.dismissToast(id), duration);
-  }
-
-  dismissToast(id: number) {
-    this.toasts.update(list => list.filter(t => t.id !== id));
-  }
-
-  /* =====================================================
-   * Confirm dialog
-   * ===================================================== */
-  askConfirm(message: string, confirmLabel: string, onConfirm: () => void) {
-    this.confirmDialog.set({ message, confirmLabel, onConfirm });
-  }
-
-  confirmYes() {
-    const dialog = this.confirmDialog();
-    if (!dialog) return;
-    this.confirmDialog.set(null);
-    dialog.onConfirm();
-  }
-
-  confirmNo() {
-    this.confirmDialog.set(null);
   }
 
   /* =====================================================
@@ -142,7 +100,7 @@ export class RolesPage {
    * ===================================================== */
   openCreate() {
     if (!this.canManage()) {
-      this.showToast('لا تملك صلاحية إدارة الأدوار', 'error');
+      this.toast.show('لا تملك صلاحية إدارة الأدوار', 'error');
       return;
     }
 
@@ -153,7 +111,7 @@ export class RolesPage {
 
   openEdit(role: Role) {
     if (!this.canManage()) {
-      this.showToast('لا تملك صلاحية إدارة الأدوار', 'error');
+      this.toast.show('لا تملك صلاحية إدارة الأدوار', 'error');
       return;
     }
 
@@ -171,17 +129,6 @@ export class RolesPage {
 
   modalTitle(type: ModalType): string {
     return type === 'create' ? 'إنشاء دور جديد' : 'تعديل الدور';
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape() {
-    if (this.confirmDialog()) {
-      this.confirmNo();
-      return;
-    }
-    if (this.activeModal()) {
-      this.closeModal();
-    }
   }
 
   /* =====================================================
@@ -231,7 +178,7 @@ export class RolesPage {
       form.append('PermissionIds', String(id));
     }
 
-    this.save(
+    this.actions.run(
       'create',
       this.ewms.createRole(form),
       'تم إنشاء الدور بنجاح',
@@ -252,7 +199,7 @@ export class RolesPage {
       form.append('PermissionIds', String(id));
     }
 
-    this.save(
+    this.actions.run(
       'edit',
       this.ewms.updateRole(role.id, form),
       'تم تعديل الدور بنجاح',
@@ -262,19 +209,18 @@ export class RolesPage {
 
   deleteRole(role: Role) {
     if (!this.canManage()) {
-      this.showToast('لا تملك صلاحية حذف الأدوار', 'error');
+      this.toast.show('لا تملك صلاحية حذف الأدوار', 'error');
       return;
     }
 
-    this.askConfirm(
+    this.confirm.ask(
       `هل أنت متأكد من حذف الدور "${role.name}"؟ سيؤثر هذا على المستخدمين المرتبطين به.`,
-      'تأكيد الحذف',
-      () => this.performDelete(role)
-    );
+      'تأكيد الحذف'
+    ).then(confirmed => { if (confirmed) this.performDelete(role); });
   }
 
   private performDelete(role: Role) {
-    this.save(
+    this.actions.run(
       `delete-${role.id}`,
       this.ewms.deleteRole(role.id),
       'تم حذف الدور بنجاح',
@@ -292,42 +238,5 @@ export class RolesPage {
   isFullRole(role: Role): boolean {
     const total = this.permissions().length;
     return total > 0 && (role.permissions?.length ?? 0) === total;
-  }
-
-  /* =====================================================
-   * Private helpers
-   * ===================================================== */
-  private save(
-    key: string,
-    request: import('rxjs').Observable<unknown>,
-    message: string,
-    after?: () => void
-  ) {
-    this.saving.set(key);
-
-    request.subscribe({
-      next: () => {
-        this.saving.set(null);
-        this.showToast(message, 'success');
-        after?.();
-        this.load();
-      },
-      error: error => {
-        this.saving.set(null);
-        this.showToast(
-          error?.error?.message || error?.message || 'تعذر تنفيذ العملية',
-          'error'
-        );
-      }
-    });
-  }
-
-  private fail(error: { message?: string; error?: { message?: string } }) {
-    this.showToast(
-      error?.error?.message || error?.message || 'تعذر تحميل البيانات',
-      'error'
-    );
-    this.loading.set(false);
-    this.saving.set(null);
   }
 }

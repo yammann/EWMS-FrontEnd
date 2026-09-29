@@ -1,4 +1,4 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,10 @@ import { forkJoin } from 'rxjs';
 import { DeviceService } from '../../core/services/device.service';
 import { Device, DeviceSite, Region, Site } from '../../core/models/device.models';
 import { DevicesNav } from './devices-nav';
+import { Modal } from '../../shared/ui/modal';
+import { ToastService } from '../../shared/ui/toast.service';
+import { ConfirmService } from '../../shared/ui/confirm.service';
+import { CopyText, SecretText } from '../../shared/ui/secret-text';
 
 const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
 
@@ -14,7 +18,7 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
  * كلمة السر مخفية افتراضياً مع زر إظهار ونسخ لكل من يشاهد (قرار المستخدم 2026-09-28).
  */
 @Component({
-  selector: 'app-installations-page', standalone: true, imports: [ReactiveFormsModule, DevicesNav],
+  selector: 'app-installations-page', standalone: true, imports: [ReactiveFormsModule, DevicesNav, Modal, CopyText, SecretText],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -58,16 +62,10 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
                   <td><span class="cell-strong">{{ i.deviceName }}</span><small>{{ join(i.deviceModel, i.sn ? 'SN: ' + i.sn : '') || '—' }}</small></td>
                   <td><span class="cell-strong">{{ i.siteName }}</span><small>{{ i.regionName }}</small></td>
                   <td class="wrap">{{ i.installLocation || '—' }}</td>
-                  <td><span class="secret"><span class="mono">{{ i.ip }}</span><button type="button" class="icon-btn-sm" (click)="copy(i.ip, 'IP')" [attr.aria-label]="'نسخ ' + i.ip">⧉</button>@if (isDuplicate(i)) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع">⚠ مكرر</span> }</span></td>
+                  <td><app-copy-text [value]="i.ip" label="IP">@if (isDuplicate(i)) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع">⚠ مكرر</span> }</app-copy-text></td>
                   <td><span class="mono">{{ i.subnetMask }}</span></td>
-                  <td><span class="secret"><span class="mono">{{ i.userName }}</span><button type="button" class="icon-btn-sm" (click)="copy(i.userName, 'اسم المستخدم')" aria-label="نسخ اسم المستخدم">⧉</button></span></td>
-                  <td>
-                    <span class="secret">
-                      <span class="mono">{{ revealed().has(i.id) ? i.pass : '••••••••' }}</span>
-                      <button type="button" class="icon-btn-sm" (click)="toggle(i.id)" [attr.aria-label]="revealed().has(i.id) ? 'إخفاء كلمة السر' : 'إظهار كلمة السر'" [attr.aria-pressed]="revealed().has(i.id)">{{ revealed().has(i.id) ? '🙈' : '👁' }}</button>
-                      <button type="button" class="icon-btn-sm" (click)="copy(i.pass, 'كلمة السر')" aria-label="نسخ كلمة السر">⧉</button>
-                    </span>
-                  </td>
+                  <td><app-copy-text [value]="i.userName" label="اسم المستخدم" /></td>
+                  <td><app-secret-text [value]="i.pass" /></td>
                   <td class="wrap">{{ i.note || '—' }}</td>
                   @if (access().canManage) {
                     <td><div class="row-actions">
@@ -83,13 +81,9 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
       </section>
     </div>
 
-    @if (copied()) { <div class="copied" role="status">{{ copied() }}</div> }
 
     @if (formOpen()) {
-      <div class="modal-backdrop" (click)="closeForm()">
-        <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="inst-form-title" (click)="$event.stopPropagation()">
-          <header class="modal-header"><h2 id="inst-form-title">{{ editing() ? 'تعديل التركيب' : 'تركيب جهاز في موقع' }}</h2>
-            <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeForm()">×</button></header>
+      <app-modal [heading]="editing() ? 'تعديل التركيب' : 'تركيب جهاز في موقع'" size="lg" [busy]="saving()" (closed)="closeForm()">
           <form [formGroup]="form" (ngSubmit)="save()">
             <div class="modal-body form-grid-2">
               @if (formError()) { <p class="alert alert-error full" role="alert">{{ formError() }}</p> }
@@ -127,28 +121,15 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
               <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
             </footer>
           </form>
-        </div>
-      </div>
+      </app-modal>
     }
-
-    @if (deleting(); as i) {
-      <div class="modal-backdrop" (click)="deleting.set(null)">
-        <div class="modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
-          <div class="modal-body form-stack">
-            <p>حذف تركيب «{{ i.deviceName }}» في «{{ i.siteName }}» ({{ i.ip }})؟</p>
-            @if (formError()) { <p class="alert alert-error" role="alert">{{ formError() }}</p> }
-          </div>
-          <footer class="modal-actions">
-            <button type="button" class="ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button>
-            <button type="button" class="danger" (click)="remove(i)" [disabled]="saving()">تأكيد الحذف</button>
-          </footer>
-        </div>
-      </div>
-    }`,
+`,
   styles: [`.secret input { flex: 1; } .dup { font-size: 11px; font-weight: 800; color: var(--warning-700); background: var(--warning-50); border: 1px solid var(--warning-300); border-radius: 999px; padding: 1px 8px; } .dup-warning { display: grid; gap: 2px; margin-top: 4px; padding: 8px 10px; border-radius: var(--radius-md); background: var(--warning-50); color: var(--warning-700); font-size: 12px; font-weight: 700; }`]
 })
 export class InstallationsPage {
   private service = inject(DeviceService);
+  private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
   private router = inject(Router);
   access = this.service.access;
 
@@ -156,12 +137,11 @@ export class InstallationsPage {
   regions = signal<Region[]>([]);
   sites = signal<Site[]>([]);
   devices = signal<Device[]>([]);
-  revealed = signal(new Set<number>());
   search = signal('');
   regionId = signal(0); siteId = signal(0); deviceId = signal(0);
   loading = signal(false); saving = signal(false);
-  error = signal(''); formError = signal(''); copied = signal('');
-  formOpen = signal(false); editing = signal<DeviceSite | null>(null); deleting = signal<DeviceSite | null>(null);
+  error = signal(''); formError = signal('');
+  formOpen = signal(false); editing = signal<DeviceSite | null>(null);
   showPass = signal(false);
 
   sitesInRegion = computed(() => this.regionId() ? this.sites().filter(s => s.regionId === this.regionId()) : this.sites());
@@ -242,20 +222,6 @@ export class InstallationsPage {
     });
   }
 
-  toggle(id: number) {
-    this.revealed.update(set => { const next = new Set(set); next.has(id) ? next.delete(id) : next.add(id); return next; });
-  }
-
-  copy(text: string, label: string) {
-    navigator.clipboard?.writeText(text).then(
-      () => this.flash(`تم نسخ ${label}`),
-      () => this.flash('تعذر النسخ — انسخ يدوياً'));
-  }
-
-  private flash(message: string) {
-    this.copied.set(message);
-    setTimeout(() => this.copied.set(''), 2000);
-  }
 
   openForm(i: DeviceSite | null) {
     this.editing.set(i); this.formError.set(''); this.showPass.set(false);
@@ -269,10 +235,14 @@ export class InstallationsPage {
   }
 
   closeForm() { if (!this.saving()) this.formOpen.set(false); }
-  askDelete(i: DeviceSite) { this.formError.set(''); this.deleting.set(i); }
+  async askDelete(i: DeviceSite) {
+    if (!await this.confirm.ask(`حذف تركيب «${i.deviceName}» في «${i.siteName}» (${i.ip})؟`, 'حذف')) return;
+    this.service.deleteInstallation(i.id).subscribe({
+      next: () => { this.toast.success('تم الحذف'); this.load(); },
+      error: e => this.toast.error(e.message)
+    });
+  }
 
-  @HostListener('document:keydown.escape')
-  onEscape() { this.closeForm(); if (!this.saving()) this.deleting.set(null); }
 
   save() {
     if (this.form.invalid || this.saving()) return;
@@ -284,16 +254,9 @@ export class InstallationsPage {
     const i = this.editing();
     this.saving.set(true); this.formError.set('');
     (i ? this.service.updateInstallation(i.id, body) : this.service.createInstallation(body)).subscribe({
-      next: () => { this.saving.set(false); this.formOpen.set(false); this.load(); },
+      next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
       error: e => { this.saving.set(false); this.formError.set(e.message); }
     });
   }
 
-  remove(i: DeviceSite) {
-    this.saving.set(true); this.formError.set('');
-    this.service.deleteInstallation(i.id).subscribe({
-      next: () => { this.saving.set(false); this.deleting.set(null); this.load(); },
-      error: e => { this.saving.set(false); this.formError.set(e.message); }
-    });
-  }
 }

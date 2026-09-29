@@ -10,10 +10,11 @@ import {
   AssignedTaskCard, AssignedTaskDetail, TaskBoardMode, TaskPriority, TaskStatus, TaskTargetOption,
   TASK_PRIORITY_LABEL, TASK_STATUS_LABEL
 } from '../../core/models/assigned-task.models';
-import { LEADER_ROLES } from '../../core/utils/roles';
+
 import { StatTile } from '../dashboard/dashboard-widgets';
 import { TaskDetailDrawer } from './task-detail-drawer';
 import { TaskFormDialog, TaskFormMode } from './task-form-dialog';
+import { ToastService } from '../../shared/ui/toast.service';
 
 interface Column { status: TaskStatus; label: string; hint: string; }
 
@@ -47,7 +48,7 @@ export class TaskBoardPage {
   targetTypeLabel = signal('');
   loading = signal(false);
   error = signal('');
-  toast = signal('');
+  private toast = inject(ToastService);
 
   // الفلاتر
   search = signal('');
@@ -59,7 +60,7 @@ export class TaskBoardPage {
   form = signal<{ mode: TaskFormMode; task: AssignedTaskDetail | null } | null>(null);
   targets = signal<TaskTargetOption[]>([]);
 
-  isLeader = computed(() => LEADER_ROLES.includes(this.auth.currentUser()?.role ?? ''));
+  isLeader = computed(() => this.auth.isLeader());
 
   filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -128,8 +129,8 @@ export class TaskBoardPage {
     // تحديث متفائل ثم التراجع إن رفض الخادم
     this.patch(task.id, { status: to, statusAr: TASK_STATUS_LABEL[to] });
     this.service.changeStatus(task.id, to).subscribe({
-      next: updated => { this.patch(task.id, updated); this.flash(`«${task.title}» ← ${TASK_STATUS_LABEL[to]}`); },
-      error: e => { this.patch(task.id, { status: from, statusAr: TASK_STATUS_LABEL[from] }); this.error.set(e.message); }
+      next: updated => { this.patch(task.id, updated); this.toast.success(`«${task.title}» ← ${TASK_STATUS_LABEL[to]}`); },
+      error: e => { this.patch(task.id, { status: from, statusAr: TASK_STATUS_LABEL[from] }); this.toast.error(e.message); }
     });
   }
 
@@ -138,11 +139,6 @@ export class TaskBoardPage {
 
   private patch(id: number, changes: Partial<AssignedTaskCard>) {
     this.tasks.update(list => list.map(t => t.id === id ? { ...t, ...changes } : t));
-  }
-
-  private flash(message: string) {
-    this.toast.set(message);
-    setTimeout(() => this.toast.set(''), 3000);
   }
 
   // ─────────── التفاصيل والنماذج ───────────
@@ -168,7 +164,7 @@ export class TaskBoardPage {
   formSaved(result: AssignedTaskDetail) {
     const mode = this.form()?.mode;
     this.form.set(null);
-    this.flash(mode === 'edit' ? 'تم حفظ التعديلات' : `تم إسناد «${result.title}» إلى ${result.targetName}`);
+    this.toast.success(mode === 'edit' ? 'تم حفظ التعديلات' : `تم إسناد «${result.title}» إلى ${result.targetName}`);
     this.load(false);
     // بعد الإنشاء: تظهر المهمة في "الصادرة"
     if (mode === 'create' && this.mode() === 'incoming') this.setMode('outgoing');

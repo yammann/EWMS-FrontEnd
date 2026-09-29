@@ -1,0 +1,151 @@
+/* =========================================================
+   الأساس: إعادة الضبط، الخط، تخطيط الصفحات
+   ========================================================= */
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  direction: rtl;
+  background: var(--page-bg);
+  color: var(--ink-900);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background-color .3s var(--ease), color .3s var(--ease);
+}
+
+h1, h2, h3, h4 { margin: 0; color: var(--ink-900); font-weight: 700; letter-spacing: -.01em; line-height: 1.3; }
+p { margin: 0; }
+button, input, textarea, select { font: inherit; }
+a { color: inherit; text-decoration: none; }
+svg { display: block; }
+::selection { background: var(--brand-200); }
+
+:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; border-radius: 6px; }
+
+/* شريط التمرير الرفيع (macOS) */
+* { scrollbar-width: thin; scrollbar-color: var(--ink-300) transparent; }
+
+/* =========================================================
+   تخطيط الصفحة (مشترك بين كل الصفحات)
+   ========================================================= */
+.page,
+.projects-page,
+.departments-page,
+.branches-page,
+.users-page,
+.roles-page {
+  /* الحشوة الأفقية كمتغير: عناصر تمتد لحافة الصفحة (مثل ورقة الخريطة) تستخدمه */
+  --page-pad-x: clamp(18px, 3vw, 40px);
+  min-height: 100%;
+  padding: 32px var(--page-pad-x) 40px;
+  display: grid;
+  gap: 22px;
+  align-content: start;
+  color: var(--ink-900);
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 2px;
+}
+
+.page-title { min-width: 0; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--brand-600);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand-600);
+  box-shadow: 0 0 0 4px var(--brand-100);
+}
+
+/* عناوين كبيرة بأسلوب "Large Title" */
+.page-header h1 {
+  font-size: clamp(26px, 3.2vw, 34px);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+}
+
+.page-header p {
+  margin-top: 6px;
+  max-width: 720px;
+  color: var(--ink-500);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.new-btn,
+.new-project-btn { white-space: nowrap; }
+
+/* =========================================================
+   الشبكات
+   ========================================================= */
+.stats-grid,
+.grid-2,
+.grid-3,
+.grid-4 { display: grid; gap: 16px; }
+
+.stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid-2     { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3     { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4     { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 1150px) {
+  .stats-grid,
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 980px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .page,
+  .projects-page,
+  .departments-page,
+  .branches-page,
+  .users-page,
+  .roles-page { --page-pad-x: 16px; padding: 20px var(--page-pad-x) 28px; gap: 16px; }
+
+  .page-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .page-header button { width: 100%; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .header-actions { width: 100%; }
+  .header-actions button { flex: 1; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .page-header h1 { font-size: 25px; }
+  .page-header p  { font-size: 13px; }
+  .header-actions { flex-direction: column; }
+  .header-actions button { width: 100%; }
+}

@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnDestroy, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { Box, GOVERNORATES_ATTRIBUTION, GovernorateFeature, ProjectedGovernorate, SyriaGeoService, SyriaProjection, projectSyria } from '../../core/utils/geo';
+import { STAMP_LANDMARKS, Stamp } from '../../shared/ui/stamp';
 
 export interface MapPoint {
   id: number;
@@ -10,7 +11,7 @@ export interface MapPoint {
   selected?: boolean;
 }
 
-interface Tip { x: number; y: number; title: string; sub: string; }
+interface Tip { x: number; y: number; title: string; sub: string; /** رمز المحافظة — يعرض طابعها في التلميح */ code?: string; }
 
 const PAD = 24;               // هامش حول سوريا (بوحدات الإسقاط)
 const ZOOM_MS = 550;
@@ -22,7 +23,7 @@ const ZOOM_MS = 550;
  * - pickable: في وضع المحافظة، النقر يحدد إحداثيات (منتقي الإحداثيات في النماذج).
  */
 @Component({
-  selector: 'app-syria-svg-map', standalone: true,
+  selector: 'app-syria-svg-map', standalone: true, imports: [Stamp],
   host: { '[class.bare]': '!framed()' },
   templateUrl: './syria-svg-map.html',
   styleUrl: './syria-svg-map.scss'
@@ -40,6 +41,8 @@ export class SyriaSvgMap implements OnDestroy {
   height = input('min(66vh, 600px)');
   /** false = بلا خلفية/إطار حول الخريطة (تملأ مكانها في الصفحة مباشرة) */
   framed = input(true);
+  /** طوابع المحافظات (الهوية البصرية): في تلميح المحافظة وفي زاوية المحافظة المعروضة */
+  showStamp = input(true);
   /** لون كل قطعة (للتلوين حسب إحصائية) */
   fillFor = input<(code: string) => string>(() => '#e3e8ef');
   /** نص التلميح الثانوي لكل محافظة */
@@ -55,6 +58,7 @@ export class SyriaSvgMap implements OnDestroy {
   back = output<void>();
 
   attribution = GOVERNORATES_ATTRIBUTION;
+  protected landmark = (code: string) => STAMP_LANDMARKS[code] ?? null;
   projection = signal<SyriaProjection | null>(null);
   hovered = signal<string | null>(null);
   tip = signal<Tip | null>(null);
@@ -118,14 +122,14 @@ export class SyriaSvgMap implements OnDestroy {
 
   hover(g: ProjectedGovernorate, event: MouseEvent) {
     if (this.focus() === g.code) return;
-    if (this.focus()) { this.moveTip(event, g.nameAr, 'انقر للانتقال إليها'); return; }
+    if (this.focus()) { this.moveTip(event, g.nameAr, 'انقر للانتقال إليها', g.code); return; }
     this.hovered.set(g.code);
-    this.moveTip(event, g.nameAr, this.subFor()(g.code));
+    this.moveTip(event, g.nameAr, this.subFor()(g.code), g.code);
   }
 
   unhover() { this.hovered.set(null); this.tip.set(null); }
 
-  moveTip(event: MouseEvent, title?: string, sub?: string) {
+  moveTip(event: MouseEvent, title?: string, sub?: string, code?: string) {
     const stage = this.stage()?.nativeElement.getBoundingClientRect();
     if (!stage) return;
     const current = this.tip();
@@ -133,7 +137,9 @@ export class SyriaSvgMap implements OnDestroy {
       x: event.clientX - stage.left,
       y: event.clientY - stage.top,
       title: title ?? current?.title ?? '',
-      sub: sub ?? current?.sub ?? ''
+      sub: sub ?? current?.sub ?? '',
+      // التلميح الجديد (عنوان جديد) يأخذ رمزه فقط؛ الحركة داخل نفس العنصر تُبقي الرمز
+      code: title !== undefined ? code : current?.code
     });
   }
 

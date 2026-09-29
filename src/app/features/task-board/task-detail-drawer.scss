@@ -1,9 +1,9 @@
-.drawer-backdrop { position: fixed; inset: 0; z-index: 900; background: rgba(15, 23, 42, .35); animation: fade .15s ease; }
+.drawer-backdrop { position: fixed; inset: 0; z-index: 900; background: var(--backdrop); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: fade .2s ease; }
 /* تنزلق من الطرف المقابل للقائمة الجانبية (يسار الشاشة في RTL) */
 .drawer {
   position: fixed; top: 0; bottom: 0; inset-inline-end: 0; z-index: 901;
   width: min(560px, 100vw); display: flex; flex-direction: column;
-  background: var(--surface); box-shadow: 0 0 40px rgba(15, 23, 42, .25);
+  background: var(--surface); box-shadow: var(--shadow-xl);
   animation: slide .2s ease-out;
 }
 @keyframes fade { from { opacity: 0; } }
@@ -29,7 +29,7 @@
 .st.s-Todo { background: var(--ink-100); color: var(--ink-700); }
 .st.s-InProgress { background: var(--info-50); color: var(--info-700); }
 .st.s-Done { background: var(--brand-50); color: var(--brand-700); }
-.overdue { background: var(--danger-600); color: #fff; }
+.overdue { background: var(--danger-100); color: var(--danger-700); }
 
 .link-btn { justify-self: start; min-height: 0; padding: 0; background: none; color: var(--brand-700); font-weight: 700; font-size: 12px; }
 .link-btn:hover:not(:disabled) { background: none; box-shadow: none; transform: none; text-decoration: underline; }

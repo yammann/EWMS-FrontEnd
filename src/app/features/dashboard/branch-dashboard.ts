@@ -95,7 +95,7 @@ export class BranchDashboardPage {
   data = signal<BranchDashboard | null>(null);
   loading = signal(false);
   error = signal('');
-  isAdmin = computed(() => this.auth.currentUser()?.role === 'SuperAdmin');
+  isAdmin = computed(() => this.auth.isSuperAdmin());
   private id: number | null = null;
 
   constructor() {

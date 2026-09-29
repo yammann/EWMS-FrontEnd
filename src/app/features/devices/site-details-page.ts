@@ -8,13 +8,14 @@ import { DeviceSite, Site } from '../../core/models/device.models';
 import { GovernorateFeature, governorateOf } from '../../core/utils/geo';
 import { StatTile } from '../dashboard/dashboard-widgets';
 import { MapPoint, SyriaSvgMap } from '../map/syria-svg-map';
+import { CopyText, SecretText } from '../../shared/ui/secret-text';
 
 /**
  * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):
  * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [RouterLink, StatTile, SyriaSvgMap],
+  selector: 'app-site-details-page', standalone: true, imports: [RouterLink, StatTile, SyriaSvgMap, CopyText, SecretText],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -50,7 +51,7 @@ import { MapPoint, SyriaSvgMap } from '../map/syria-svg-map';
             <div><dt>المحافظة</dt><dd>{{ governorate()?.properties?.nameAr || (s.latitude != null ? 'خارج حدود المحافظات' : '—') }}</dd></div>
             <div><dt>الإحداثيات</dt><dd>
               @if (coords(s.latitude, s.longitude); as c) {
-                <span class="secret"><span class="mono">{{ c }}</span><button type="button" class="icon-btn-sm" (click)="copy(c, 'الإحداثيات')" aria-label="نسخ الإحداثيات">⧉</button></span>
+                <app-copy-text [value]="c" label="الإحداثيات" />
               } @else { <span class="missing">⚠ بلا إحداثيات — لا يظهر على الخريطة</span> }
             </dd></div>
             <div class="wide"><dt>الوصف</dt><dd>{{ s.description || '—' }}</dd></div>
@@ -77,14 +78,10 @@ import { MapPoint, SyriaSvgMap } from '../map/syria-svg-map';
                     <td><strong class="cell-strong">{{ i.deviceName }}</strong>@if (i.deviceModel) { <small class="sub">{{ i.deviceModel }}</small> }</td>
                     <td>@if (i.sn) { <span class="mono">{{ i.sn }}</span> } @else { — }</td>
                     <td class="wrap">{{ i.installLocation || '—' }}</td>
-                    <td><span class="secret"><span class="mono">{{ i.ip }}</span><button type="button" class="icon-btn-sm" (click)="copy(i.ip, 'IP')" [attr.aria-label]="'نسخ ' + i.ip">⧉</button>@if (isDuplicate(i)) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع">⚠ مكرر</span> }</span></td>
+                    <td><app-copy-text [value]="i.ip" label="IP">@if (isDuplicate(i)) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع">⚠ مكرر</span> }</app-copy-text></td>
                     <td><span class="mono">{{ i.subnetMask }}</span></td>
-                    <td><span class="secret"><span class="mono">{{ i.userName }}</span><button type="button" class="icon-btn-sm" (click)="copy(i.userName, 'اسم المستخدم')" aria-label="نسخ اسم المستخدم">⧉</button></span></td>
-                    <td><span class="secret">
-                      <span class="mono">{{ revealed().has(i.id) ? i.pass : '••••••••' }}</span>
-                      <button type="button" class="icon-btn-sm" (click)="toggle(i.id)" [attr.aria-label]="revealed().has(i.id) ? 'إخفاء كلمة السر' : 'إظهار كلمة السر'" [attr.aria-pressed]="revealed().has(i.id)">{{ revealed().has(i.id) ? '🙈' : '👁' }}</button>
-                      <button type="button" class="icon-btn-sm" (click)="copy(i.pass, 'كلمة السر')" aria-label="نسخ كلمة السر">⧉</button>
-                    </span></td>
+                    <td><app-copy-text [value]="i.userName" label="اسم المستخدم" /></td>
+                    <td><app-secret-text [value]="i.pass" /></td>
                     <td class="wrap">{{ i.note || '—' }}</td>
                   </tr>
                 }
@@ -107,7 +104,6 @@ import { MapPoint, SyriaSvgMap } from '../map/syria-svg-map';
         <div class="panel empty-state" role="status">جارٍ تحميل تفاصيل الموقع…</div>
       }
 
-      @if (copied()) { <div class="copied" role="status">{{ copied() }}</div> }
     </div>`,
   styles: [`
     .site-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
@@ -140,10 +136,8 @@ export class SiteDetailsPage {
   installations = signal<DeviceSite[]>([]);
   allSites = signal<Site[]>([]);
   features = signal<GovernorateFeature[]>([]);
-  revealed = signal(new Set<number>());
   loading = signal(false);
   error = signal('');
-  copied = signal('');
   coords = formatCoords;
 
   governorate = computed(() => { const s = this.site(); return s ? governorateOf(s.latitude, s.longitude, this.features()) : null; });
@@ -189,8 +183,7 @@ export class SiteDetailsPage {
   }
 
   private load(id: number) {
-    this.loading.set(true); this.error.set(''); this.revealed.set(new Set());
-    forkJoin({ site: this.service.site(id), installations: this.service.installations({ siteId: id }), sites: this.service.sites() }).subscribe({
+    this.loading.set(true); this.error.set(''); forkJoin({ site: this.service.site(id), installations: this.service.installations({ siteId: id }), sites: this.service.sites() }).subscribe({
       next: r => { this.site.set(r.site); this.installations.set(r.installations); this.allSites.set(r.sites); this.loading.set(false); },
       error: e => { this.site.set(null); this.loading.set(false); this.error.set(e.message); }
     });
@@ -208,18 +201,4 @@ export class SiteDetailsPage {
     else this.router.navigateByUrl('/');
   }
 
-  toggle(id: number) {
-    this.revealed.update(set => { const next = new Set(set); next.has(id) ? next.delete(id) : next.add(id); return next; });
-  }
-
-  copy(text: string, label: string) {
-    navigator.clipboard?.writeText(text).then(
-      () => this.flash(`تم نسخ ${label}`),
-      () => this.flash('تعذر النسخ — انسخ يدوياً'));
-  }
-
-  private flash(message: string) {
-    this.copied.set(message);
-    setTimeout(() => this.copied.set(''), 2000);
-  }
 }

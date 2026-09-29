@@ -1,15 +1,27 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NotificationToasts } from './notification-toasts';
-import { LEADER_ROLES, roleLabel } from '../../core/utils/roles';
+import { Toasts } from '../../shared/ui/toasts';
+import { ConfirmHost } from '../../shared/ui/confirm-host';
+import { Logo } from '../../shared/ui/logo';
+import { Icon, IconName } from '../../shared/ui/icon';
+import { AppearanceMenu } from './appearance-menu';
+import { roleLabel } from '../../core/utils/roles';
+import { AppPermission, AppPermissionName } from '../../core/constants/access';
+
+const SIDEBAR_KEY = 'ewms_sidebar';
+
+interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
+interface NavSection { id: 'main' | 'vacations' | 'admin'; title: string; items: NavItem[]; }
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss'
 })
@@ -27,20 +39,77 @@ export class MainLayout {
   constructor() {
     // اتصال لحظي (SignalR) لاستقبال الإشعارات فور حدوثها
     this.notifications.start(() => this.auth.getToken() ?? '');
+    this.loadSidebar();
   }
 
   /* =====================================================
-   * الصلاحيات — تُستخدم في السايدبار
+   * السايدبار: الروابط حسب الصلاحيات، أقسام قابلة للطي، ووضع الأيقونات فقط
    * ===================================================== */
-  canManageOffices = computed(() => this.auth.hasPermission('ManageOffices'));
-  canReviewVacations = computed(() => this.auth.canReviewVacations());
-  canViewVacationStats = computed(() => LEADER_ROLES.includes(this.user()?.role ?? ''));
-  canManageVacationTypes = computed(() => this.auth.hasPermission('ManageVacationTypes'));
-  canManageDepartments = computed(() => this.auth.hasPermission('ManageDepartments'));
-  canManageBranches = computed(() => this.auth.hasPermission('ManageBranches'));
-  canManageUsers = computed(() => this.auth.hasPermission('ManageUsers'));
-  canManageRoles = computed(() => this.auth.hasPermission('ManageRoles'));
-  canManageWorkTasks = computed(() => this.auth.hasPermission('ManageWorkTasks'));
+  private router = inject(Router);
+  private url = toSignal(this.router.events.pipe(filter(e => e instanceof NavigationEnd), map(() => this.router.url)), { initialValue: this.router.url });
+
+  readonly sections = computed<NavSection[]>(() => {
+    const can = (p: AppPermissionName) => this.auth.hasPermission(p);
+    const all: NavSection[] = [
+      { id: 'main', title: '', items: [
+        { path: '/', label: 'لوحة المتابعة', icon: 'home', exact: true },
+        { path: '/task-board', label: 'لوحة المهام', icon: 'board' }
+      ] },
+      { id: 'vacations', title: 'الإجازات', items: [
+        this.auth.canReviewVacations() && { path: '/vacations/review', label: 'مراجعة الإجازات', icon: 'check' },
+        this.auth.isLeader() && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
+        can(AppPermission.ManageVacationTypes) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' }
+      ].filter(Boolean) as NavItem[] },
+      { id: 'admin', title: 'الإدارة', items: [
+        can(AppPermission.ManageWorkTasks) && { path: '/work-tasks', label: 'مهام العمل', icon: 'briefcase' },
+        can(AppPermission.ManageBranches) && { path: '/branches', label: 'الفروع', icon: 'landmark' },
+        can(AppPermission.ManageDepartments) && { path: '/departments', label: 'الأقسام', icon: 'building' },
+        can(AppPermission.ManageOffices) && { path: '/offices', label: 'المكاتب', icon: 'door' },
+        can(AppPermission.ManageUsers) && { path: '/users', label: 'الموظفون', icon: 'users' },
+        can(AppPermission.ManageRoles) && { path: '/roles', label: 'الأدوار', icon: 'shield' }
+      ].filter(Boolean) as NavItem[] }
+    ];
+    return all.filter(section => section.items.length);
+  });
+
+  /** حالة السايدبار المحفوظة: مطوي (أيقونات فقط) + الأقسام المغلقة */
+  readonly collapsed = signal(false);
+  readonly closedSections = signal<ReadonlySet<string>>(new Set());
+
+  isOpen(section: NavSection) { return !section.title || !this.closedSections().has(section.id); }
+
+  /** قسم مغلق يحتوي الصفحة الحالية — تظهر نقطة بجانب عنوانه */
+  hasActive(section: NavSection) {
+    const url = this.url().split('?')[0];
+    return section.items.some(i => i.exact ? url === i.path : url === i.path || url.startsWith(i.path + '/'));
+  }
+
+  toggleSidebar() {
+    this.collapsed.update(v => !v);
+    this.saveSidebar();
+  }
+
+  toggleSection(section: NavSection) {
+    this.closedSections.update(set => {
+      const next = new Set(set);
+      next.has(section.id) ? next.delete(section.id) : next.add(section.id);
+      return next;
+    });
+    this.saveSidebar();
+  }
+
+  private loadSidebar() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SIDEBAR_KEY) ?? 'null');
+      this.collapsed.set(saved?.collapsed === true);
+      this.closedSections.set(new Set(Array.isArray(saved?.closed) ? saved.closed : []));
+    } catch { /* التخزين غير متاح — الإعداد الافتراضي */ }
+  }
+
+  private saveSidebar() {
+    try { localStorage.setItem(SIDEBAR_KEY, JSON.stringify({ collapsed: this.collapsed(), closed: [...this.closedSections()] })); }
+    catch { /* تجاهل */ }
+  }
 
   logout() {
     this.auth.logout();

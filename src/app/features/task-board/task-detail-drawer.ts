@@ -3,6 +3,7 @@ import { Component, HostListener, effect, inject, input, output, signal } from '
 import { FormsModule } from '@angular/forms';
 import { AssignedTaskService } from '../../core/services/assigned-task.service';
 import { AssignedTaskDetail, TaskStatus, TASK_STATUS_LABEL } from '../../core/models/assigned-task.models';
+import { hasOpenModal } from '../../shared/ui/modal';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، المهام الفرعية، السجل والتعليقات */
 @Component({
@@ -135,7 +136,7 @@ export class TaskDetailDrawer {
   }
 
   @HostListener('document:keydown.escape')
-  onEscape() { this.close.emit(); }
+  onEscape() { if (!hasOpenModal()) this.close.emit(); }   // نافذة فوق اللوحة تُغلق وحدها أولاً
 
   load(id = this.taskId()) {
     this.error.set(''); this.confirmDelete.set(false);

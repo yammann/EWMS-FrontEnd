@@ -83,7 +83,7 @@ export class VacationStatsPage {
   branchId = signal(0);
   loading = signal(false);
   error = signal('');
-  isAdmin = computed(() => this.auth.currentUser()?.role === 'SuperAdmin');
+  isAdmin = computed(() => this.auth.isSuperAdmin());
   canReview = computed(() => this.auth.canReviewVacations());
 
   constructor() {

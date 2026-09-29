@@ -18,21 +18,15 @@
 .cell-strong { color: var(--ink-900); font-weight: 700; }
 .cell-link { color: var(--brand-700); font-weight: 700; text-decoration: none; background: none; border: 0; padding: 0; min-height: 0; cursor: pointer; font: inherit; }
 .cell-link:hover:not(:disabled) { text-decoration: underline; background: none; box-shadow: none; transform: none; }
-.mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; direction: ltr; unicode-bidi: isolate; }
 .muted-cell { color: var(--ink-400); }
 .num { font-variant-numeric: tabular-nums; }
 
-/* كلمة السر: مخفية مع إظهار/نسخ */
-.secret { display: inline-flex; align-items: center; gap: 6px; }
-.icon-btn-sm { min-height: 28px; width: 28px; padding: 0; border-radius: var(--radius-sm); background: var(--ink-50); color: var(--ink-600); border: 1px solid var(--border); font-size: 13px; }
-.icon-btn-sm:hover:not(:disabled) { background: var(--ink-100); box-shadow: none; transform: none; }
 
 .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
 .form-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .form-grid-2 .full { grid-column: 1 / -1; }
 .hint { font-size: 11px; color: var(--ink-400); }
 .readonly-note { margin: 0; padding: 10px 14px; border-radius: var(--radius-md); background: var(--info-50); color: var(--info-700); font-size: 12px; font-weight: 700; }
-.copied { position: fixed; bottom: 24px; inset-inline-start: 50%; transform: translateX(50%); z-index: 1100; padding: 10px 16px; border-radius: var(--radius-lg); background: var(--ink-900); color: #fff; font-size: 13px; font-weight: 700; }
 
 @media (max-width: 640px) { .form-grid-2 { grid-template-columns: minmax(0, 1fr); } }
 .missing { color: var(--warning-700); font-size: 12px; font-weight: 700; }

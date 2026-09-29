@@ -1,14 +1,17 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeviceService } from '../../core/services/device.service';
 import { Device } from '../../core/models/device.models';
 import { DevicesNav } from './devices-nav';
+import { Modal } from '../../shared/ui/modal';
+import { ToastService } from '../../shared/ui/toast.service';
+import { ConfirmService } from '../../shared/ui/confirm.service';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
-  selector: 'app-devices-catalog-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, DevicesNav],
+  selector: 'app-devices-catalog-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, DevicesNav, Modal],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -54,10 +57,7 @@ import { DevicesNav } from './devices-nav';
     </div>
 
     @if (formOpen()) {
-      <div class="modal-backdrop" (click)="closeForm()">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="device-form-title" (click)="$event.stopPropagation()">
-          <header class="modal-header"><h2 id="device-form-title">{{ editing() ? 'تعديل الجهاز' : 'جهاز جديد' }}</h2>
-            <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeForm()">×</button></header>
+      <app-modal [heading]="editing() ? 'تعديل الجهاز' : 'جهاز جديد'" [busy]="saving()" (closed)="closeForm()">
           <form [formGroup]="form" (ngSubmit)="save()">
             <div class="modal-body form-grid-2">
               @if (formError()) { <p class="alert alert-error full" role="alert">{{ formError() }}</p> }
@@ -71,27 +71,14 @@ import { DevicesNav } from './devices-nav';
               <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
             </footer>
           </form>
-        </div>
-      </div>
+      </app-modal>
     }
-
-    @if (deleting(); as d) {
-      <div class="modal-backdrop" (click)="deleting.set(null)">
-        <div class="modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
-          <div class="modal-body form-stack">
-            <p>حذف الجهاز «{{ d.name }}»؟ لا يمكن حذف جهاز له تركيبات.</p>
-            @if (formError()) { <p class="alert alert-error" role="alert">{{ formError() }}</p> }
-          </div>
-          <footer class="modal-actions">
-            <button type="button" class="ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button>
-            <button type="button" class="danger" (click)="remove(d)" [disabled]="saving()">تأكيد الحذف</button>
-          </footer>
-        </div>
-      </div>
-    }`
+`
 })
 export class DevicesCatalogPage {
   private service = inject(DeviceService);
+  private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
   access = this.service.access;
 
   devices = signal<Device[]>([]);
@@ -99,7 +86,7 @@ export class DevicesCatalogPage {
   search = signal('');
   loading = signal(false); saving = signal(false);
   error = signal(''); formError = signal('');
-  formOpen = signal(false); editing = signal<Device | null>(null); deleting = signal<Device | null>(null);
+  formOpen = signal(false); editing = signal<Device | null>(null);
 
   filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -129,10 +116,14 @@ export class DevicesCatalogPage {
   }
 
   closeForm() { if (!this.saving()) this.formOpen.set(false); }
-  askDelete(d: Device) { this.formError.set(''); this.deleting.set(d); }
+  async askDelete(d: Device) {
+    if (!await this.confirm.ask(`حذف الجهاز «${d.name}»؟ لا يمكن حذف جهاز له تركيبات.`, 'حذف')) return;
+    this.service.deleteDevice(d.id).subscribe({
+      next: () => { this.toast.success('تم الحذف'); this.load(); },
+      error: e => this.toast.error(e.message)
+    });
+  }
 
-  @HostListener('document:keydown.escape')
-  onEscape() { this.closeForm(); if (!this.saving()) this.deleting.set(null); }
 
   save() {
     if (this.form.invalid || this.saving()) return;
@@ -141,16 +132,9 @@ export class DevicesCatalogPage {
     const d = this.editing();
     this.saving.set(true); this.formError.set('');
     (d ? this.service.updateDevice(d.id, body) : this.service.createDevice(body)).subscribe({
-      next: () => { this.saving.set(false); this.formOpen.set(false); this.load(); },
+      next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
       error: e => { this.saving.set(false); this.formError.set(e.message); }
     });
   }
 
-  remove(d: Device) {
-    this.saving.set(true); this.formError.set('');
-    this.service.deleteDevice(d.id).subscribe({
-      next: () => { this.saving.set(false); this.deleting.set(null); this.load(); },
-      error: e => { this.saving.set(false); this.formError.set(e.message); }
-    });
-  }
 }

@@ -19,7 +19,7 @@ export interface Coordinates { latitude: number; longitude: number; }
           <span>اختر المحافظة أولاً، ثم انقر على المكان بدقة</span>
         }
       </div>
-      <app-syria-svg-map [focus]="focus()" [points]="points()" [pickable]="true" height="300px"
+      <app-syria-svg-map [focus]="focus()" [points]="points()" [pickable]="true" [showStamp]="false" height="300px"
                          (governorateSelect)="focus.set($event)" (back)="focus.set(null)" (pick)="picked.emit($event)" (ready)="features.set($event)" />
       <div class="picker-bar">
         <label>خط العرض<input type="number" step="0.00001" dir="ltr" [value]="latitude() ?? ''" (change)="manual('lat', $any($event.target).value)"></label>

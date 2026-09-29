@@ -1,30 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Branch, Department } from '../../core/models/ewms.models';
 import { EwmsService } from '../../core/services/ewms.service';
 import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
+import { Modal } from '../../shared/ui/modal';
+import { ToastService } from '../../shared/ui/toast.service';
+import { ConfirmService } from '../../shared/ui/confirm.service';
+import { PageActions } from '../../shared/ui/page-actions';
 
 type ModalType = 'create' | 'edit';
-type ToastType = 'success' | 'error' | 'info';
-
-interface Toast {
-  id: number;
-  type: ToastType;
-  message: string;
-}
-
-interface ConfirmState {
-  message: string;
-  confirmLabel: string;
-  onConfirm: () => void;
-}
 
 @Component({
   selector: 'app-departments-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Modal],
   templateUrl: './departments-page.html',
   styleUrl: './departments-page.scss'
 })
@@ -32,17 +24,16 @@ export class DepartmentsPage {
   private ewms = inject(EwmsService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
   departments = signal<Department[]>([]);
   branches = signal<Branch[]>([]);
   selectedDepartment = signal<Department | null>(null);
   activeModal = signal<ModalType | null>(null);
-  toasts = signal<Toast[]>([]);
-  confirmDialog = signal<ConfirmState | null>(null);
   loading = signal(true);
-  saving = signal<string | null>(null);
-
-  private toastSeq = 0;
+  private actions = new PageActions(() => this.load());
+  saving = this.actions.saving;
 
   createForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -56,7 +47,7 @@ export class DepartmentsPage {
     branchId: ['', Validators.required]
   });
 
-  canManage = computed(() => this.auth.hasPermission('ManageDepartments'));
+  canManage = computed(() => this.auth.hasPermission(AppPermission.ManageDepartments));
 
   stats = computed(() => {
     const departments = this.departments();
@@ -88,41 +79,8 @@ export class DepartmentsPage {
         this.branches.set(result.branches);
         this.loading.set(false);
       },
-      error: error => this.fail(error)
+      error: error => { this.loading.set(false); this.actions.loadFailed(error); }
     });
-  }
-
-  /* =====================================================
-   * Toast system
-   * ===================================================== */
-  showToast(message: string, type: ToastType = 'success') {
-    const id = ++this.toastSeq;
-    this.toasts.update(list => [...list, { id, type, message }]);
-
-    const duration = type === 'error' ? 6000 : 4000;
-    setTimeout(() => this.dismissToast(id), duration);
-  }
-
-  dismissToast(id: number) {
-    this.toasts.update(list => list.filter(t => t.id !== id));
-  }
-
-  /* =====================================================
-   * Confirm dialog
-   * ===================================================== */
-  askConfirm(message: string, confirmLabel: string, onConfirm: () => void) {
-    this.confirmDialog.set({ message, confirmLabel, onConfirm });
-  }
-
-  confirmYes() {
-    const dialog = this.confirmDialog();
-    if (!dialog) return;
-    this.confirmDialog.set(null);
-    dialog.onConfirm();
-  }
-
-  confirmNo() {
-    this.confirmDialog.set(null);
   }
 
   /* =====================================================
@@ -130,7 +88,7 @@ export class DepartmentsPage {
    * ===================================================== */
   openCreate() {
     if (!this.canManage()) {
-      this.showToast('لا تملك صلاحية إدارة الأقسام', 'error');
+      this.toast.show('لا تملك صلاحية إدارة الأقسام', 'error');
       return;
     }
 
@@ -141,7 +99,7 @@ export class DepartmentsPage {
 
   openEdit(department: Department) {
     if (!this.canManage()) {
-      this.showToast('لا تملك صلاحية إدارة الأقسام', 'error');
+      this.toast.show('لا تملك صلاحية إدارة الأقسام', 'error');
       return;
     }
 
@@ -162,17 +120,6 @@ export class DepartmentsPage {
     return type === 'create' ? 'إنشاء قسم جديد' : 'تعديل القسم';
   }
 
-  @HostListener('document:keydown.escape')
-  onEscape() {
-    if (this.confirmDialog()) {
-      this.confirmNo();
-      return;
-    }
-    if (this.activeModal()) {
-      this.closeModal();
-    }
-  }
-
   /* =====================================================
    * CRUD actions
    * ===================================================== */
@@ -184,7 +131,7 @@ export class DepartmentsPage {
     form.append('Description', this.createForm.value.description ?? '');
     form.append('BranchId', this.createForm.value.branchId ?? '');
 
-    this.save(
+    this.actions.run(
       'create',
       this.ewms.createDepartment(form),
       'تم إنشاء القسم بنجاح',
@@ -204,7 +151,7 @@ export class DepartmentsPage {
     form.append('Description', this.editForm.value.description ?? '');
     form.append('BranchId', this.editForm.value.branchId ?? '');
 
-    this.save(
+    this.actions.run(
       'edit',
       this.ewms.updateDepartment(department.id, form),
       'تم تعديل القسم بنجاح',
@@ -214,19 +161,18 @@ export class DepartmentsPage {
 
   deleteDepartment(department: Department) {
     if (!this.canManage()) {
-      this.showToast('لا تملك صلاحية حذف الأقسام', 'error');
+      this.toast.show('لا تملك صلاحية حذف الأقسام', 'error');
       return;
     }
 
-    this.askConfirm(
+    this.confirm.ask(
       `هل أنت متأكد من حذف القسم "${department.name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
-      'تأكيد الحذف',
-      () => this.performDelete(department)
-    );
+      'تأكيد الحذف'
+    ).then(confirmed => { if (confirmed) this.performDelete(department); });
   }
 
   private performDelete(department: Department) {
-    this.save(
+    this.actions.run(
       `delete-${department.id}`,
       this.ewms.deleteDepartment(department.id),
       'تم حذف القسم بنجاح',
@@ -243,42 +189,5 @@ export class DepartmentsPage {
    * ===================================================== */
   branchName(branchId: number): string {
     return this.branches().find(b => b.id === branchId)?.name ?? 'غير محدد';
-  }
-
-  /* =====================================================
-   * Private helpers
-   * ===================================================== */
-  private save(
-    key: string,
-    request: import('rxjs').Observable<unknown>,
-    message: string,
-    after?: () => void
-  ) {
-    this.saving.set(key);
-
-    request.subscribe({
-      next: () => {
-        this.saving.set(null);
-        this.showToast(message, 'success');
-        after?.();
-        this.load();
-      },
-      error: error => {
-        this.saving.set(null);
-        this.showToast(
-          error?.error?.message || error?.message || 'تعذر تنفيذ العملية',
-          'error'
-        );
-      }
-    });
-  }
-
-  private fail(error: { message?: string; error?: { message?: string } }) {
-    this.showToast(
-      error?.error?.message || error?.message || 'تعذر تحميل البيانات',
-      'error'
-    );
-    this.loading.set(false);
-    this.saving.set(null);
   }
 }

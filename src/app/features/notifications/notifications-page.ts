@@ -54,7 +54,7 @@ import { AppNotification } from '../../core/models/notification.models';
     </div>`,
   styles: [`
     .notification-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-    .notification { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+    .notification { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
     .notification.unread { border-color: var(--brand-500); background: var(--brand-50); }
     .notification-body { flex: 1; display: grid; gap: 6px; text-align: start; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; }
     /* نلغي تأثير button:hover العام (خلفية خضراء) — عند المرور يتغير لون الإطار فقط */

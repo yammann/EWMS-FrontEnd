@@ -1,57 +1,56 @@
-<main class="shell">
-  <aside class="sidebar">
-    <div class="flag-strip" aria-hidden="true">
-      <span></span><span></span><span></span>
-    </div>
-
-    <div class="brand">
-      <span class="brand-mark">★ ★ ★</span>
-      <div>
-        <strong>EWMS</strong>
-        <small>نظام إدارة سير العمل</small>
-      </div>
+<main class="shell" [class.collapsed]="collapsed()">
+  <!-- السايدبار بأسلوب macOS: مادة شفافة، أقسام قابلة للطي، ووضع الأيقونات فقط -->
+  <aside class="sidebar" aria-label="القائمة الرئيسية">
+    <div class="sidebar-head">
+      <a class="brand" routerLink="/" aria-label="EWMS — لوحة المتابعة">
+        <app-logo class="brand-logo" />
+        <span class="brand-text">
+          <strong>EWMS</strong>
+          <small>نظام إدارة سير العمل</small>
+        </span>
+      </a>
+      <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" [attr.aria-expanded]="!collapsed()"
+              [attr.aria-label]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'" [attr.title]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'">
+        <app-icon name="sidebar" />
+      </button>
     </div>
 
     <nav aria-label="التنقل الرئيسي">
-
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          لوحة المتابعة
-        </a>
-      <a routerLink="/task-board" routerLinkActive="active">لوحة المهام</a>
-      @if (canReviewVacations()) { <a routerLink="/vacations/review" routerLinkActive="active">مراجعة الإجازات</a> }
-      @if (canViewVacationStats()) { <a routerLink="/vacations/stats" routerLinkActive="active">إحصائيات الإجازات</a> }
-      @if (canManageVacationTypes()) { <a routerLink="/vacation-types" routerLinkActive="active">أنواع الإجازات</a> }
-      @if (canManageWorkTasks()) { <a routerLink="/work-tasks" routerLinkActive="active">مهام العمل</a> }
-      @if (canManageOffices()) { <a routerLink="/offices" routerLinkActive="active">المكاتب</a> }
-
-      @if (canManageDepartments()) {
-        <a routerLink="/departments" routerLinkActive="active">الأقسام</a>
+      @for (section of sections(); track section.id) {
+        @if (section.title) {
+          <button type="button" class="nav-section" [class.has-active]="!isOpen(section) && hasActive(section)"
+                  (click)="toggleSection(section)" [attr.aria-expanded]="isOpen(section)" [attr.aria-controls]="'nav-' + section.id">
+            <span>{{ section.title }}</span>
+            <app-icon name="chevron" class="chevron" />
+          </button>
+        }
+        <!-- في وضع الأيقونات تظهر كل الروابط (الأقسام بلا عناوين) -->
+        <div class="nav-group" [id]="'nav-' + section.id" [class.closed]="!collapsed() && !isOpen(section)">
+          <div class="nav-group-inner">
+            @for (item of section.items; track item.path) {
+              <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                 [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null"
+                 [attr.tabindex]="!collapsed() && !isOpen(section) ? -1 : null">
+                <app-icon [name]="item.icon" /><span class="label">{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
       }
-
-      @if (canManageBranches()) {
-        <a routerLink="/branches" routerLinkActive="active">الفروع</a>
-      }
-
-      @if (canManageUsers()) {
-        <a routerLink="/users" routerLinkActive="active">الموظفون</a>
-      }
-
-      @if (canManageRoles()) {
-        <a routerLink="/roles" routerLinkActive="active">الأدوار</a>
-      }
-
     </nav>
 
+    <p class="sidebar-foot">الجمهورية العربية السورية</p>
   </aside>
 
   <section class="workspace">
-    <!-- النافبار: الإشعارات والملف الشخصي وتسجيل الخروج -->
+    <!-- النافبار: المظهر والإشعارات والملف الشخصي وتسجيل الخروج -->
     <header class="topbar">
       <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
       <div class="topbar-actions">
+        <app-appearance-menu />
         <a class="top-btn bell" routerLink="/notifications" routerLinkActive="active"
            [attr.aria-label]="unreadCount() ? 'الإشعارات — ' + unreadCount() + ' غير مقروء' : 'الإشعارات'" title="الإشعارات">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-1.7 1.7A1 1 0 0 0 4 19.4h16a1 1 0 0 0 .7-1.7Z"/></svg>
+          <app-icon name="bell" />
           @if (unreadCount() > 0) { <span class="badge">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span> }
         </a>
         @if (user()) {
@@ -60,9 +59,8 @@
             <span class="me-text"><strong>{{ user()?.fullName || user()?.email }}</strong><small>{{ roleLabel(user()?.role) }}</small></span>
           </a>
         }
-        <button class="logout" type="button" (click)="logout()" title="تسجيل الخروج">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5v-2H6V6h4Zm4.3 3.3-1.4 1.4 2.3 2.3H8v2h7.2l-2.3 2.3 1.4 1.4L19 12Z" transform="scale(-1 1) translate(-24 0)"/></svg>
-          <span>تسجيل الخروج</span>
+        <button class="top-btn logout" type="button" (click)="logout()" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+          <app-icon name="logout" />
         </button>
       </div>
     </header>
@@ -72,3 +70,5 @@
 
 <!-- خارج .shell: الـ shell عبارة عن grid بعمودين، وأي عنصر إضافي داخله يأخذ خلية ويكسر التخطيط -->
 <app-notification-toasts />
+<app-toasts />
+<app-confirm-host />

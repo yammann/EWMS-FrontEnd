@@ -159,7 +159,7 @@
 .permission-card.checked {
   border-color: var(--brand-400);
   background: var(--brand-50);
-  box-shadow: 0 0 0 2px rgba(0, 122, 61, .08);
+  box-shadow: 0 0 0 2px var(--brand-100);
 }
 
 .permission-card input[type="checkbox"] {
@@ -221,7 +221,7 @@
 .permission-card.checked .permission-check {
   background: var(--brand-600);
   border-color: var(--brand-600);
-  color: #fff;
+  color: var(--on-brand);
 }
 
 /* Scrollbar صغير للـ permissions-grid */

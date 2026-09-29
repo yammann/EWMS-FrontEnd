@@ -6,7 +6,7 @@
 
       <!-- القطع (المحافظات) -->
       @for (g of govs(); track g.code) {
-        <path class="piece" [attr.d]="g.path" [attr.fill]="fillFor()(g.code)"
+        <path class="piece" [attr.d]="g.path" [style.--piece-fill]="fillFor()(g.code)"
               [class.hovered]="hovered() === g.code" [class.focused]="focus() === g.code" [class.faded]="!!focus() && focus() !== g.code"
               [attr.tabindex]="focus() ? -1 : 0" role="button" [attr.aria-label]="'محافظة ' + g.nameAr + (subFor()(g.code) ? ' — ' + subFor()(g.code) : '')"
               (mouseenter)="hover(g, $event)" (mousemove)="moveTip($event)" (mouseleave)="unhover()"
@@ -15,7 +15,7 @@
 
       <!-- القطعة المرفوعة عند المرور (نسخة فوق الجميع؛ يبقى مكانها ظاهراً تحتها) -->
       @if (hoveredGov(); as h) {
-        <path class="lifted" [attr.d]="h.path" [attr.fill]="fillFor()(h.code)" pointer-events="none" />
+        <path class="lifted" [attr.d]="h.path" [style.--piece-fill]="fillFor()(h.code)" pointer-events="none" />
       }
 
       <!-- أسماء المحافظات والشارات (عرض سوريا فقط) -->
@@ -47,8 +47,21 @@
     <div class="loading" [style.height]="height()" role="status">جارٍ تحميل الخريطة…</div>
   }
 
+  <!-- طابع المحافظة المعروضة (من الهوية البصرية) — كطابع على رسالة -->
+  @if (showStamp() && focus(); as code) {
+    @if (landmark(code); as l) {
+      <figure class="focus-stamp" aria-hidden="true">
+        <app-stamp [code]="code" />
+        <figcaption>{{ l.ar }}</figcaption>
+      </figure>
+    }
+  }
+
   @if (tip(); as t) {
-    <div class="tip" [style.left.px]="t.x" [style.top.px]="t.y" role="tooltip"><strong>{{ t.title }}</strong>@if (t.sub) { <span>{{ t.sub }}</span> }</div>
+    <div class="tip" [class.with-stamp]="!!t.code && showStamp()" [style.left.px]="t.x" [style.top.px]="t.y" role="tooltip">
+      @if (t.code && showStamp()) { <app-stamp class="tip-stamp" [code]="t.code" variant="plain" /> }
+      <span class="tip-text"><strong>{{ t.title }}</strong>@if (t.sub) { <span>{{ t.sub }}</span> }</span>
+    </div>
   }
   <small class="attribution">{{ attribution }}</small>
 </div>

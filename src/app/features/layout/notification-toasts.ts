@@ -28,20 +28,20 @@ import { AppNotification } from '../../core/models/notification.models';
     </section>`,
   styles: [`
     .toast-stack { position: fixed; top: 20px; inset-inline-end: 20px; z-index: 1000; display: grid; gap: 12px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
-    .toast { pointer-events: auto; position: relative; overflow: hidden; display: flex; align-items: flex-start; gap: 4px; background: #fff; border: 1px solid var(--border, #e5e7eb); border-inline-start: 4px solid var(--brand-500, #007a3d); border-radius: 14px; box-shadow: 0 12px 32px rgba(15, 23, 42, .18); animation: toast-in .28s ease-out; }
+    .toast { pointer-events: auto; position: relative; overflow: hidden; display: flex; align-items: flex-start; gap: 4px; background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); animation: toast-in .4s var(--ease-spring); }
     .toast-body { flex: 1; display: flex; gap: 12px; align-items: flex-start; padding: 14px 4px 16px 14px; padding-inline-start: 14px; background: none; border: 0; text-align: start; font: inherit; color: inherit; cursor: pointer; }
     /* نلغي تأثير button:hover العام (خلفية خضراء) — عند المرور يتغير لون الإطار فقط */
     .toast { transition: border-color .15s ease; }
-    .toast:hover { border-color: var(--brand-600, #006432); }
+    .toast:hover { border-color: var(--brand-300); }
     .toast-body:hover:not(:disabled) { background: none; box-shadow: none; transform: none; }
-    .toast-icon { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--brand-50, #e8f5ee); font-size: 17px; }
+    .toast-icon { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--brand-100); font-size: 17px; }
     .toast-text { display: grid; gap: 4px; min-width: 0; }
-    .toast-text strong { font-size: 14px; color: var(--ink-900, #0f172a); }
-    .toast-text span { font-size: 13px; line-height: 1.6; color: var(--ink-600, #475569); overflow-wrap: anywhere; }
-    .toast-text small { font-size: 11px; color: var(--ink-400, #94a3b8); }
-    .toast-close { flex: none; margin: 8px; width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--ink-400, #94a3b8); font-size: 20px; line-height: 1; cursor: pointer; }
-    .toast-close:hover { background: var(--ink-50, #f1f5f9); color: var(--ink-700, #334155); }
-    .toast-progress { position: absolute; bottom: 0; inset-inline-start: 0; height: 3px; width: 100%; background: var(--brand-500, #007a3d); opacity: .5; transform-origin: right; animation: toast-timer 7s linear forwards; }
+    .toast-text strong { font-size: 14px; color: var(--ink-900); }
+    .toast-text span { font-size: 13px; line-height: 1.6; color: var(--ink-600); overflow-wrap: anywhere; }
+    .toast-text small { font-size: 11px; color: var(--ink-400); }
+    .toast-close { flex: none; margin: 8px; width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--ink-400); font-size: 20px; line-height: 1; cursor: pointer; }
+    .toast-close:hover { background: var(--fill); color: var(--ink-700); filter: none; }
+    .toast-progress { position: absolute; bottom: 0; inset-inline-start: 0; height: 3px; width: 100%; background: var(--brand-500); opacity: .5; transform-origin: right; animation: toast-timer 7s linear forwards; }
     .toast:hover .toast-progress { animation-play-state: paused; }
     @keyframes toast-in { from { opacity: 0; transform: translateY(-12px) scale(.97); } to { opacity: 1; transform: none; } }
     @keyframes toast-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }

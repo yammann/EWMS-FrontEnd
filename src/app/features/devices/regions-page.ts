@@ -1,4 +1,4 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -6,10 +6,13 @@ import { DeviceService, formatCoords } from '../../core/services/device.service'
 import { CoordinatePicker, Coordinates } from '../map/coordinate-picker';
 import { Region } from '../../core/models/device.models';
 import { DevicesNav } from './devices-nav';
+import { Modal } from '../../shared/ui/modal';
+import { ToastService } from '../../shared/ui/toast.service';
+import { ConfirmService } from '../../shared/ui/confirm.service';
 
 /** المناطق التابعة للمؤسسة — كل منطقة تضم مواقع */
 @Component({
-  selector: 'app-regions-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, DevicesNav, CoordinatePicker],
+  selector: 'app-regions-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, DevicesNav, CoordinatePicker, Modal],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -55,10 +58,7 @@ import { DevicesNav } from './devices-nav';
     </div>
 
     @if (formOpen()) {
-      <div class="modal-backdrop" (click)="closeForm()">
-        <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="region-form-title" (click)="$event.stopPropagation()">
-          <header class="modal-header"><h2 id="region-form-title">{{ editing() ? 'تعديل المنطقة' : 'منطقة جديدة' }}</h2>
-            <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeForm()">×</button></header>
+      <app-modal [heading]="editing() ? 'تعديل المنطقة' : 'منطقة جديدة'" size="lg" [busy]="saving()" (closed)="closeForm()">
           <form [formGroup]="form" (ngSubmit)="save()">
             <div class="modal-body form-stack">
               @if (formError()) { <p class="alert alert-error" role="alert">{{ formError() }}</p> }
@@ -73,27 +73,14 @@ import { DevicesNav } from './devices-nav';
               <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
             </footer>
           </form>
-        </div>
-      </div>
+      </app-modal>
     }
-
-    @if (deleting(); as r) {
-      <div class="modal-backdrop" (click)="deleting.set(null)">
-        <div class="modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
-          <div class="modal-body form-stack">
-            <p>حذف المنطقة «{{ r.name }}»؟ لا يمكن حذف منطقة تحتوي على مواقع.</p>
-            @if (formError()) { <p class="alert alert-error" role="alert">{{ formError() }}</p> }
-          </div>
-          <footer class="modal-actions">
-            <button type="button" class="ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button>
-            <button type="button" class="danger" (click)="remove(r)" [disabled]="saving()">تأكيد الحذف</button>
-          </footer>
-        </div>
-      </div>
-    }`
+`
 })
 export class RegionsPage {
   private service = inject(DeviceService);
+  private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
   access = this.service.access;
 
   regions = signal<Region[]>([]);
@@ -101,7 +88,7 @@ export class RegionsPage {
   search = signal('');
   loading = signal(false); saving = signal(false);
   error = signal(''); formError = signal('');
-  formOpen = signal(false); editing = signal<Region | null>(null); deleting = signal<Region | null>(null);
+  formOpen = signal(false); editing = signal<Region | null>(null);
 
   filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -137,10 +124,14 @@ export class RegionsPage {
   }
 
   closeForm() { if (!this.saving()) this.formOpen.set(false); }
-  askDelete(r: Region) { this.formError.set(''); this.deleting.set(r); }
+  async askDelete(r: Region) {
+    if (!await this.confirm.ask(`حذف المنطقة «${r.name}»؟ لا يمكن حذف منطقة تحتوي على مواقع.`, 'حذف')) return;
+    this.service.deleteRegion(r.id).subscribe({
+      next: () => { this.toast.success('تم الحذف'); this.load(); },
+      error: e => this.toast.error(e.message)
+    });
+  }
 
-  @HostListener('document:keydown.escape')
-  onEscape() { this.closeForm(); if (!this.saving()) this.deleting.set(null); }
 
   save() {
     if (this.form.invalid || this.saving()) return;
@@ -149,16 +140,9 @@ export class RegionsPage {
     const r = this.editing();
     this.saving.set(true); this.formError.set('');
     (r ? this.service.updateRegion(r.id, v) : this.service.createRegion(v)).subscribe({
-      next: () => { this.saving.set(false); this.formOpen.set(false); this.load(); },
+      next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
       error: e => { this.saving.set(false); this.formError.set(e.message); }
     });
   }
 
-  remove(r: Region) {
-    this.saving.set(true); this.formError.set('');
-    this.service.deleteRegion(r.id).subscribe({
-      next: () => { this.saving.set(false); this.deleting.set(null); this.load(); },
-      error: e => { this.saving.set(false); this.formError.set(e.message); }
-    });
-  }
 }

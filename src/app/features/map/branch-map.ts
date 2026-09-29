@@ -5,9 +5,9 @@ import { BranchMap, MapBranchOption, MapSite } from '../../core/models/device.mo
 import { GovernorateFeature, governorateOf } from '../../core/utils/geo';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 
-/** تدرّج أخضر واحد (من الفاتح للداكن) لعدد المواقع في المحافظة — المحافظة بلا مواقع رمادية */
-const RAMP = ['#cdebdc', '#9bd4b6', '#5cb58a', '#23905a'];
-const EMPTY = '#e3e8ef';
+/** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */
+const RAMP = ['var(--map-1)', 'var(--map-2)', 'var(--map-3)', 'var(--map-4)'];
+const EMPTY = 'var(--map-empty)';
 
 /** آخر عرض للخريطة (الفرع + المحافظة) — حتى يرجع المستخدم لنفس المكان بعد فتح صفحة موقع */
 let lastView: { branchId: number; focus: string | null } | null = null;

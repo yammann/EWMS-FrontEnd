@@ -1,0 +1,215 @@
+/* =========================================================
+   النوافذ المنبثقة، التأكيد، التنبيهات العائمة — بأسلوب أوراق Apple (Sheets)
+   ========================================================= */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--backdrop);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fadeIn .2s var(--ease);
+}
+
+.modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  animation: sheetIn .38s var(--ease-spring);
+}
+.modal-lg { max-width: 680px; }
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 14px;
+}
+
+.modal-header h2 { font-size: 19px; font-weight: 700; color: var(--ink-900); }
+
+.modal-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--ink-500);
+  cursor: pointer;
+}
+.modal-close:hover:not(:disabled) { background: var(--fill-strong); color: var(--ink-900); filter: none; }
+.modal-close svg { width: 14px; height: 14px; }
+
+/* عندما يلفّ <form> جسم النافذة يجب أن يكون هو أيضاً flex حتى يعمل السكرول داخل .modal-body */
+.modal > form {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  flex: 1;
+  min-height: 0;
+  padding: 8px 22px 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+.modal-actions button { min-width: 96px; }
+
+/* أزرار النافذة خارج الجسم: شريط ثابت أسفلها بينما يتمرر المحتوى */
+.modal > .modal-actions,
+.modal > form > .modal-actions {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 14px 22px;
+  border-top: 1px solid var(--separator);
+  background: var(--material);
+  backdrop-filter: var(--material-blur);
+  -webkit-backdrop-filter: var(--material-blur);
+}
+
+/* ---------- نافذة التأكيد (Alert) ---------- */
+.confirm-backdrop { z-index: 1050; }
+
+.confirm-dialog {
+  width: 100%;
+  max-width: 340px;
+  padding: 24px 20px 18px;
+  background: var(--surface-raised);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  text-align: center;
+  animation: alertIn .3s var(--ease-spring);
+}
+
+.confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--danger-100);
+  color: var(--danger-600);
+}
+.confirm-icon svg { width: 24px; height: 24px; }
+
+.confirm-dialog h3 { margin: 0 0 6px; color: var(--ink-900); font-size: 17px; font-weight: 700; }
+
+.confirm-dialog p {
+  margin: 0 0 20px;
+  color: var(--ink-600);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.confirm-actions button { min-width: 0; }
+
+/* ---------- التنبيهات العائمة ---------- */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  inset-inline-end: 24px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--material);
+  backdrop-filter: var(--material-blur);
+  -webkit-backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  pointer-events: auto;
+  animation: toastIn .4s var(--ease-spring);
+}
+
+.toast-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.toast-icon svg { width: 16px; height: 16px; }
+
+.toast-message {
+  flex: 1;
+  color: var(--ink-900);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.toast-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-400);
+  cursor: pointer;
+}
+.toast-close:hover:not(:disabled) { background: var(--fill); color: var(--ink-700); filter: none; }
+.toast-close svg { width: 12px; height: 12px; }
+
+.toast-success .toast-icon { background: var(--brand-100); color: var(--brand-600); }
+.toast-error .toast-icon { background: var(--danger-100); color: var(--danger-600); }
+.toast-info .toast-icon { background: var(--info-100); color: var(--info-500); }
+
+@media (max-width: 760px) {
+  .modal-backdrop { padding: 0; align-items: flex-end; }
+  .modal {
+    max-height: calc(100vh - 32px);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+  .modal-body { padding: 8px 18px 18px; }
+
+  .toast-container {
+    bottom: 16px;
+    inset-inline-end: 16px;
+    inset-inline-start: 16px;
+    max-width: none;
+  }
+}

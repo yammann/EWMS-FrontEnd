@@ -3,6 +3,7 @@ import { map } from 'rxjs';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
 import { Branch, Department, Office, Role, User } from '../models/ewms.models';
+import { AppPermission } from '../constants/access';
 
 @Injectable({ providedIn: 'root' })
 export class EwmsService {
@@ -37,7 +38,7 @@ export class EwmsService {
   // قائمة فروع للقوائم المنسدلة: Branches/GetAll يتطلب ManageBranches (غير متاحة لرؤساء الأقسام/الفروع)،
   // لذلك نستخرج الفروع من الأقسام (Department/GetAll متاح لأي مستخدم مسجّل)
   getBranchLookup() {
-    if (this.auth.hasPermission('ManageBranches')) return this.getBranches();
+    if (this.auth.hasPermission(AppPermission.ManageBranches)) return this.getBranches();
     return this.getDepartments().pipe(map(departments => {
       const branches = new Map<number, Branch>();
       for (const d of departments) {

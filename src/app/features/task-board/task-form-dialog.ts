@@ -1,5 +1,6 @@
-import { Component, HostListener, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Modal } from '../../shared/ui/modal';
 import { AssignedTaskService } from '../../core/services/assigned-task.service';
 import {
   AssignedTaskDetail, TaskPriority, TaskTargetOption, TASK_PRIORITY_LABEL, TASK_PRIORITY_VALUE
@@ -9,17 +10,9 @@ export type TaskFormMode = 'create' | 'edit' | 'delegate';
 
 /** نافذة إنشاء مهمة / تعديلها / تفويض جزء من مهمة واردة لجهة أدنى */
 @Component({
-  selector: 'app-task-form-dialog', standalone: true, imports: [ReactiveFormsModule],
+  selector: 'app-task-form-dialog', standalone: true, imports: [ReactiveFormsModule, Modal],
   template: `
-    <div class="modal-backdrop" (click)="close.emit()">
-      <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="task-form-title" (click)="$event.stopPropagation()">
-        <header class="modal-header">
-          <div>
-            <h2 id="task-form-title">{{ heading() }}</h2>
-            @if (mode() === 'delegate' && task()) { <p class="sub">من المهمة: «{{ task()!.title }}»</p> }
-          </div>
-          <button type="button" class="modal-close" aria-label="إغلاق" (click)="close.emit()">×</button>
-        </header>
+    <app-modal [heading]="heading()" [subheading]="subheading()" size="lg" [busy]="saving()" (closed)="close.emit()">
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="modal-body form-stack">
@@ -77,15 +70,13 @@ export type TaskFormMode = 'create' | 'edit' | 'delegate';
             </button>
           </footer>
         </form>
-      </div>
-    </div>`,
+    </app-modal>`,
   styles: [`
-    .sub { margin: 4px 0 0; font-size: 12px; color: var(--ink-500); }
     fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .segmented { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
     .seg { min-height: 40px; padding: 0 8px; background: var(--surface); color: var(--ink-600); border: 1px solid var(--border-strong); font-weight: 700; }
     .seg:hover:not(:disabled) { background: var(--ink-50); box-shadow: none; transform: none; }
-    .seg.on { color: #fff; border-color: transparent; }
+    .seg.on { color: var(--on-brand); border-color: transparent; }
     .seg.on.p-Low { background: var(--ink-500); }
     .seg.on.p-Normal { background: var(--info-500); }
     .seg.on.p-High { background: var(--warning-700); }
@@ -124,6 +115,7 @@ export class TaskFormDialog implements OnInit {
   selectedTarget = computed(() => this.targets().find(t => t.id === this.targetId()) ?? null);
 
   heading = computed(() => ({ create: 'مهمة جديدة', edit: 'تعديل المهمة', delegate: 'تفويض مهمة فرعية' })[this.mode()]);
+  subheading = computed(() => this.mode() === 'delegate' && this.task() ? `من المهمة: «${this.task()!.title}»` : '');
 
   ngOnInit() {
     const t = this.task();
@@ -135,9 +127,6 @@ export class TaskFormDialog implements OnInit {
     }
     this.form.controls.targetId.valueChanges.subscribe(v => this.targetId.set(Number(v)));
   }
-
-  @HostListener('document:keydown.escape')
-  onEscape() { if (!this.saving()) this.close.emit(); }
 
   submit() {
     this.form.markAllAsTouched();
