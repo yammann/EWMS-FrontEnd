@@ -34,10 +34,12 @@ export class MaintenanceService {
       createRequest: has(AppPermission.CreateMaintenanceRequest),
       editRequest: has(AppPermission.EditMaintenanceRequest),
       deleteRequest: has(AppPermission.DeleteMaintenanceRequest),
+      assignRequest: has(AppPermission.AssignMaintenanceRequest),
       viewTasks: has(AppPermission.ViewMaintenanceTasks),
       createTask: has(AppPermission.CreateMaintenanceTask),
       editTask: has(AppPermission.EditMaintenanceTask),
       deleteTask: has(AppPermission.DeleteMaintenanceTask),
+      assignTask: has(AppPermission.AssignMaintenanceTask),
       createLookup: has(AppPermission.CreateMaintenanceLookup),
       editLookup: has(AppPermission.EditMaintenanceLookup),
       deleteLookup: has(AppPermission.DeleteMaintenanceLookup)

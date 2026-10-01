@@ -18,6 +18,26 @@ export const ROLE_LEVELS: { value: string; label: string; hint: string }[] = [
   { value: AppRole.Employee, label: 'موظف', hint: 'يتبع لفرع وقسم ومكتب — يرى سجلاته فقط' }
 ];
 
+/** نطاقات الصلاحية (مطابقة لـ Domain/Enums/PermissionScope في الباكاند) */
+export const PERMISSION_SCOPES: { value: number; label: string }[] = [
+  { value: 1, label: 'سجلاته فقط' },
+  { value: 2, label: 'مكتبه' },
+  { value: 3, label: 'قسمه' },
+  { value: 4, label: 'فرعه' },
+  { value: 5, label: 'كل المؤسسة' }
+];
+
+/** النطاق الافتراضي لصلاحية تُمنح لدور بهذا المستوى (مطابق لـ RoleLevels.DefaultScope) */
+export function defaultScopeFor(level: string | null | undefined): number {
+  switch (level) {
+    case AppRole.SuperAdmin: return 5;
+    case AppRole.BranchManager: return 4;
+    case AppRole.Manager: return 3;
+    case AppRole.OfficeManager: return 2;
+    default: return 1;
+  }
+}
+
 export function roleLevelLabel(level: string | null | undefined): string {
   return level === AppRole.SuperAdmin ? 'مدير النظام' : ROLE_LEVELS.find(l => l.value === level)?.label ?? 'موظف';
 }

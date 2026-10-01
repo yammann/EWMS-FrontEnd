@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Permission, Role } from '../../core/models/ewms.models';
 import { EwmsService } from '../../core/services/ewms.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AppPermission, AppRole } from '../../core/constants/access';
-import { ROLE_LEVELS, roleLevelLabel } from '../../core/utils/roles';
+import { PERMISSION_SCOPES, ROLE_LEVELS, defaultScopeFor, roleLevelLabel } from '../../core/utils/roles';
 import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
 import { ConfirmService } from '../../shared/ui/confirm.service';
@@ -59,6 +59,7 @@ export class RolesPage {
   saving = this.actions.saving;
 
   levels = ROLE_LEVELS;
+  scopeOptions = PERMISSION_SCOPES;
   levelLabel = roleLevelLabel;
   /** تلميح المستوى المختار */
   levelHint(level: string | null | undefined): string {
@@ -69,13 +70,17 @@ export class RolesPage {
   createForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     level: [AppRole.Employee as string, Validators.required],
-    permissionIds: [[] as number[]]
+    permissionIds: [[] as number[]],
+    /** نطاق كل صلاحية مختارة ذات نطاق: معرّف الصلاحية ← 1..5 */
+    scopes: this.fb.nonNullable.control<Record<number, number>>({})
   });
 
   editForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     level: [AppRole.Employee as string, Validators.required],
-    permissionIds: [[] as number[]]
+    permissionIds: [[] as number[]],
+    /** نطاق كل صلاحية مختارة ذات نطاق: معرّف الصلاحية ← 1..5 */
+    scopes: this.fb.nonNullable.control<Record<number, number>>({})
   });
 
   canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateRole));
@@ -140,7 +145,7 @@ export class RolesPage {
     }
 
     this.selectedRole.set(null);
-    this.createForm.reset({ level: AppRole.Employee, permissionIds: [] });
+    this.createForm.reset({ level: AppRole.Employee, permissionIds: [], scopes: {} });
     this.collapseAllGroups();
     this.activeModal.set('create');
   }
@@ -156,6 +161,7 @@ export class RolesPage {
     this.editForm.patchValue({
       name: role.name,
       level: role.level,
+      scopes: Object.fromEntries((role.permissions ?? []).filter(p => p.scoped && p.scope).map(p => [p.id, p.scope!])),
       permissionIds: role.permissions?.map(p => p.id) ?? []
     });
     this.activeModal.set('edit');
@@ -219,7 +225,39 @@ export class RolesPage {
     const form = modal === 'create' ? this.createForm : this.editForm;
     const ids = new Set(group.items.map(p => p.id));
     const rest = (form.value.permissionIds ?? []).filter(id => !ids.has(id));
-    form.patchValue({ permissionIds: checked ? [...rest, ...ids] : rest });
+    const next = checked ? [...rest, ...ids] : rest;
+    form.patchValue({ permissionIds: next, scopes: this.withDefaultScopes(form, next) });
+  }
+
+  /* =====================================================
+   * نطاق الصلاحية (لكل صلاحية ذات نطاق: على أي سجلات تعمل)
+   * ===================================================== */
+  scopeOf(modal: ModalType, permission: Permission): number {
+    const form = modal === 'create' ? this.createForm : this.editForm;
+    return form.value.scopes?.[permission.id] ?? defaultScopeFor(form.value.level);
+  }
+
+  setScope(modal: ModalType, permission: Permission, event: Event) {
+    const form = modal === 'create' ? this.createForm : this.editForm;
+    const value = Number((event.target as HTMLSelectElement).value);
+    form.patchValue({ scopes: { ...(form.value.scopes ?? {}), [permission.id]: value } });
+  }
+
+  /** يُبقي نطاقات المختار، ويعطي الجديد النطاق الافتراضي لمستوى الدور، ويحذف نطاق ما أُلغي */
+  private withDefaultScopes(form: FormGroup, ids: number[]): Record<number, number> {
+    const current = (form.value.scopes ?? {}) as Record<number, number>;
+    const fallback = defaultScopeFor(form.value.level);
+    const scopedIds = new Set(this.permissions().filter(p => p.scoped).map(p => p.id));
+    return Object.fromEntries(ids.filter(id => scopedIds.has(id)).map(id => [id, current[id] ?? fallback]));
+  }
+
+  /** النطاقات بنفس ترتيب المعرّفات (0 = الافتراضي لمستوى الدور) */
+  private appendGrants(data: FormData, form: FormGroup) {
+    const scopes = (form.value.scopes ?? {}) as Record<number, number>;
+    for (const id of form.value.permissionIds ?? []) {
+      data.append('PermissionIds', String(id));
+      data.append('PermissionScopes', String(scopes[id] ?? 0));
+    }
   }
 
   /* =====================================================
@@ -239,12 +277,13 @@ export class RolesPage {
       ? [...current, permissionId]
       : current.filter(id => id !== permissionId);
 
-    form.patchValue({ permissionIds: next });
+    form.patchValue({ permissionIds: next, scopes: this.withDefaultScopes(form, next) });
   }
 
   selectAllPermissions(modal: ModalType) {
     const form = modal === 'create' ? this.createForm : this.editForm;
-    form.patchValue({ permissionIds: this.permissions().map(p => p.id) });
+    const all = this.permissions().map(p => p.id);
+    form.patchValue({ permissionIds: all, scopes: this.withDefaultScopes(form, all) });
   }
 
   clearAllPermissions(modal: ModalType) {
@@ -266,16 +305,14 @@ export class RolesPage {
     const form = new FormData();
     form.append('Name', this.createForm.value.name ?? '');
     form.append('Level', this.createForm.value.level ?? AppRole.Employee);
-    for (const id of this.createForm.value.permissionIds ?? []) {
-      form.append('PermissionIds', String(id));
-    }
+    this.appendGrants(form, this.createForm);
 
     this.actions.run(
       'create',
       this.ewms.createRole(form),
       'تم إنشاء الدور بنجاح',
       () => {
-        this.createForm.reset({ permissionIds: [] });
+        this.createForm.reset({ level: AppRole.Employee, permissionIds: [], scopes: {} });
         this.closeModal();
       }
     );
@@ -288,9 +325,7 @@ export class RolesPage {
     const form = new FormData();
     form.append('Name', this.editForm.value.name ?? '');
     form.append('Level', this.editForm.value.level ?? AppRole.Employee);
-    for (const id of this.editForm.value.permissionIds ?? []) {
-      form.append('PermissionIds', String(id));
-    }
+    this.appendGrants(form, this.editForm);
 
     this.actions.run(
       'edit',

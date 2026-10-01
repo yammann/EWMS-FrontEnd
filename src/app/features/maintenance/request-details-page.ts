@@ -166,8 +166,8 @@ export class MaintenanceRequestDetailsPage {
   assignOpen = signal(false);
 
   canEdit = computed(() => this.can().editRequest && !!this.request()?.canEdit);
-  canAssign = computed(() => this.can().editRequest && !!this.request()?.canAssign);
-  canDelete = computed(() => this.can().deleteRequest && !!this.request()?.canEdit);
+  canAssign = computed(() => this.can().assignRequest && !!this.request()?.canAssign);
+  canDelete = computed(() => this.can().deleteRequest && !!this.request()?.canDelete);
 
   duration = computed(() => {
     const r = this.request();

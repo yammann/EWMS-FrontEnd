@@ -59,8 +59,8 @@ const PAGE_SIZE = 20;
                   <td>{{ t.userName }}</td>
                   <td class="nowrap">{{ utc(t.createdAt) | date:'yyyy/MM/dd' }}</td>
                   <td (click)="$event.stopPropagation()"><div class="row-actions">
-                    @if (can().editTask && t.canAssign) { <button class="btn btn-ghost btn-sm" type="button" (click)="assigning.set(t)">نقل</button> }
-                    @if (can().deleteTask && t.canEdit) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(t)">حذف</button> }
+                    @if (can().assignTask && t.canAssign) { <button class="btn btn-ghost btn-sm" type="button" (click)="assigning.set(t)">نقل</button> }
+                    @if (can().deleteTask && t.canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(t)">حذف</button> }
                   </div></td>
                 </tr>
               }

@@ -390,6 +390,17 @@
                   <div class="permission-card-body">
                     <strong>{{ permission.description || permission.name }}</strong>
                     <small>{{ permission.name }}</small>
+                    @if (permission.scoped && isPermissionSelected(modal, permission.id)) {
+                      <span class="scope-field" (click)="$event.preventDefault(); $event.stopPropagation()">
+                        <span class="scope-label">النطاق</span>
+                        <select class="scope-select" [attr.aria-label]="'نطاق ' + (permission.description || permission.name)"
+                                (change)="setScope(modal, permission, $event)">
+                          @for (s of scopeOptions; track s.value) {
+                            <option [value]="s.value" [selected]="s.value === scopeOf(modal, permission)">{{ s.label }}</option>
+                          }
+                        </select>
+                      </span>
+                    }
                   </div>
                   <span class="permission-check">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">

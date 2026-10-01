@@ -121,6 +121,11 @@
   gap: 6px;
 }
 
+/* نطاق الصلاحية داخل بطاقتها: على أي سجلات تعمل */
+.scope-field { display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: default; }
+.scope-label { font-size: 11px; font-weight: 700; color: var(--brand-700); }
+.scope-select { width: auto; min-width: 120px; height: 30px; padding: 0 10px; font-size: 12px; font-weight: 700; border-radius: var(--radius-sm); }
+
 /* مجموعات الصلاحيات القابلة للطي */
 .perm-groups { display: grid; gap: 8px; }
 .perm-group { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; }

@@ -16,6 +16,10 @@ export interface Permission {
   id: number;
   name: string;
   description: string;
+  /** للصلاحية نطاق يُختار عند منحها للدور */
+  scoped?: boolean;
+  /** نطاقها لهذا الدور (في الأدوار فقط): 1 سجلاته، 2 مكتبه، 3 قسمه، 4 فرعه، 5 كل المؤسسة */
+  scope?: number;
 }
 
 export interface Office {

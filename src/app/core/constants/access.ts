@@ -36,8 +36,10 @@ export const AppPermission = {
 
   ViewMaintenanceRequests: 'ViewMaintenanceRequests', CreateMaintenanceRequest: 'CreateMaintenanceRequest',
   EditMaintenanceRequest: 'EditMaintenanceRequest', DeleteMaintenanceRequest: 'DeleteMaintenanceRequest',
+  AssignMaintenanceRequest: 'AssignMaintenanceRequest',
   ViewMaintenanceTasks: 'ViewMaintenanceTasks', CreateMaintenanceTask: 'CreateMaintenanceTask',
   EditMaintenanceTask: 'EditMaintenanceTask', DeleteMaintenanceTask: 'DeleteMaintenanceTask',
+  AssignMaintenanceTask: 'AssignMaintenanceTask',
   ViewMaintenanceLookups: 'ViewMaintenanceLookups', CreateMaintenanceLookup: 'CreateMaintenanceLookup',
   EditMaintenanceLookup: 'EditMaintenanceLookup', DeleteMaintenanceLookup: 'DeleteMaintenanceLookup'
 } as const;

@@ -14,6 +14,7 @@ export interface MaintenanceRequest {
   number: string;
   /** ما يستطيعه المستخدم الحالي على هذا الطلب (النطاق — الصلاحية تُفحص منفصلة) */
   canEdit: boolean;
+  canDelete: boolean;
   canAssign: boolean;
 
   userId: number;
@@ -77,6 +78,7 @@ export interface MaintenanceRequestFilter {
 export interface MaintenanceTask {
   id: number;
   canEdit: boolean;
+  canDelete: boolean;
   canAssign: boolean;
 
   userId: number;
