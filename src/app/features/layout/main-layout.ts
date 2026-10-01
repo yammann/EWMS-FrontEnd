@@ -60,7 +60,7 @@ export class MainLayout {
       ].filter(Boolean) as NavItem[] },
       { id: 'vacations', title: 'الإجازات', items: [
         this.auth.canReviewVacations() && { path: '/vacations/review', label: 'مراجعة الإجازات', icon: 'check' },
-        this.auth.isLeader() && can(AppPermission.ViewVacations) && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
+        this.auth.scopeOf(AppPermission.ViewVacations) >= 2 && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
         canAny(MANAGE_VACATION_TYPES) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' }
       ].filter(Boolean) as NavItem[] },
       { id: 'maintenance', title: 'الصيانة', items: [

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { deviceGuard } from './core/guards/device.guard';
 import { permissionGuard } from './core/guards/permission.guard';
-import { AppPermission, LEADER_ROLES, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES } from './core/constants/access';
+import { AppPermission, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES } from './core/constants/access';
 import { MainLayout } from './features/layout/main-layout';
 
 /**
@@ -89,7 +89,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/vacations/vacation-review-page').then(m => m.VacationReviewPage)
       },
       {
-        path: 'vacations/stats', canActivate: [permissionGuard], data: { roles: LEADER_ROLES, permission: AppPermission.ViewVacations },
+        path: 'vacations/stats', canActivate: [permissionGuard], data: { permission: AppPermission.ViewVacations, minScope: 2 },
         loadComponent: () => import('./features/vacations/vacation-stats-page').then(m => m.VacationStatsPage)
       },
       {

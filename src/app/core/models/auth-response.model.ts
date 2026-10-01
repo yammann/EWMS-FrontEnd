@@ -8,6 +8,8 @@ export interface AuthResponse {
   /** اسم الدور كما كتبه المدير — للعرض فقط */
   roleName?: string;
   permissions: string[];
+  /** نطاق الصلاحيات ذات النطاق: الاسم ← 1 سجلاته، 2 مكتبه، 3 قسمه، 4 فرعه، 5 كل المؤسسة */
+  permissionScopes?: Record<string, number>;
 }
 
 export interface AuthUser {
@@ -19,4 +21,6 @@ export interface AuthUser {
   roleName?: string;
   expiresAt: string;
   permissions: string[];
+  /** نطاق الصلاحيات ذات النطاق: الاسم ← 1 سجلاته، 2 مكتبه، 3 قسمه، 4 فرعه، 5 كل المؤسسة */
+  permissionScopes?: Record<string, number>;
 }

@@ -31,6 +31,9 @@ export const AppPermission = {
 
   ViewWorkTasks: 'ViewWorkTasks', CreateWorkTask: 'CreateWorkTask', EditWorkTask: 'EditWorkTask', DeleteWorkTask: 'DeleteWorkTask',
 
+  // لوحة المهام: الإسناد نزولاً والاطلاع، كلاهما بنطاق
+  ViewAssignedTasks: 'ViewAssignedTasks', CreateAssignedTask: 'CreateAssignedTask',
+
   // توثيق الأجهزة: الواجهة تعتمد Devices/MyAccess (الصلاحية أو القسم المالك) لا هذه الأسماء مباشرة
   ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
 

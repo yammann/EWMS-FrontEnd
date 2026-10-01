@@ -17,6 +17,9 @@ export const permissionGuard: CanActivateFn = route => {
   const permissionOk = anyPermission ? auth.hasAnyPermission(anyPermission)
     : permission ? auth.hasPermission(permission)
       : !!roles || auth.canReviewVacations();
-  const allowed = roleOk && permissionOk;
+  // data.minScope: الصلاحية بنطاق لا يقل عن هذا (مثل إحصائيات الإجازات: أوسع من سجلاته)
+  const minScope = route.data['minScope'] as number | undefined;
+  const scopeOk = !minScope || !permission || auth.scopeOf(permission) >= minScope;
+  const allowed = roleOk && permissionOk && scopeOk;
   return allowed || router.createUrlTree(['/profile']);
 };

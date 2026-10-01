@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AssignedTaskService } from '../../core/services/assigned-task.service';
 import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
 import { NotificationService } from '../../core/services/notification.service';
 import {
   AssignedTaskCard, AssignedTaskDetail, TaskBoardMode, TaskPriority, TaskStatus, TaskTargetOption,
@@ -60,7 +61,8 @@ export class TaskBoardPage {
   form = signal<{ mode: TaskFormMode; task: AssignedTaskDetail | null } | null>(null);
   targets = signal<TaskTargetOption[]>([]);
 
-  isLeader = computed(() => this.auth.isLeader());
+  /** تبويب "كل مهام نطاقي": لمن يتابع المهام بنطاق أوسع من سجلاته */
+  isLeader = computed(() => this.auth.scopeOf(AppPermission.ViewAssignedTasks) >= 2);
 
   filtered = computed(() => {
     const q = this.search().trim().toLowerCase();

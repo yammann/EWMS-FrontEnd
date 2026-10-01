@@ -49,7 +49,8 @@ export class AuthService {
           role: response.role,
           roleName: response.roleName,
           expiresAt: response.expiresAt,
-          permissions: response.permissions ?? []
+          permissions: response.permissions ?? [],
+          permissionScopes: response.permissionScopes ?? {}
         };
 
         this.token.set(response.token);
@@ -66,11 +67,12 @@ export class AuthService {
    */
   refreshPermissions() {
     if (!this.isAuthenticated()) return;
-    this.api.get<string[]>('/Auth/Permissions').subscribe({
-      next: permissions => {
+    this.api.get<{ permissions: string[]; scopes: Record<string, number> }>('/Auth/Permissions').subscribe({
+      next: ({ permissions, scopes }) => {
         const user = this.currentUser();
-        if (!user || JSON.stringify(user.permissions) === JSON.stringify(permissions)) return;
-        const updated = { ...user, permissions };
+        if (!user || (JSON.stringify(user.permissions) === JSON.stringify(permissions)
+          && JSON.stringify(user.permissionScopes ?? {}) === JSON.stringify(scopes))) return;
+        const updated = { ...user, permissions, permissionScopes: scopes };
         storage.set(USER_KEY, JSON.stringify(updated));
         this.currentUser.set(updated);
         this.devices.resetAccess();
@@ -108,6 +110,15 @@ export class AuthService {
 
   hasPermission(permission: AppPermissionName): boolean {
     return this.currentUser()?.permissions?.includes(permission) ?? false;
+  }
+
+  /**
+   * نطاق الصلاحية للمستخدم: 0 لا يملكها، 1 سجلاته، 2 مكتبه، 3 قسمه، 4 فرعه، 5 كل المؤسسة.
+   * للعرض فقط (إظهار رابط أو تبويب) — الباكاند يحدد السجلات فعلياً.
+   */
+  scopeOf(permission: AppPermissionName): number {
+    if (!this.hasPermission(permission)) return 0;
+    return this.currentUser()?.permissionScopes?.[permission] ?? 1;
   }
 
   /** تكفي واحدة من عدة صلاحيات */
