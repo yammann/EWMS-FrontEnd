@@ -13,11 +13,14 @@
     }
   </section>
   @if (profileError()) { <div class="alert alert-error" role="alert">تعذر تحميل البيانات الوظيفية: {{ profileError() }} <button class="btn btn-ghost" (click)="loadProfile()">إعادة المحاولة</button></div> }
+@if (canViewVacations()) {
   <section class="stats-grid">
     <div class="stat-card"><span class="stat-label">كل طلباتي</span><strong class="stat-value">{{ loading() || error() ? '—' : vacations().length }}</strong></div>
     <div class="stat-card"><span class="stat-label">بانتظار الموافقة</span><strong class="stat-value">{{ loading() || error() ? '—' : pending() }}</strong></div>
     <div class="stat-card"><span class="stat-label">طلبات معتمدة</span><strong class="stat-value">{{ loading() || error() ? '—' : approved() }}</strong></div>
   </section>
+  }
+  @if (isManager()) { <app-signature-panel /> }
   @if (canRequest()) {
   <section class="panel">
     <div class="panel-heading"><div><span class="panel-kicker">طلب جديد</span><h2>تقديم إجازة</h2><p>يحدد النظام حالة الدفع عند تقديم الطلب وفق نوع الإجازة والحد الشهري.</p></div></div>
@@ -35,6 +38,7 @@
     </form>
   </section>
   }
+  @if (canViewVacations()) {
   <section class="panel">
     <div class="panel-heading"><h2>سجل إجازاتي</h2><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
     @if (loading()) { <p class="empty-state" role="status">جارٍ تحميل الإجازات…</p> }
@@ -45,4 +49,5 @@
     </tbody></table></div> }
     @if (cancelling(); as v) { <div class="alert alert-warning" role="alertdialog"><span>إلغاء طلب {{ v.vacationTypeName }} ({{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }})؟ سيُحفظ الطلب في السجل بحالة «ملغاة».</span> <button class="btn btn-danger" (click)="cancel(v)" [disabled]="cancelSaving()">{{ cancelSaving() ? 'جارٍ الإلغاء…' : 'تأكيد الإلغاء' }}</button> <button class="btn btn-ghost" (click)="cancelling.set(null)" [disabled]="cancelSaving()">تراجع</button></div> }
   </section>
+  }
 </div>

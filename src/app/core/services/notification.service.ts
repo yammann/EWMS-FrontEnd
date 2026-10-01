@@ -152,6 +152,8 @@ export class NotificationService {
 export function notificationRoute(n: AppNotification, canReview: boolean): string {
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
+  if (n.relatedEntityType === 'MaintenanceRequest' && n.relatedEntityId) return `/maintenance/requests/${n.relatedEntityId}`;
+  if (n.relatedEntityType === 'MaintenanceTask' && n.relatedEntityId) return `/maintenance/tasks?task=${n.relatedEntityId}`;
   const reviewTypes = ['VacationSubmitted', 'VacationForwardedToBranchManager', 'VacationCancelled'];
   return n.relatedEntityType === 'Vacation' && reviewTypes.includes(n.type) && canReview
     ? '/vacations/review' : '/profile';

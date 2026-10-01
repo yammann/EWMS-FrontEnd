@@ -1,4 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { VacationService } from '../../core/services/vacation.service';
 import { VacationType } from '../../core/models/vacation.models';
@@ -11,6 +13,7 @@ import { VacationType } from '../../core/models/vacation.models';
       <header class="page-header"><div><span class="eyebrow">إعدادات الإجازات</span><h1>أنواع الإجازات</h1></div><button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button></header>
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
+      @if (editing() ? can().edit : can().create) {
       <section class="panel"><div class="panel-heading"><h2>{{ editing() ? 'تعديل النوع' : 'إضافة نوع إجازة' }}</h2></div>
         <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
           <label class="form-field">الاسم<input formControlName="name" maxlength="100"></label>
@@ -20,15 +23,23 @@ import { VacationType } from '../../core/models/vacation.models';
           <div class="actions full-width"><button class="btn" type="submit" [disabled]="saving() || form.invalid">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ النوع' }}</button>@if (editing()) { <button class="btn btn-ghost" type="button" (click)="reset()" [disabled]="saving()">إلغاء</button> }</div>
         </form>
       </section>
+      }
       <section class="panel">
         @if (loading()) { <p class="empty-state">جارٍ التحميل…</p> }
         @else if (!items().length && !error()) { <p class="empty-state">لا توجد أنواع إجازات بعد.</p> }
-        @else { <div class="table-wrap"><table><thead><tr><th>النوع</th><th>الوصف</th><th>الدفع</th><th>الإجراءات</th></tr></thead><tbody>@for (v of items(); track v.id) { <tr><td>{{ v.name }}</td><td class="wrap">{{ v.description || '—' }}</td><td>{{ v.paymentTypeAr }}</td><td><div class="actions"><button class="btn btn-ghost btn-sm" (click)="edit(v)" [disabled]="saving()">تعديل</button><button class="btn btn-danger btn-sm" (click)="deleting.set(v)" [disabled]="saving()">حذف</button></div></td></tr> }</tbody></table></div> }
+        @else { <div class="table-wrap"><table><thead><tr><th>النوع</th><th>الوصف</th><th>الدفع</th><th>الإجراءات</th></tr></thead><tbody>@for (v of items(); track v.id) { <tr><td>{{ v.name }}</td><td class="wrap">{{ v.description || '—' }}</td><td>{{ v.paymentTypeAr }}</td><td><div class="actions">@if (can().edit) { <button class="btn btn-ghost btn-sm" (click)="edit(v)" [disabled]="saving()">تعديل</button> }@if (can().delete) { <button class="btn btn-danger btn-sm" (click)="deleting.set(v)" [disabled]="saving()">حذف</button> }</div></td></tr> }</tbody></table></div> }
         @if (deleting(); as v) { <div class="alert alert-warning">حذف «{{ v.name }}»؟ <button class="btn btn-danger" (click)="remove(v)" [disabled]="saving()">تأكيد الحذف</button><button class="btn btn-ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button></div> }
       </section>
     </div>`
 })
 export class VacationTypesPage {
+  private auth = inject(AuthService);
+  /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والنموذج والأزرار تظهر حسب الإضافة/التعديل/الحذف */
+  can = computed(() => ({
+    create: this.auth.hasPermission(AppPermission.CreateVacationType),
+    edit: this.auth.hasPermission(AppPermission.EditVacationType),
+    delete: this.auth.hasPermission(AppPermission.DeleteVacationType)
+  }));
   private service = inject(VacationService);
   items = signal<VacationType[]>([]); editing = signal<number | null>(null); deleting = signal<VacationType | null>(null);
   loading = signal(false); saving = signal(false); error = signal(''); success = signal('');

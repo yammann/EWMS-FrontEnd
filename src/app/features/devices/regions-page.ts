@@ -19,7 +19,7 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
       <header class="page-header">
         <div><span class="eyebrow">توثيق الأجهزة</span><h1>المناطق</h1><p class="muted">المناطق التي تُركَّب فيها أجهزة المؤسسة، وكل منطقة تضم عدة مواقع</p></div>
         <div class="header-actions">
-          @if (access().canManage) { <button class="btn" type="button" (click)="openForm(null)">+ منطقة جديدة</button> }
+          @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)">+ منطقة جديدة</button> }
           <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
         </div>
       </header>
@@ -35,7 +35,7 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
         @else if (!filtered().length) { <p class="empty-state">{{ search() ? 'لا توجد نتائج' : 'لا توجد مناطق بعد' }}</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>المنطقة</th><th>الوصف</th><th>الإحداثيات</th><th>المواقع</th>@if (access().canManage) { <th class="actions-th"></th> }</tr></thead>
+            <thead><tr><th>المنطقة</th><th>الوصف</th><th>الإحداثيات</th><th>المواقع</th>@if (access().canEdit || access().canDelete) { <th class="actions-th"></th> }</tr></thead>
             <tbody>
               @for (r of filtered(); track r.id) {
                 <tr>
@@ -43,10 +43,10 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
                   <td class="wrap">{{ r.description || '—' }}</td>
                   <td>@if (coords(r.latitude, r.longitude); as c) { <span class="mono">{{ c }}</span> } @else { <span class="missing">⚠ بلا إحداثيات</span> }</td>
                   <td><a class="cell-link" [routerLink]="['/devices/sites']" [queryParams]="{ regionId: r.id }">{{ siteCounts().get(r.id) ?? 0 }} موقع ←</a></td>
-                  @if (access().canManage) {
+                  @if (access().canEdit || access().canDelete) {
                     <td><div class="row-actions">
-                      <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(r)">تعديل</button>
-                      <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(r)">حذف</button>
+                      @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(r)">تعديل</button> }
+                      @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(r)">حذف</button> }
                     </div></td>
                   }
                 </tr>

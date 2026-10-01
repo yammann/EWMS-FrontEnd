@@ -21,7 +21,7 @@
         <span>{{ loading() ? 'جاري التحديث...' : 'تحديث' }}</span>
       </button>
 
-      @if (canManage()) {
+      @if (canCreate()) {
         <button type="button" class="new-btn" (click)="openCreate()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path d="M12 5v14M5 12h14"></path>
@@ -141,7 +141,7 @@
                     </div>
                     <div class="role-details">
                       <strong>{{ role.name || 'دور بدون اسم' }}</strong>
-                      <small>#{{ role.id }}</small>
+                      <small>{{ levelLabel(role.level) }}</small>
                     </div>
                   </div>
                 </td>
@@ -191,7 +191,7 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    @if (canManage()) {
+                    @if (canEdit()) {
                       <button type="button" class="icon-btn edit" title="تعديل"
                               (click)="openEdit(role)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -201,7 +201,7 @@
                       </button>
                     }
 
-                    @if (canManage()) {
+                    @if (canDelete()) {
                       <button type="button" class="icon-btn danger" title="حذف"
                               (click)="deleteRole(role)"
                               [disabled]="saving() === 'delete-' + role.id">
@@ -263,46 +263,15 @@
                   }
                 </div>
 
-                <!-- Permissions grid -->
-                <div class="permissions-section">
-                  <div class="permissions-header">
-                    <div>
-                      <span class="form-label">الصلاحيات</span>
-                      <small class="form-hint">
-                        تم اختيار {{ selectedPermissionsCount('create') }} من {{ permissions().length }}
-                      </small>
-                    </div>
-                    <div class="permissions-actions">
-                      <button type="button" class="btn-mini" (click)="selectAllPermissions('create')">
-                        تحديد الكل
-                      </button>
-                      <button type="button" class="btn-mini ghost" (click)="clearAllPermissions('create')">
-                        مسح
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="permissions-grid">
-                    @for (permission of permissions(); track permission.id) {
-                      <label class="permission-card" [class.checked]="isPermissionSelected('create', permission.id)">
-                        <input type="checkbox"
-                               [checked]="isPermissionSelected('create', permission.id)"
-                               (change)="togglePermission('create', permission.id, $event)" />
-                        <div class="permission-card-body">
-                          <strong>{{ permission.name }}</strong>
-                          @if (permission.description) {
-                            <small>{{ permission.description }}</small>
-                          }
-                        </div>
-                        <span class="permission-check">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <path d="M20 6 9 17l-5-5"></path>
-                          </svg>
-                        </span>
-                      </label>
-                    }
-                  </div>
+                <div class="form-field">
+                  <label class="form-label" for="create-level">مستوى الدور</label>
+                  <select id="create-level" formControlName="level">
+                    @for (l of levels; track l.value) { <option [value]="l.value">{{ l.label }}</option> }
+                  </select>
+                  <small class="form-hint">{{ levelHint(createForm.value.level) }}. المستوى يحدد التبعية المطلوبة عند إضافة الموظف ودوره في سير العمل، أما الاسم فحر.</small>
                 </div>
+
+                <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'create' }" />
 
                 <div class="modal-actions">
                   <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
@@ -332,45 +301,20 @@
                   }
                 </div>
 
-                <div class="permissions-section">
-                  <div class="permissions-header">
-                    <div>
-                      <span class="form-label">الصلاحيات</span>
-                      <small class="form-hint">
-                        تم اختيار {{ selectedPermissionsCount('edit') }} من {{ permissions().length }}
-                      </small>
-                    </div>
-                    <div class="permissions-actions">
-                      <button type="button" class="btn-mini" (click)="selectAllPermissions('edit')">
-                        تحديد الكل
-                      </button>
-                      <button type="button" class="btn-mini ghost" (click)="clearAllPermissions('edit')">
-                        مسح
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="permissions-grid">
-                    @for (permission of permissions(); track permission.id) {
-                      <label class="permission-card" [class.checked]="isPermissionSelected('edit', permission.id)">
-                        <input type="checkbox"
-                               [checked]="isPermissionSelected('edit', permission.id)"
-                               (change)="togglePermission('edit', permission.id, $event)" />
-                        <div class="permission-card-body">
-                          <strong>{{ permission.name }}</strong>
-                          @if (permission.description) {
-                            <small>{{ permission.description }}</small>
-                          }
-                        </div>
-                        <span class="permission-check">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <path d="M20 6 9 17l-5-5"></path>
-                          </svg>
-                        </span>
-                      </label>
-                    }
-                  </div>
+                <div class="form-field">
+                  <label class="form-label" for="edit-level">مستوى الدور</label>
+                  @if (editForm.value.level === superAdminLevel) {
+                    <input id="edit-level" type="text" [value]="levelLabel(superAdminLevel)" disabled />
+                    <small class="form-hint">مستوى مدير النظام ثابت.</small>
+                  } @else {
+                    <select id="edit-level" formControlName="level">
+                      @for (l of levels; track l.value) { <option [value]="l.value">{{ l.label }}</option> }
+                    </select>
+                    <small class="form-hint">{{ levelHint(editForm.value.level) }}. لا يمكن تغيير المستوى ما دام للدور موظفون.</small>
+                  }
                 </div>
+
+                <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'edit' }" />
 
                 <div class="modal-actions">
                   <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
@@ -395,3 +339,69 @@
   }
 
 </section>
+
+<!-- الصلاحيات مجمّعة بالميزة في مجموعات قابلة للطي (مشتركة بين نافذتي الإنشاء والتعديل) -->
+<ng-template #permissionsTpl let-modal>
+  <div class="permissions-section">
+    <div class="permissions-header">
+      <div>
+        <span class="form-label">الصلاحيات</span>
+        <small class="form-hint">
+          تم اختيار {{ selectedPermissionsCount(modal) }} من {{ permissions().length }}
+        </small>
+      </div>
+      <div class="permissions-actions">
+        <button type="button" class="btn-mini ghost" (click)="expandAllGroups()">توسيع الكل</button>
+        <button type="button" class="btn-mini ghost" (click)="collapseAllGroups()">طيّ الكل</button>
+        <button type="button" class="btn-mini" (click)="selectAllPermissions(modal)">تحديد الكل</button>
+        <button type="button" class="btn-mini ghost" (click)="clearAllPermissions(modal)">مسح</button>
+      </div>
+    </div>
+
+    <div class="perm-groups">
+      @for (group of permissionGroups(); track group.key) {
+        <section class="perm-group" [class.open]="isGroupOpen(group.key)">
+          <header class="perm-group-head">
+            <button type="button" class="perm-group-toggle" (click)="toggleGroupOpen(group.key)"
+                    [attr.aria-expanded]="isGroupOpen(group.key)" [attr.aria-controls]="'perm-' + modal + '-' + group.key">
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              <span class="perm-group-title">{{ group.title }}</span>
+              <span class="perm-group-count" [class.has]="groupSelectedCount(modal, group) > 0">
+                {{ groupSelectedCount(modal, group) }} من {{ group.items.length }}
+              </span>
+            </button>
+            <label class="perm-group-all" [attr.title]="'تحديد كل صلاحيات ' + group.title">
+              <input type="checkbox"
+                     [checked]="groupSelectedCount(modal, group) === group.items.length"
+                     [indeterminate]="groupSelectedCount(modal, group) > 0 && groupSelectedCount(modal, group) < group.items.length"
+                     (change)="toggleGroupSelection(modal, group, $event)"
+                     [attr.aria-label]="'تحديد كل صلاحيات ' + group.title" />
+            </label>
+          </header>
+
+          <div class="perm-group-body" [id]="'perm-' + modal + '-' + group.key">
+            <div class="permissions-grid">
+              @for (permission of group.items; track permission.id) {
+                <label class="permission-card" [class.checked]="isPermissionSelected(modal, permission.id)">
+                  <input type="checkbox"
+                         [checked]="isPermissionSelected(modal, permission.id)"
+                         (change)="togglePermission(modal, permission.id, $event)"
+                         [attr.tabindex]="isGroupOpen(group.key) ? null : -1" />
+                  <div class="permission-card-body">
+                    <strong>{{ permission.description || permission.name }}</strong>
+                    <small>{{ permission.name }}</small>
+                  </div>
+                  <span class="permission-check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <path d="M20 6 9 17l-5-5"></path>
+                    </svg>
+                  </span>
+                </label>
+              }
+            </div>
+          </div>
+        </section>
+      }
+    </div>
+  </div>
+</ng-template>

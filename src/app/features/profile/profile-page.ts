@@ -7,6 +7,8 @@ import { ApiService } from '../../core/services/api.service';
 import { User } from '../../core/models/ewms.models';
 import { Vacation, VacationType } from '../../core/models/vacation.models';
 import { canRequestVacation } from '../../core/utils/user-placement';
+import { AppPermission, AppRole } from '../../core/constants/access';
+import { SignaturePanel } from './signature-panel';
 
 export function vacationDateRange(control: AbstractControl) {
   const { startVac, endVac } = control.value;
@@ -15,7 +17,7 @@ export function vacationDateRange(control: AbstractControl) {
 
 @Component({
   selector: 'app-profile-page', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SignaturePanel],
   templateUrl: './profile-page.html', styleUrl: '../shared/organization.scss'
 })
 export class ProfilePage {
@@ -35,7 +37,12 @@ export class ProfilePage {
   submitError = signal('');
   success = signal('');
   // رئيس الفرع و SuperAdmin لا يتبعان لقسم → لا يقدّمان إجازات
-  canRequest = computed(() => canRequestVacation(this.user()?.role));
+  private auth = inject(AuthService);
+  /** خدمة الإجازات قد لا تكون مُسندة لوحدة الموظف — عندها تختفي أقسامها من الملف */
+  canViewVacations = computed(() => this.auth.hasPermission(AppPermission.ViewVacations));
+  canRequest = computed(() => canRequestVacation(this.user()?.role) && this.auth.hasPermission(AppPermission.CreateVacation));
+  /** التوقيع الإلكتروني لرئيس القسم (يُطبع على ورقة تسليم طلبات الصيانة) */
+  isManager = computed(() => this.user()?.role === AppRole.Manager);
   cancelling = signal<Vacation | null>(null);
   cancelSaving = signal(false);
   approved = computed(() => this.vacations().filter(v => v.status === 'Approved').length);
@@ -46,7 +53,7 @@ export class ProfilePage {
     vacReason: ['', Validators.maxLength(500)]
   }, { validators: vacationDateRange });
 
-  constructor() { this.loadProfile(); this.load(); if (this.canRequest()) this.loadTypes(); }
+  constructor() { this.loadProfile(); if (this.canViewVacations()) this.load(); if (this.canRequest()) this.loadTypes(); }
   loadProfile() {
     this.profileError.set('');
     this.api.get<User>('/Auth/Me').subscribe({ next: value => this.profile.set(value), error: e => this.profileError.set(e.message) });

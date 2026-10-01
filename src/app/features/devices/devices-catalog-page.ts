@@ -18,7 +18,7 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
       <header class="page-header">
         <div><span class="eyebrow">توثيق الأجهزة</span><h1>الأجهزة</h1><p class="muted">أنواع وموديلات الأجهزة — الجهاز الواحد يمكن تركيبه عدة مرات في نفس الموقع أو في مواقع مختلفة</p></div>
         <div class="header-actions">
-          @if (access().canManage) { <button class="btn" type="button" (click)="openForm(null)">+ جهاز جديد</button> }
+          @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)">+ جهاز جديد</button> }
           <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
         </div>
       </header>
@@ -34,7 +34,7 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
         @else if (!filtered().length) { <p class="empty-state">{{ search() ? 'لا توجد نتائج' : 'لا توجد أجهزة بعد' }}</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>الجهاز</th><th>الموديل</th><th>الوصف</th><th>التركيبات</th>@if (access().canManage) { <th class="actions-th"></th> }</tr></thead>
+            <thead><tr><th>الجهاز</th><th>الموديل</th><th>الوصف</th><th>التركيبات</th>@if (access().canEdit || access().canDelete) { <th class="actions-th"></th> }</tr></thead>
             <tbody>
               @for (d of filtered(); track d.id) {
                 <tr>
@@ -42,10 +42,10 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
                   <td>{{ d.model || '—' }}</td>
                   <td class="wrap">{{ d.description || '—' }}</td>
                   <td><a class="cell-link" [routerLink]="['/devices/installations']" [queryParams]="{ deviceId: d.id }">{{ installCounts().get(d.id) ?? 0 }} تركيب ←</a></td>
-                  @if (access().canManage) {
+                  @if (access().canEdit || access().canDelete) {
                     <td><div class="row-actions">
-                      <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(d)">تعديل</button>
-                      <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(d)">حذف</button>
+                      @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(d)">تعديل</button> }
+                      @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(d)">حذف</button> }
                     </div></td>
                   }
                 </tr>

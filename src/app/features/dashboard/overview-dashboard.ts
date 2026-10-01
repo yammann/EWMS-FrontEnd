@@ -8,7 +8,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { OverviewDashboard } from '../../core/models/dashboard.models';
 import { roleLabel } from '../../core/utils/roles';
 import { ActivityList, CountBars, StatTile } from './dashboard-widgets';
-import { AppPermission } from '../../core/constants/access';
+import { AppPermission, MANAGE_DEPARTMENTS, MANAGE_VACATION_TYPES } from '../../core/constants/access';
 
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع + صفحات الإدارة */
 @Component({
@@ -79,7 +79,7 @@ import { AppPermission } from '../../core/constants/access';
         <div class="panel-heading"><div><span class="panel-kicker">الإدارة</span><h2>إدارة النظام</h2></div></div>
         <div class="cards">
           @for (item of links; track item.path) {
-            @if (auth.hasPermission(item.permission)) {
+            @if (auth.hasAnyPermission(item.permissions)) {
               <a class="link-card" [routerLink]="item.path"><h3>{{ item.label }}</h3><p>{{ item.description }}</p><span>فتح الصفحة ←</span></a>
             }
           }
@@ -108,13 +108,13 @@ export class OverviewDashboardPage {
   error = signal('');
 
   links = [
-    { path: '/work-tasks', permission: AppPermission.ManageWorkTasks, label: 'مهام العمل', description: 'تعريف مهام كل فرع وإسنادها للموظفين' },
-    { path: '/users', permission: AppPermission.ManageUsers, label: 'الموظفون', description: 'إدارة الموظفين وتعيين أدوارهم وتبعيتهم' },
-    { path: '/branches', permission: AppPermission.ManageBranches, label: 'الفروع', description: 'إدارة فروع المؤسسة' },
-    { path: '/departments', permission: AppPermission.ManageDepartments, label: 'الأقسام', description: 'تنظيم الأقسام داخل الفروع' },
-    { path: '/offices', permission: AppPermission.ManageOffices, label: 'المكاتب', description: 'إدارة المكاتب التابعة للأقسام' },
-    { path: '/roles', permission: AppPermission.ManageRoles, label: 'الأدوار والصلاحيات', description: 'تحديد الخدمات المسموحة لكل دور' },
-    { path: '/vacation-types', permission: AppPermission.ManageVacationTypes, label: 'أنواع الإجازات', description: 'إدارة أنواع الإجازات المتاحة' }
+    { path: '/work-tasks', permissions: [AppPermission.ViewWorkTasks], label: 'مهام العمل', description: 'تعريف مهام كل فرع وإسنادها للموظفين' },
+    { path: '/users', permissions: [AppPermission.ViewUsers], label: 'الموظفون', description: 'إدارة الموظفين وتعيين أدوارهم وتبعيتهم' },
+    { path: '/branches', permissions: [AppPermission.ViewBranches], label: 'الفروع', description: 'إدارة فروع المؤسسة' },
+    { path: '/departments', permissions: MANAGE_DEPARTMENTS, label: 'الأقسام', description: 'تنظيم الأقسام داخل الفروع' },
+    { path: '/offices', permissions: [AppPermission.ViewOffices], label: 'المكاتب', description: 'إدارة المكاتب التابعة للأقسام' },
+    { path: '/roles', permissions: [AppPermission.ViewRoles], label: 'الأدوار والصلاحيات', description: 'تحديد الخدمات المسموحة لكل دور' },
+    { path: '/vacation-types', permissions: MANAGE_VACATION_TYPES, label: 'أنواع الإجازات', description: 'إدارة أنواع الإجازات المتاحة' }
   ];
 
   constructor() {

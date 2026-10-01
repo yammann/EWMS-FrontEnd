@@ -47,7 +47,9 @@ export class DepartmentsPage {
     branchId: ['', Validators.required]
   });
 
-  canManage = computed(() => this.auth.hasPermission(AppPermission.ManageDepartments));
+  canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateDepartment));
+  canEdit = computed(() => this.auth.hasPermission(AppPermission.EditDepartment));
+  canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteDepartment));
 
   stats = computed(() => {
     const departments = this.departments();
@@ -87,7 +89,7 @@ export class DepartmentsPage {
    * Modal control
    * ===================================================== */
   openCreate() {
-    if (!this.canManage()) {
+    if (!this.canCreate()) {
       this.toast.show('لا تملك صلاحية إدارة الأقسام', 'error');
       return;
     }
@@ -98,7 +100,7 @@ export class DepartmentsPage {
   }
 
   openEdit(department: Department) {
-    if (!this.canManage()) {
+    if (!this.canEdit()) {
       this.toast.show('لا تملك صلاحية إدارة الأقسام', 'error');
       return;
     }
@@ -160,7 +162,7 @@ export class DepartmentsPage {
   }
 
   deleteDepartment(department: Department) {
-    if (!this.canManage()) {
+    if (!this.canDelete()) {
       this.toast.show('لا تملك صلاحية حذف الأقسام', 'error');
       return;
     }

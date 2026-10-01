@@ -48,6 +48,10 @@ export interface DeviceSite {
 
 export interface DeviceAccess {
   canView: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  /** يملك أي عملية تعديل (إضافة أو تعديل أو حذف) */
   canManage: boolean;
   /** من قسم العمليات نفسه — قسم "توثيق الأجهزة" يظهر في لوحته فقط عندها */
   inOwnerDepartment: boolean;

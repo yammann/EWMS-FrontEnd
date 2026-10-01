@@ -25,7 +25,7 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
       <header class="page-header">
         <div><span class="eyebrow">توثيق الأجهزة</span><h1>تركيبات الأجهزة</h1><p class="muted">الأجهزة المركّبة في مواقع المؤسسة وبيانات الاتصال بها</p></div>
         <div class="header-actions">
-          @if (access().canManage) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!devices().length || !sites().length">+ تركيب جديد</button> }
+          @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!devices().length || !sites().length">+ تركيب جديد</button> }
           <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
         </div>
       </header>
@@ -55,7 +55,7 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
         @else if (!filtered().length) { <p class="empty-state">{{ hasFilter() ? 'لا توجد نتائج' : 'لا توجد تركيبات بعد' }}</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>الجهاز</th><th>الموقع</th><th>مكان التركيب</th><th>IP</th><th>Subnet Mask</th><th>المستخدم</th><th>كلمة السر</th><th>ملاحظات</th>@if (access().canManage) { <th class="actions-th"></th> }</tr></thead>
+            <thead><tr><th>الجهاز</th><th>الموقع</th><th>مكان التركيب</th><th>IP</th><th>Subnet Mask</th><th>المستخدم</th><th>كلمة السر</th><th>ملاحظات</th>@if (access().canEdit || access().canDelete) { <th class="actions-th"></th> }</tr></thead>
             <tbody>
               @for (i of filtered(); track i.id) {
                 <tr>
@@ -67,10 +67,10 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
                   <td><app-copy-text [value]="i.userName" label="اسم المستخدم" /></td>
                   <td><app-secret-text [value]="i.pass" /></td>
                   <td class="wrap">{{ i.note || '—' }}</td>
-                  @if (access().canManage) {
+                  @if (access().canEdit || access().canDelete) {
                     <td><div class="row-actions">
-                      <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(i)">تعديل</button>
-                      <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(i)">حذف</button>
+                      @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(i)">تعديل</button> }
+                      @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(i)">حذف</button> }
                     </div></td>
                   }
                 </tr>

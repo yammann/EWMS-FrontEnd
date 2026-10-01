@@ -31,6 +31,8 @@ export interface Office {
 export interface Role {
   id: number;
   name: string;
+  /** مستوى الدور: SuperAdmin | BranchManager | Manager | OfficeManager | Emp — الاسم حر والمنطق يعتمد المستوى */
+  level: string;
   permissions: Permission[];
 }
 

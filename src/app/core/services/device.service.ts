@@ -10,6 +10,8 @@ function form(body: Record<string, string | number>): FormData {
   return data;
 }
 
+const NO_ACCESS: DeviceAccess = { canView: false, canCreate: false, canEdit: false, canDelete: false, canManage: false, inOwnerDepartment: false };
+
 @Injectable({ providedIn: 'root' })
 export class DeviceService {
   private api = inject(ApiService);
@@ -18,13 +20,13 @@ export class DeviceService {
    * صلاحيتي على توثيق الأجهزة: المشاهدة لموظفي قسم العمليات (أو ViewDevices)،
    * والإدارة لرئيس القسم (أو ManageDevices). تُحمَّل مرة لكل جلسة.
    */
-  access = signal<DeviceAccess>({ canView: false, canManage: false, inOwnerDepartment: false });
+  access = signal<DeviceAccess>(NO_ACCESS);
   private access$?: Observable<DeviceAccess>;
 
   loadAccess(force = false): Observable<DeviceAccess> {
     if (!this.access$ || force) {
       this.access$ = this.api.get<DeviceAccess>('/Devices/MyAccess').pipe(
-        catchError(() => of({ canView: false, canManage: false, inOwnerDepartment: false })),
+        catchError(() => of(NO_ACCESS)),
         tap(a => this.access.set(a)),
         shareReplay(1)
       );
@@ -34,7 +36,7 @@ export class DeviceService {
 
   resetAccess() {
     this.access$ = undefined;
-    this.access.set({ canView: false, canManage: false, inOwnerDepartment: false });
+    this.access.set(NO_ACCESS);
   }
 
   // ─────────── المناطق ───────────

@@ -21,7 +21,7 @@
         <span>{{ loading() ? 'جاري التحديث...' : 'تحديث' }}</span>
       </button>
 
-      @if (canManage()) {
+      @if (canCreate()) {
         <button type="button" class="new-btn" (click)="openCreate()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path d="M12 5v14M5 12h14"></path>
@@ -162,7 +162,7 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    @if (canManage()) {
+                    @if (canEdit()) {
                       <button type="button" class="icon-btn edit" title="تعديل"
                               (click)="openEdit(department)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -172,7 +172,7 @@
                       </button>
                     }
 
-                    @if (canManage()) {
+                    @if (canDelete()) {
                       <button type="button" class="icon-btn danger" title="حذف"
                               (click)="deleteDepartment(department)"
                               [disabled]="saving() === 'delete-' + department.id">

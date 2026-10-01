@@ -47,6 +47,7 @@ export class AuthService {
           email: response.email,
           fullName: response.fullName,
           role: response.role,
+          roleName: response.roleName,
           expiresAt: response.expiresAt,
           permissions: response.permissions ?? []
         };
@@ -57,6 +58,25 @@ export class AuthService {
         this.currentUser.set(user);
       })
     );
+  }
+
+  /**
+   * يحدّث قائمة الصلاحيات من الخادم (عند فتح التطبيق): تتغيّر بتعديل الدور أو إسناد الخدمات أو نقل الموظف،
+   * فلا يحتاج المستخدم لإعادة تسجيل الدخول — يكفي تحديث الصفحة. الفشل يُهمل (تبقى القائمة المحفوظة).
+   */
+  refreshPermissions() {
+    if (!this.isAuthenticated()) return;
+    this.api.get<string[]>('/Auth/Permissions').subscribe({
+      next: permissions => {
+        const user = this.currentUser();
+        if (!user || JSON.stringify(user.permissions) === JSON.stringify(permissions)) return;
+        const updated = { ...user, permissions };
+        storage.set(USER_KEY, JSON.stringify(updated));
+        this.currentUser.set(updated);
+        this.devices.resetAccess();
+      },
+      error: () => { /* تبقى الصلاحيات المحفوظة */ }
+    });
   }
 
   /** يُبطل التوكن في الباكاند ثم ينظّف الجلسة (حتى لو فشل الطلب) */
@@ -88,6 +108,11 @@ export class AuthService {
 
   hasPermission(permission: AppPermissionName): boolean {
     return this.currentUser()?.permissions?.includes(permission) ?? false;
+  }
+
+  /** تكفي واحدة من عدة صلاحيات */
+  hasAnyPermission(permissions: readonly AppPermissionName[]): boolean {
+    return permissions.some(p => this.hasPermission(p));
   }
 
   hasRole(...roles: readonly string[]): boolean {

@@ -61,7 +61,9 @@ export class UsersPage {
     isActive: [true]
   });
 
-  canManage = computed(() => this.auth.hasPermission(AppPermission.ManageUsers));
+  canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateUser));
+  canEdit = computed(() => this.auth.hasPermission(AppPermission.EditUser));
+  canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteUser));
 
   stats = computed(() => {
     const users = this.users();
@@ -109,7 +111,7 @@ export class UsersPage {
    * Modal control
    * ===================================================== */
   openCreate() {
-    if (!this.canManage()) {
+    if (!this.canCreate()) {
       this.toast.show('لا تملك صلاحية إدارة المستخدمين', 'error');
       return;
     }
@@ -121,7 +123,7 @@ export class UsersPage {
   }
 
   openEdit(user: User) {
-    if (!this.canManage()) {
+    if (!this.canEdit()) {
       this.toast.show('لا تملك صلاحية إدارة المستخدمين', 'error');
       return;
     }
@@ -198,7 +200,7 @@ export class UsersPage {
   }
 
   deleteUser(user: User) {
-    if (!this.canManage()) {
+    if (!this.canDelete()) {
       this.toast.show('لا تملك صلاحية حذف المستخدمين', 'error');
       return;
     }
@@ -260,7 +262,8 @@ export class UsersPage {
     // قيمة الحقل نفسه وليس form.value: داخل valueChanges للدور لم تُحدَّث قيمة النموذج بعد،
     // فكان التحقق يُحسب على الدور السابق (المكتب يبقى إجبارياً وهو مخفي → زر الإضافة معطّل)
     const role = this.roles().find(r => String(r.id) === String(form.get('roleId')?.value));
-    return placementForRole(role?.name);
+    // المستوى لا الاسم: أسماء الأدوار حرة (مثل "رئيس قسم الصيانة")
+    return placementForRole(role?.level);
   }
 
   placement(): UserPlacement {

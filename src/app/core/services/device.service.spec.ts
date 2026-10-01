@@ -30,7 +30,7 @@ describe('Device inventory', () => {
     service.loadAccess().subscribe(a => access = a);
     service.loadAccess().subscribe();
     http.expectOne('/api/Devices/MyAccess').flush({ message: 'x' }, { status: 500, statusText: 'Error' });
-    expect(access).toEqual({ canView: false, canManage: false, inOwnerDepartment: false });
+    expect(access).toEqual({ canView: false, canCreate: false, canEdit: false, canDelete: false, canManage: false, inOwnerDepartment: false });
   });
 
   it('sends site coordinates as Latitude/Longitude', () => {

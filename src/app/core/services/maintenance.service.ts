@@ -1,0 +1,93 @@
+import { Injectable, computed, inject } from '@angular/core';
+import { ApiService } from './api.service';
+import { AuthService } from './auth.service';
+import { AppPermission } from '../constants/access';
+import {
+  MAINTENANCE_LOOKUPS, MaintenanceActivity, MaintenanceLookup, MaintenanceLookupKind, MaintenancePrint, MaintenanceRequest,
+  MaintenanceRequestFilter, MaintenanceRequestInput, MaintenanceStats, MaintenanceTask, MaintenanceTaskInput,
+  PagedResult, TechnicianOption
+} from '../models/maintenance.models';
+
+function query(params: object): string {
+  const q = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== null && value !== undefined && value !== '' && value !== 0) q.set(key, String(value));
+  }
+  return q.size ? '?' + q : '';
+}
+
+/**
+ * الصيانة: طلبات الصيانة (أجهزة العملاء)، مهام الصيانة (أعمال ميدانية)، والجداول المساعدة.
+ * الصلاحية تحدد العملية، والنطاق (سجلاتي / قسمي / فرعي) يحدده الباكاند ويعيده في canEdit / canAssign.
+ */
+@Injectable({ providedIn: 'root' })
+export class MaintenanceService {
+  private api = inject(ApiService);
+  private auth = inject(AuthService);
+
+  // ─────────── ما يستطيعه المستخدم (الصلاحيات) ───────────
+  readonly can = computed(() => {
+    const has = this.auth.hasPermission.bind(this.auth);
+    this.auth.currentUser(); // يعاد الحساب عند تبديل المستخدم
+    return {
+      viewRequests: has(AppPermission.ViewMaintenanceRequests),
+      createRequest: has(AppPermission.CreateMaintenanceRequest),
+      editRequest: has(AppPermission.EditMaintenanceRequest),
+      deleteRequest: has(AppPermission.DeleteMaintenanceRequest),
+      viewTasks: has(AppPermission.ViewMaintenanceTasks),
+      createTask: has(AppPermission.CreateMaintenanceTask),
+      editTask: has(AppPermission.EditMaintenanceTask),
+      deleteTask: has(AppPermission.DeleteMaintenanceTask),
+      createLookup: has(AppPermission.CreateMaintenanceLookup),
+      editLookup: has(AppPermission.EditMaintenanceLookup),
+      deleteLookup: has(AppPermission.DeleteMaintenanceLookup)
+    };
+  });
+
+  // ─────────── الطلبات ───────────
+  requests(filter: MaintenanceRequestFilter) {
+    return this.api.get<PagedResult<MaintenanceRequest>>('/MaintenanceRequests/GetAll' + query(filter));
+  }
+  request(id: number) { return this.api.get<MaintenanceRequest>(`/MaintenanceRequests/Get/${id}`); }
+  createRequest(body: MaintenanceRequestInput) { return this.api.post<MaintenanceRequest>('/MaintenanceRequests/Create', body); }
+  updateRequest(id: number, body: MaintenanceRequestInput) { return this.api.put<MaintenanceRequest>(`/MaintenanceRequests/Update/${id}`, body); }
+  deleteRequest(id: number) { return this.api.delete<{ message: string }>(`/MaintenanceRequests/Delete/${id}`); }
+  changeStatus(id: number, statusId: number) { return this.api.put<MaintenanceRequest>(`/MaintenanceRequests/Status/${id}`, { statusId }); }
+  assignRequest(id: number, userId: number) { return this.api.put<MaintenanceRequest>(`/MaintenanceRequests/Assign/${id}`, { userId }); }
+  activities(id: number) { return this.api.get<MaintenanceActivity[]>(`/MaintenanceRequests/Activities/${id}`); }
+  printData(id: number) { return this.api.get<MaintenancePrint>(`/MaintenanceRequests/Print/${id}`); }
+  technicians() { return this.api.get<TechnicianOption[]>('/MaintenanceRequests/Technicians'); }
+  stats() { return this.api.get<MaintenanceStats>('/MaintenanceRequests/Stats'); }
+
+  /** الموظفون الذين يمكن نقل طلب/مهمة إليهم (رئيس القسم: موظفو قسمه) */
+  assignees(departmentId?: number | null) {
+    return this.api.get<TechnicianOption[]>('/MaintenanceRequests/Assignees' + query({ departmentId }));
+  }
+
+  // ─────────── المهام ───────────
+  tasks(filter: { userId?: number | null; page?: number; pageSize?: number }) {
+    return this.api.get<PagedResult<MaintenanceTask>>('/MaintenanceTasks/GetAll' + query(filter));
+  }
+  createTask(body: MaintenanceTaskInput) { return this.api.post<MaintenanceTask>('/MaintenanceTasks/Create', body); }
+  updateTask(id: number, body: MaintenanceTaskInput) { return this.api.put<MaintenanceTask>(`/MaintenanceTasks/Update/${id}`, body); }
+  deleteTask(id: number) { return this.api.delete<{ message: string }>(`/MaintenanceTasks/Delete/${id}`); }
+  assignTask(id: number, userId: number) { return this.api.put<MaintenanceTask>(`/MaintenanceTasks/Assign/${id}`, { userId }); }
+
+  // ─────────── الجداول المساعدة ───────────
+  lookup<T extends MaintenanceLookup = MaintenanceLookup>(kind: MaintenanceLookupKind) {
+    return this.api.get<T[]>(`${MAINTENANCE_LOOKUPS[kind].api}/GetAll`);
+  }
+  createLookup(kind: MaintenanceLookupKind, body: Partial<MaintenanceLookup>) {
+    return this.api.post<MaintenanceLookup>(`${MAINTENANCE_LOOKUPS[kind].api}/Create`, body);
+  }
+  updateLookup(kind: MaintenanceLookupKind, id: number, body: Partial<MaintenanceLookup>) {
+    return this.api.put<MaintenanceLookup>(`${MAINTENANCE_LOOKUPS[kind].api}/Update/${id}`, body);
+  }
+  deleteLookup(kind: MaintenanceLookupKind, id: number) {
+    return this.api.delete<{ message: string }>(`${MAINTENANCE_LOOKUPS[kind].api}/Delete/${id}`);
+  }
+
+  // ─────────── توقيعي (يُطبع على ورقة التسليم) ───────────
+  mySignature() { return this.api.get<{ image: string | null }>('/Auth/Signature'); }
+  saveSignature(image: string | null) { return this.api.put<{ message: string }>('/Auth/Signature', { image }); }
+}

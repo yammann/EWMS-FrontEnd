@@ -20,7 +20,7 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
       <header class="page-header">
         <div><span class="eyebrow">توثيق الأجهزة</span><h1>المواقع</h1><p class="muted">مواقع التركيب داخل كل منطقة</p></div>
         <div class="header-actions">
-          @if (access().canManage) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!regions().length">+ موقع جديد</button> }
+          @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!regions().length">+ موقع جديد</button> }
           <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
         </div>
       </header>
@@ -42,7 +42,7 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
         @else if (!filtered().length) { <p class="empty-state">{{ search() || regionId() ? 'لا توجد نتائج' : 'لا توجد مواقع بعد' }}</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>الموقع</th><th>المنطقة</th><th>الإحداثيات</th><th>الوصف</th><th>الأجهزة المركّبة</th>@if (access().canManage) { <th class="actions-th"></th> }</tr></thead>
+            <thead><tr><th>الموقع</th><th>المنطقة</th><th>الإحداثيات</th><th>الوصف</th><th>الأجهزة المركّبة</th>@if (access().canEdit || access().canDelete) { <th class="actions-th"></th> }</tr></thead>
             <tbody>
               @for (s of filtered(); track s.id) {
                 <tr>
@@ -51,10 +51,10 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
                   <td>@if (coords(s.latitude, s.longitude); as c) { <span class="mono">{{ c }}</span> } @else { <span class="missing">⚠ بلا إحداثيات</span> }</td>
                   <td class="wrap">{{ s.description || '—' }}</td>
                   <td><a class="cell-link" [routerLink]="['/devices/installations']" [queryParams]="{ siteId: s.id }">{{ deviceCounts().get(s.id) ?? 0 }} جهاز ←</a></td>
-                  @if (access().canManage) {
+                  @if (access().canEdit || access().canDelete) {
                     <td><div class="row-actions">
-                      <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(s)">تعديل</button>
-                      <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(s)">حذف</button>
+                      @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(s)">تعديل</button> }
+                      @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(s)">حذف</button> }
                     </div></td>
                   }
                 </tr>

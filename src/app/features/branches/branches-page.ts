@@ -43,7 +43,9 @@ export class BranchesPage {
     description: ['']
   });
 
-  canManage = computed(() => this.auth.hasPermission(AppPermission.ManageBranches));
+  canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateBranch));
+  canEdit = computed(() => this.auth.hasPermission(AppPermission.EditBranch));
+  canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteBranch));
 
   stats = computed(() => {
     const branches = this.branches();
@@ -77,7 +79,7 @@ export class BranchesPage {
    * Modal control
    * ===================================================== */
   openCreate() {
-    if (!this.canManage()) {
+    if (!this.canCreate()) {
       this.toast.show('لا تملك صلاحية إدارة الفروع', 'error');
       return;
     }
@@ -88,7 +90,7 @@ export class BranchesPage {
   }
 
   openEdit(branch: Branch) {
-    if (!this.canManage()) {
+    if (!this.canEdit()) {
       this.toast.show('لا تملك صلاحية إدارة الفروع', 'error');
       return;
     }
@@ -147,7 +149,7 @@ export class BranchesPage {
   }
 
   deleteBranch(branch: Branch) {
-    if (!this.canManage()) {
+    if (!this.canDelete()) {
       this.toast.show('لا تملك صلاحية حذف الفروع', 'error');
       return;
     }

@@ -1,4 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { WorkTaskService } from '../../core/services/work-task.service';
 import { EwmsService } from '../../core/services/ewms.service';
@@ -22,6 +24,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
 
+      @if (editing() ? can().edit : can().create) {
       <section class="panel">
         <div class="panel-heading"><h2>{{ editing() ? 'تعديل المهمة' : 'إضافة مهمة' }}</h2></div>
         <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
@@ -67,6 +70,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
           </div>
         </form>
       </section>
+      }
 
       <section class="panel">
         <div class="panel-heading">
@@ -88,7 +92,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
                   <td>{{ t.branchName }}</td>
                   <td><span class="status-badge" [class.status-active]="t.isActive" [class.status-draft]="!t.isActive"><span class="status-badge-dot"></span>{{ t.isActive ? 'فعّالة' : 'معطّلة' }}</span></td>
                   <td class="wrap">{{ assigneeNames(t) || '—' }}</td>
-                  <td><div class="actions"><button class="btn btn-ghost btn-sm" (click)="edit(t)" [disabled]="saving()">تعديل</button><button class="btn btn-danger btn-sm" (click)="deleting.set(t)" [disabled]="saving()">حذف</button></div></td>
+                  <td><div class="actions">@if (can().edit) { <button class="btn btn-ghost btn-sm" (click)="edit(t)" [disabled]="saving()">تعديل</button> }@if (can().delete) { <button class="btn btn-danger btn-sm" (click)="deleting.set(t)" [disabled]="saving()">حذف</button> }</div></td>
                 </tr>
               }
             </tbody>
@@ -119,6 +123,13 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
   `]
 })
 export class WorkTasksPage {
+  private auth = inject(AuthService);
+  /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والنموذج والأزرار تظهر حسب الإضافة/التعديل/الحذف */
+  can = computed(() => ({
+    create: this.auth.hasPermission(AppPermission.CreateWorkTask),
+    edit: this.auth.hasPermission(AppPermission.EditWorkTask),
+    delete: this.auth.hasPermission(AppPermission.DeleteWorkTask)
+  }));
   private service = inject(WorkTaskService);
   private ewms = inject(EwmsService);
   private fb = inject(FormBuilder);

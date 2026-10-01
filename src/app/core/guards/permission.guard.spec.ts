@@ -25,15 +25,15 @@ describe('Permission guard', () => {
     TestBed.inject(AuthService).currentUser.set({ role, permissions, fullName: 'Test', email: 'test@example.test', expiresAt: new Date(Date.now() + 60000).toISOString() });
   }
   it('redirects unauthenticated direct links to login', () => {
-    expect(TestBed.inject(Router).serializeUrl(run('ManageUsers') as any)).toBe('/login');
+    expect(TestBed.inject(Router).serializeUrl(run('ViewUsers') as any)).toBe('/login');
   });
   it('blocks an employee from administration and approvals', () => {
     login('Emp');
-    expect(TestBed.inject(Router).serializeUrl(run('ManageUsers') as any)).toBe('/profile');
+    expect(TestBed.inject(Router).serializeUrl(run('ViewUsers') as any)).toBe('/profile');
     expect(TestBed.inject(Router).serializeUrl(run('ApproveVacation') as any)).toBe('/profile');
   });
   it('allows an office manager only with the office permission', () => {
-    login('Custom', ['ManageOffices']); expect(run('ManageOffices')).toBe(true);
+    login('Custom', ['ViewOffices']); expect(run('ViewOffices')).toBe(true);
   });
   it('matches backend approval policy', () => { login('BranchManager', ['ApproveVacation']); expect(run('ApproveVacation')).toBe(true); });
   it('restricts role-based pages (vacation stats) to leaders', () => {
@@ -43,8 +43,8 @@ describe('Permission guard', () => {
     login('Emp'); expect(TestBed.inject(Router).serializeUrl(byRoles() as any)).toBe('/profile');
   });
   it('rejects expired sessions', () => {
-    login('SuperAdmin', ['ManageUsers']);
+    login('SuperAdmin', ['ViewUsers']);
     TestBed.inject(AuthService).currentUser.update(u => ({ ...u!, expiresAt: '2000-01-01T00:00:00Z' }));
-    expect(TestBed.inject(Router).serializeUrl(run('ManageUsers') as any)).toBe('/login');
+    expect(TestBed.inject(Router).serializeUrl(run('ViewUsers') as any)).toBe('/login');
   });
 });
