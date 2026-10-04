@@ -1,12 +1,5 @@
-// توثيق الأجهزة: المنطقة ← الموقع ← (التركيب) ← الجهاز — تطابق DTOs الباكاند (Region/Site/Device/DeviceSite)
+// توثيق الأجهزة: الموقع (يتبع محافظة ثابتة تُحدَّد من إحداثياته) ← (التركيب) ← الجهاز — تطابق DTOs الباكاند (Site/Device/DeviceSite)
 
-export interface Region {
-  id: number;
-  name: string;
-  description: string;
-  latitude: number | null;
-  longitude: number | null;
-}
 
 export interface Site {
   id: number;
@@ -14,8 +7,9 @@ export interface Site {
   description: string;
   latitude: number | null;
   longitude: number | null;
-  regionId: number;
-  regionName: string;
+  /** رمز المحافظة SYxx — يحدده الخادم من الإحداثيات */
+  governorateCode: string;
+  governorateName: string;
 }
 
 export interface Device {
@@ -33,8 +27,9 @@ export interface DeviceSite {
   deviceModel: string;
   siteId: number;
   siteName: string;
-  regionId: number;
-  regionName: string;
+  /** رمز المحافظة SYxx — يحدده الخادم من الإحداثيات */
+  governorateCode: string;
+  governorateName: string;
   ip: string;
   subnetMask: string;
   userName: string;
@@ -59,22 +54,14 @@ export interface DeviceAccess {
 
 // ════════════════════ خريطة الفرع (GET api/Map/Branch/{id}) ════════════════════
 
-export interface MapRegion {
-  id: number;
-  name: string;
-  description: string;
-  latitude: number | null;
-  longitude: number | null;
-  sitesCount: number;
-  installationsCount: number;
-}
 
 export interface MapSite {
   id: number;
   name: string;
   description: string;
-  regionId: number;
-  regionName: string;
+  /** رمز المحافظة SYxx — يحدده الخادم من الإحداثيات */
+  governorateCode: string;
+  governorateName: string;
   latitude: number | null;
   longitude: number | null;
   installationsCount: number;
@@ -83,9 +70,7 @@ export interface MapSite {
 
 export interface DevicesMapLayer {
   title: string;
-  regions: MapRegion[];
   sites: MapSite[];
-  regionsWithoutCoordinates: number;
   sitesWithoutCoordinates: number;
 }
 

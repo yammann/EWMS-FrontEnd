@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
 import {
   AssignedTaskCard, AssignedTaskDetail, CreateTaskRequest, TaskBoard, TaskBoardMode, TaskStatus,
-  TaskTargetOption, TASK_STATUS_VALUE, UpdateTaskRequest
+  TaskTargetKind, TaskTargetOption, TASK_STATUS_VALUE, UpdateTaskRequest
 } from '../models/assigned-task.models';
 
 @Injectable({ providedIn: 'root' })
@@ -11,7 +11,11 @@ export class AssignedTaskService {
 
   board(mode: TaskBoardMode) { return this.api.get<TaskBoard>(`/AssignedTasks/Board?mode=${mode}`); }
   get(id: number) { return this.api.get<AssignedTaskDetail>(`/AssignedTasks/Get/${id}`); }
-  targets() { return this.api.get<TaskTargetOption[]>('/AssignedTasks/Targets'); }
+  /** جهات الإسناد من نوع معيّن، أو جهات التفويض من مهمة واردة (parentTaskId) */
+  targets(options: { type?: TaskTargetKind; parentTaskId?: number } = {}) {
+    const query = options.parentTaskId ? `?parentTaskId=${options.parentTaskId}` : options.type ? `?type=${options.type}` : '';
+    return this.api.get<TaskTargetOption[]>(`/AssignedTasks/Targets${query}`);
+  }
 
   create(body: CreateTaskRequest) { return this.api.post<AssignedTaskDetail>('/AssignedTasks/Create', body); }
   update(id: number, body: UpdateTaskRequest) { return this.api.put<AssignedTaskDetail>(`/AssignedTasks/Update/${id}`, body); }

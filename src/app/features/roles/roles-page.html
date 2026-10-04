@@ -141,7 +141,6 @@
                     </div>
                     <div class="role-details">
                       <strong>{{ role.name || 'دور بدون اسم' }}</strong>
-                      <small>{{ levelLabel(role.level) }}</small>
                     </div>
                   </div>
                 </td>
@@ -197,6 +196,16 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M12 20h9"></path>
                           <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                        </svg>
+                      </button>
+                    }
+
+                    @if (canCreate()) {
+                      <button type="button" class="icon-btn" title="نسخ الدور" [attr.aria-label]="'نسخ الدور ' + role.name"
+                              (click)="openClone(role)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
                       </button>
                     }
@@ -263,13 +272,6 @@
                   }
                 </div>
 
-                <div class="form-field">
-                  <label class="form-label" for="create-level">مستوى الدور</label>
-                  <select id="create-level" formControlName="level">
-                    @for (l of levels; track l.value) { <option [value]="l.value">{{ l.label }}</option> }
-                  </select>
-                  <small class="form-hint">{{ levelHint(createForm.value.level) }}. المستوى يحدد التبعية المطلوبة عند إضافة الموظف ودوره في سير العمل، أما الاسم فحر.</small>
-                </div>
 
                 <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'create' }" />
 
@@ -301,18 +303,6 @@
                   }
                 </div>
 
-                <div class="form-field">
-                  <label class="form-label" for="edit-level">مستوى الدور</label>
-                  @if (editForm.value.level === superAdminLevel) {
-                    <input id="edit-level" type="text" [value]="levelLabel(superAdminLevel)" disabled />
-                    <small class="form-hint">مستوى مدير النظام ثابت.</small>
-                  } @else {
-                    <select id="edit-level" formControlName="level">
-                      @for (l of levels; track l.value) { <option [value]="l.value">{{ l.label }}</option> }
-                    </select>
-                    <small class="form-hint">{{ levelHint(editForm.value.level) }}. لا يمكن تغيير المستوى ما دام للدور موظفون.</small>
-                  }
-                </div>
 
                 <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'edit' }" />
 
@@ -358,8 +348,38 @@
       </div>
     </div>
 
-    <div class="perm-groups">
-      @for (group of permissionGroups(); track group.key) {
+    <!-- عناوين الأقسام ثابتة أعلى القائمة؛ الضغط على عنوان يعرض صلاحياته -->
+    <div class="perm-tabs" role="tablist" aria-label="أقسام الصلاحيات">
+      @for (section of permissionSections(); track section.key) {
+        <button type="button" role="tab" class="perm-tab" [class.on]="activeSection()?.key === section.key"
+                [attr.aria-selected]="activeSection()?.key === section.key" (click)="selectSection(section.key)">
+          {{ section.title }}
+          <span class="perm-tab-count" [class.has]="groupSelectedCount(modal, section) > 0">
+            {{ groupSelectedCount(modal, section) }}/{{ section.items.length }}
+          </span>
+        </button>
+      }
+    </div>
+
+    @if (activeSection(); as section) {
+      <!-- جذر القسم: تحديد كل صلاحياته دفعة واحدة -->
+      <div class="perm-section-root">
+        <span class="perm-section-title">{{ section.title }}</span>
+        <span class="perm-group-count" [class.has]="groupSelectedCount(modal, section) > 0">
+          {{ groupSelectedCount(modal, section) }} من {{ section.items.length }}
+        </span>
+        <label class="perm-group-all" [attr.title]="'تحديد كل صلاحيات ' + section.title">
+          <input type="checkbox"
+                 [checked]="groupSelectedCount(modal, section) === section.items.length"
+                 [indeterminate]="groupSelectedCount(modal, section) > 0 && groupSelectedCount(modal, section) < section.items.length"
+                 (change)="toggleGroupSelection(modal, section, $event)"
+                 [attr.aria-label]="'تحديد كل صلاحيات ' + section.title" />
+        </label>
+      </div>
+    }
+
+    <div class="perm-groups" role="tabpanel">
+      @for (group of activeSection()?.groups ?? []; track group.key) {
         <section class="perm-group" [class.open]="isGroupOpen(group.key)">
           <header class="perm-group-head">
             <button type="button" class="perm-group-toggle" (click)="toggleGroupOpen(group.key)"
@@ -390,17 +410,6 @@
                   <div class="permission-card-body">
                     <strong>{{ permission.description || permission.name }}</strong>
                     <small>{{ permission.name }}</small>
-                    @if (permission.scoped && isPermissionSelected(modal, permission.id)) {
-                      <span class="scope-field" (click)="$event.preventDefault(); $event.stopPropagation()">
-                        <span class="scope-label">النطاق</span>
-                        <select class="scope-select" [attr.aria-label]="'نطاق ' + (permission.description || permission.name)"
-                                (change)="setScope(modal, permission, $event)">
-                          @for (s of scopeOptions; track s.value) {
-                            <option [value]="s.value" [selected]="s.value === scopeOf(modal, permission)">{{ s.label }}</option>
-                          }
-                        </select>
-                      </span>
-                    }
                   </div>
                   <span class="permission-check">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">

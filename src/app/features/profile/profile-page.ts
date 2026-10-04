@@ -6,8 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { User } from '../../core/models/ewms.models';
 import { Vacation, VacationType } from '../../core/models/vacation.models';
-import { canRequestVacation } from '../../core/utils/user-placement';
-import { AppPermission, AppRole } from '../../core/constants/access';
+import { AppPermission } from '../../core/constants/access';
 import { SignaturePanel } from './signature-panel';
 
 export function vacationDateRange(control: AbstractControl) {
@@ -36,13 +35,12 @@ export class ProfilePage {
   typesError = signal('');
   submitError = signal('');
   success = signal('');
-  // رئيس الفرع و SuperAdmin لا يتبعان لقسم → لا يقدّمان إجازات
   private auth = inject(AuthService);
   /** خدمة الإجازات قد لا تكون مُسندة لوحدة الموظف — عندها تختفي أقسامها من الملف */
   canViewVacations = computed(() => this.auth.hasPermission(AppPermission.ViewVacations));
-  canRequest = computed(() => canRequestVacation(this.user()?.role) && this.auth.hasPermission(AppPermission.CreateVacation));
-  /** التوقيع الإلكتروني لرئيس القسم (يُطبع على ورقة تسليم طلبات الصيانة) */
-  isManager = computed(() => this.user()?.role === AppRole.Manager);
+  canRequest = computed(() => this.profile()?.departmentId != null && this.auth.hasPermission(AppPermission.CreateVacation));
+  /** التوقيع الإلكتروني على ورقة تسليم طلبات الصيانة: لمن يملك SignMaintenanceReceipt */
+  isManager = computed(() => this.auth.hasPermission(AppPermission.SignMaintenanceReceipt));
   cancelling = signal<Vacation | null>(null);
   cancelSaving = signal(false);
   approved = computed(() => this.vacations().filter(v => v.status === 'Approved').length);
@@ -53,10 +51,13 @@ export class ProfilePage {
     vacReason: ['', Validators.maxLength(500)]
   }, { validators: vacationDateRange });
 
-  constructor() { this.loadProfile(); if (this.canViewVacations()) this.load(); if (this.canRequest()) this.loadTypes(); }
+  constructor() { this.loadProfile(); if (this.canViewVacations()) this.load(); }
   loadProfile() {
     this.profileError.set('');
-    this.api.get<User>('/Auth/Me').subscribe({ next: value => this.profile.set(value), error: e => this.profileError.set(e.message) });
+    this.api.get<User>('/Auth/Me').subscribe({
+      next: value => { this.profile.set(value); if (this.canRequest()) this.loadTypes(); },
+      error: e => this.profileError.set(e.message)
+    });
   }
   loadTypes() {
     this.typesLoading.set(true); this.typesError.set('');

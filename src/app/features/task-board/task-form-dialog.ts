@@ -3,10 +3,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Modal } from '../../shared/ui/modal';
 import { AssignedTaskService } from '../../core/services/assigned-task.service';
 import {
-  AssignedTaskDetail, TaskPriority, TaskTargetOption, TASK_PRIORITY_LABEL, TASK_PRIORITY_VALUE
+  AssignedTaskDetail, TaskPriority, TaskTargetKind, TaskTargetOption, TaskTargetType, TASK_PRIORITY_LABEL, TASK_PRIORITY_VALUE
 } from '../../core/models/assigned-task.models';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';
+
+const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };
 
 /** نافذة إنشاء مهمة / تعديلها / تفويض جزء من مهمة واردة لجهة أدنى */
 @Component({
@@ -25,17 +27,28 @@ export type TaskFormMode = 'create' | 'edit' | 'delegate';
             </label>
 
             @if (mode() !== 'edit') {
+              @if (mode() === 'create' && targetTypes().length > 1) {
+                <fieldset class="form-field">
+                  <legend class="form-label">نوع الجهة</legend>
+                  <div class="segmented types" role="radiogroup">
+                    @for (type of targetTypes(); track type.value) {
+                      <button type="button" class="seg" role="radio" [attr.aria-checked]="kind() === type.value"
+                              [class.on]="kind() === type.value" (click)="chooseKind(type.value)">{{ type.label }}</button>
+                    }
+                  </div>
+                </fieldset>
+              }
               <label class="form-field">
-                <span class="form-label">إسناد إلى {{ targetTypeLabel() }}</span>
+                <span class="form-label">إسناد إلى {{ targetLabel() }}</span>
                 <select formControlName="targetId">
-                  <option [ngValue]="0">اختر {{ targetTypeLabel() }}</option>
+                  <option [ngValue]="0">{{ targetsLoading() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel() }}</option>
                   @for (t of targets(); track t.id) {
-                    <option [ngValue]="t.id">{{ t.name }}@if (targetTypeLabel() !== 'موظف') { — {{ t.headNames || 'بدون رئيس حالياً' }} }</option>
+                    <option [ngValue]="t.id">{{ t.name }}@if (targetLabel() !== 'موظف') { — {{ t.headNames || 'لا أحد يتولاها حالياً' }} }</option>
                   }
                 </select>
-                @if (!targets().length) { <small class="form-hint">لا توجد جهات متاحة للإسناد ضمن نطاقك.</small> }
-                @else if (selectedTarget() && targetTypeLabel() !== 'موظف' && !selectedTarget()!.headNames) {
-                  <small class="form-hint warn">لا يوجد رئيس معيَّن لهذه الجهة حالياً — ستبقى المهمة بانتظار تعيينه.</small>
+                @if (!targetsLoading() && !targets().length) { <small class="form-hint">لا توجد جهات متاحة للإسناد ضمن صلاحياتك.</small> }
+                @else if (selectedTarget() && targetLabel() !== 'موظف' && !selectedTarget()!.headNames) {
+                  <small class="form-hint warn">لا يوجد من يملك صلاحية تولّي مهام هذه الجهة حالياً — ستبقى المهمة بانتظاره.</small>
                 }
               </label>
             } @else {
@@ -74,6 +87,7 @@ export type TaskFormMode = 'create' | 'edit' | 'delegate';
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .segmented { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .segmented.types { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); }
     .seg { min-height: 40px; padding: 0 8px; background: var(--surface); color: var(--ink-600); border: 1px solid var(--border-strong); font-weight: 700; }
     .seg:hover:not(:disabled) { background: var(--ink-50); box-shadow: none; transform: none; }
     .seg.on { color: var(--on-brand); border-color: transparent; }
@@ -92,8 +106,8 @@ export class TaskFormDialog implements OnInit {
   mode = input.required<TaskFormMode>();
   /** للتعديل: المهمة نفسها — للتفويض: المهمة الأصل */
   task = input<AssignedTaskDetail | null>(null);
-  targets = input<TaskTargetOption[]>([]);
-  targetTypeLabel = input('');
+  /** أنواع الإسناد المتاحة لي (من اللوحة) — يظهر اختيار النوع إن كانت أكثر من واحد */
+  targetTypes = input<TaskTargetType[]>([]);
   saved = output<AssignedTaskDetail>();
   close = output<void>();
 
@@ -111,6 +125,12 @@ export class TaskFormDialog implements OnInit {
     targetId: [0]
   });
 
+  targets = signal<TaskTargetOption[]>([]);
+  targetsLoading = signal(false);
+  /** نوع الجهة المختار (الإنشاء) أو المشتق من المهمة الأصل (التفويض: قسم ← مكتب، مكتب ← موظف) */
+  kind = signal<TaskTargetKind | null>(null);
+  targetLabel = computed(() => TARGET_LABEL[this.kind() ?? 'User']);
+
   private targetId = signal(0);
   selectedTarget = computed(() => this.targets().find(t => t.id === this.targetId()) ?? null);
 
@@ -122,10 +142,31 @@ export class TaskFormDialog implements OnInit {
     if (this.mode() === 'edit' && t) {
       this.form.patchValue({ title: t.title, description: t.description, priority: t.priority, dueDate: t.dueDate?.slice(0, 10) ?? '' });
     } else if (this.mode() === 'delegate' && t) {
-      // التفويض يرث الأولوية والموعد من الأصل افتراضياً
+      // التفويض يرث الأولوية والموعد من الأصل افتراضياً، والجهات أدنى منه بدرجة
       this.form.patchValue({ priority: t.priority, dueDate: t.dueDate?.slice(0, 10) ?? '' });
+      this.kind.set(t.targetType === 'Department' ? 'Office' : 'User');
+      this.loadTargets({ parentTaskId: t.id });
+    } else if (this.mode() === 'create') {
+      const first = this.targetTypes()[0]?.value;
+      if (first) this.chooseKind(first);
     }
     this.form.controls.targetId.valueChanges.subscribe(v => this.targetId.set(Number(v)));
+  }
+
+  chooseKind(kind: TaskTargetKind) {
+    if (this.kind() === kind && this.targets().length) return;
+    this.kind.set(kind);
+    this.form.patchValue({ targetId: 0 });
+    this.loadTargets({ type: kind });
+  }
+
+  private loadTargets(options: { type?: TaskTargetKind; parentTaskId?: number }) {
+    this.targets.set([]);
+    this.targetsLoading.set(true);
+    this.service.targets(options).subscribe({
+      next: list => { this.targets.set(list); this.targetsLoading.set(false); },
+      error: e => { this.error.set(e.message); this.targetsLoading.set(false); }
+    });
   }
 
   submit() {
@@ -143,7 +184,11 @@ export class TaskFormDialog implements OnInit {
     this.saving.set(true); this.error.set('');
     const request = this.mode() === 'edit'
       ? this.service.update(this.task()!.id, common)
-      : this.service.create({ ...common, targetId: Number(v.targetId), parentTaskId: this.mode() === 'delegate' ? this.task()!.id : null });
+      : this.service.create({
+        ...common, targetId: Number(v.targetId),
+        targetType: this.mode() === 'create' ? this.kind() : null,
+        parentTaskId: this.mode() === 'delegate' ? this.task()!.id : null
+      });
 
     request.subscribe({
       next: result => { this.saving.set(false); this.saved.emit(result); },

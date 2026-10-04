@@ -6,7 +6,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Branch, Department, Office, Role, User } from '../../core/models/ewms.models';
 import { EwmsService } from '../../core/services/ewms.service';
 import { AuthService } from '../../core/services/auth.service';
-import { UserPlacement, placementForRole } from '../../core/utils/user-placement';
 import { AppPermission } from '../../core/constants/access';
 import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
@@ -14,6 +13,8 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
 import { PageActions } from '../../shared/ui/page-actions';
 
 type ModalType = 'create' | 'edit';
+/** أي حقول المكان تُعرض في نموذج الموظف */
+type UserPlacement = { needsBranch: boolean; needsDepartment: boolean; needsOffice: boolean };
 
 @Component({
   selector: 'app-users-page',
@@ -139,6 +140,9 @@ export class UsersPage {
       branchId: user.branchId ? String(user.branchId) : '',
       isActive: user.isActive
     });
+    // تفعيل الحساب وتعطيله بصلاحية منفصلة: من لا يملكها يرى الخيار معطلاً (القيمة ترسل كما هي)
+    const toggle = this.editForm.controls.isActive;
+    if (this.auth.hasPermission(AppPermission.ToggleUserActive)) toggle.enable(); else toggle.disable();
     this.activeModal.set('edit');
     this.applyPlacement(this.editForm);
   }
@@ -184,7 +188,7 @@ export class UsersPage {
     form.append('Email', this.editForm.value.email ?? '');
     form.append('RoleId', this.editForm.value.roleId ?? '');
     this.appendPlacement(form, this.editForm);
-    form.append('IsActive', String(this.editForm.value.isActive ?? true));
+    form.append('IsActive', String(this.editForm.getRawValue().isActive ?? true));
 
     // كلمة المرور تُرسَل فقط إن أراد المستخدم تغييرها
     if (this.editForm.value.password) {
@@ -252,25 +256,26 @@ export class UsersPage {
   }
 
   /* =====================================================
-   * التبعية حسب الدور: SuperAdmin بلا فرع، رئيس الفرع بلا قسم، رئيس القسم بلا مكتب
+   * مكان الموظف (فرع / قسم / مكتب): يُحدَّد هنا لا في الدور، وكلها اختيارية —
+   * مدير النظام (SuperAdmin) وحده لا يتبع لوحدة. الباكاند يشتق الأعلى من الأدق ويرفض التعارض.
    * ===================================================== */
   private activeForm(): FormGroup {
     return this.activeModal() === 'create' ? this.createForm : this.editForm;
   }
 
+  /** "needs…" هنا تعني: يُعرض الحقل (لا يُلزم) */
   private placementOf(form: FormGroup): UserPlacement {
-    // قيمة الحقل نفسه وليس form.value: داخل valueChanges للدور لم تُحدَّث قيمة النموذج بعد،
-    // فكان التحقق يُحسب على الدور السابق (المكتب يبقى إجبارياً وهو مخفي → زر الإضافة معطّل)
+    // قيمة الحقل نفسه وليس form.value: داخل valueChanges للدور لم تُحدَّث قيمة النموذج بعد
     const role = this.roles().find(r => String(r.id) === String(form.get('roleId')?.value));
-    // المستوى لا الاسم: أسماء الأدوار حرة (مثل "رئيس قسم الصيانة")
-    return placementForRole(role?.level);
+    const placed = role?.name?.toLowerCase() !== 'superadmin';
+    return { needsBranch: placed, needsDepartment: placed, needsOffice: placed };
   }
 
   placement(): UserPlacement {
     return this.placementOf(this.activeForm());
   }
 
-  // الحقول المطلوبة للدور تصبح إجبارية، وغير المطلوبة تُفرَّغ وتُعفى من التحقق
+  // الحقول المخفية (دور SuperAdmin) تُفرَّغ؛ لا حقل إجباري
   private applyPlacement(form: FormGroup) {
     const placement = this.placementOf(form);
     const fields: [string, boolean][] = [
@@ -278,29 +283,31 @@ export class UsersPage {
       ['departmentId', placement.needsDepartment],
       ['officeId', placement.needsOffice]
     ];
-    for (const [name, needed] of fields) {
+    for (const [name, shown] of fields) {
       const control = form.get(name)!;
-      control.setValidators(needed ? Validators.required : null);
-      if (!needed) control.setValue('', { emitEvent: false });
+      control.setValidators(null);
+      if (!shown) control.setValue('', { emitEvent: false });
       control.updateValueAndValidity({ emitEvent: false });
     }
   }
 
   private appendPlacement(data: FormData, form: FormGroup) {
     const placement = this.placementOf(form);
-    if (placement.needsBranch) data.append('BranchId', form.value.branchId ?? '');
-    if (placement.needsDepartment) data.append('DepartmentId', form.value.departmentId ?? '');
-    if (placement.needsOffice) data.append('OfficeId', form.value.officeId ?? '');
+    if (!placement.needsBranch) return;
+    // الفارغ لا يُرسل: الباكاند يعتبره بلا وحدة
+    for (const [key, value] of [['BranchId', form.value.branchId], ['DepartmentId', form.value.departmentId], ['OfficeId', form.value.officeId]]) {
+      if (value) data.append(key, String(value));
+    }
   }
 
+  /** التعارض فقط (قسم خارج الفرع المختار، أو مكتب خارج القسم المختار) — الفراغ مسموح */
   private validAssignment(): boolean {
-    const form = this.activeForm();
-    const value = form.value;
-    const placement = this.placementOf(form);
+    const value = this.activeForm().value;
     const department = this.departments().find(d => d.id === Number(value.departmentId));
+    const office = this.offices().find(o => o.id === Number(value.officeId));
     const invalid =
-      (placement.needsDepartment && (!department || department.branchId !== Number(value.branchId)))
-      || (placement.needsOffice && !this.filteredOffices().some(o => o.id === Number(value.officeId)));
+      (value.branchId && department && department.branchId !== Number(value.branchId))
+      || (value.departmentId && office && office.departmentId !== Number(value.departmentId));
     if (invalid) {
       this.toast.show('تحقق من تبعية القسم للفرع والمكتب للقسم', 'error');
       return false;

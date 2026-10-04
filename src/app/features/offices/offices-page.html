@@ -1,0 +1,240 @@
+<section class="offices-page" dir="rtl">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="page-title">
+      <span class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        الهيكل التنظيمي
+      </span>
+      <h1>المكاتب</h1>
+      <p>إدارة مكاتب الأقسام وربطها بالموظفين.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="refresh-btn" (click)="load()" [disabled]="loading()">
+        <svg class="icon" [class.spin]="loading()" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"></path>
+          <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"></path>
+        </svg>
+        <span>{{ loading() ? 'جاري التحديث...' : 'تحديث' }}</span>
+      </button>
+
+      @if (can().create) {
+        <button type="button" class="new-btn" (click)="openCreate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+          <span>مكتب جديد</span>
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Offices List -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-kicker">السجل</span>
+        <h2>دليل المكاتب</h2>
+        <p>اضغط أيقونة التعديل لتحديث بيانات مكتب، أو الحذف لإزالته. لا يمكن حذف مكتب مرتبط بموظفين.</p>
+      </div>
+      <span class="pill">{{ items().length }} مكتب</span>
+    </div>
+
+    @if (loading()) {
+      <div class="skeleton-list">
+        @for (item of [1,2,3,4,5]; track item) {
+          <div class="skeleton-row offices-skeleton">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        }
+      </div>
+    } @else if (items().length) {
+      <div class="table-wrap">
+        <table class="offices-table">
+          <thead>
+            <tr>
+              <th>المكتب</th>
+              <th>القسم</th>
+              <th>الفرع</th>
+              <th>الوصف</th>
+              <th class="actions-th">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (office of items(); track office.id) {
+              <tr [class.selected]="selected()?.id === office.id">
+                <td>
+                  <div class="office-cell-name">
+                    <div class="office-avatar">{{ (office.name || 'م').charAt(0) }}</div>
+                    <div class="office-details">
+                      <strong>{{ office.name || 'مكتب بدون اسم' }}</strong>
+                      <small>#{{ office.id }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ office.departmentName }}</td>
+                <td><span class="branch-chip">{{ office.branchName }}</span></td>
+                <td>
+                  @if (office.description) {
+                    <span class="description-text">{{ office.description }}</span>
+                  } @else {
+                    <span class="muted-text">لا يوجد وصف</span>
+                  }
+                </td>
+                <td>
+                  <div class="row-actions">
+                    @if (can().edit) {
+                      <button type="button" class="icon-btn edit" title="تعديل" (click)="openEdit(office)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                        </svg>
+                      </button>
+                    }
+
+                    @if (can().delete) {
+                      <button type="button" class="icon-btn danger" title="حذف"
+                              (click)="deleteOffice(office)"
+                              [disabled]="saving() === 'delete-' + office.id">
+                        @if (saving() === 'delete-' + office.id) {
+                          <span class="button-spinner dark"></span>
+                        } @else {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"></path>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                          </svg>
+                        }
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17M3 21h18"></path>
+            <circle cx="15" cy="12" r="1"></circle>
+          </svg>
+        </div>
+        <h3>لا توجد مكاتب</h3>
+        <p>ابدأ بالضغط على زر "مكتب جديد" في الأعلى واختر القسم التابع له.</p>
+      </div>
+    }
+  </section>
+
+  <!-- ============================================================
+       Modals
+       ============================================================ -->
+  @if (activeModal(); as modal) {
+    <app-modal kicker="إجراء" [heading]="modalTitle(modal)" [busy]="!!saving()" (closed)="closeModal()">
+
+        <div class="modal-body">
+
+          @switch (modal) {
+
+            <!-- CREATE -->
+            @case ('create') {
+              <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
+                <div class="form-field">
+                  <label class="form-label" for="create-name">اسم المكتب</label>
+                  <input id="create-name" type="text" formControlName="name" maxlength="100"
+                         placeholder="مثال: مكتب المتابعة" autocomplete="off" />
+                  @if (createForm.controls.name.touched && createForm.controls.name.invalid) {
+                    <small class="form-error">أدخل اسماً لا يقل عن حرفين.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label" for="create-dept">القسم</label>
+                  <select id="create-dept" formControlName="departmentId">
+                    <option value="">اختر القسم</option>
+                    @for (department of departments(); track department.id) {
+                      <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
+                    }
+                  </select>
+                  @if (createForm.controls.departmentId.touched && createForm.controls.departmentId.invalid) {
+                    <small class="form-error">اختر القسم التابع له المكتب.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label" for="create-desc">الوصف</label>
+                  <textarea id="create-desc" formControlName="description" rows="3" maxlength="500"
+                            placeholder="وصف مختصر عن المكتب..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
+                  <button type="submit" [disabled]="createForm.invalid || saving() === 'create'">
+                    @if (saving() === 'create') {
+                      <span class="button-spinner"></span>
+                      <span>جاري الإنشاء...</span>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M12 5v14M5 12h14"></path>
+                      </svg>
+                      <span>إنشاء المكتب</span>
+                    }
+                  </button>
+                </div>
+              </form>
+            }
+
+            <!-- EDIT -->
+            @case ('edit') {
+              <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
+                <div class="form-field">
+                  <label class="form-label" for="edit-name">اسم المكتب</label>
+                  <input id="edit-name" type="text" formControlName="name" maxlength="100" />
+                  @if (editForm.controls.name.touched && editForm.controls.name.invalid) {
+                    <small class="form-error">أدخل اسماً لا يقل عن حرفين.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label" for="edit-dept">القسم</label>
+                  <select id="edit-dept" formControlName="departmentId">
+                    <option value="">اختر القسم</option>
+                    @for (department of departments(); track department.id) {
+                      <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label" for="edit-desc">الوصف</label>
+                  <textarea id="edit-desc" formControlName="description" rows="4" maxlength="500"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
+                  <button type="submit" [disabled]="editForm.invalid || saving() === 'edit'">
+                    @if (saving() === 'edit') {
+                      <span class="button-spinner"></span>
+                      <span>جاري الحفظ...</span>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M20 6 9 17l-5-5"></path>
+                      </svg>
+                      <span>حفظ التعديل</span>
+                    }
+                  </button>
+                </div>
+              </form>
+            }
+          }
+
+        </div>
+    </app-modal>
+  }
+
+</section>

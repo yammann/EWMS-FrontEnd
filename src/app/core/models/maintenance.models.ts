@@ -16,6 +16,7 @@ export interface MaintenanceRequest {
   canEdit: boolean;
   canDelete: boolean;
   canAssign: boolean;
+  canChangeStatus: boolean;
 
   userId: number;
   technicianName: string;

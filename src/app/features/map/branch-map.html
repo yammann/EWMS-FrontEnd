@@ -3,18 +3,28 @@
  <div #pinned class="map-pinned">
   <header class="map-head">
     <div class="title">
-      <span class="kicker">الخريطة</span>
+      <span class="kicker">الخريطة@if (data() && !layer()) { <span class="dev-badge">قيد التطوير</span> }</span>
       <h2 id="branch-map-title">{{ focus() ? 'محافظة ' + focusName() : 'خريطة الفروع' }} — {{ data()?.branchName || '…' }}</h2>
       <p>
-        @if (!layer()) { اختر فرعاً لعرض بياناته على الخريطة }
+        @if (!layer()) { خريطة هذا الفرع قيد التطوير وستُعرض بياناتها قريباً }
         @else if (!focus()) { مرّر المؤشر على محافظة لعرض إحصائياتها، وانقر عليها لفتح خريطتها }
         @else { انقر على نقطة موقع لفتح صفحة تفاصيله · <em>الزر الأيمن للرجوع إلى كل سوريا</em> }
       </p>
+      @if (layer(); as l) {
+        <div class="summary">
+          <span><strong>{{ totals().sites }}</strong> موقع</span>
+          <span><strong>{{ totals().installations }}</strong> تركيب</span>
+          <span>في <strong>{{ totals().governorates }}</strong> محافظة</span>
+          @if (l.sitesWithoutCoordinates) { <span class="warn">⚠ <a routerLink="/devices/sites">{{ l.sitesWithoutCoordinates }} موقع بلا إحداثيات</a> لا يظهر على الخريطة</span> }
+        </div>
+      }
     </div>
     <div class="head-actions">
+      @if (branches().length > 1) {
       <select [value]="branchId()" (change)="selectBranch(+$any($event.target).value)" aria-label="اختيار الفرع">
         @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}{{ b.hasMapData ? '' : ' (لا توجد بيانات بعد)' }}</option> }
       </select>
+      }
     </div>
   </header>
 
@@ -24,7 +34,7 @@
     <app-syria-svg-map [framed]="false" height="min(max(360px, calc(100vh - 230px)), 760px)" [focus]="focus()" [points]="points()" [fillFor]="fillFor()" [subFor]="subFor()" [badgeFor]="badgeFor()"
                        (governorateSelect)="openGovernorate($event)" (back)="back()" (pointSelect)="openSite($event)" (ready)="features.set($event)" />
     @if (loading()) { <div class="overlay" role="status">جارٍ تحميل بيانات الفرع…</div> }
-    @else if (data() && !layer()) { <div class="overlay">لا توجد بيانات خريطة لفرع {{ data()!.branchName }} بعد</div> }
+    @else if (data() && !layer()) { <div class="overlay">خريطة فرع {{ data()!.branchName }} قيد التطوير</div> }
     @if (!focus() && legend().length) {
       <div class="legend" aria-label="مفتاح الألوان">
         <strong>المواقع في المحافظة</strong>
@@ -39,12 +49,6 @@
   <ng-content select=".page-header" />
 
   @if (layer(); as l) {
-    <div class="summary">
-      <span><strong>{{ totals().sites }}</strong> موقع</span>
-      <span><strong>{{ totals().installations }}</strong> تركيب</span>
-      <span>في <strong>{{ totals().governorates }}</strong> محافظة</span>
-      @if (l.sitesWithoutCoordinates) { <span class="warn">⚠ <a routerLink="/devices/sites">{{ l.sitesWithoutCoordinates }} موقع بلا إحداثيات</a> لا يظهر على الخريطة</span> }
-    </div>
 
     @if (focus()) {
       <div class="details">
@@ -52,12 +56,12 @@
         @if (!sitesInFocus().length) { <p class="empty">لا توجد مواقع في هذه المحافظة</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>الموقع</th><th>المنطقة</th><th>التركيبات</th><th>أنواع الأجهزة</th><th>الإحداثيات</th></tr></thead>
+            <thead><tr><th>الموقع</th><th>الوصف</th><th>التركيبات</th><th>أنواع الأجهزة</th><th>الإحداثيات</th></tr></thead>
             <tbody>
               @for (s of sitesInFocus(); track s.id) {
                 <tr>
                   <td><a class="cell-link" [routerLink]="['/devices/sites', s.id]">{{ s.name }}</a></td>
-                  <td>{{ s.regionName }}</td>
+                  <td class="wrap">{{ s.description || '—' }}</td>
                   <td class="num">{{ s.installationsCount }}</td>
                   <td class="num">{{ s.deviceTypesCount }}</td>
                   <td><span class="mono">{{ coords(s.latitude, s.longitude) }}</span></td>

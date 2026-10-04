@@ -4,14 +4,13 @@ import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeviceService } from '../../core/services/device.service';
 import { Device } from '../../core/models/device.models';
-import { DevicesNav } from './devices-nav';
 import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
 import { ConfirmService } from '../../shared/ui/confirm.service';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
-  selector: 'app-devices-catalog-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, DevicesNav, Modal],
+  selector: 'app-devices-catalog-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, Modal],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -22,7 +21,6 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
           <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
         </div>
       </header>
-      <app-devices-nav />
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 

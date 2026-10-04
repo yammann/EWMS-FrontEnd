@@ -1,31 +1,30 @@
-import { DeviceShortcuts } from '../devices/device-shortcuts';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
 import { NotificationService } from '../../core/services/notification.service';
 import { WorkTaskService } from '../../core/services/work-task.service';
 import { OfficeDashboard } from '../../core/models/dashboard.models';
 import { WorkTaskCard } from '../../core/models/work-task.models';
 import { roleLabel } from '../../core/utils/roles';
 import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
-import { AppRole } from '../../core/constants/access';
 
 /** لوحة رئيس المكتب */
 @Component({
   selector: 'app-office-dashboard', standalone: true,
-  imports: [CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, DeviceShortcuts],
+  imports: [CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
       @if (data(); as d) {
-        @if (role() === AppRole.SuperAdmin) {
+        @if (isSuperAdmin()) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">المؤسسة</a><span>/</span><a [routerLink]="['/dashboard/branch', d.branchId]">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
-        } @else if (role() === AppRole.BranchManager) {
+        } @else if (isBranchPosition()) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
-        } @else if (role() === AppRole.Manager) {
+        } @else if (isDepartmentPosition()) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
         }
       }
@@ -53,7 +52,6 @@ import { AppRole } from '../../core/constants/access';
             <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام المسنَدة إليك</h2></div></div>
             <app-task-cards [tasks]="myTasks()" emptyText="لا توجد مهام مسنَدة إليك" />
           </section>
-          <app-device-shortcuts />
         }
 
         <section class="panel">
@@ -89,12 +87,6 @@ import { AppRole } from '../../core/constants/access';
           <app-activity-list [items]="d.recentActivity" />
         </section>
 
-        @if (isOwn()) {
-          <a class="jump" routerLink="/vacations/stats">
-            <div><strong>إحصائيات إجازات المكتب</strong><span>من في إجازة وطلبات موظفي المكتب قيد الموافقة</span></div>
-            <span class="go">فتح ←</span>
-          </a>
-        }
       } @else if (loading()) {
         <div class="panel skeleton" role="status">جارٍ تحميل لوحة المكتب…</div>
       }
@@ -110,11 +102,14 @@ export class OfficeDashboardPage {
   myTasks = signal<WorkTaskCard[]>([]);
   loading = signal(false);
   error = signal('');
-  role = this.auth.role;
-  protected readonly AppRole = AppRole;
   isOwn = signal(true);
   label = roleLabel;
   private id: number | null = null;
+
+  isSuperAdmin() { return this.auth.isSuperAdmin(); }
+  /** من أي لوحة وصل للمكتب (يحدد بداية المسار): لوحة الفرع أو لوحة القسم */
+  isBranchPosition() { return this.auth.hasPermission(AppPermission.ViewBranchDashboard); }
+  isDepartmentPosition() { return this.auth.hasPermission(AppPermission.ViewDepartmentDashboard); }
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(p => {

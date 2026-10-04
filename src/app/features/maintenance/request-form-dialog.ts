@@ -115,6 +115,8 @@ export class RequestFormDialog implements OnInit {
       model: r?.model ?? '', serialNumber: r?.serialNumber ?? '', accessories: r?.accessories ?? '', description: r?.description ?? '',
       startedAt: toLocalInput(r?.startedAt), completedAt: toLocalInput(r?.completedAt)
     });
+    // تعديل طلب: الحالة تُغيَّر بصلاحية تغيير الحالة فقط (الباكاند يرفض غير ذلك)؛ الطلب الجديد يختار حالته
+    if (r && !(this.service.can().changeStatus && r.canChangeStatus)) this.form.controls.maintenanceRequestStatusId.disable();
   }
 
   missingLookups() {

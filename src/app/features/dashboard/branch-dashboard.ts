@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -5,26 +6,40 @@ import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { BranchDashboard } from '../../core/models/dashboard.models';
-import { roleLabel } from '../../core/utils/roles';
-import { ActivityList, CountBars, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
+import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
+import { BranchMapComponent } from '../map/branch-map';
+import { AppPermission } from '../../core/constants/access';
 
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({
   selector: 'app-branch-dashboard', standalone: true,
-  imports: [RouterLink, StatTile, TaskCards, TaskDistributionTable, CountBars, ActivityList],
+  imports: [RouterLink, NgTemplateOutlet, StatTile, TaskCards, TaskDistributionTable, ActivityList, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
       @if (isAdmin()) { <nav class="crumbs" aria-label="المسار"><a routerLink="/">المؤسسة</a><span>/</span><span>{{ data()?.branchName }}</span></nav> }
-      <header class="page-header">
-        <div>
-          <span class="eyebrow">لوحة رئيس الفرع</span>
-          <h1>{{ data()?.branchName || 'الفرع' }}</h1>
-          @if (data()?.managerNames) { <p class="header-sub">رئيس الفرع: {{ data()?.managerNames }}</p> }
-        </div>
-        <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
-      </header>
+      @if (showMap()) {
+        <!-- خريطة فرعه مثبّتة في رأس الصفحة (لمن يملك ViewBranchMap) — الصفحة تنزلق فوقها أثناء السكرول -->
+        <app-branch-map>
+          <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+          <ng-container *ngTemplateOutlet="bodyTpl" />
+        </app-branch-map>
+      } @else {
+        <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+        <ng-container *ngTemplateOutlet="bodyTpl" />
+      }
+    </div>
 
+    <ng-template #headerTpl>
+      <div>
+        <span class="eyebrow">لوحة رئيس الفرع</span>
+        <h1>{{ data()?.branchName || 'الفرع' }}</h1>
+        @if (data()?.managerNames) { <p class="header-sub">رئيس الفرع: {{ data()?.managerNames }}</p> }
+      </div>
+      <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
+    </ng-template>
+
+    <ng-template #bodyTpl>
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
       @if (data(); as d) {
@@ -65,37 +80,28 @@ import { ActivityList, CountBars, StatTile, TaskCards, TaskDistributionTable } f
           <app-task-distribution [items]="d.taskDistribution" />
         </section>
 
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الكادر حسب الدور</h2></div></div>
-          <app-count-bars [items]="d.employeesByRole" unit="موظف" [translate]="roleLabel" emptyText="لا يوجد موظفون في هذا الفرع" />
-        </section>
 
         <section class="panel">
           <div class="panel-heading"><div><h2>آخر الإجراءات</h2><p>انضمام الموظفين وإضافة مهام العمل وإسنادها في الفرع</p></div></div>
           <app-activity-list [items]="d.recentActivity" />
         </section>
 
-        @if (!isAdmin()) {
-          <a class="jump" routerLink="/vacations/stats">
-            <div><strong>إحصائيات إجازات الفرع</strong><span>من في إجازة، الطلبات بانتظار اعتمادك، والإجازات حسب النوع</span></div>
-            <span class="go">فتح ←</span>
-          </a>
-        }
       } @else if (loading()) {
         <div class="panel skeleton" role="status">جارٍ تحميل لوحة الفرع…</div>
       }
-    </div>`
+    </ng-template>`
 })
 export class BranchDashboardPage {
   private service = inject(DashboardService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
-  roleLabel = roleLabel;
 
   data = signal<BranchDashboard | null>(null);
   loading = signal(false);
   error = signal('');
   isAdmin = computed(() => this.auth.isSuperAdmin());
+  /** خريطة فرعه: لمن يملك ViewBranchMap وهو يتصفح لوحة فرعه (مدير النظام يراها في لوحة المؤسسة) */
+  showMap = computed(() => !this.auth.isSuperAdmin() && this.auth.hasPermission(AppPermission.ViewBranchMap));
   private id: number | null = null;
 
   constructor() {

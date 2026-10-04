@@ -3,10 +3,9 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
-import { DeviceService } from './device.service';
 import { LoginRequest } from '../models/login-request.model';
 import { AuthResponse, AuthUser } from '../models/auth-response.model';
-import { AppPermission, AppPermissionName, AppRole, LEADER_ROLES } from '../constants/access';
+import { APPROVE_VACATIONS, AppPermissionName, TASK_OVERSIGHT } from '../constants/access';
 
 const TOKEN_KEY = 'ewms_token';
 const USER_KEY = 'ewms_user';
@@ -23,7 +22,6 @@ export class AuthService {
   private api = inject(ApiService);
   private router = inject(Router);
   private notifications = inject(NotificationService);
-  private devices = inject(DeviceService);
 
   /** التوكن في الذاكرة أيضاً — لا نقرأ التخزين مع كل طلب */
   private token = signal<string | null>(storage.get(TOKEN_KEY));
@@ -31,26 +29,26 @@ export class AuthService {
   currentUser = signal<AuthUser | null>(this.loadUser());
 
   role = computed(() => this.currentUser()?.role ?? '');
-  isSuperAdmin = computed(() => this.role() === AppRole.SuperAdmin);
-  /** رئيس فرع/قسم/مكتب أو مدير النظام */
-  isLeader = computed(() => LEADER_ROLES.includes(this.role()));
-  /** نفس سياسة الباكاند على PendingForMe / Approve */
-  canReviewVacations = computed(() => this.hasPermission(AppPermission.ApproveVacation));
+  isSuperAdmin = computed(() => this.role().toLowerCase() === 'superadmin');
+  /** يسند المهام أو يتولى مهام وحدته (صلاحيات لوحة المهام) */
+  isLeader = computed(() => this.hasAnyPermission(TASK_OVERSIGHT));
+  /** الموافقة الأولى أو الاعتماد النهائي — نفس فحص الباكاند في PendingForMe / Approve */
+  canReviewVacations = computed(() => this.hasAnyPermission(APPROVE_VACATIONS));
 
   login(request: LoginRequest) {
     return this.api.post<AuthResponse>('/Auth/login', request).pipe(
       tap(response => {
         // صلاحيات توثيق الأجهزة تخص المستخدم — تُعاد قراءتها للمستخدم الجديد
-        this.devices.resetAccess();
 
         const user: AuthUser = {
           email: response.email,
           fullName: response.fullName,
           role: response.role,
-          roleName: response.roleName,
+          branchId: response.branchId,
+          departmentId: response.departmentId,
+          officeId: response.officeId,
           expiresAt: response.expiresAt,
-          permissions: response.permissions ?? [],
-          permissionScopes: response.permissionScopes ?? {}
+          permissions: response.permissions ?? []
         };
 
         this.token.set(response.token);
@@ -67,15 +65,13 @@ export class AuthService {
    */
   refreshPermissions() {
     if (!this.isAuthenticated()) return;
-    this.api.get<{ permissions: string[]; scopes: Record<string, number> }>('/Auth/Permissions').subscribe({
-      next: ({ permissions, scopes }) => {
+    this.api.get<{ permissions: string[] }>('/Auth/Permissions').subscribe({
+      next: ({ permissions }) => {
         const user = this.currentUser();
-        if (!user || (JSON.stringify(user.permissions) === JSON.stringify(permissions)
-          && JSON.stringify(user.permissionScopes ?? {}) === JSON.stringify(scopes))) return;
-        const updated = { ...user, permissions, permissionScopes: scopes };
+        if (!user || JSON.stringify(user.permissions) === JSON.stringify(permissions)) return;
+        const updated = { ...user, permissions };
         storage.set(USER_KEY, JSON.stringify(updated));
         this.currentUser.set(updated);
-        this.devices.resetAccess();
       },
       error: () => { /* تبقى الصلاحيات المحفوظة */ }
     });
@@ -91,7 +87,6 @@ export class AuthService {
 
   clearSession() {
     this.notifications.stop();
-    this.devices.resetAccess();
     this.token.set(null);
     storage.remove(TOKEN_KEY);
     storage.remove(USER_KEY);
@@ -112,22 +107,9 @@ export class AuthService {
     return this.currentUser()?.permissions?.includes(permission) ?? false;
   }
 
-  /**
-   * نطاق الصلاحية للمستخدم: 0 لا يملكها، 1 سجلاته، 2 مكتبه، 3 قسمه، 4 فرعه، 5 كل المؤسسة.
-   * للعرض فقط (إظهار رابط أو تبويب) — الباكاند يحدد السجلات فعلياً.
-   */
-  scopeOf(permission: AppPermissionName): number {
-    if (!this.hasPermission(permission)) return 0;
-    return this.currentUser()?.permissionScopes?.[permission] ?? 1;
-  }
-
   /** تكفي واحدة من عدة صلاحيات */
   hasAnyPermission(permissions: readonly AppPermissionName[]): boolean {
     return permissions.some(p => this.hasPermission(p));
-  }
-
-  hasRole(...roles: readonly string[]): boolean {
-    return roles.includes(this.role());
   }
 
   private loadUser(): AuthUser | null {

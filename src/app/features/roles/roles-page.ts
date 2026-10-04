@@ -5,8 +5,7 @@ import { forkJoin } from 'rxjs';
 import { Permission, Role } from '../../core/models/ewms.models';
 import { EwmsService } from '../../core/services/ewms.service';
 import { AuthService } from '../../core/services/auth.service';
-import { AppPermission, AppRole } from '../../core/constants/access';
-import { PERMISSION_SCOPES, ROLE_LEVELS, defaultScopeFor, roleLevelLabel } from '../../core/utils/roles';
+import { AppPermission } from '../../core/constants/access';
 import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
 import { ConfirmService } from '../../shared/ui/confirm.service';
@@ -15,26 +14,45 @@ import { PageActions } from '../../shared/ui/page-actions';
 type ModalType = 'create' | 'edit';
 
 interface PermissionGroup { key: string; title: string; items: Permission[]; }
+interface PermissionSection { key: string; title: string; groups: PermissionGroup[]; items: Permission[]; }
 
 /**
- * مجموعات الصلاحيات في نافذتي الدور (بحسب الميزة). ما لا يرد هنا من صلاحيات جديدة يظهر تحت "أخرى"
- * فلا يضيع — أضفه لمجموعته حين تُضاف الصلاحية إلى AppPermissions في الباكاند.
+ * شجرة الصلاحيات في نافذتي الدور: أقسام ثابتة (عناوين في أعلى القائمة) ← مجموعات قابلة للطي ← صلاحيات.
+ * ما لا يرد هنا من صلاحيات جديدة يظهر في قسم "أخرى" فلا يضيع — أضفه لمجموعته حين تُضاف إلى AppPermissions في الباكاند.
  */
-const PERMISSION_GROUPS: { key: string; title: string; names: string[] }[] = [
-  { key: 'vacations', title: 'الإجازات', names: ['ViewVacations', 'CreateVacation', 'CancelVacation', 'ApproveVacation'] },
-  { key: 'vacation-types', title: 'أنواع الإجازات', names: ['ViewVacationTypes', 'CreateVacationType', 'EditVacationType', 'DeleteVacationType'] },
-  { key: 'work-tasks', title: 'مهام العمل', names: ['ViewWorkTasks', 'CreateWorkTask', 'EditWorkTask', 'DeleteWorkTask'] },
-  { key: 'task-board', title: 'لوحة المهام', names: ['ViewAssignedTasks', 'CreateAssignedTask'] },
-  { key: 'devices', title: 'توثيق الأجهزة', names: ['ViewDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice'] },
-  { key: 'maint-requests', title: 'طلبات الصيانة', names: ['ViewMaintenanceRequests', 'CreateMaintenanceRequest', 'EditMaintenanceRequest', 'DeleteMaintenanceRequest', 'AssignMaintenanceRequest'] },
-  { key: 'maint-tasks', title: 'مهام الصيانة', names: ['ViewMaintenanceTasks', 'CreateMaintenanceTask', 'EditMaintenanceTask', 'DeleteMaintenanceTask', 'AssignMaintenanceTask'] },
-  { key: 'maint-lookups', title: 'جداول الصيانة (أنواع الأجهزة والشركات والأعطال والحالات)', names: ['ViewMaintenanceLookups', 'CreateMaintenanceLookup', 'EditMaintenanceLookup', 'DeleteMaintenanceLookup'] },
-  { key: 'users', title: 'الموظفون', names: ['ViewUsers', 'CreateUser', 'EditUser', 'DeleteUser'] },
-  { key: 'roles', title: 'الأدوار والصلاحيات', names: ['ViewRoles', 'CreateRole', 'EditRole', 'DeleteRole'] },
-  { key: 'branches', title: 'الفروع', names: ['ViewBranches', 'CreateBranch', 'EditBranch', 'DeleteBranch'] },
-  { key: 'departments', title: 'الأقسام', names: ['ViewDepartments', 'CreateDepartment', 'EditDepartment', 'DeleteDepartment'] },
-  { key: 'offices', title: 'المكاتب', names: ['ViewOffices', 'CreateOffice', 'EditOffice', 'DeleteOffice'] },
-  { key: 'modules', title: 'إسناد الخدمات', names: ['ViewModuleAssignments', 'EditModuleAssignments'] }
+const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; title: string; names: string[] }[] }[] = [
+  { key: 'vacations', title: 'الإجازات', groups: [
+    { key: 'vac-own', title: 'طلبات الإجازة', names: ['ViewVacations', 'CreateVacation', 'CancelVacation'] },
+    { key: 'vac-view', title: 'الاطلاع على إجازات الآخرين', names: ['ViewDepartmentVacations', 'ViewBranchVacations'] },
+    { key: 'vac-approve', title: 'الموافقة على الإجازات', names: ['ApproveVacationFirst', 'ApproveVacationFinal'] },
+    { key: 'vacation-types', title: 'أنواع الإجازات', names: ['ViewVacationTypes', 'CreateVacationType', 'EditVacationType', 'DeleteVacationType'] }
+  ] },
+  { key: 'tasks', title: 'المهام', groups: [
+    { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'HandleUnitTasks'] },
+    { key: 'work-tasks', title: 'مهام العمل', names: ['ViewMyWorkTasks', 'ViewWorkTasks', 'CreateWorkTask', 'EditWorkTask', 'DeleteWorkTask'] }
+  ] },
+  { key: 'maintenance', title: 'الصيانة', groups: [
+    { key: 'maint-requests', title: 'طلبات الصيانة', names: ['ViewMaintenanceRequests', 'CreateMaintenanceRequest', 'EditMaintenanceRequest', 'ChangeMaintenanceStatus', 'DeleteMaintenanceRequest', 'AssignMaintenanceRequest'] },
+    { key: 'maint-tasks', title: 'مهام الصيانة', names: ['ViewMaintenanceTasks', 'CreateMaintenanceTask', 'EditMaintenanceTask', 'DeleteMaintenanceTask', 'AssignMaintenanceTask'] },
+    { key: 'maint-department', title: 'الإشراف على صيانة القسم', names: ['ViewDepartmentMaintenance', 'ViewMaintenanceStats', 'SignMaintenanceReceipt'] },
+    { key: 'maint-lookups', title: 'جداول الصيانة (أنواع الأجهزة والشركات والأعطال والحالات)', names: ['ViewMaintenanceLookups', 'CreateMaintenanceLookup', 'EditMaintenanceLookup', 'DeleteMaintenanceLookup'] }
+  ] },
+  { key: 'general', title: 'عام', groups: [
+    { key: 'notifications', title: 'الإشعارات', names: ['ViewNotifications'] }
+  ] },
+  { key: 'devices', title: 'توثيق الأجهزة', groups: [
+    { key: 'devices', title: 'المواقع والأجهزة والتركيبات', names: ['ViewDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice'] }
+  ] },
+  { key: 'dashboards', title: 'لوحات المتابعة', groups: [
+    { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard', 'ViewBranchMap'] }
+  ] },
+  { key: 'admin', title: 'الإدارة والهيكل', groups: [
+    { key: 'users', title: 'الموظفون', names: ['ViewUsers', 'CreateUser', 'EditUser', 'ToggleUserActive', 'DeleteUser'] },
+    { key: 'roles', title: 'الأدوار والصلاحيات', names: ['ViewRoles', 'CreateRole', 'EditRole', 'DeleteRole'] },
+    { key: 'branches', title: 'الفروع', names: ['ViewBranches', 'CreateBranch', 'EditBranch', 'DeleteBranch'] },
+    { key: 'departments', title: 'الأقسام', names: ['ViewDepartments', 'CreateDepartment', 'EditDepartment', 'DeleteDepartment'] },
+    { key: 'offices', title: 'المكاتب', names: ['ViewOffices', 'CreateOffice', 'EditOffice', 'DeleteOffice'] }
+  ] }
 ];
 
 @Component({
@@ -59,29 +77,15 @@ export class RolesPage {
   private actions = new PageActions(() => this.load());
   saving = this.actions.saving;
 
-  levels = ROLE_LEVELS;
-  scopeOptions = PERMISSION_SCOPES;
-  levelLabel = roleLevelLabel;
-  /** تلميح المستوى المختار */
-  levelHint(level: string | null | undefined): string {
-    return ROLE_LEVELS.find(l => l.value === level)?.hint ?? '';
-  }
-  superAdminLevel = AppRole.SuperAdmin;
 
   createForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
-    level: [AppRole.Employee as string, Validators.required],
-    permissionIds: [[] as number[]],
-    /** نطاق كل صلاحية مختارة ذات نطاق: معرّف الصلاحية ← 1..5 */
-    scopes: this.fb.nonNullable.control<Record<number, number>>({})
+    permissionIds: [[] as number[]]
   });
 
   editForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
-    level: [AppRole.Employee as string, Validators.required],
-    permissionIds: [[] as number[]],
-    /** نطاق كل صلاحية مختارة ذات نطاق: معرّف الصلاحية ← 1..5 */
-    scopes: this.fb.nonNullable.control<Record<number, number>>({})
+    permissionIds: [[] as number[]]
   });
 
   canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateRole));
@@ -124,8 +128,7 @@ export class RolesPage {
   load() {
     this.loading.set(true);
     forkJoin({
-      roles: this.ewms.getRoles(),
-      permissions: this.ewms.getPermissions()
+      roles: this.ewms.getRoles(), permissions: this.ewms.getPermissions(),
     }).subscribe({
       next: result => {
         this.roles.set(result.roles);
@@ -146,8 +149,29 @@ export class RolesPage {
     }
 
     this.selectedRole.set(null);
-    this.createForm.reset({ level: AppRole.Employee, permissionIds: [], scopes: {} });
+    this.createForm.reset({ permissionIds: [] });
     this.collapseAllGroups();
+    this.activeSectionKey.set('');
+    this.activeModal.set('create');
+  }
+
+  /**
+   * نسخ دور: نافذة الإنشاء بنفس صلاحيات الدور ووحدته واسم مقترح — لإنشاء دور شخص جديد من دور مشابه
+   * ثم تعديل الاسم والوحدة وما يختلف من صلاحيات (قرار المستخدم 2026-10-03: دور لكل شخص).
+   */
+  openClone(role: Role) {
+    if (!this.canCreate()) {
+      this.toast.show('لا تملك صلاحية إدارة الأدوار', 'error');
+      return;
+    }
+
+    this.selectedRole.set(null);
+    this.collapseAllGroups();
+    this.activeSectionKey.set('');
+    this.createForm.reset({
+      name: `${role.name} - نسخة`,
+      permissionIds: role.permissions?.map(p => p.id) ?? []
+    });
     this.activeModal.set('create');
   }
 
@@ -159,10 +183,9 @@ export class RolesPage {
 
     this.selectedRole.set(role);
     this.collapseAllGroups();
+    this.activeSectionKey.set('');
     this.editForm.patchValue({
       name: role.name,
-      level: role.level,
-      scopes: Object.fromEntries((role.permissions ?? []).filter(p => p.scoped && p.scope).map(p => [p.id, p.scope!])),
       permissionIds: role.permissions?.map(p => p.id) ?? []
     });
     this.activeModal.set('edit');
@@ -179,24 +202,36 @@ export class RolesPage {
   /* =====================================================
    * مجموعات الصلاحيات القابلة للطي
    * ===================================================== */
-  permissionGroups = computed<PermissionGroup[]>(() => {
+  /** الأقسام الثابتة ← مجموعاتها ← صلاحياتها (ما لا ينتمي لمجموعة يظهر في قسم "أخرى") */
+  permissionSections = computed<PermissionSection[]>(() => {
     const all = this.permissions();
     const byName = new Map(all.map(p => [p.name, p]));
     const used = new Set<string>();
 
-    const groups = PERMISSION_GROUPS
-      .map(g => ({
-        key: g.key, title: g.title,
-        items: g.names.map(n => byName.get(n)).filter((p): p is Permission => !!p)
-      }))
-      .filter(g => g.items.length);
+    const sections: PermissionSection[] = PERMISSION_SECTIONS.map(s => {
+      const groups = s.groups
+        .map(g => ({ key: g.key, title: g.title, items: g.names.map(n => byName.get(n)).filter((p): p is Permission => !!p) }))
+        .filter(g => g.items.length);
+      return { key: s.key, title: s.title, groups, items: groups.flatMap(g => g.items) };
+    }).filter(s => s.items.length);
 
-    groups.forEach(g => g.items.forEach(p => used.add(p.name)));
+    sections.forEach(s => s.items.forEach(p => used.add(p.name)));
     const others = all.filter(p => !used.has(p.name));
-    if (others.length) groups.push({ key: 'others', title: 'أخرى', items: others });
+    if (others.length) sections.push({ key: 'others', title: 'أخرى', groups: [{ key: 'others', title: 'أخرى', items: others }], items: others });
 
-    return groups;
+    return sections;
   });
+
+  permissionGroups = computed<PermissionGroup[]>(() => this.permissionSections().flatMap(s => s.groups));
+
+  /** القسم المعروض تحت العناوين الثابتة */
+  private activeSectionKey = signal('');
+  activeSection = computed(() => {
+    const sections = this.permissionSections();
+    return sections.find(s => s.key === this.activeSectionKey()) ?? sections[0] ?? null;
+  });
+
+  selectSection(key: string) { this.activeSectionKey.set(key); }
 
   /** المجموعات المفتوحة (الافتراضي: كلها مطوية) */
   private openGroups = signal<ReadonlySet<string>>(new Set());
@@ -211,55 +246,27 @@ export class RolesPage {
     });
   }
 
-  expandAllGroups() { this.openGroups.set(new Set(this.permissionGroups().map(g => g.key))); }
+  /** توسيع/طيّ مجموعات القسم المعروض */
+  expandAllGroups() { this.openGroups.set(new Set(this.activeSection()?.groups.map(g => g.key) ?? [])); }
   collapseAllGroups() { this.openGroups.set(new Set()); }
 
-  groupSelectedCount(modal: ModalType, group: PermissionGroup): number {
+  /** عدد المختار من مجموعة أو قسم كامل */
+  groupSelectedCount(modal: ModalType, group: { items: Permission[] }): number {
     const form = modal === 'create' ? this.createForm : this.editForm;
     const selected = new Set(form.value.permissionIds ?? []);
     return group.items.filter(p => selected.has(p.id)).length;
   }
 
-  /** تحديد/إلغاء كل صلاحيات المجموعة (بدون المساس بباقي المجموعات) */
-  toggleGroupSelection(modal: ModalType, group: PermissionGroup, event: Event) {
+  /** تحديد/إلغاء كل صلاحيات المجموعة أو القسم (بدون المساس بالباقي) */
+  toggleGroupSelection(modal: ModalType, group: { items: Permission[] }, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     const form = modal === 'create' ? this.createForm : this.editForm;
     const ids = new Set(group.items.map(p => p.id));
     const rest = (form.value.permissionIds ?? []).filter(id => !ids.has(id));
     const next = checked ? [...rest, ...ids] : rest;
-    form.patchValue({ permissionIds: next, scopes: this.withDefaultScopes(form, next) });
+    form.patchValue({ permissionIds: next });
   }
 
-  /* =====================================================
-   * نطاق الصلاحية (لكل صلاحية ذات نطاق: على أي سجلات تعمل)
-   * ===================================================== */
-  scopeOf(modal: ModalType, permission: Permission): number {
-    const form = modal === 'create' ? this.createForm : this.editForm;
-    return form.value.scopes?.[permission.id] ?? defaultScopeFor(form.value.level);
-  }
-
-  setScope(modal: ModalType, permission: Permission, event: Event) {
-    const form = modal === 'create' ? this.createForm : this.editForm;
-    const value = Number((event.target as HTMLSelectElement).value);
-    form.patchValue({ scopes: { ...(form.value.scopes ?? {}), [permission.id]: value } });
-  }
-
-  /** يُبقي نطاقات المختار، ويعطي الجديد النطاق الافتراضي لمستوى الدور، ويحذف نطاق ما أُلغي */
-  private withDefaultScopes(form: FormGroup, ids: number[]): Record<number, number> {
-    const current = (form.value.scopes ?? {}) as Record<number, number>;
-    const fallback = defaultScopeFor(form.value.level);
-    const scopedIds = new Set(this.permissions().filter(p => p.scoped).map(p => p.id));
-    return Object.fromEntries(ids.filter(id => scopedIds.has(id)).map(id => [id, current[id] ?? fallback]));
-  }
-
-  /** النطاقات بنفس ترتيب المعرّفات (0 = الافتراضي لمستوى الدور) */
-  private appendGrants(data: FormData, form: FormGroup) {
-    const scopes = (form.value.scopes ?? {}) as Record<number, number>;
-    for (const id of form.value.permissionIds ?? []) {
-      data.append('PermissionIds', String(id));
-      data.append('PermissionScopes', String(scopes[id] ?? 0));
-    }
-  }
 
   /* =====================================================
    * Permission toggle (checkbox)
@@ -278,13 +285,13 @@ export class RolesPage {
       ? [...current, permissionId]
       : current.filter(id => id !== permissionId);
 
-    form.patchValue({ permissionIds: next, scopes: this.withDefaultScopes(form, next) });
+    form.patchValue({ permissionIds: next });
   }
 
   selectAllPermissions(modal: ModalType) {
     const form = modal === 'create' ? this.createForm : this.editForm;
     const all = this.permissions().map(p => p.id);
-    form.patchValue({ permissionIds: all, scopes: this.withDefaultScopes(form, all) });
+    form.patchValue({ permissionIds: all });
   }
 
   clearAllPermissions(modal: ModalType) {
@@ -297,6 +304,10 @@ export class RolesPage {
     return (form.value.permissionIds ?? []).length;
   }
 
+  private appendRole(data: FormData, form: FormGroup) {
+    for (const id of form.value.permissionIds ?? []) data.append('PermissionIds', String(id));
+  }
+
   /* =====================================================
    * CRUD actions
    * ===================================================== */
@@ -305,15 +316,14 @@ export class RolesPage {
 
     const form = new FormData();
     form.append('Name', this.createForm.value.name ?? '');
-    form.append('Level', this.createForm.value.level ?? AppRole.Employee);
-    this.appendGrants(form, this.createForm);
+    this.appendRole(form, this.createForm);
 
     this.actions.run(
       'create',
       this.ewms.createRole(form),
       'تم إنشاء الدور بنجاح',
       () => {
-        this.createForm.reset({ level: AppRole.Employee, permissionIds: [], scopes: {} });
+        this.createForm.reset({ permissionIds: [] });
         this.closeModal();
       }
     );
@@ -325,8 +335,7 @@ export class RolesPage {
 
     const form = new FormData();
     form.append('Name', this.editForm.value.name ?? '');
-    form.append('Level', this.editForm.value.level ?? AppRole.Employee);
-    this.appendGrants(form, this.editForm);
+    this.appendRole(form, this.editForm);
 
     this.actions.run(
       'edit',

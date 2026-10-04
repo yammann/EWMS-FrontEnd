@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
@@ -11,12 +11,12 @@ import { Logo } from '../../shared/ui/logo';
 import { Icon, IconName } from '../../shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
 import { roleLabel } from '../../core/utils/roles';
-import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES } from '../../core/constants/access';
+import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, DASHBOARD_ACCESS } from '../../core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
-interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'admin'; title: string; items: NavItem[]; }
+interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'devices' | 'admin'; title: string; items: NavItem[]; }
 
 @Component({
   selector: 'app-main-layout',
@@ -30,6 +30,7 @@ export class MainLayout {
   private notifications = inject(NotificationService);
   user = this.auth.currentUser;
   unreadCount = this.notifications.unreadCount;
+  canNotify = computed(() => this.auth.hasPermission(AppPermission.ViewNotifications));
   roleLabel = roleLabel;
   /** للنافبار: الاسم الأول والحرف الأول للصورة الرمزية */
   private displayName = computed(() => (this.user()?.fullName || this.user()?.email || '').trim());
@@ -38,7 +39,8 @@ export class MainLayout {
 
   constructor() {
     // اتصال لحظي (SignalR) لاستقبال الإشعارات فور حدوثها
-    this.notifications.start(() => this.auth.getToken() ?? '');
+    // (لمن يملك ViewNotifications فقط — الباكاند يرفض الاتصال لغيره)
+    effect(() => { if (this.canNotify()) untracked(() => this.notifications.start(() => this.auth.getToken() ?? '')); });
     this.loadSidebar();
     // الصلاحيات الفعّالة قد تتغيّر بعد تسجيل الدخول (إسناد خدمة لوحدتي، تعديل دوري)
     this.auth.refreshPermissions();
@@ -55,20 +57,25 @@ export class MainLayout {
     const canAny = (list: readonly AppPermissionName[]) => this.auth.hasAnyPermission(list);
     const all: NavSection[] = [
       { id: 'main', title: '', items: [
-        { path: '/', label: 'لوحة المتابعة', icon: 'home', exact: true },
-        can(AppPermission.ModuleTaskBoard) && { path: '/task-board', label: 'لوحة المهام', icon: 'board' }
+        canAny(DASHBOARD_ACCESS) && { path: '/', label: 'لوحة المتابعة', icon: 'home', exact: true },
+        can(AppPermission.ViewTaskBoard) && { path: '/task-board', label: 'لوحة المهام', icon: 'board' }
       ].filter(Boolean) as NavItem[] },
       { id: 'vacations', title: 'الإجازات', items: [
         this.auth.canReviewVacations() && { path: '/vacations/review', label: 'مراجعة الإجازات', icon: 'check' },
-        this.auth.scopeOf(AppPermission.ViewVacations) >= 2 && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
+        canAny(VACATION_STATS) && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
         canAny(MANAGE_VACATION_TYPES) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' }
       ].filter(Boolean) as NavItem[] },
       { id: 'maintenance', title: 'الصيانة', items: [
         can(AppPermission.ViewMaintenanceRequests) && { path: '/maintenance/requests', label: 'طلبات الصيانة', icon: 'wrench' },
         can(AppPermission.ViewMaintenanceTasks) && { path: '/maintenance/tasks', label: 'مهام الصيانة', icon: 'clipboard' },
-        can(AppPermission.ViewMaintenanceRequests) && { path: '/maintenance/stats', label: 'إحصائيات الصيانة', icon: 'chart' },
+        can(AppPermission.ViewMaintenanceStats) && { path: '/maintenance/stats', label: 'إحصائيات الصيانة', icon: 'chart' },
         canAny(MANAGE_MAINTENANCE_LOOKUPS) && { path: '/maintenance/settings', label: 'إعدادات الصيانة', icon: 'gear' }
       ].filter(Boolean) as NavItem[] },
+      { id: 'devices', title: 'توثيق الأجهزة', items: canAny(DEVICE_ACCESS) ? [
+        { path: '/devices/installations', label: 'التركيبات', icon: 'device' },
+        { path: '/devices/sites', label: 'المواقع', icon: 'landmark' },
+        { path: '/devices/catalog', label: 'الأجهزة', icon: 'layers' }
+      ] : [] },
       { id: 'admin', title: 'الإدارة', items: [
         can(AppPermission.ViewWorkTasks) && { path: '/work-tasks', label: 'مهام العمل', icon: 'briefcase' },
         can(AppPermission.ViewBranches) && { path: '/branches', label: 'الفروع', icon: 'landmark' },
@@ -76,7 +83,6 @@ export class MainLayout {
         can(AppPermission.ViewOffices) && { path: '/offices', label: 'المكاتب', icon: 'door' },
         can(AppPermission.ViewUsers) && { path: '/users', label: 'الموظفون', icon: 'users' },
         can(AppPermission.ViewRoles) && { path: '/roles', label: 'الأدوار', icon: 'shield' },
-        can(AppPermission.ViewModuleAssignments) && { path: '/modules', label: 'إسناد الخدمات', icon: 'layers' }
       ].filter(Boolean) as NavItem[] }
     ];
     return all.filter(section => section.items.length);

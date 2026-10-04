@@ -107,6 +107,6 @@
 }
 
 @if (form(); as f) {
-  <app-task-form-dialog [mode]="f.mode" [task]="f.task" [targets]="targets()" [targetTypeLabel]="targetTypeLabel()"
+  <app-task-form-dialog [mode]="f.mode" [task]="f.task" [targetTypes]="targetTypes()"
                         (saved)="formSaved($event)" (close)="form.set(null)" />
 }

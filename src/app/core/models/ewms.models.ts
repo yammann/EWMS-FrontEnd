@@ -16,10 +16,6 @@ export interface Permission {
   id: number;
   name: string;
   description: string;
-  /** للصلاحية نطاق يُختار عند منحها للدور */
-  scoped?: boolean;
-  /** نطاقها لهذا الدور (في الأدوار فقط): 1 سجلاته، 2 مكتبه، 3 قسمه، 4 فرعه، 5 كل المؤسسة */
-  scope?: number;
 }
 
 export interface Office {
@@ -35,8 +31,6 @@ export interface Office {
 export interface Role {
   id: number;
   name: string;
-  /** مستوى الدور: SuperAdmin | BranchManager | Manager | OfficeManager | Emp — الاسم حر والمنطق يعتمد المستوى */
-  level: string;
   permissions: Permission[];
 }
 
@@ -48,10 +42,10 @@ export interface User {
   email: string;
   roleId: number;
   roleName: string;
-  departmentId: number | null;
-  departmentName: string;
   branchId: number | null;
   branchName: string;
+  departmentId: number | null;
+  departmentName: string;
   isActive: boolean;
   createdAt: string;
 }

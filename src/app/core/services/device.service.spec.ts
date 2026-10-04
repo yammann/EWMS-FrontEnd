@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DeviceService, formatCoords } from './device.service';
+import { AuthService } from './auth.service';
 
 describe('Device inventory', () => {
   let service: DeviceService;
@@ -25,16 +26,25 @@ describe('Device inventory', () => {
     req.flush({});
   });
 
-  it('loads access once and falls back to no access on error', () => {
-    let access = { canView: true, canManage: true, inOwnerDepartment: true };
-    service.loadAccess().subscribe(a => access = a);
-    service.loadAccess().subscribe();
-    http.expectOne('/api/Devices/MyAccess').flush({ message: 'x' }, { status: 500, statusText: 'Error' });
-    expect(access).toEqual({ canView: false, canCreate: false, canEdit: false, canDelete: false, canManage: false, inOwnerDepartment: false });
+  it('derives device access from the user permissions only', () => {
+    const auth = TestBed.inject(AuthService);
+    const login = (permissions: string[]) => auth.currentUser.set({
+      role: 'x', permissions, fullName: 't', email: 't@e.test', branchId: null, departmentId: null, officeId: null,
+      expiresAt: new Date(Date.now() + 60000).toISOString()
+    });
+
+    login([]);
+    expect(service.access()).toEqual({ canView: false, canCreate: false, canEdit: false, canDelete: false, canManage: false, inOwnerDepartment: false });
+
+    login(['ViewDevices']);
+    expect(service.access()).toMatchObject({ canView: true, canManage: false });
+
+    login(['EditDevice']);   // من يعدّل يرى ما يعدّله
+    expect(service.access()).toMatchObject({ canView: true, canEdit: true, canCreate: false, canManage: true });
   });
 
   it('sends site coordinates as Latitude/Longitude', () => {
-    service.createSite({ name: 'م', description: '', latitude: 33.51, longitude: 36.27, regionId: 3 }).subscribe();
+    service.createSite({ name: 'م', description: '', latitude: 33.51, longitude: 36.27 }).subscribe();
     const req = http.expectOne('/api/Sites/Create');
     const body = req.request.body as FormData;
     expect(body.get('Latitude')).toBe('33.51');

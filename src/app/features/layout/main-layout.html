@@ -48,15 +48,17 @@
       <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
       <div class="topbar-actions">
         <app-appearance-menu />
+        @if (canNotify()) {
         <a class="top-btn bell" routerLink="/notifications" routerLinkActive="active"
            [attr.aria-label]="unreadCount() ? 'الإشعارات — ' + unreadCount() + ' غير مقروء' : 'الإشعارات'" title="الإشعارات">
           <app-icon name="bell" />
           @if (unreadCount() > 0) { <span class="badge">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span> }
         </a>
+        }
         @if (user()) {
           <a class="me" routerLink="/profile" routerLinkActive="active" title="ملفي وإجازاتي">
             <span class="avatar" aria-hidden="true">{{ initial() }}</span>
-            <span class="me-text"><strong>{{ user()?.fullName || user()?.email }}</strong><small>{{ roleLabel(user()?.roleName || user()?.role) }}</small></span>
+            <span class="me-text"><strong>{{ user()?.fullName || user()?.email }}</strong><small>{{ roleLabel(user()?.role) }}</small></span>
           </a>
         }
         <button class="top-btn logout" type="button" (click)="logout()" title="تسجيل الخروج" aria-label="تسجيل الخروج">

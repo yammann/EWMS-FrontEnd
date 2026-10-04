@@ -1,17 +1,20 @@
 import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 import { GovernorateFeature, governorateOf } from '../../core/utils/geo';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
+import { PlaceSearch } from './place-search';
+import { Place } from '../../core/utils/places';
 
 export interface Coordinates { latitude: number; longitude: number; }
 
 /**
  * اختيار الإحداثيات على خريطة سوريا (بدون إنترنت): اختر المحافظة أولاً ثم انقر على المكان بدقة،
- * أو اكتب الإحداثيات يدوياً. يُستخدم في نماذج المناطق والمواقع.
+ * أو ابحث باسم المكان (مدينة/بلدة/قرية/حي) فتقفز الخريطة إليه، أو اكتب الإحداثيات يدوياً. يُستخدم في نموذج الموقع.
  */
 @Component({
-  selector: 'app-coordinate-picker', standalone: true, imports: [SyriaSvgMap],
+  selector: 'app-coordinate-picker', standalone: true, imports: [SyriaSvgMap, PlaceSearch],
   template: `
     <div class="picker">
+      <app-place-search (selected)="onPlace($event)" />
       <div class="hint-bar">
         @if (focus()) {
           <span>انقر داخل <strong>{{ focusName() }}</strong> على المكان بدقة · <em>الزر الأيمن للرجوع إلى كل سوريا</em></span>
@@ -59,6 +62,12 @@ export class CoordinatePicker {
       const code = this.current()?.properties.code;
       if (code) untracked(() => { if (!this.focus()) this.focus.set(code); });
     });
+  }
+
+  /** نتيجة بحث: تقفز الخريطة لمحافظة المكان وتُحدَّد نقطته مبدئياً (ثم يضبطها المستخدم بالنقر) */
+  onPlace(place: Place) {
+    this.focus.set(place.governorate);
+    this.picked.emit({ latitude: place.latitude, longitude: place.longitude });
   }
 
   manual(which: 'lat' | 'lng', raw: string) {

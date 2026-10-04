@@ -35,7 +35,8 @@
 @media (max-width: 760px) { .map-sheet { gap: 16px; } }
 @media (prefers-reduced-motion: reduce) { .map-pinned { transform: none; } }
 .map-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.title .kicker { font-size: 12px; font-weight: 700; color: var(--brand-600); }
+.title .kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--brand-600); }
+.dev-badge { padding: 2px 10px; border-radius: var(--radius-full); background: var(--warning-50, var(--fill)); color: var(--warning-700); font-size: 11px; font-weight: 800; }
 .title h2 { margin: 2px 0 0; font-size: 22px; letter-spacing: -.01em; }
 .title p { margin: 4px 0 0; font-size: 13px; color: var(--ink-500); }
 .title p em { font-style: normal; color: var(--brand-700); font-weight: 700; }
@@ -49,6 +50,7 @@
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
 
+.title .summary { margin-top: 8px; }
 .summary { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 13px; color: var(--ink-600); }
 .summary strong { color: var(--ink-900); font-size: 15px; }
 .summary .warn { color: var(--warning-700); font-weight: 700; }

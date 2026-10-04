@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { ConfirmService } from './confirm.service';
 import { ToastService } from './toast.service';
 import { PageActions, errorMessage } from './page-actions';
-import { dashboardKindFor, roleLabel } from '../../core/utils/roles';
+import { roleLabel } from '../../core/utils/roles';
 
 describe('ConfirmService', () => {
   it('resolves true on confirm and clears the dialog', async () => {
@@ -72,19 +72,10 @@ describe('PageActions', () => {
 });
 
 describe('Role helpers', () => {
-  it('maps roles to dashboards (custom roles → employee)', () => {
-    expect(dashboardKindFor('SuperAdmin')).toBe('overview');
-    expect(dashboardKindFor('branchmanager')).toBe('branch');
-    expect(dashboardKindFor('Manager')).toBe('department');
-    expect(dashboardKindFor('OfficeManager')).toBe('office');
-    expect(dashboardKindFor('Emp')).toBe('employee');
-    expect(dashboardKindFor('موظف إداري')).toBe('employee');
-    expect(dashboardKindFor(null)).toBe('employee');
-  });
-
-  it('labels roles in Arabic and keeps unknown names', () => {
-    expect(roleLabel('Manager')).toBe('رئيس القسم');
-    expect(roleLabel('Emp')).toBe('موظف');
+  it('shows role names as written, except the general system admin role', () => {
+    expect(roleLabel('SuperAdmin')).toBe('مدير النظام');
+    expect(roleLabel('superadmin')).toBe('مدير النظام');
     expect(roleLabel('موظف إداري')).toBe('موظف إداري');
+    expect(roleLabel(null)).toBe('');
   });
 });

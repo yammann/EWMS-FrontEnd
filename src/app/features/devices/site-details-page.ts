@@ -23,7 +23,7 @@ import { CopyText, SecretText } from '../../shared/ui/secret-text';
         <div>
           <span class="eyebrow">توثيق الأجهزة · تفاصيل الموقع</span>
           <h1>{{ site()?.name || (loading() ? 'جارٍ التحميل…' : 'الموقع') }}</h1>
-          @if (site(); as s) { <p class="muted">{{ s.regionName }}{{ governorate() ? ' · محافظة ' + governorate()!.properties.nameAr : '' }}</p> }
+          @if (site(); as s) { <p class="muted">{{ s.governorateName ? 'محافظة ' + s.governorateName : '' }}</p> }
         </div>
         <div class="header-actions">
           <button class="btn btn-ghost" type="button" (click)="goBack()">→ رجوع</button>
@@ -40,15 +40,14 @@ import { CopyText, SecretText } from '../../shared/ui/secret-text';
           <app-stat-tile label="التركيبات" [value]="installations().length" icon="🔌" tone="green" hint="أجهزة مركّبة في الموقع" />
           <app-stat-tile label="أنواع الأجهزة" [value]="deviceTypes().length" icon="🧩" tone="blue" />
           <app-stat-tile label="عناوين IP" [value]="uniqueIps()" icon="🌐" tone="purple" [hint]="duplicateCount() ? duplicateCount() + ' تركيب بعنوان مكرر' : 'بدون تكرار'" [alert]="duplicateCount() > 0" />
-          <app-stat-tile label="مواقع المنطقة" [value]="regionSites().length" icon="📍" tone="orange" [hint]="s.regionName" />
+          <app-stat-tile label="مواقع المحافظة" [value]="governorateSites().length" icon="📍" tone="orange" [hint]="s.governorateName" />
         </section>
 
         <section class="panel">
           <div class="panel-heading"><div><h2>معلومات الموقع</h2></div></div>
           <dl class="facts">
             <div><dt>اسم الموقع</dt><dd>{{ s.name }}</dd></div>
-            <div><dt>المنطقة</dt><dd>{{ s.regionName }}</dd></div>
-            <div><dt>المحافظة</dt><dd>{{ governorate()?.properties?.nameAr || (s.latitude != null ? 'خارج حدود المحافظات' : '—') }}</dd></div>
+            <div><dt>المحافظة</dt><dd>{{ s.governorateName || (s.latitude != null ? 'خارج حدود المحافظات' : '—') }}</dd></div>
             <div><dt>الإحداثيات</dt><dd>
               @if (coords(s.latitude, s.longitude); as c) {
                 <app-copy-text [value]="c" label="الإحداثيات" />
@@ -153,12 +152,12 @@ export class SiteDetailsPage {
     const s = this.site();
     if (!s || s.latitude == null || s.longitude == null) return [];
     return [
-      ...this.nearby().map(n => ({ id: n.id, latitude: n.latitude!, longitude: n.longitude!, label: n.name, sub: n.regionName })),
+      ...this.nearby().map(n => ({ id: n.id, latitude: n.latitude!, longitude: n.longitude!, label: n.name, sub: n.governorateName })),
       { id: s.id, latitude: s.latitude, longitude: s.longitude, label: s.name, sub: 'الموقع الحالي', selected: true }
     ];
   });
 
-  regionSites = computed(() => this.allSites().filter(s => s.regionId === this.site()?.regionId));
+  governorateSites = computed(() => this.allSites().filter(s => s.governorateCode === this.site()?.governorateCode));
 
   deviceTypes = computed(() => {
     const byDevice = new Map<number, { name: string; model: string; count: number }>();
@@ -178,7 +177,6 @@ export class SiteDetailsPage {
   duplicateCount = computed(() => this.installations().filter(i => this.isDuplicate(i)).length);
 
   constructor() {
-    this.service.loadAccess().subscribe();
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(params => this.load(Number(params.get('id'))));
   }
 

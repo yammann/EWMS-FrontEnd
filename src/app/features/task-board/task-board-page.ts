@@ -5,10 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AssignedTaskService } from '../../core/services/assigned-task.service';
 import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
+import { TASK_OVERSIGHT } from '../../core/constants/access';
 import { NotificationService } from '../../core/services/notification.service';
 import {
-  AssignedTaskCard, AssignedTaskDetail, TaskBoardMode, TaskPriority, TaskStatus, TaskTargetOption,
+  AssignedTaskCard, AssignedTaskDetail, TaskBoardMode, TaskPriority, TaskStatus, TaskTargetType,
   TASK_PRIORITY_LABEL, TASK_STATUS_LABEL
 } from '../../core/models/assigned-task.models';
 
@@ -46,7 +46,7 @@ export class TaskBoardPage {
   mode = signal<TaskBoardMode>('incoming');
   tasks = signal<AssignedTaskCard[]>([]);
   canCreate = signal(false);
-  targetTypeLabel = signal('');
+  targetTypes = signal<TaskTargetType[]>([]);
   loading = signal(false);
   error = signal('');
   private toast = inject(ToastService);
@@ -59,10 +59,10 @@ export class TaskBoardPage {
   // التفاصيل والنماذج
   openTaskId = signal<number | null>(null);
   form = signal<{ mode: TaskFormMode; task: AssignedTaskDetail | null } | null>(null);
-  targets = signal<TaskTargetOption[]>([]);
 
-  /** تبويب "كل مهام نطاقي": لمن يتابع المهام بنطاق أوسع من سجلاته */
-  isLeader = computed(() => this.auth.scopeOf(AppPermission.ViewAssignedTasks) >= 2);
+  /** تبويب "كل مهام نطاقي": لمن يملك صلاحية إسناد أو تولٍّ (يتحدّث من اللوحة نفسها) */
+  private hasScope = signal(false);
+  isLeader = computed(() => this.hasScope() || this.auth.hasAnyPermission(TASK_OVERSIGHT));
 
   filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -110,7 +110,8 @@ export class TaskBoardPage {
     this.error.set('');
     this.service.board(this.mode()).subscribe({
       next: b => {
-        this.tasks.set(b.tasks); this.canCreate.set(b.canCreate); this.targetTypeLabel.set(b.targetTypeLabel);
+        this.tasks.set(b.tasks); this.canCreate.set(b.canCreate);
+        this.targetTypes.set(b.targetTypes ?? []); this.hasScope.set(b.hasScope);
         this.loading.set(false);
       },
       error: e => { this.error.set(e.message); this.loading.set(false); }
@@ -159,7 +160,6 @@ export class TaskBoardPage {
   delegateTask(task: AssignedTaskDetail) { this.openForm('delegate', task); }
 
   private openForm(mode: TaskFormMode, task: AssignedTaskDetail | null) {
-    if (mode !== 'edit') this.service.targets().subscribe({ next: t => this.targets.set(t), error: e => this.error.set(e.message) });
     this.form.set({ mode, task });
   }
 

@@ -13,7 +13,7 @@ const EMPTY = 'var(--map-empty)';
 let lastView: { branchId: number; focus: string | null } | null = null;
 
 /**
- * خريطة الفروع (لوحة السوبر ادمن الآن — لاحقاً لوحة رئيس كل فرع ببيانات فرعه):
+ * خريطة الفروع (لوحة مدير النظام: أي فرع، ولوحة من يملك ViewBranchMap: فرعه فقط ببيانات فرعه — الباك يقيّد القائمة والبيانات):
  * سوريا كقطع (المحافظات) ← النقر على قطعة يكبّرها لتملأ الإطار مع نقاط المواقع ← النقر على موقع يفتح صفحة تفاصيله
  * (devices/sites/:id). الزر الأيمن (أو Esc) يرجع إلى كل سوريا.
  *
@@ -99,7 +99,7 @@ export class BranchMapComponent {
   points = computed<MapPoint[]>(() => {
     return this.sitesInFocus()
       .filter(s => s.latitude != null && s.longitude != null)
-      .map(s => ({ id: s.id, latitude: s.latitude!, longitude: s.longitude!, label: s.name, sub: `${s.regionName} · ${s.installationsCount} تركيب` }));
+      .map(s => ({ id: s.id, latitude: s.latitude!, longitude: s.longitude!, label: s.name, sub: `${s.governorateName} · ${s.installationsCount} تركيب` }));
   });
 
   /** المحافظات التي فيها مواقع (جدول أسفل الخريطة في عرض سوريا) */

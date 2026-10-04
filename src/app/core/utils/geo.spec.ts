@@ -58,4 +58,11 @@ describe('Point in governorate', () => {
     expect(governorateOf(34.7324, 36.7137, features)?.properties.nameAr).toBe('حمص');    // حمص
     expect(governorateOf(35.5317, 35.7913, features)?.properties.nameAr).toBe('اللاذقية'); // اللاذقية
   });
+
+  it('accepts coastal cities just outside the simplified border (Tartus), but not the open sea', () => {
+    const file = resolve(process.cwd(), 'public/maps/syria-governorates.geojson');
+    const features = (JSON.parse(readFileSync(file, 'utf8')) as GovernorateCollection).features;
+    expect(governorateOf(34.8936, 35.8852, features)?.properties.nameAr).toBe('طرطوس');
+    expect(governorateOf(34.7, 32.0, features)).toBeNull();
+  });
 });

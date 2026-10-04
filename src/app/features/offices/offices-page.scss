@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* خاص بالمكاتب فقط */
+
+.offices-table { min-width: 820px; }
+
+.offices-skeleton { grid-template-columns: 2.2fr 1.4fr 1.2fr 2.2fr 1fr; }
+
+.office-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 200px;
+}
+
+.office-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--brand-50);
+  color: var(--brand-600);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.office-details { display: flex; flex-direction: column; min-width: 0; }
+.office-details strong {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-800);
+  font-size: 13px;
+  font-weight: 800;
+}
+.office-details small {
+  margin-top: 3px;
+  color: var(--ink-400);
+  font-size: 10px;
+}

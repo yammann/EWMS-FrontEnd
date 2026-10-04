@@ -2,10 +2,6 @@
 .page { gap: 20px; }
 .header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-.subnav { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: var(--radius-lg); background: var(--ink-100); justify-self: start; }
-.subnav a { padding: 8px 16px; border-radius: var(--radius-md); color: var(--ink-600); font-size: 13px; font-weight: 700; text-decoration: none; }
-.subnav a:hover { background: var(--surface); }
-.subnav a.active { background: var(--surface); color: var(--ink-900); box-shadow: var(--shadow-sm); }
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .toolbar .search { flex: 1; min-width: 220px; }
@@ -26,7 +22,6 @@
 .form-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .form-grid-2 .full { grid-column: 1 / -1; }
 .hint { font-size: 11px; color: var(--ink-400); }
-.readonly-note { margin: 0; padding: 10px 14px; border-radius: var(--radius-md); background: var(--info-50); color: var(--info-700); font-size: 12px; font-weight: 700; }
 
 @media (max-width: 640px) { .form-grid-2 { grid-template-columns: minmax(0, 1fr); } }
 .missing { color: var(--warning-700); font-size: 12px; font-weight: 700; }

@@ -43,7 +43,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
       @if (request(); as r) {
-        @if (canEdit() && statuses().length) {
+        @if (canChangeStatus() && statuses().length) {
           <section class="panel">
             <div class="panel-heading"><div><h2>حالة الطلب</h2><p>انقر على الحالة الجديدة لتحديث الطلب — يُسجَّل التغيير ويصل إشعار للمعنيين</p></div></div>
             <div class="status-pick" role="radiogroup" aria-label="حالة الطلب">
@@ -166,6 +166,7 @@ export class MaintenanceRequestDetailsPage {
   assignOpen = signal(false);
 
   canEdit = computed(() => this.can().editRequest && !!this.request()?.canEdit);
+  canChangeStatus = computed(() => this.can().changeStatus && !!this.request()?.canChangeStatus);
   canAssign = computed(() => this.can().assignRequest && !!this.request()?.canAssign);
   canDelete = computed(() => this.can().deleteRequest && !!this.request()?.canDelete);
 

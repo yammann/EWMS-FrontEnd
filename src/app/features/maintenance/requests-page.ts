@@ -120,7 +120,7 @@ const BOARD_LIMIT = 50;
           }
         </section>
       } @else {
-        @if (!canDrag()) { <p class="readonly-note">وضع المشاهدة — تغيير الحالة لمن يملك صلاحية تعديل الطلب</p> }
+        @if (!canDrag()) { <p class="readonly-note">وضع المشاهدة — تغيير الحالة لمن يملك صلاحية تغيير حالة الطلب</p> }
         @if (loading() && !columns().length) { <div class="panel empty-state" role="status">جارٍ تحميل اللوحة…</div> }
         @else if (!columns().length) { <div class="panel empty-state"><h3>لا توجد حالات معرّفة</h3><p>أضف حالات الطلب من «إعدادات الصيانة».</p></div> }
         @else {
@@ -190,7 +190,7 @@ export class MaintenanceRequestsPage {
 
   hasFilter = computed(() => !!(this.searchText().trim() || this.technicianId() || this.deviceTypeId() || this.damageTypeId() || this.companyId()));
   totalAll = computed(() => this.statusCounts().reduce((sum, s) => sum + s.count, 0));
-  canDrag = computed(() => this.can().editRequest);
+  canDrag = computed(() => this.can().changeStatus);
 
   /** كل طلب تحميل يمر من هنا: تأخير قصير أثناء الكتابة، وإلغاء الطلب السابق إن لم يكتمل */
   private reload$ = new Subject<number>();
@@ -284,7 +284,7 @@ export class MaintenanceRequestsPage {
   }
 
   // ─────────── السحب والإفلات (لوحة الحالات) ───────────
-  draggable(r: MaintenanceRequest) { return this.canDrag() && r.canEdit; }
+  draggable(r: MaintenanceRequest) { return this.canDrag() && r.canChangeStatus; }
   canDrop = (drag: CdkDrag<MaintenanceRequest>) => this.draggable(drag.data);
 
   drop(event: CdkDragDrop<number>) {

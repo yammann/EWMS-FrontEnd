@@ -20,31 +20,41 @@ describe('Permission guard', () => {
   function run(permission?: string) {
     return TestBed.runInInjectionContext(() => permissionGuard({ data: permission ? { permission } : {} } as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
   }
+  function runAny(anyPermission: string[]) {
+    return TestBed.runInInjectionContext(() => permissionGuard({ data: { anyPermission } } as unknown as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
+  }
   function login(role: string, permissions: string[] = []) {
     localStorage.setItem('ewms_token', 'test-only');
-    TestBed.inject(AuthService).currentUser.set({ role, permissions, fullName: 'Test', email: 'test@example.test', expiresAt: new Date(Date.now() + 60000).toISOString() });
+    TestBed.inject(AuthService).currentUser.set({
+      role, permissions, fullName: 'Test', email: 'test@example.test',
+      branchId: 1, departmentId: 2, officeId: 3,
+      expiresAt: new Date(Date.now() + 60000).toISOString()
+    });
   }
+  const url = (result: unknown) => TestBed.inject(Router).serializeUrl(result as any);
+
   it('redirects unauthenticated direct links to login', () => {
-    expect(TestBed.inject(Router).serializeUrl(run('ViewUsers') as any)).toBe('/login');
+    expect(url(run('ViewUsers'))).toBe('/login');
   });
-  it('blocks an employee from administration and approvals', () => {
-    login('Emp');
-    expect(TestBed.inject(Router).serializeUrl(run('ViewUsers') as any)).toBe('/profile');
-    expect(TestBed.inject(Router).serializeUrl(run('ApproveVacation') as any)).toBe('/profile');
+  it('blocks a role without the permission, whatever its name', () => {
+    login('رئيس قسم العمليات');
+    expect(url(run('ViewUsers'))).toBe('/profile');
+    expect(url(runAny(['ApproveVacationFirst', 'ApproveVacationFinal']))).toBe('/profile');
   });
-  it('allows an office manager only with the office permission', () => {
-    login('Custom', ['ViewOffices']); expect(run('ViewOffices')).toBe(true);
+  it('allows any role that holds the permission (Role-Permission only)', () => {
+    login('موظف', ['ViewOffices']); expect(run('ViewOffices')).toBe(true);
   });
-  it('matches backend approval policy', () => { login('BranchManager', ['ApproveVacation']); expect(run('ApproveVacation')).toBe(true); });
-  it('restricts role-based pages (vacation stats) to leaders', () => {
-    const byRoles = () => TestBed.runInInjectionContext(() =>
-      permissionGuard({ data: { roles: ['SuperAdmin', 'BranchManager', 'Manager', 'OfficeManager'] } } as unknown as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
-    login('OfficeManager'); expect(byRoles()).toBe(true);
-    login('Emp'); expect(TestBed.inject(Router).serializeUrl(byRoles() as any)).toBe('/profile');
+  it('vacation review needs either approval stage', () => {
+    login('إداري الفرع', ['ApproveVacationFinal']);
+    expect(runAny(['ApproveVacationFirst', 'ApproveVacationFinal'])).toBe(true);
+  });
+  it('a route without a declared permission is never open by default', () => {
+    login('SuperAdmin', ['ViewUsers']);
+    expect(url(run())).toBe('/profile');
   });
   it('rejects expired sessions', () => {
     login('SuperAdmin', ['ViewUsers']);
     TestBed.inject(AuthService).currentUser.update(u => ({ ...u!, expiresAt: '2000-01-01T00:00:00Z' }));
-    expect(TestBed.inject(Router).serializeUrl(run('ViewUsers') as any)).toBe('/login');
+    expect(url(run('ViewUsers'))).toBe('/login');
   });
 });

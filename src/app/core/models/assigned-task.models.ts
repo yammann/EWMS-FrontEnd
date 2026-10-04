@@ -65,10 +65,21 @@ export interface TaskTargetOption {
   headNames: string;
 }
 
+export type TaskTargetKind = 'Department' | 'Office' | 'User';
+
+export interface TaskTargetType {
+  value: TaskTargetKind;
+  label: string;
+}
+
 export interface TaskBoard {
   mode: TaskBoardMode;
   canCreate: boolean;
   targetTypeLabel: string;
+  /** أنواع الإسناد المتاحة لي حسب صلاحياتي (AssignTaskToDepartment / Office / User) */
+  targetTypes: TaskTargetType[];
+  /** يظهر تبويب "كل مهام نطاقي" */
+  hasScope: boolean;
   tasks: AssignedTaskCard[];
 }
 
@@ -78,6 +89,8 @@ export interface CreateTaskRequest {
   priority: number;
   dueDate: string | null;
   targetId: number;
+  /** مطلوب إن كان لي أكثر من نوع إسناد — يُتجاهل في التفويض */
+  targetType?: TaskTargetKind | null;
   parentTaskId: number | null;
 }
 

@@ -3,42 +3,39 @@
  * (صلاحية لكل عملية: View / Create / Edit / Delete — لا توجد صلاحيات Manage…).
  * استخدمها بدل كتابة النص: خطأ إملائي في اسم صلاحية يخفي صفحة أو زراً بصمت.
  */
-export const AppRole = {
-  SuperAdmin: 'SuperAdmin',
-  BranchManager: 'BranchManager',
-  Manager: 'Manager',
-  OfficeManager: 'OfficeManager',
-  Employee: 'Emp'
-} as const;
-
-export type AppRoleName = (typeof AppRole)[keyof typeof AppRole];
-
 export const AppPermission = {
-  ViewUsers: 'ViewUsers', CreateUser: 'CreateUser', EditUser: 'EditUser', DeleteUser: 'DeleteUser',
+  ViewUsers: 'ViewUsers', CreateUser: 'CreateUser', EditUser: 'EditUser', ToggleUserActive: 'ToggleUserActive', DeleteUser: 'DeleteUser',
   ViewBranches: 'ViewBranches', CreateBranch: 'CreateBranch', EditBranch: 'EditBranch', DeleteBranch: 'DeleteBranch',
   ViewDepartments: 'ViewDepartments', CreateDepartment: 'CreateDepartment', EditDepartment: 'EditDepartment', DeleteDepartment: 'DeleteDepartment',
   ViewOffices: 'ViewOffices', CreateOffice: 'CreateOffice', EditOffice: 'EditOffice', DeleteOffice: 'DeleteOffice',
   ViewRoles: 'ViewRoles', CreateRole: 'CreateRole', EditRole: 'EditRole', DeleteRole: 'DeleteRole',
-  // الانتماء لخدمة مُسندة لوحدتي (AppModules.AccessPolicy في الباكاند) — لما لا صلاحية خاصة له
-  ModuleVacations: 'Module.Vacations', ModuleTaskBoard: 'Module.TaskBoard', ModuleWorkTasks: 'Module.WorkTasks',
-  ModuleDeviceInventory: 'Module.DeviceInventory', ModuleMaintenance: 'Module.Maintenance',
-
-  // إسناد الخدمات للوحدات التنظيمية التي تملكها
-  ViewModuleAssignments: 'ViewModuleAssignments', EditModuleAssignments: 'EditModuleAssignments',
-
-  ViewVacations: 'ViewVacations', CreateVacation: 'CreateVacation', CancelVacation: 'CancelVacation', ApproveVacation: 'ApproveVacation',
+  // كل صلاحية تحمل حدّها: ViewVacations = إجازاتي، وقسمي/فرعي بصلاحيتين منفصلتين، والموافقة مرحلتان لإجازات فرعه
+  ViewVacations: 'ViewVacations', ViewDepartmentVacations: 'ViewDepartmentVacations', ViewBranchVacations: 'ViewBranchVacations',
+  CreateVacation: 'CreateVacation', CancelVacation: 'CancelVacation',
+  ApproveVacationFirst: 'ApproveVacationFirst', ApproveVacationFinal: 'ApproveVacationFinal',
   ViewVacationTypes: 'ViewVacationTypes', CreateVacationType: 'CreateVacationType', EditVacationType: 'EditVacationType', DeleteVacationType: 'DeleteVacationType',
+
+  // لوحات المتابعة: لوحة وحدة المستخدم وما تحتها
+  ViewBranchDashboard: 'ViewBranchDashboard', ViewDepartmentDashboard: 'ViewDepartmentDashboard', ViewOfficeDashboard: 'ViewOfficeDashboard',
+  ViewBranchMap: 'ViewBranchMap',
+  // لا لوحة ولا إشعارات ولا مهام شخصية بلا صلاحية (قرار 2026-10-03: لا شيء مفتوح للجميع)
+  ViewOrganizationDashboard: 'ViewOrganizationDashboard', ViewMyDashboard: 'ViewMyDashboard',
+  ViewMyWorkTasks: 'ViewMyWorkTasks', ViewNotifications: 'ViewNotifications',
 
   ViewWorkTasks: 'ViewWorkTasks', CreateWorkTask: 'CreateWorkTask', EditWorkTask: 'EditWorkTask', DeleteWorkTask: 'DeleteWorkTask',
 
-  // لوحة المهام: الإسناد نزولاً والاطلاع، كلاهما بنطاق
-  ViewAssignedTasks: 'ViewAssignedTasks', CreateAssignedTask: 'CreateAssignedTask',
+  // لوحة المهام: ViewTaskBoard تفتح اللوحة (واستقبال ما أُسند للمستخدم شخصياً)؛ الإسناد والتولّي بصلاحيات
+  ViewTaskBoard: 'ViewTaskBoard',
+  AssignTaskToDepartment: 'AssignTaskToDepartment', AssignTaskToOffice: 'AssignTaskToOffice', AssignTaskToUser: 'AssignTaskToUser',
+  HandleUnitTasks: 'HandleUnitTasks',
 
-  // توثيق الأجهزة: الواجهة تعتمد Devices/MyAccess (الصلاحية أو القسم المالك) لا هذه الأسماء مباشرة
+  // توثيق الأجهزة (Devices/MyAccess يعيد نفس النتيجة من صلاحيات الدور)
   ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
 
+  ViewDepartmentMaintenance: 'ViewDepartmentMaintenance', SignMaintenanceReceipt: 'SignMaintenanceReceipt',
   ViewMaintenanceRequests: 'ViewMaintenanceRequests', CreateMaintenanceRequest: 'CreateMaintenanceRequest',
-  EditMaintenanceRequest: 'EditMaintenanceRequest', DeleteMaintenanceRequest: 'DeleteMaintenanceRequest',
+  EditMaintenanceRequest: 'EditMaintenanceRequest', ChangeMaintenanceStatus: 'ChangeMaintenanceStatus', ViewMaintenanceStats: 'ViewMaintenanceStats',
+  DeleteMaintenanceRequest: 'DeleteMaintenanceRequest',
   AssignMaintenanceRequest: 'AssignMaintenanceRequest',
   ViewMaintenanceTasks: 'ViewMaintenanceTasks', CreateMaintenanceTask: 'CreateMaintenanceTask',
   EditMaintenanceTask: 'EditMaintenanceTask', DeleteMaintenanceTask: 'DeleteMaintenanceTask',
@@ -57,5 +54,29 @@ export const MANAGE_DEPARTMENTS: readonly AppPermissionName[] = [AppPermission.C
 export const MANAGE_VACATION_TYPES: readonly AppPermissionName[] = [AppPermission.CreateVacationType, AppPermission.EditVacationType, AppPermission.DeleteVacationType];
 export const MANAGE_MAINTENANCE_LOOKUPS: readonly AppPermissionName[] = [AppPermission.CreateMaintenanceLookup, AppPermission.EditMaintenanceLookup, AppPermission.DeleteMaintenanceLookup];
 
-/** الرؤساء + مدير النظام — لهم صفحة إحصائيات الإجازات */
-export const LEADER_ROLES: readonly string[] = [AppRole.SuperAdmin, AppRole.BranchManager, AppRole.Manager, AppRole.OfficeManager];
+/** أي صلاحية موافقة على الإجازات (الأولى أو النهائية) */
+export const APPROVE_VACATIONS: readonly AppPermissionName[] = [AppPermission.ApproveVacationFirst, AppPermission.ApproveVacationFinal];
+/** إحصائيات الإجازات: لمن يرى إجازات قسمه أو فرعه */
+export const VACATION_STATS: readonly AppPermissionName[] = [AppPermission.ViewDepartmentVacations, AppPermission.ViewBranchVacations];
+/** يتابع مهام وحدة (يُظهر تبويب "كل مهام نطاقي") */
+export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
+  AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser, AppPermission.HandleUnitTasks
+];
+/** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس DeviceAccessService في الباكاند) */
+export const DEVICE_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
+];
+/** أي لوحة متابعة (الصفحة الرئيسية) */
+export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewOrganizationDashboard, AppPermission.ViewBranchDashboard, AppPermission.ViewDepartmentDashboard,
+  AppPermission.ViewOfficeDashboard, AppPermission.ViewMyDashboard
+];
+export const DEPARTMENT_DASHBOARD_ACCESS: readonly AppPermissionName[] = [AppPermission.ViewBranchDashboard, AppPermission.ViewDepartmentDashboard];
+export const OFFICE_DASHBOARD_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewBranchDashboard, AppPermission.ViewDepartmentDashboard, AppPermission.ViewOfficeDashboard
+];
+/** صفحة مهمة عمل: المسنَدة لي أو أي صلاحية إشراف (نفس AnyWorkTaskView في الباكاند) */
+export const WORK_TASK_VIEW: readonly AppPermissionName[] = [
+  AppPermission.ViewMyWorkTasks, AppPermission.ViewWorkTasks, AppPermission.ViewBranchDashboard,
+  AppPermission.ViewDepartmentDashboard, AppPermission.ViewOfficeDashboard
+];

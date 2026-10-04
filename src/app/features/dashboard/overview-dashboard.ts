@@ -3,17 +3,14 @@ import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { DashboardService } from '../../core/services/dashboard.service';
-import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { OverviewDashboard } from '../../core/models/dashboard.models';
-import { roleLabel } from '../../core/utils/roles';
-import { ActivityList, CountBars, StatTile } from './dashboard-widgets';
-import { AppPermission, MANAGE_DEPARTMENTS, MANAGE_VACATION_TYPES } from '../../core/constants/access';
+import { ActivityList, StatTile } from './dashboard-widgets';
 
-/** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع + صفحات الإدارة */
+/** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */
 @Component({
   selector: 'app-overview-dashboard', standalone: true,
-  imports: [RouterLink, StatTile, ActivityList, CountBars, BranchMapComponent],
+  imports: [RouterLink, StatTile, ActivityList, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -57,65 +54,26 @@ import { AppPermission, MANAGE_DEPARTMENTS, MANAGE_VACATION_TYPES } from '../../
           } @else { <p class="empty-state">لا توجد فروع بعد</p> }
         </section>
 
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الكادر حسب الدور</h2><p>عدد الموظفين الفعّالين في كل دور</p></div></div>
-          <app-count-bars [items]="d.employeesByRole" unit="موظف" [translate]="roleLabel" emptyText="لا يوجد موظفون بعد" />
-        </section>
 
         <section class="panel">
           <div class="panel-heading"><div><h2>آخر الإجراءات</h2><p>انضمام الموظفين وإضافة مهام العمل وإسنادها</p></div></div>
           <app-activity-list [items]="d.recentActivity" />
         </section>
 
-        <a class="jump" routerLink="/vacations/stats">
-          <div><strong>إحصائيات الإجازات</strong><span>من في إجازة، الطلبات قيد الموافقة، والإجازات حسب النوع</span></div>
-          <span class="go">فتح ←</span>
-        </a>
       } @else if (loading()) {
         <div class="panel skeleton" role="status">جارٍ تحميل النظرة العامة…</div>
       }
 
-      <section class="panel">
-        <div class="panel-heading"><div><span class="panel-kicker">الإدارة</span><h2>إدارة النظام</h2></div></div>
-        <div class="cards">
-          @for (item of links; track item.path) {
-            @if (auth.hasAnyPermission(item.permissions)) {
-              <a class="link-card" [routerLink]="item.path"><h3>{{ item.label }}</h3><p>{{ item.description }}</p><span>فتح الصفحة ←</span></a>
-            }
-          }
-        </div>
-      </section>
       </app-branch-map>
-    </div>`,
-  styles: [`
-    .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-    .link-card { display: grid; gap: 8px; padding: 18px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: inherit; text-decoration: none; }
-    .link-card:hover { border-color: var(--brand-500); }
-    .link-card h3 { font-size: 15px; }
-    .link-card p { margin: 0; font-size: 12px; color: var(--ink-500); line-height: 1.7; }
-    .link-card span { font-size: 12px; font-weight: 800; color: var(--brand-700); }
-    @media (max-width: 1100px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 560px) { .cards { grid-template-columns: minmax(0, 1fr); } }
-  `]
+    </div>`
 })
 export class OverviewDashboardPage {
   private service = inject(DashboardService);
-  auth = inject(AuthService);
-  roleLabel = roleLabel;
 
   data = signal<OverviewDashboard | null>(null);
   loading = signal(false);
   error = signal('');
 
-  links = [
-    { path: '/work-tasks', permissions: [AppPermission.ViewWorkTasks], label: 'مهام العمل', description: 'تعريف مهام كل فرع وإسنادها للموظفين' },
-    { path: '/users', permissions: [AppPermission.ViewUsers], label: 'الموظفون', description: 'إدارة الموظفين وتعيين أدوارهم وتبعيتهم' },
-    { path: '/branches', permissions: [AppPermission.ViewBranches], label: 'الفروع', description: 'إدارة فروع المؤسسة' },
-    { path: '/departments', permissions: MANAGE_DEPARTMENTS, label: 'الأقسام', description: 'تنظيم الأقسام داخل الفروع' },
-    { path: '/offices', permissions: [AppPermission.ViewOffices], label: 'المكاتب', description: 'إدارة المكاتب التابعة للأقسام' },
-    { path: '/roles', permissions: [AppPermission.ViewRoles], label: 'الأدوار والصلاحيات', description: 'تحديد الخدمات المسموحة لكل دور' },
-    { path: '/vacation-types', permissions: MANAGE_VACATION_TYPES, label: 'أنواع الإجازات', description: 'إدارة أنواع الإجازات المتاحة' }
-  ];
 
   constructor() {
     this.load();

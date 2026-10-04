@@ -3,23 +3,19 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { AppPermissionName } from '../constants/access';
 
+/**
+ * حماية الصفحات بصلاحيات الدور فقط (Role-Permission، 2026-10-03) — لا أسماء أدوار ولا مناصب.
+ * data.permission: صلاحية واحدة. data.anyPermission: تكفي واحدة من عدة صلاحيات
+ * (مثل مراجعة الإجازات: الموافقة الأولى أو الاعتماد النهائي). الباكاند يطبّق حدّ كل صلاحية على السجلات.
+ */
 export const permissionGuard: CanActivateFn = route => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (!auth.isAuthenticated()) return router.createUrlTree(['/login']);
   const permission = route.data['permission'] as AppPermissionName | undefined;
-  // data.roles: صفحات حسب الدور (مثل إحصائيات الإجازات للرؤساء) — الباكاند يتحقق من النطاق أيضاً
-  const roles = route.data['roles'] as readonly string[] | undefined;
-  // data.anyPermission: تكفي واحدة من عدة صلاحيات (مثل إعدادات الصيانة: إضافة أو تعديل أو حذف)
   const anyPermission = route.data['anyPermission'] as readonly AppPermissionName[] | undefined;
-  // الدور والصلاحية معاً إن حُدّدا (مثل إحصائيات الإجازات: رئيس + خدمة الإجازات مُسندة لوحدته)
-  const roleOk = !roles || auth.hasRole(...roles);
-  const permissionOk = anyPermission ? auth.hasAnyPermission(anyPermission)
+  const allowed = anyPermission ? auth.hasAnyPermission(anyPermission)
     : permission ? auth.hasPermission(permission)
-      : !!roles || auth.canReviewVacations();
-  // data.minScope: الصلاحية بنطاق لا يقل عن هذا (مثل إحصائيات الإجازات: أوسع من سجلاته)
-  const minScope = route.data['minScope'] as number | undefined;
-  const scopeOk = !minScope || !permission || auth.scopeOf(permission) >= minScope;
-  const allowed = roleOk && permissionOk && scopeOk;
+      : false;
   return allowed || router.createUrlTree(['/profile']);
 };

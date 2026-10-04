@@ -4,8 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeviceService } from '../../core/services/device.service';
-import { Device, DeviceSite, Region, Site } from '../../core/models/device.models';
-import { DevicesNav } from './devices-nav';
+import { Device, DeviceSite, Site } from '../../core/models/device.models';
+import { GOVERNORATES } from '../../core/constants/governorates';
 import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
 import { ConfirmService } from '../../shared/ui/confirm.service';
@@ -18,7 +18,7 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
  * كلمة السر مخفية افتراضياً مع زر إظهار ونسخ لكل من يشاهد (قرار المستخدم 2026-09-28).
  */
 @Component({
-  selector: 'app-installations-page', standalone: true, imports: [ReactiveFormsModule, DevicesNav, Modal, CopyText, SecretText],
+  selector: 'app-installations-page', standalone: true, imports: [ReactiveFormsModule, Modal, CopyText, SecretText],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -29,19 +29,18 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
           <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
         </div>
       </header>
-      <app-devices-nav />
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
       <div class="toolbar">
         <input class="search" type="search" placeholder="بحث بالـ IP أو الجهاز أو الرقم التسلسلي أو مكان التركيب…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="بحث">
-        <select [value]="regionId()" (change)="setFilter({ regionId: +$any($event.target).value || null, siteId: null })" aria-label="المنطقة">
-          <option [value]="0">كل المناطق</option>
-          @for (r of regions(); track r.id) { <option [value]="r.id">{{ r.name }}</option> }
+        <select [value]="governorate()" (change)="setFilter({ governorate: $any($event.target).value || null, siteId: null })" aria-label="المحافظة">
+          <option value="">كل المحافظات</option>
+          @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
         </select>
         <select [value]="siteId()" (change)="setFilter({ siteId: +$any($event.target).value || null })" aria-label="الموقع">
           <option [value]="0">كل المواقع</option>
-          @for (s of sitesInRegion(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+          @for (s of sitesInGovernorate(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
         </select>
         <select [value]="deviceId()" (change)="setFilter({ deviceId: +$any($event.target).value || null })" aria-label="الجهاز">
           <option [value]="0">كل الأجهزة</option>
@@ -60,7 +59,7 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
               @for (i of filtered(); track i.id) {
                 <tr>
                   <td><span class="cell-strong">{{ i.deviceName }}</span><small>{{ join(i.deviceModel, i.sn ? 'SN: ' + i.sn : '') || '—' }}</small></td>
-                  <td><span class="cell-strong">{{ i.siteName }}</span><small>{{ i.regionName }}</small></td>
+                  <td><span class="cell-strong">{{ i.siteName }}</span><small>{{ i.governorateName }}</small></td>
                   <td class="wrap">{{ i.installLocation || '—' }}</td>
                   <td><app-copy-text [value]="i.ip" label="IP">@if (isDuplicate(i)) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع">⚠ مكرر</span> }</app-copy-text></td>
                   <td><span class="mono">{{ i.subnetMask }}</span></td>
@@ -93,8 +92,8 @@ const IPV4 = /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[
                 </select></label>
               <label class="form-field"><span class="form-label">الموقع</span>
                 <select formControlName="siteId"><option [ngValue]="0">اختر الموقع</option>
-                  @for (r of regions(); track r.id) {
-                    <optgroup [label]="r.name">@for (s of sitesOf(r.id); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }</optgroup>
+                  @for (g of siteGroups(); track g.code) {
+                    <optgroup [label]="g.name">@for (s of g.sites; track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }</optgroup>
                   }
                 </select></label>
               <label class="form-field"><span class="form-label">الرقم التسلسلي <small class="hint">(اختياري)</small></span><input formControlName="sn" maxlength="100" dir="ltr"></label>
@@ -134,24 +133,27 @@ export class InstallationsPage {
   access = this.service.access;
 
   installations = signal<DeviceSite[]>([]);
-  regions = signal<Region[]>([]);
   sites = signal<Site[]>([]);
   devices = signal<Device[]>([]);
   search = signal('');
-  regionId = signal(0); siteId = signal(0); deviceId = signal(0);
+  governorates = GOVERNORATES;
+  governorate = signal(''); siteId = signal(0); deviceId = signal(0);
   loading = signal(false); saving = signal(false);
   error = signal(''); formError = signal('');
   formOpen = signal(false); editing = signal<DeviceSite | null>(null);
   showPass = signal(false);
 
-  sitesInRegion = computed(() => this.regionId() ? this.sites().filter(s => s.regionId === this.regionId()) : this.sites());
-  hasFilter = computed(() => !!(this.search() || this.regionId() || this.siteId() || this.deviceId()));
+  sitesInGovernorate = computed(() => this.governorate() ? this.sites().filter(s => s.governorateCode === this.governorate()) : this.sites());
+  /** مواقع نموذج التركيب مجمّعة بمحافظتها (تظهر المحافظات التي فيها مواقع فقط) */
+  siteGroups = computed(() => [...GOVERNORATES, { code: "", name: "بلا محافظة" }]
+    .map(g => ({ code: g.code, name: g.name, sites: this.sites().filter(s => s.governorateCode === g.code) })).filter(g => g.sites.length));
+  hasFilter = computed(() => !!(this.search() || this.governorate() || this.siteId() || this.deviceId()));
 
   filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
-    const [region, site, device] = [this.regionId(), this.siteId(), this.deviceId()];
+    const governorate = this.governorate(); const [site, device] = [this.siteId(), this.deviceId()];
     return this.installations().filter(i =>
-      (!region || i.regionId === region) && (!site || i.siteId === site) && (!device || i.deviceId === device)
+      (!governorate || i.governorateCode === governorate) && (!site || i.siteId === site) && (!device || i.deviceId === device)
       && (!q || [i.ip, i.deviceName, i.deviceModel, i.sn, i.userName, i.siteName, i.installLocation, i.note].some(f => (f ?? '').toLowerCase().includes(q))));
   });
 
@@ -192,7 +194,7 @@ export class InstallationsPage {
 
   constructor() {
     inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe(p => {
-      this.regionId.set(Number(p.get('regionId')) || 0);
+      this.governorate.set(p.get('governorate') ?? '');
       this.siteId.set(Number(p.get('siteId')) || 0);
       this.deviceId.set(Number(p.get('deviceId')) || 0);
     });
@@ -201,20 +203,19 @@ export class InstallationsPage {
 
   join(...parts: string[]) { return parts.filter(p => !!p).join(' · '); }
 
-  sitesOf(regionId: number) { return this.sites().filter(s => s.regionId === regionId); }
 
-  setFilter(changes: Record<string, number | null>) {
+  setFilter(changes: Record<string, number | string | null>) {
     this.router.navigate([], { queryParams: changes, queryParamsHandling: 'merge' });
   }
 
   load() {
     this.loading.set(true); this.error.set('');
     forkJoin({
-      installations: this.service.installations(), regions: this.service.regions(),
+      installations: this.service.installations(),
       sites: this.service.sites(), devices: this.service.devices()
     }).subscribe({
       next: r => {
-        this.installations.set(r.installations); this.regions.set(r.regions);
+        this.installations.set(r.installations);
         this.sites.set(r.sites); this.devices.set(r.devices);
         this.loading.set(false);
       },

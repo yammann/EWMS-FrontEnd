@@ -301,9 +301,9 @@
 
                   @if (placement().needsBranch) {
                   <div class="form-field">
-                    <label class="form-label" for="create-branch">الفرع</label>
+                    <label class="form-label" for="create-branch">الفرع <small class="muted">(اختياري)</small></label>
                     <select id="create-branch" formControlName="branchId" (change)="branchChanged()">
-                      <option value="">اختر الفرع</option>
+                      <option value="">بدون فرع</option>
                       @for (branch of branches(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
@@ -313,9 +313,9 @@
 
                   @if (placement().needsDepartment) {
                   <div class="form-field">
-                    <label class="form-label" for="create-dept">القسم</label>
+                    <label class="form-label" for="create-dept">القسم <small class="muted">(اختياري)</small></label>
                     <select id="create-dept" formControlName="departmentId" (change)="departmentChanged()">
-                      <option value="">اختر القسم</option>
+                      <option value="">بدون قسم</option>
                       @for (department of filteredDepartments(); track department.id) {
                         <option [value]="department.id">{{ department.name }}</option>
                       }
@@ -324,9 +324,9 @@
                   }
                   @if (placement().needsOffice) {
                   <div class="form-field">
-                    <label class="form-label" for="create-office">المكتب</label>
+                    <label class="form-label" for="create-office">المكتب <small class="muted">(اختياري)</small></label>
                     <select id="create-office" formControlName="officeId">
-                      <option value="">اختر المكتب</option>
+                      <option value="">بدون مكتب</option>
                       @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
                     </select>
                     <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
@@ -393,9 +393,9 @@
 
                   @if (placement().needsBranch) {
                   <div class="form-field">
-                    <label class="form-label" for="edit-branch">الفرع</label>
+                    <label class="form-label" for="edit-branch">الفرع <small class="muted">(اختياري)</small></label>
                     <select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
-                      <option value="">اختر الفرع</option>
+                      <option value="">بدون فرع</option>
                       @for (branch of branches(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
@@ -405,9 +405,9 @@
 
                   @if (placement().needsDepartment) {
                   <div class="form-field">
-                    <label class="form-label" for="edit-dept">القسم</label>
+                    <label class="form-label" for="edit-dept">القسم <small class="muted">(اختياري)</small></label>
                     <select id="edit-dept" formControlName="departmentId" (change)="departmentChanged()">
-                      <option value="">اختر القسم</option>
+                      <option value="">بدون قسم</option>
                       @for (department of filteredDepartments(); track department.id) {
                         <option [value]="department.id">{{ department.name }}</option>
                       }
@@ -416,9 +416,9 @@
                   }
                   @if (placement().needsOffice) {
                   <div class="form-field">
-                    <label class="form-label" for="edit-office">المكتب</label>
+                    <label class="form-label" for="edit-office">المكتب <small class="muted">(اختياري)</small></label>
                     <select id="edit-office" formControlName="officeId">
-                      <option value="">اختر المكتب</option>
+                      <option value="">بدون مكتب</option>
                       @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
                     </select>
                     <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>

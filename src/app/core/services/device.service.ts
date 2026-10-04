@@ -1,7 +1,8 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, of, shareReplay, tap } from 'rxjs';
+import { Injectable, computed, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { BranchMap, Device, DeviceAccess, DeviceSite, MapBranchOption, Region, Site } from '../models/device.models';
+import { AuthService } from './auth.service';
+import { AppPermission, AppPermissionName } from '../constants/access';
+import { BranchMap, Device, DeviceAccess, DeviceSite, MapBranchOption, Site } from '../models/device.models';
 
 /** يحوّل كائناً إلى FormData (الـ API يستقبل [FromForm] بأسماء الخصائص كما هي) */
 function form(body: Record<string, string | number>): FormData {
@@ -10,40 +11,27 @@ function form(body: Record<string, string | number>): FormData {
   return data;
 }
 
-const NO_ACCESS: DeviceAccess = { canView: false, canCreate: false, canEdit: false, canDelete: false, canManage: false, inOwnerDepartment: false };
-
 @Injectable({ providedIn: 'root' })
 export class DeviceService {
   private api = inject(ApiService);
+  private auth = inject(AuthService);
 
   /**
-   * صلاحيتي على توثيق الأجهزة: المشاهدة لموظفي قسم العمليات (أو ViewDevices)،
-   * والإدارة لرئيس القسم (أو ManageDevices). تُحمَّل مرة لكل جلسة.
+   * صلاحيتي على توثيق الأجهزة: من صلاحيات الدور مباشرة (Role-Permission فقط — مثل DeviceAccessService في الباكاند):
+   * من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه. تتحدّث تلقائياً مع تغيّر صلاحيات المستخدم.
    */
-  access = signal<DeviceAccess>(NO_ACCESS);
-  private access$?: Observable<DeviceAccess>;
-
-  loadAccess(force = false): Observable<DeviceAccess> {
-    if (!this.access$ || force) {
-      this.access$ = this.api.get<DeviceAccess>('/Devices/MyAccess').pipe(
-        catchError(() => of(NO_ACCESS)),
-        tap(a => this.access.set(a)),
-        shareReplay(1)
-      );
-    }
-    return this.access$;
-  }
-
-  resetAccess() {
-    this.access$ = undefined;
-    this.access.set(NO_ACCESS);
-  }
-
-  // ─────────── المناطق ───────────
-  regions() { return this.api.get<Region[]>('/Regions/GetAll'); }
-  createRegion(v: RegionInput) { return this.api.post<Region>('/Regions/Create', regionForm(v)); }
-  updateRegion(id: number, v: RegionInput) { return this.api.put<Region>(`/Regions/Update/${id}`, regionForm(v)); }
-  deleteRegion(id: number) { return this.api.delete<{ message: string }>(`/Regions/Delete/${id}`); }
+  access = computed<DeviceAccess>(() => {
+    const has = (p: AppPermissionName) => this.auth.hasPermission(p);
+    const canCreate = has(AppPermission.CreateDevice);
+    const canEdit = has(AppPermission.EditDevice);
+    const canDelete = has(AppPermission.DeleteDevice);
+    return {
+      canView: has(AppPermission.ViewDevices) || canCreate || canEdit || canDelete,
+      canCreate, canEdit, canDelete,
+      canManage: canCreate || canEdit || canDelete,
+      inOwnerDepartment: false
+    };
+  });
 
   // ─────────── المواقع ───────────
   sites() { return this.api.get<Site[]>('/Sites/GetAll'); }
@@ -81,15 +69,13 @@ export class DeviceService {
   }
 }
 
-export interface RegionInput { name: string; description: string; latitude: number; longitude: number; }
-export interface SiteInput { name: string; description: string; latitude: number; longitude: number; regionId: number; }
+export interface SiteInput { name: string; description: string; latitude: number; longitude: number; }
 export interface DeviceInput { name: string; model: string; description: string; }
 export interface InstallationInput {
   deviceId: number; siteId: number; ip: string; subnetMask: string; userName: string; pass: string; note: string; installLocation: string; sn: string;
 }
 
-const regionForm = (v: RegionInput) => form({ Name: v.name, Description: v.description, Latitude: v.latitude, Longitude: v.longitude });
-const siteForm = (v: SiteInput) => form({ Name: v.name, Description: v.description, Latitude: v.latitude, Longitude: v.longitude, RegionId: v.regionId });
+const siteForm = (v: SiteInput) => form({ Name: v.name, Description: v.description, Latitude: v.latitude, Longitude: v.longitude });
 const deviceForm = (v: DeviceInput) => form({ Name: v.name, Model: v.model, Description: v.description });
 const installationForm = (v: InstallationInput) => form({
   DeviceId: v.deviceId, SiteId: v.siteId, Ip: v.ip, SubnetMask: v.subnetMask, UserName: v.userName, Pass: v.pass, Note: v.note,

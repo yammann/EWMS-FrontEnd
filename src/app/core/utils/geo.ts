@@ -124,9 +124,47 @@ export function pointInFeature(lat: number, lng: number, feature: GovernorateFea
     : g.coordinates.some(polygon => inPolygon(lat, lng, polygon));
 }
 
-/** المحافظة التي تقع فيها النقطة (null إن كانت خارج كل المحافظات) */
+/**
+ * أقصى بُعد (بالدرجات ≈ 5.5 كم) يُقبل بين النقطة وحدّ محافظة: الحدود المبسّطة تقصّ الساحل والحدود قليلاً،
+ * فمدينة ساحلية (طرطوس، اللاذقية، بانياس…) قد تقع نقطتها خارج المضلع بمئات الأمتار.
+ * مطابق لـ Governorates.BorderTolerance في الباكاند (Application/Common/Governorates.cs).
+ */
+export const NEAR_BORDER_TOLERANCE = 0.05;
+
+/** أقرب مسافة (بالدرجات، مستوٍ تقريبي) من النقطة إلى حلقة */
+function distanceToRing(lat: number, lng: number, ring: Ring): number {
+  let best = Infinity;
+  for (let i = 0; i < ring.length - 1; i++) {
+    const [ax, ay] = ring[i]; const [bx, by] = ring[i + 1];
+    const dx = bx - ax; const dy = by - ay;
+    const length2 = dx * dx + dy * dy;
+    const t = length2 === 0 ? 0 : Math.min(1, Math.max(0, ((lng - ax) * dx + (lat - ay) * dy) / length2));
+    best = Math.min(best, Math.hypot(lng - (ax + t * dx), lat - (ay + t * dy)));
+  }
+  return best;
+}
+
+function polygonsOf(feature: GovernorateFeature): Ring[][] {
+  const g = feature.geometry;
+  return g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+}
+
+/** المحافظة التي تقع فيها النقطة، أو أقربها إن كانت على بُعد ≤ NEAR_BORDER_TOLERANCE من حدّها (null: بحر/خارج سوريا) */
 export function governorateOf(lat: number | null | undefined, lng: number | null | undefined,
                               features: GovernorateFeature[]): GovernorateFeature | null {
   if (lat == null || lng == null) return null;
-  return features.find(f => pointInFeature(lat, lng, f)) ?? null;
+  const inside = features.find(f => pointInFeature(lat, lng, f));
+  if (inside) return inside;
+
+  let nearest: GovernorateFeature | null = null;
+  let best = NEAR_BORDER_TOLERANCE;
+  for (const f of features) {
+    for (const polygon of polygonsOf(f)) {
+      for (const ring of polygon) {
+        const d = distanceToRing(lat, lng, ring);
+        if (d <= best) { best = d; nearest = f; }
+      }
+    }
+  }
+  return nearest;
 }
