@@ -1,4 +1,6 @@
 import { CommonModule } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
+import { BranchMapComponent } from '../map/branch-map';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -15,11 +17,23 @@ import { StatTile, TaskCards } from './dashboard-widgets';
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({
   selector: 'app-employee-dashboard', standalone: true,
-  imports: [CommonModule, RouterLink, StatTile, TaskCards],
+  imports: [CommonModule, RouterLink, StatTile, TaskCards, NgTemplateOutlet, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
-      <header class="page-header">
+      @if (showMap()) {
+        <!-- خريطة فرعه مثبّتة في رأس الصفحة (لمن يملك ViewBranchMap) — الصفحة تنزلق فوقها أثناء السكرول -->
+        <app-branch-map>
+          <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+          <ng-container *ngTemplateOutlet="bodyTpl" />
+        </app-branch-map>
+      } @else {
+        <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+        <ng-container *ngTemplateOutlet="bodyTpl" />
+      }
+    </div>
+
+    <ng-template #headerTpl>
         <div>
           <span class="eyebrow">لوحتي</span>
           <h1>مرحباً، {{ data()?.fullName }}</h1>
@@ -28,10 +42,12 @@ import { StatTile, TaskCards } from './dashboard-widgets';
           }
         </div>
         <div class="header-actions">
-          @if (data()?.canRequestVacation) { <a class="btn" routerLink="/profile">طلب إجازة</a> }
+          @if (canRequestVacation()) { <a class="btn" routerLink="/profile">طلب إجازة</a> }
           <button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button>
         </div>
-      </header>
+    </ng-template>
+
+    <ng-template #bodyTpl>
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
@@ -68,13 +84,14 @@ import { StatTile, TaskCards } from './dashboard-widgets';
       } @else if (loading()) {
         <div class="panel skeleton" role="status">جارٍ تحميل لوحتك…</div>
       }
-    </div>`
+    </ng-template>`
 })
 export class EmployeeDashboardPage {
   private service = inject(DashboardService);
   private workTasks = inject(WorkTaskService);
   private notificationService = inject(NotificationService);
   private auth = inject(AuthService);
+  canRequestVacation = computed(() => this.auth.hasPermission(AppPermission.CreateVacation));
   canMyTasks = computed(() => this.auth.hasPermission(AppPermission.ViewMyWorkTasks));
   canNotifications = computed(() => this.auth.hasPermission(AppPermission.ViewNotifications));
 
@@ -84,6 +101,9 @@ export class EmployeeDashboardPage {
   loading = signal(false);
   error = signal('');
   label = roleLabel;
+
+  /** خريطة فرعه في لوحتي: لمن يملك ViewBranchMap (مدير النظام يراها في لوحة المؤسسة) */
+  showMap = computed(() => this.auth.hasPermission(AppPermission.ViewBranchMap));
 
   constructor() {
     this.load();

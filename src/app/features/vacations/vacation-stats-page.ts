@@ -1,3 +1,4 @@
+import { AppPermission } from '../../core/constants/access';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -83,7 +84,7 @@ export class VacationStatsPage {
   branchId = signal(0);
   loading = signal(false);
   error = signal('');
-  isAdmin = computed(() => this.auth.isSuperAdmin());
+  isAdmin = computed(() => this.auth.hasPermission(AppPermission.ViewOrganizationDashboard));
   canReview = computed(() => this.auth.canReviewVacations());
 
   constructor() {

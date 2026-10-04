@@ -38,7 +38,7 @@ export class ProfilePage {
   private auth = inject(AuthService);
   /** خدمة الإجازات قد لا تكون مُسندة لوحدة الموظف — عندها تختفي أقسامها من الملف */
   canViewVacations = computed(() => this.auth.hasPermission(AppPermission.ViewVacations));
-  canRequest = computed(() => this.profile()?.departmentId != null && this.auth.hasPermission(AppPermission.CreateVacation));
+  canRequest = computed(() => this.auth.hasPermission(AppPermission.CreateVacation));
   /** التوقيع الإلكتروني على ورقة تسليم طلبات الصيانة: لمن يملك SignMaintenanceReceipt */
   isManager = computed(() => this.auth.hasPermission(AppPermission.SignMaintenanceReceipt));
   cancelling = signal<Vacation | null>(null);

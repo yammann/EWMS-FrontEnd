@@ -99,14 +99,17 @@ export class BranchDashboardPage {
   data = signal<BranchDashboard | null>(null);
   loading = signal(false);
   error = signal('');
-  isAdmin = computed(() => this.auth.isSuperAdmin());
+  /** يتصفح الفرع من مستوى المؤسسة (فتات المسار يبدأ بالمؤسسة) */
+  isAdmin = computed(() => this.auth.hasPermission(AppPermission.ViewOrganizationDashboard));
+  private own = signal(true);
   /** خريطة فرعه: لمن يملك ViewBranchMap وهو يتصفح لوحة فرعه (مدير النظام يراها في لوحة المؤسسة) */
-  showMap = computed(() => !this.auth.isSuperAdmin() && this.auth.hasPermission(AppPermission.ViewBranchMap));
+  showMap = computed(() => this.own() && this.auth.hasPermission(AppPermission.ViewBranchMap));
   private id: number | null = null;
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(p => {
       this.id = p.get('id') ? Number(p.get('id')) : null;
+      this.own.set(this.id === null);
       this.load();
     });
     // تحديث تلقائي عند وصول إشعار — بدون إعادة تحميل الصفحة

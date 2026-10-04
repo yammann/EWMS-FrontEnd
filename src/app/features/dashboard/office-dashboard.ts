@@ -1,4 +1,6 @@
 import { CommonModule } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
+import { BranchMapComponent } from '../map/branch-map';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -15,12 +17,12 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
 /** لوحة رئيس المكتب */
 @Component({
   selector: 'app-office-dashboard', standalone: true,
-  imports: [CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
+  imports: [CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
       @if (data(); as d) {
-        @if (isSuperAdmin()) {
+        @if (seesOrganization()) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">المؤسسة</a><span>/</span><a [routerLink]="['/dashboard/branch', d.branchId]">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
         } @else if (isBranchPosition()) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
@@ -28,14 +30,28 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
         }
       }
-      <header class="page-header">
+      @if (showMap()) {
+        <!-- خريطة فرعه مثبّتة في رأس الصفحة (لمن يملك ViewBranchMap) — الصفحة تنزلق فوقها أثناء السكرول -->
+        <app-branch-map>
+          <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+          <ng-container *ngTemplateOutlet="bodyTpl" />
+        </app-branch-map>
+      } @else {
+        <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+        <ng-container *ngTemplateOutlet="bodyTpl" />
+      }
+    </div>
+
+    <ng-template #headerTpl>
         <div>
           <span class="eyebrow">لوحة رئيس المكتب</span>
           <h1>{{ data()?.officeName || 'المكتب' }}</h1>
           @if (data(); as d) { <p class="header-sub">{{ d.branchName }} / {{ d.departmentName }}@if (d.managerNames) { · رئيس المكتب: {{ d.managerNames }} }</p> }
         </div>
         <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
-      </header>
+    </ng-template>
+
+    <ng-template #bodyTpl>
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
@@ -90,7 +106,7 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
       } @else if (loading()) {
         <div class="panel skeleton" role="status">جارٍ تحميل لوحة المكتب…</div>
       }
-    </div>`
+    </ng-template>`
 })
 export class OfficeDashboardPage {
   private service = inject(DashboardService);
@@ -106,10 +122,14 @@ export class OfficeDashboardPage {
   label = roleLabel;
   private id: number | null = null;
 
-  isSuperAdmin() { return this.auth.isSuperAdmin(); }
+  /** يتصفح الهيكل من مستوى المؤسسة (يبدأ مسار التنقل بالمؤسسة) */
+  seesOrganization() { return this.auth.hasPermission(AppPermission.ViewOrganizationDashboard); }
   /** من أي لوحة وصل للمكتب (يحدد بداية المسار): لوحة الفرع أو لوحة القسم */
   isBranchPosition() { return this.auth.hasPermission(AppPermission.ViewBranchDashboard); }
   isDepartmentPosition() { return this.auth.hasPermission(AppPermission.ViewDepartmentDashboard); }
+
+  /** خريطة فرعه في لوحتي: لمن يملك ViewBranchMap (مدير النظام يراها في لوحة المؤسسة) */
+  showMap = computed(() => this.isOwn() && this.auth.hasPermission(AppPermission.ViewBranchMap));
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(p => {

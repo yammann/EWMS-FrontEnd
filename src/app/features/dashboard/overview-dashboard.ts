@@ -1,8 +1,11 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { BranchMapComponent } from '../map/branch-map';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
 import { NotificationService } from '../../core/services/notification.service';
 import { OverviewDashboard } from '../../core/models/dashboard.models';
 import { ActivityList, StatTile } from './dashboard-widgets';
@@ -10,18 +13,28 @@ import { ActivityList, StatTile } from './dashboard-widgets';
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */
 @Component({
   selector: 'app-overview-dashboard', standalone: true,
-  imports: [RouterLink, StatTile, ActivityList, BranchMapComponent],
+  imports: [RouterLink, NgTemplateOutlet, StatTile, ActivityList, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
-      <!-- خريطة سوريا مثبّتة في رأس الصفحة (بلا إطار) — يتصفح السوبر ادمن بيانات أي فرع (حالياً: الفرع التقني).
-           محتوى اللوحة داخلها (ng-content) هو الصفحة التي تنزلق فوق الخريطة أثناء السكرول فتنغلق؛
-           رأس الصفحة (.page-header) يُعرض أولاً مباشرة بعد الخريطة -->
-      <app-branch-map>
-        <header class="page-header">
+      @if (showMap()) {
+        <!-- خريطة سوريا مثبّتة في رأس الصفحة (لمن يملك ViewBranchMap) — الصفحة تنزلق فوقها أثناء السكرول -->
+        <app-branch-map>
+          <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+          <ng-container *ngTemplateOutlet="bodyTpl" />
+        </app-branch-map>
+      } @else {
+        <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+        <ng-container *ngTemplateOutlet="bodyTpl" />
+      }
+    </div>
+
+    <ng-template #headerTpl>
           <div><span class="eyebrow">مدير النظام</span><h1>نظرة عامة على المؤسسة</h1><p class="header-sub">الهيكل التنظيمي والكادر ومهام العمل في كل الفروع</p></div>
           <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
-        </header>
+    </ng-template>
+
+    <ng-template #bodyTpl>
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
@@ -64,11 +77,13 @@ import { ActivityList, StatTile } from './dashboard-widgets';
         <div class="panel skeleton" role="status">جارٍ تحميل النظرة العامة…</div>
       }
 
-      </app-branch-map>
-    </div>`
+
+    </ng-template>`
 })
 export class OverviewDashboardPage {
   private service = inject(DashboardService);
+  private auth = inject(AuthService);
+  showMap = computed(() => this.auth.hasPermission(AppPermission.ViewBranchMap));
 
   data = signal<OverviewDashboard | null>(null);
   loading = signal(false);

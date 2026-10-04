@@ -1,3 +1,5 @@
+import { NgTemplateOutlet } from '@angular/common';
+import { BranchMapComponent } from '../map/branch-map';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -13,25 +15,39 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
   selector: 'app-department-dashboard', standalone: true,
-  imports: [RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
+  imports: [RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
       @if (data(); as d) {
-        @if (isSuperAdmin()) {
+        @if (seesOrganization()) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">المؤسسة</a><span>/</span><a [routerLink]="['/dashboard/branch', d.branchId]">{{ d.branchName }}</a><span>/</span><span>{{ d.departmentName }}</span></nav>
         } @else if (isBranchPosition()) {
           <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.branchName }}</a><span>/</span><span>{{ d.departmentName }}</span></nav>
         }
       }
-      <header class="page-header">
+      @if (showMap()) {
+        <!-- خريطة فرعه مثبّتة في رأس الصفحة (لمن يملك ViewBranchMap) — الصفحة تنزلق فوقها أثناء السكرول -->
+        <app-branch-map>
+          <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+          <ng-container *ngTemplateOutlet="bodyTpl" />
+        </app-branch-map>
+      } @else {
+        <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
+        <ng-container *ngTemplateOutlet="bodyTpl" />
+      }
+    </div>
+
+    <ng-template #headerTpl>
         <div>
           <span class="eyebrow">لوحة رئيس القسم</span>
           <h1>{{ data()?.departmentName || 'القسم' }}</h1>
           @if (data(); as d) { <p class="header-sub">{{ d.branchName }}@if (d.managerNames) { · رئيس القسم: {{ d.managerNames }} }</p> }
         </div>
         <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
-      </header>
+    </ng-template>
+
+    <ng-template #bodyTpl>
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
@@ -82,7 +98,7 @@ import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dash
       } @else if (loading()) {
         <div class="panel skeleton" role="status">جارٍ تحميل لوحة القسم…</div>
       }
-    </div>`
+    </ng-template>`
 })
 export class DepartmentDashboardPage {
   private service = inject(DashboardService);
@@ -98,9 +114,13 @@ export class DepartmentDashboardPage {
   isOwn = signal(true);
   private id: number | null = null;
 
-  isSuperAdmin() { return this.auth.isSuperAdmin(); }
+  /** يتصفح الهيكل من مستوى المؤسسة (يبدأ مسار التنقل بالمؤسسة) */
+  seesOrganization() { return this.auth.hasPermission(AppPermission.ViewOrganizationDashboard); }
   /** يتصفح القسم من لوحة فرعه (المسار يبدأ بالفرع) */
   isBranchPosition() { return this.auth.hasPermission(AppPermission.ViewBranchDashboard); }
+
+  /** خريطة فرعه في لوحتي: لمن يملك ViewBranchMap (مدير النظام يراها في لوحة المؤسسة) */
+  showMap = computed(() => this.isOwn() && this.auth.hasPermission(AppPermission.ViewBranchMap));
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(p => {

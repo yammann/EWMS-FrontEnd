@@ -29,7 +29,6 @@ export class AuthService {
   currentUser = signal<AuthUser | null>(this.loadUser());
 
   role = computed(() => this.currentUser()?.role ?? '');
-  isSuperAdmin = computed(() => this.role().toLowerCase() === 'superadmin');
   /** يسند المهام أو يتولى مهام وحدته (صلاحيات لوحة المهام) */
   isLeader = computed(() => this.hasAnyPermission(TASK_OVERSIGHT));
   /** الموافقة الأولى أو الاعتماد النهائي — نفس فحص الباكاند في PendingForMe / Approve */
