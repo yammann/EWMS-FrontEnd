@@ -68,6 +68,8 @@ export class MainLayout {
       ].filter(Boolean) as NavItem[] },
       { id: 'maintenance', title: 'الصيانة', items: [
         can(AppPermission.ViewMaintenanceRequests) && { path: '/maintenance/requests', label: 'طلبات الصيانة', icon: 'wrench' },
+        can(AppPermission.ViewMaintenanceDevices) && { path: '/maintenance/devices', label: 'أجهزة الصيانة', icon: 'device' },
+        can(AppPermission.ViewMyMaintenanceRequests) && { path: '/maintenance/mine', label: 'أجهزتي في الصيانة', icon: 'user' },
         can(AppPermission.ViewMaintenanceTasks) && { path: '/maintenance/tasks', label: 'مهام الصيانة', icon: 'clipboard' },
         can(AppPermission.ViewMaintenanceStats) && { path: '/maintenance/stats', label: 'إحصائيات الصيانة', icon: 'chart' },
         canAny(MANAGE_MAINTENANCE_LOOKUPS) && { path: '/maintenance/settings', label: 'إعدادات الصيانة', icon: 'gear' }

@@ -5,12 +5,16 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { MaintenanceActivity, MaintenanceRequest, MaintenanceStatus, formatHours, utcDate } from '../../core/models/maintenance.models';
+import {
+  MaintenanceActivity, MaintenanceRequest, MaintenanceStatus, finalStageConfirm, formatHours, isFinalStage, stageLabel, utcDate
+} from '../../core/models/maintenance.models';
 import { ConfirmService } from '../../shared/ui/confirm.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { CopyText } from '../../shared/ui/secret-text';
 import { AssignDialog, StatusChip } from './maintenance-ui';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
+import { DeviceRepairHistory } from './device-repair-history';
+import { TransferPanel } from './transfer-panel';
 
 const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4: '✎' };
 
@@ -20,7 +24,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
  */
 @Component({
   selector: 'app-maintenance-request-details', standalone: true,
-  imports: [DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog],
+  imports: [DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -43,13 +47,18 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
       @if (request(); as r) {
+        @if (r.isClosed) {
+          <p class="alert notice closed-note" role="status">🔒 الطلب مُغلق ({{ stageLabel(r.statusStage) }}) — لا تعديل ولا تغيير حالة ولا نقل. إن عاد الجهاز يُسجَّل له طلب جديد.</p>
+        }
+        <app-transfer-panel [request]="r" (changed)="load(false)" />
+
         @if (canChangeStatus() && statuses().length) {
           <section class="panel">
-            <div class="panel-heading"><div><h2>حالة الطلب</h2><p>انقر على الحالة الجديدة لتحديث الطلب — يُسجَّل التغيير ويصل إشعار للمعنيين</p></div></div>
+            <div class="panel-heading"><div><h2>حالة الطلب</h2><p>انقر على الحالة الجديدة لتحديث الطلب — يُسجَّل التغيير ويصل إشعار للمعنيين. الحالات المعلَّمة بـ🔒 نهائية وتُقفل الطلب بعد التأكيد.</p></div></div>
             <div class="status-pick" role="radiogroup" aria-label="حالة الطلب">
               @for (s of statuses(); track s.id) {
                 <button type="button" role="radio" [attr.aria-checked]="s.id === r.maintenanceRequestStatusId" [class.on]="s.id === r.maintenanceRequestStatusId"
-                        [style.--c]="s.color" [disabled]="busy()" (click)="setStatus(s)"><i aria-hidden="true"></i>{{ s.name }}</button>
+                        [style.--c]="s.color" [disabled]="busy()" [title]="stageLabel(s.stage)" (click)="setStatus(s)"><i aria-hidden="true"></i>{{ s.name }}@if (isFinal(s.stage)) { <span aria-label="نهائية"> 🔒</span> }</button>
               }
             </div>
           </section>
@@ -69,6 +78,13 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
           </dl>
         </section>
 
+        @if (r.deviceMaintenanceId) {
+          <section class="panel">
+            <div class="panel-heading"><div><h2>سجل إصلاحات الجهاز</h2><p>طلبات الصيانة الأخرى للجهاز <span class="mono">{{ r.serialNumber }}</span>، الأحدث أولاً</p></div></div>
+            <app-device-repair-history [deviceId]="r.deviceMaintenanceId" [excludeRequestId]="r.id" [limit]="10" />
+          </section>
+        }
+
         <section class="panel">
           <div class="panel-heading">
             <div><h2>الصيانة</h2></div>
@@ -78,8 +94,9 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
             <div><dt>الفني المسؤول</dt><dd>{{ r.technicianName }}</dd></div>
             <div><dt>القسم</dt><dd>{{ r.departmentName || '—' }}</dd></div>
             <div><dt>نوع العطل</dt><dd>{{ r.damageTypeName }}</dd></div>
-            <div><dt>بدء العمل</dt><dd>{{ r.startedAt ? (r.startedAt | date:'yyyy/MM/dd — HH:mm') : '—' }}</dd></div>
-            <div><dt>الإنجاز</dt><dd>{{ r.completedAt ? (r.completedAt | date:'yyyy/MM/dd — HH:mm') : '—' }}</dd></div>
+            <div><dt>المرحلة</dt><dd>{{ stageLabel(r.statusStage) }}</dd></div>
+            <div><dt>بدء العمل <small class="hint">(تلقائي)</small></dt><dd>{{ r.startedAt ? (r.startedAt | date:'yyyy/MM/dd — HH:mm') : '—' }}</dd></div>
+            <div><dt>الإنجاز <small class="hint">(تلقائي)</small></dt><dd>{{ r.completedAt ? (r.completedAt | date:'yyyy/MM/dd — HH:mm') : '—' }}</dd></div>
             <div><dt>مدة الإصلاح</dt><dd>{{ duration() }}</dd></div>
             <div class="wide"><dt>وصف العطل والملاحظات</dt><dd>{{ r.description || '—' }}</dd></div>
           </dl>
@@ -119,6 +136,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
   styles: [`
     .title { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
     .title .mono { font-size: inherit; }
+    .closed-note { margin: 0; }
     a.btn { text-decoration: none; }
 
     .status-pick { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -152,6 +170,8 @@ export class MaintenanceRequestDetailsPage {
   private location = inject(Location);
 
   utc = utcDate;
+  stageLabel = stageLabel;
+  isFinal = isFinalStage;
   private can = this.service.can;
   private id = 0;
 
@@ -206,9 +226,11 @@ export class MaintenanceRequestDetailsPage {
     if (history.length > 1) this.location.back(); else this.router.navigate(['/maintenance/requests']);
   }
 
-  setStatus(status: MaintenanceStatus) {
+  async setStatus(status: MaintenanceStatus) {
     const r = this.request();
     if (!r || r.maintenanceRequestStatusId === status.id || this.busy()) return;
+    // الحالة النهائية تُقفل الطلب — تأكيد صريح لا نقرة واحدة
+    if (isFinalStage(status.stage) && !await this.confirm.ask(finalStageConfirm(r.number, status.name), 'نعم، أقفل الطلب', 'حالة نهائية')) return;
     this.busy.set(true);
     this.service.changeStatus(r.id, status.id).subscribe({
       next: () => { this.busy.set(false); this.toast.success(`الحالة ← ${status.name}`); this.load(false); },

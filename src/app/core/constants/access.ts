@@ -41,11 +41,18 @@ export const AppPermission = {
   EditMaintenanceRequest: 'EditMaintenanceRequest', ChangeMaintenanceStatus: 'ChangeMaintenanceStatus', ViewMaintenanceStats: 'ViewMaintenanceStats',
   DeleteMaintenanceRequest: 'DeleteMaintenanceRequest',
   AssignMaintenanceRequest: 'AssignMaintenanceRequest',
+  // الفني يطلب تحويل طلب مسند إليه إلى موظف آخر (يقرّره صاحب AssignMaintenanceRequest)
+  RequestMaintenanceTransfer: 'RequestMaintenanceTransfer',
+  // «أجهزتي في الصيانة»: طلبات أنا عميلها
+  ViewMyMaintenanceRequests: 'ViewMyMaintenanceRequests',
   ViewMaintenanceTasks: 'ViewMaintenanceTasks', CreateMaintenanceTask: 'CreateMaintenanceTask',
   EditMaintenanceTask: 'EditMaintenanceTask', DeleteMaintenanceTask: 'DeleteMaintenanceTask',
   AssignMaintenanceTask: 'AssignMaintenanceTask',
   ViewMaintenanceLookups: 'ViewMaintenanceLookups', CreateMaintenanceLookup: 'CreateMaintenanceLookup',
-  EditMaintenanceLookup: 'EditMaintenanceLookup', DeleteMaintenanceLookup: 'DeleteMaintenanceLookup'
+  EditMaintenanceLookup: 'EditMaintenanceLookup', DeleteMaintenanceLookup: 'DeleteMaintenanceLookup',
+  // أجهزة الصيانة: سجل مشترك للأجهزة برقمها التسلسلي (تقديم طلب يحتاج العرض، وجهاز جديد يحتاج الإضافة)
+  ViewMaintenanceDevices: 'ViewMaintenanceDevices', CreateMaintenanceDevice: 'CreateMaintenanceDevice',
+  EditMaintenanceDevice: 'EditMaintenanceDevice', DeleteMaintenanceDevice: 'DeleteMaintenanceDevice'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];

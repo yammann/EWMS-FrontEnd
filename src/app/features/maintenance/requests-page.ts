@@ -7,12 +7,14 @@ import { Observable, Subject, catchError, forkJoin, map, of, switchMap, tap, tim
 import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NotificationService } from '../../core/services/notification.service';
 import {
-  MaintenanceCount, MaintenanceRequest, MaintenanceRequestFilter, MaintenanceStatus, TechnicianOption, utcDate
+  MaintenanceCount, MaintenanceRequest, MaintenanceRequestFilter, MaintenanceStatus, TechnicianOption, finalStageConfirm, isFinalStage, utcDate
 } from '../../core/models/maintenance.models';
 import { formatPhone } from '../../core/utils/phone';
+import { ConfirmService } from '../../shared/ui/confirm.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { Pager, StatusChip } from './maintenance-ui';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
+import { PendingTransfersButton } from './transfer-panel';
 
 type View = 'table' | 'board';
 type SearchField = 'clientName' | 'serialNumber' | 'model';
@@ -29,13 +31,14 @@ const BOARD_LIMIT = 50;
  */
 @Component({
   selector: 'app-maintenance-requests-page', standalone: true,
-  imports: [DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog],
+  imports: [DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
       <header class="page-header">
         <div><span class="eyebrow">الصيانة</span><h1>طلبات الصيانة</h1><p class="muted">الأجهزة المستلمة للإصلاح ومتابعة حالتها حتى التسليم</p></div>
         <div class="header-actions">
+          @if (can().assignRequest) { <app-pending-transfers-button /> }
           @if (can().createRequest) { <button class="btn" type="button" (click)="formOpen.set(true)" [disabled]="!lookups()">+ طلب جديد</button> }
           <button class="btn btn-ghost" type="button" (click)="refresh()" [disabled]="loading()">تحديث</button>
         </div>
@@ -160,6 +163,7 @@ const BOARD_LIMIT = 50;
 export class MaintenanceRequestsPage {
   private service = inject(MaintenanceService);
   private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
   private router = inject(Router);
 
   can = this.service.can;
@@ -287,7 +291,7 @@ export class MaintenanceRequestsPage {
   draggable(r: MaintenanceRequest) { return this.canDrag() && r.canChangeStatus; }
   canDrop = (drag: CdkDrag<MaintenanceRequest>) => this.draggable(drag.data);
 
-  drop(event: CdkDragDrop<number>) {
+  async drop(event: CdkDragDrop<number>) {
     if (event.previousContainer === event.container) return;
     const request = event.item.data as MaintenanceRequest;
     const from = request.maintenanceRequestStatusId;
@@ -295,8 +299,15 @@ export class MaintenanceRequestsPage {
     const target = this.columns().find(c => c.status.id === to)?.status;
     if (!target) return;
 
+    // الحالة النهائية تُقفل الطلب — لا تكفي سحبة: تأكيد صريح، وعند الإلغاء تبقى البطاقة مكانها
+    const final = isFinalStage(target.stage);
+    if (final && !await this.confirm.ask(finalStageConfirm(request.number, target.name), 'نعم، أقفل الطلب', 'حالة نهائية')) return;
+
     // تحديث متفائل ثم التراجع إن رفض الخادم
-    this.move(request, from, to, { maintenanceRequestStatusId: to, statusName: target.name, statusColor: target.color });
+    this.move(request, from, to, {
+      maintenanceRequestStatusId: to, statusName: target.name, statusColor: target.color, statusStage: target.stage,
+      ...(final ? { isClosed: true, canChangeStatus: false, canEdit: false, canAssign: false, canRequestTransfer: false } : {})
+    });
     this.service.changeStatus(request.id, to).subscribe({
       next: () => this.toast.success(`${request.number} ← ${target.name}`),
       error: e => { this.move({ ...request, maintenanceRequestStatusId: to }, to, from, request); this.toast.error(e.message); }

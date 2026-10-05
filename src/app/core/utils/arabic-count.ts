@@ -18,5 +18,8 @@ export const fridaysAr = (n: number) => countAr(n, { zero: 'لا جمعة', one:
 /** 1 → عطلة رسمية واحدة، 2 → عطلتان رسميتان، 3–10 → 3 عطل رسمية */
 export const holidaysAr = (n: number) => countAr(n, { zero: 'لا عطل رسمية', one: 'عطلة رسمية واحدة', two: 'عطلتان رسميتان', few: 'عطل رسمية', many: 'عطلة رسمية' });
 
+/** 1 → مرة واحدة، 2 → مرتين، 3–10 → 3 مرات، 11+ → 11 مرة */
+export const timesAr = (n: number) => countAr(n, { zero: 'ولا مرة', one: 'مرة واحدة', two: 'مرتين', few: 'مرات', many: 'مرة' });
+
 /** 1 → إجازة واحدة، 2 → إجازتان، 3–10 → 3 إجازات */
 export const vacationsAr = (n: number) => countAr(n, { zero: 'لا إجازات', one: 'إجازة واحدة', two: 'إجازتان', few: 'إجازات', many: 'إجازة' });

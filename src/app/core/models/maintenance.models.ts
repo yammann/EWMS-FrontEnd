@@ -4,11 +4,36 @@ export interface MaintenanceLookup {
   name: string;
   description?: string;
   color?: string;
-  /** حالات الطلب فقط: دخولها يثبّت موقّع ورقة التسليم وتوقيعه */
-  isDelivery?: boolean;
+  /** حالات الطلب فقط: المرحلة الثابتة التي تحدد سلوك الحالة (انظر MAINTENANCE_STAGES) */
+  stage?: MaintenanceStage;
 }
 
-export type MaintenanceStatus = MaintenanceLookup & { color: string };
+/** مراحل ثابتة يفهمها النظام — الحالات أسماء وألوان، والمرحلة تحدد السلوك */
+export type MaintenanceStage = 1 | 2 | 3 | 4 | 5;
+
+export const MAINTENANCE_STAGES: { value: MaintenanceStage; label: string; hint: string }[] = [
+  { value: 1, label: 'جديد', hint: 'استُلم ولم يبدأ العمل' },
+  { value: 2, label: 'قيد العمل', hint: 'يُسجَّل وقت البدء تلقائياً' },
+  { value: 3, label: 'جاهز للتسليم', hint: 'يُسجَّل وقت الإنجاز ويُبلَّغ العميل' },
+  { value: 4, label: 'مُسلَّم', hint: 'نهائية — يُقفل الطلب ويُثبَّت توقيع ورقة التسليم' },
+  { value: 5, label: 'غير قابل للصيانة', hint: 'نهائية — يُقفل الطلب' }
+];
+
+export function stageLabel(stage: number | null | undefined): string {
+  return MAINTENANCE_STAGES.find(s => s.value === stage)?.label ?? '—';
+}
+
+/** «مُسلَّم» و«غير قابل للصيانة»: الطلب يُقفل بعدها (لا تعديل ولا تغيير حالة ولا نقل) */
+export function isFinalStage(stage: number | null | undefined): boolean {
+  return stage === 4 || stage === 5;
+}
+
+/** نص التأكيد قبل تحويل طلب إلى حالة نهائية */
+export function finalStageConfirm(number: string, statusName: string): string {
+  return `تحويل الطلب ${number} إلى «${statusName}» سيُقفله نهائياً: لا تعديل ولا تغيير حالة بعدها، وإن عاد الجهاز يُسجَّل طلب جديد. متابعة؟`;
+}
+
+export type MaintenanceStatus = MaintenanceLookup & { color: string; stage: MaintenanceStage };
 
 export interface MaintenanceRequest {
   id: number;
@@ -19,15 +44,23 @@ export interface MaintenanceRequest {
   canDelete: boolean;
   canAssign: boolean;
   canChangeStatus: boolean;
+  /** الطلب مسند إليّ وأملك طلب التحويل */
+  canRequestTransfer: boolean;
 
   userId: number;
   technicianName: string;
   departmentId: number | null;
   departmentName: string;
 
+  /** العميل موظف (رقمه وقسمه الحالي) أو من خارج المؤسسة (null) */
+  clientUserId: number | null;
+  clientDepartmentName: string;
   clientName: string;
   clientPhone: string;
 
+  /** الجهاز (سجل أجهزة الصيانة) — النوع والشركة والموديل والرقم التسلسلي تأتي منه */
+  deviceMaintenanceId: number;
+  deviceName: string;
   deviceTypeId: number;
   deviceTypeName: string;
   damageTypeId: number;
@@ -43,29 +76,36 @@ export interface MaintenanceRequest {
   maintenanceRequestStatusId: number;
   statusName: string;
   statusColor: string;
+  /** مرحلة الحالة الحالية */
+  statusStage: MaintenanceStage;
+  /** مُسلَّم أو غير قابل للصيانة — للقراءة فقط */
+  isClosed: boolean;
 
   createdAt: string;
   updatedAt: string;
+  /** يسجّلهما الخادم تلقائياً بحسب المرحلة (لا يُدخلان يدوياً) */
   startedAt: string | null;
   completedAt: string | null;
 }
 
 export interface MaintenanceRequestInput {
+  /** عميل موظف (من ClientLookup) أو null لعميل من خارج المؤسسة */
+  clientUserId: number | null;
   clientName: string;
   clientPhone: string;
-  deviceTypeId: number;
+  /** جهاز مسجّل في أجهزة الصيانة (يُضاف أولاً إن كان جديداً) */
+  deviceMaintenanceId: number;
+  /** الفني المسؤول عند الإنشاء (لمن يملك الإسناد؛ null = من يسجّل الطلب) */
+  assigneeId?: number | null;
   damageTypeId: number;
-  deviceCompanyId: number;
-  model: string;
   accessories: string;
-  serialNumber: string;
   description: string;
   maintenanceRequestStatusId: number;
-  startedAt: string | null;
-  completedAt: string | null;
 }
 
 export interface MaintenanceRequestFilter {
+  /** كل طلبات جهاز واحد (سجل إصلاحاته) */
+  deviceMaintenanceId?: number | null;
   serialNumber?: string;
   model?: string;
   clientName?: string;
@@ -109,6 +149,70 @@ export interface MaintenanceTaskInput {
   completedWorks: string;
   startedAt: string | null;
   completedAt: string | null;
+}
+
+/** عميل موظف وجده البحث (مطابقة تامة للاسم الكامل أو الرقم الذاتي) */
+export interface MaintenanceClient { id: number; fullName: string; departmentName: string; phone: string | null; }
+
+/** طلب صيانة كما يراه العميل الموظف («أجهزتي في الصيانة») */
+export interface MyMaintenanceRequest {
+  id: number; number: string;
+  deviceName: string; deviceTypeName: string; deviceCompanyName: string; model: string; serialNumber: string;
+  damageTypeName: string; statusName: string; statusColor: string; technicianName: string;
+  createdAt: string; completedAt: string | null; deliveredAt: string | null;
+}
+
+/** طلب تحويل طلب صيانة إلى موظف آخر — status: 1 بانتظار القرار، 2 قُبل، 3 رُفض، 4 أُغلق (نُقل مباشرة) */
+export interface MaintenanceTransfer {
+  id: number;
+  maintenanceRequestId: number;
+  requestNumber: string;
+  clientName: string;
+  requestedById: number;
+  requestedByName: string;
+  suggestedUserId: number | null;
+  suggestedUserName: string | null;
+  reason: string;
+  status: number;
+  statusAr: string;
+  decidedByName: string | null;
+  newUserName: string | null;
+  decisionNote: string | null;
+  createdAt: string;
+  decidedAt: string | null;
+}
+
+/** جهاز صيانة: قطعة فعلية برقم تسلسلي فريد، تتجمّع تحته طلبات صيانتها */
+export interface MaintenanceDevice {
+  id: number;
+  name: string;
+  serialNumber: string;
+  model: string;
+  description: string;
+  deviceTypeId: number;
+  deviceTypeName: string;
+  deviceCompanyId: number;
+  deviceCompanyName: string;
+}
+
+export interface MaintenanceDeviceInput {
+  name: string;
+  serialNumber: string;
+  model: string;
+  description: string;
+  deviceTypeId: number;
+  deviceCompanyId: number;
+}
+
+/** بحث الأجهزة: serialNumber/model «يبدأ بـ»، name «يحتوي» */
+export interface MaintenanceDeviceFilter {
+  serialNumber?: string;
+  model?: string;
+  name?: string;
+  deviceTypeId?: number | null;
+  deviceCompanyId?: number | null;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface PagedResult<T> {
@@ -170,7 +274,7 @@ export type MaintenanceLookupKind = keyof typeof MAINTENANCE_LOOKUPS;
 
 /**
  * تواريخ النظام (الإنشاء/التعديل/السجل) تُحفظ UTC وتصل بلا منطقة زمنية — نضيف Z ليعرضها المتصفح بالتوقيت المحلي.
- * (تاريخا البدء والإنجاز يدخلهما المستخدم بتوقيته المحلي ويُعرضان كما هما.)
+ * (تاريخا البدء والإنجاز يسجّلهما الخادم بتوقيته المحلي ويُعرضان كما هما.)
  */
 export function utcDate(value: string | null | undefined): Date | null {
   if (!value) return null;

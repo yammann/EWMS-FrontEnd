@@ -73,6 +73,14 @@ export const routes: Routes = [
             loadComponent: () => import('./features/maintenance/request-details-page').then(m => m.MaintenanceRequestDetailsPage)
           },
           {
+            path: 'mine', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMyMaintenanceRequests },
+            loadComponent: () => import('./features/maintenance/my-requests-page').then(m => m.MaintenanceMyRequestsPage)
+          },
+          {
+            path: 'devices', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceDevices },
+            loadComponent: () => import('./features/maintenance/devices-page').then(m => m.MaintenanceDevicesPage)
+          },
+          {
             path: 'tasks', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceTasks },
             loadComponent: () => import('./features/maintenance/tasks-page').then(m => m.MaintenanceTasksPage)
           },

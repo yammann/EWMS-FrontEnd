@@ -36,7 +36,7 @@ type Kind = 'receipt' | 'delivery';
     @if (data(); as d) {
       @if (kind() === 'delivery' && !d.delivered) {
         <p class="alert alert-warning no-print" role="status">
-          لم يُسلَّم الطلب بعد — يُثبَّت اسم رئيس القسم وتوقيعه عند تحويل الطلب إلى حالة تسليم، وتُطبع الورقة الآن بخانة توقيع فارغة.
+          لم يُسلَّم الطلب بعد — يُثبَّت اسم رئيس القسم وتوقيعه عند تحويل الطلب إلى حالة من مرحلة «مُسلَّم»، وتُطبع الورقة الآن بخانة توقيع فارغة.
         </p>
       } @else if (kind() === 'delivery' && !d.managerSignature) {
         <p class="alert alert-warning no-print" role="status">

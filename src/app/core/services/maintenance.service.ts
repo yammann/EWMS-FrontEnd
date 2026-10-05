@@ -3,7 +3,7 @@ import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
 import { AppPermission } from '../constants/access';
 import {
-  MAINTENANCE_LOOKUPS, MaintenanceActivity, MaintenanceLookup, MaintenanceLookupKind, MaintenancePrint, MaintenanceRequest,
+  MAINTENANCE_LOOKUPS, MaintenanceActivity, MaintenanceClient, MaintenanceTransfer, MyMaintenanceRequest, MaintenanceDevice, MaintenanceDeviceFilter, MaintenanceDeviceInput, MaintenanceLookup, MaintenanceLookupKind, MaintenancePrint, MaintenanceRequest,
   MaintenanceRequestFilter, MaintenanceRequestInput, MaintenanceStats, MaintenanceTask, MaintenanceTaskInput,
   PagedResult, TechnicianOption
 } from '../models/maintenance.models';
@@ -37,11 +37,17 @@ export class MaintenanceService {
       viewStats: has(AppPermission.ViewMaintenanceStats),
       deleteRequest: has(AppPermission.DeleteMaintenanceRequest),
       assignRequest: has(AppPermission.AssignMaintenanceRequest),
+      requestTransfer: has(AppPermission.RequestMaintenanceTransfer),
+      viewMine: has(AppPermission.ViewMyMaintenanceRequests),
       viewTasks: has(AppPermission.ViewMaintenanceTasks),
       createTask: has(AppPermission.CreateMaintenanceTask),
       editTask: has(AppPermission.EditMaintenanceTask),
       deleteTask: has(AppPermission.DeleteMaintenanceTask),
       assignTask: has(AppPermission.AssignMaintenanceTask),
+      viewDevices: has(AppPermission.ViewMaintenanceDevices),
+      createDevice: has(AppPermission.CreateMaintenanceDevice),
+      editDevice: has(AppPermission.EditMaintenanceDevice),
+      deleteDevice: has(AppPermission.DeleteMaintenanceDevice),
       createLookup: has(AppPermission.CreateMaintenanceLookup),
       editLookup: has(AppPermission.EditMaintenanceLookup),
       deleteLookup: has(AppPermission.DeleteMaintenanceLookup)
@@ -67,6 +73,39 @@ export class MaintenanceService {
   assignees(departmentId?: number | null) {
     return this.api.get<TechnicianOption[]>('/MaintenanceRequests/Assignees' + query({ departmentId }));
   }
+
+  // ─────────── العميل ───────────
+  /** عميل موظف بمطابقة تامة للاسم الكامل أو الرقم الذاتي — قائمة فارغة = عميل من خارج المؤسسة */
+  clientLookup(text: string) { return this.api.get<MaintenanceClient[]>('/MaintenanceRequests/ClientLookup' + query({ query: text })); }
+  /** «أجهزتي في الصيانة» */
+  myRequests() { return this.api.get<MyMaintenanceRequest[]>('/MaintenanceRequests/Mine'); }
+
+  // ─────────── طلبات التحويل (الفني يطلب، ورئيس القسم يقرّر) ───────────
+  requestTransfer(requestId: number, body: { reason: string; suggestedUserId: number | null }) {
+    return this.api.post<MaintenanceTransfer>(`/MaintenanceRequests/TransferRequest/${requestId}`, body);
+  }
+  decideTransfer(transferId: number, body: { approve: boolean; userId: number | null; note: string | null }) {
+    return this.api.put<MaintenanceTransfer>(`/MaintenanceRequests/Transfer/${transferId}/Decide`, body);
+  }
+  /** طلب التحويل المعلّق لطلب (null إن لم يوجد) */
+  pendingTransfer(requestId: number) { return this.api.get<MaintenanceTransfer | null>(`/MaintenanceRequests/Transfer/${requestId}`); }
+  /** طلبات التحويل المعلّقة التي أستطيع البت فيها */
+  pendingTransfers() { return this.api.get<MaintenanceTransfer[]>('/MaintenanceRequests/Transfers/Pending'); }
+  /** زملاء قسمي (لاقتراح من يُحوَّل إليه الطلب) */
+  transferColleagues() { return this.api.get<TechnicianOption[]>('/MaintenanceRequests/Transfers/Colleagues'); }
+
+  // ─────────── أجهزة الصيانة (MaintenanceDevices) ───────────
+  devices(filter: MaintenanceDeviceFilter) {
+    return this.api.get<PagedResult<MaintenanceDevice>>('/MaintenanceDevices/GetAll' + query(filter));
+  }
+  device(id: number) { return this.api.get<MaintenanceDevice>(`/MaintenanceDevices/Get/${id}`); }
+  /** مطابقة تامة للرقم التسلسلي — 404 (status) إن لم يُسجَّل الجهاز بعد */
+  deviceBySerial(serialNumber: string) {
+    return this.api.get<MaintenanceDevice>('/MaintenanceDevices/BySerial' + query({ serialNumber }));
+  }
+  createDevice(body: MaintenanceDeviceInput) { return this.api.post<MaintenanceDevice>('/MaintenanceDevices/Create', body); }
+  updateDevice(id: number, body: MaintenanceDeviceInput) { return this.api.put<MaintenanceDevice>(`/MaintenanceDevices/Update/${id}`, body); }
+  deleteDevice(id: number) { return this.api.delete<{ message: string }>(`/MaintenanceDevices/Delete/${id}`); }
 
   // ─────────── المهام ───────────
   tasks(filter: { userId?: number | null; page?: number; pageSize?: number }) {
