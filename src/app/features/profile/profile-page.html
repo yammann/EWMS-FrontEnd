@@ -9,7 +9,12 @@
         @if (p.departmentName) { <div><dt>القسم</dt><dd>{{ p.departmentName }}</dd></div> }
         @if (p.officeName) { <div><dt>المكتب</dt><dd>{{ p.officeName }}</dd></div> }
         @if (!p.branchName) { <div><dt>النطاق</dt><dd>كل الفروع</dd></div> }
+        <div><dt>الرقم الذاتي</dt><dd dir="ltr">{{ p.personalIdNumber || '—' }}</dd></div>
+        <div><dt>رقم التواصل</dt><dd dir="ltr">{{ p.phoneNumber ? phone(p.phoneNumber) : '—' }}</dd></div>
+        <div><dt>حالة الحساب</dt><dd>{{ p.isActive ? 'نشط' : 'معطّل' }}</dd></div>
+        <div><dt>تاريخ الإضافة</dt><dd>{{ utc(p.createdAt) | date:'yyyy/MM/dd' }}</dd></div>
       </dl>
+      @if (!p.personalIdNumber || !p.phoneNumber) { <p class="muted small-note">{{ !p.personalIdNumber && !p.phoneNumber ? 'الرقم الذاتي ورقم التواصل غير مسجّلين' : !p.personalIdNumber ? 'الرقم الذاتي غير مسجّل' : 'رقم التواصل غير مسجّل' }} — يُطبعان في نموذج طلب الإجازة، اطلب من مسؤول المستخدمين إضافتهما.</p> }
     }
   </section>
   @if (profileError()) { <div class="alert alert-error" role="alert">تعذر تحميل البيانات الوظيفية: {{ profileError() }} <button class="btn btn-ghost" (click)="loadProfile()">إعادة المحاولة</button></div> }
@@ -20,21 +25,36 @@
     <div class="stat-card"><span class="stat-label">طلبات معتمدة</span><strong class="stat-value">{{ loading() || error() ? '—' : approved() }}</strong></div>
   </section>
   }
-  @if (isManager()) { <app-signature-panel /> }
+  @if (canSign()) { <app-signature-panel /> }
   @if (canRequest()) {
   <section class="panel">
-    <div class="panel-heading"><div><span class="panel-kicker">طلب جديد</span><h2>تقديم إجازة</h2><p>يحدد النظام حالة الدفع عند تقديم الطلب وفق نوع الإجازة والحد الشهري.</p></div></div>
+    <div class="panel-heading"><div><span class="panel-kicker">طلب جديد</span><h2>تقديم إجازة</h2><p>تُحسب المدة بأيام العمل (بلا الجمعة والعطل الرسمية). يُحدَّد الدفع عند الاعتماد النهائي: يومان مدفوعان في الشهر لكل الأنواع المدفوعة معاً.</p></div></div>
     @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
     @if (submitError()) { <p class="alert alert-error" role="alert">{{ submitError() }}</p> }
     @if (typesError()) { <p class="alert alert-error" role="alert">{{ typesError() }} <button class="btn btn-ghost" (click)="loadTypes()">إعادة تحميل الأنواع</button></p> }
     @if (!typesLoading() && !typesError() && !types().length) { <p class="alert alert-warning">لا توجد أنواع إجازات متاحة. تواصل مع المسؤول لإضافتها.</p> }
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
       <label class="form-field">نوع الإجازة<select formControlName="vacationTypeId"><option [ngValue]="0">{{ typesLoading() ? 'جارٍ التحميل…' : 'اختر النوع' }}</option>@for (type of types(); track type.id) { <option [ngValue]="type.id">{{ type.name }} — {{ type.paymentTypeAr }}</option> }</select></label>
-      <label class="form-field">من تاريخ<input type="date" formControlName="startVac"></label>
-      <label class="form-field">إلى تاريخ<input type="date" formControlName="endVac" [min]="form.controls.startVac.value"></label>
+      <label class="form-field">من تاريخ<input type="date" formControlName="startVac" [min]="today"></label>
+      <label class="form-field">إلى تاريخ<input type="date" formControlName="endVac" [min]="form.controls.startVac.value || today"></label>
       <label class="form-field full-width">سبب الإجازة<textarea rows="3" maxlength="500" formControlName="vacReason" placeholder="اكتب سبب الإجازة (اختياري)"></textarea></label>
+      <div class="form-field full-width">
+        <span>المرفقات <small class="muted">(اختياري — PDF أو صورة JPG/PNG، حتى {{ attachRules.maxFiles }} ملفات، 5MB لكل ملف)</small></span>
+        <div class="actions">
+          <label class="btn btn-ghost btn-sm" [class.disabled]="files().length >= attachRules.maxFiles">إرفاق ملف
+            <input type="file" multiple hidden [accept]="attachRules.accept" (change)="addFiles($any($event.target))" [disabled]="files().length >= attachRules.maxFiles || saving()">
+          </label>
+          @for (f of files(); track $index) {
+            <span class="status-badge">{{ f.name }} · {{ size(f.size) }}
+              <button type="button" class="btn btn-ghost btn-sm" (click)="removeFile($index)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name">✕</button></span>
+          }
+        </div>
+        @if (filesError()) { <p class="form-error">{{ filesError() }}</p> }
+      </div>
+      @if (form.controls.startVac.hasError('past')) { <p class="form-error full-width">لا يمكن تقديم إجازة بتاريخ سابق، أقرب تاريخ للبداية هو اليوم.</p> }
+      @if (preview(); as p) { <p class="full-width" [class.form-error]="!p.workingDays" [class.muted]="p.workingDays" role="status">{{ p.workingDays ? previewText(p) : 'المدة المختارة كلها أيام عطلة (جمعة أو عطل رسمية)، لا حاجة لطلب إجازة.' }}</p> }
       @if (form.hasError('dateRange')) { <p class="form-error full-width">تاريخ النهاية يجب أن يساوي تاريخ البداية أو يليه.</p> }
-      <div class="full-width"><button class="btn" type="submit" [disabled]="form.invalid || saving() || typesLoading() || !!typesError() || !types().length">{{ saving() ? 'جارٍ تقديم الطلب…' : 'تقديم طلب الإجازة' }}</button></div>
+      <div class="full-width"><button class="btn" type="submit" [disabled]="form.invalid || saving() || typesLoading() || !!typesError() || !types().length || preview()?.workingDays === 0">{{ saving() ? 'جارٍ تقديم الطلب…' : 'تقديم طلب الإجازة' }}</button></div>
     </form>
   </section>
   }
@@ -44,8 +64,8 @@
     @if (loading()) { <p class="empty-state" role="status">جارٍ تحميل الإجازات…</p> }
     @else if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
     @else if (!vacations().length) { <div class="empty-state"><h3>لم تقدم أي طلب إجازة بعد</h3><p>ستظهر طلباتك ومراحل الموافقة عليها هنا.</p></div> }
-    @else { <div class="table-wrap"><table><thead><tr><th>النوع</th><th>الفترة</th><th>الأيام</th><th>الحالة</th><th>الدفع</th><th>التفاصيل</th><th></th></tr></thead><tbody>
-      @for (v of vacations(); track v.id) { <tr><td>{{ v.vacationTypeName }}</td><td>{{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }}</td><td>{{ v.vacDayCount }}</td><td><span class="status-badge" [class.status-active]="v.status === 'Approved'" [class.status-pending]="v.status.startsWith('Pending')">{{ v.statusAr }}</span></td><td>{{ v.paymentStatusAr }}</td><td class="wrap">{{ v.vacReason || '—' }} @if (v.rejectionReason) { <p class="form-error">{{ v.rejectionReason }} {{ v.rejectedByName ? '— ' + v.rejectedByName : '' }}</p> }</td><td>@if (canCancel(v)) { <button class="btn btn-danger btn-sm" (click)="cancelling.set(v)" [disabled]="cancelSaving()">إلغاء الطلب</button> }</td></tr> }
+    @else { <div class="table-wrap"><table><thead><tr><th>النوع</th><th>الفترة</th><th>أيام العمل</th><th>الحالة</th><th>الدفع</th><th>التفاصيل</th><th></th></tr></thead><tbody>
+      @for (v of vacations(); track v.id) { <tr><td>{{ v.vacationTypeName }}<small class="muted block" dir="ltr">{{ v.requestNumber }}</small></td><td>{{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }}</td><td>{{ v.vacDayCount }}</td><td><span class="status-badge" [class.status-active]="v.status === 'Approved'" [class.status-pending]="v.status.startsWith('Pending')">{{ v.statusAr }}</span></td><td>{{ v.paymentStatusAr }}</td><td class="wrap">{{ v.vacReason || '—' }} <app-vacation-attachments [attachments]="v.attachments" /> @if (v.rejectionReason) { <p class="form-error">{{ v.rejectionReason }} {{ v.rejectedByName ? '— ' + v.rejectedByName : '' }}</p> }</td><td><div class="actions">@if (canPrint()) { <a class="btn btn-ghost btn-sm" [routerLink]="['/vacations/print', v.id]">طباعة</a> }@if (canCancel(v)) { <button class="btn btn-danger btn-sm" (click)="cancelling.set(v)" [disabled]="cancelSaving()">إلغاء الطلب</button> }</div></td></tr> }
     </tbody></table></div> }
     @if (cancelling(); as v) { <div class="alert alert-warning" role="alertdialog"><span>إلغاء طلب {{ v.vacationTypeName }} ({{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }})؟ سيُحفظ الطلب في السجل بحالة «ملغاة».</span> <button class="btn btn-danger" (click)="cancel(v)" [disabled]="cancelSaving()">{{ cancelSaving() ? 'جارٍ الإلغاء…' : 'تأكيد الإلغاء' }}</button> <button class="btn btn-ghost" (click)="cancelling.set(null)" [disabled]="cancelSaving()">تراجع</button></div> }
   </section>

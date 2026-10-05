@@ -40,6 +40,10 @@ export interface User {
   id: number;
   fullName: string;
   email: string;
+  /** الرقم الذاتي (فريد، اختياري) */
+  personalIdNumber: string | null;
+  /** رقم التواصل (هاتف سوري، اختياري) */
+  phoneNumber: string | null;
   roleId: number;
   roleName: string;
   branchId: number | null;

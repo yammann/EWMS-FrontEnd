@@ -47,6 +47,16 @@
   direction: ltr;
   text-align: right;
 }
+.user-details .user-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  max-width: none;
+  direction: rtl;
+  white-space: normal;
+}
+.user-extra bdi { direction: ltr; }
+.nowrap { white-space: nowrap; }
 
 .department-cell-text {
   color: var(--ink-600);

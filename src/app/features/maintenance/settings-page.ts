@@ -37,18 +37,18 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
 
       <section class="panel">
         <div class="panel-heading"><div><h2>{{ meta().label }} <span class="count">({{ items().length }})</span></h2>
-          @if (meta().color) { <p>كل حالة تظهر عموداً في «لوحة الحالات» بلونها</p> }</div></div>
+          @if (meta().color) { <p>كل حالة تظهر عموداً في «لوحة الحالات» بلونها. «حالة تسليم»: عند تحويل الطلب إليها يُثبَّت اسم رئيس القسم وتوقيعه على ورقة التسليم.</p> }</div></div>
         @if (loading()) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
         @else if (!items().length) { <p class="empty-state">لا توجد عناصر بعد</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>الاسم</th>@if (meta().description) { <th>الوصف</th> }@if (meta().color) { <th>اللون</th> }<th class="actions-th"></th></tr></thead>
+            <thead><tr><th>الاسم</th>@if (meta().description) { <th>الوصف</th> }@if (meta().color) { <th>اللون</th><th>التسليم</th> }<th class="actions-th"></th></tr></thead>
             <tbody>
               @for (item of items(); track item.id) {
                 <tr>
                   <td>@if (meta().color) { <app-status-chip [name]="item.name" [color]="item.color" /> } @else { <span class="cell-strong">{{ item.name }}</span> }</td>
                   @if (meta().description) { <td class="wrap">{{ item.description || '—' }}</td> }
-                  @if (meta().color) { <td><span class="mono">{{ item.color }}</span></td> }
+                  @if (meta().color) { <td><span class="mono">{{ item.color }}</span></td><td>{{ item.isDelivery ? 'حالة تسليم' : '—' }}</td> }
                   <td><div class="row-actions">
                     @if (can().editLookup) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(item)">تعديل</button> }
                     @if (can().deleteLookup) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(item)">حذف</button> }
@@ -73,6 +73,8 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
             @if (meta().color) {
               <label class="form-field"><span class="form-label">اللون</span>
                 <span class="color-row"><input type="color" formControlName="color"><app-status-chip [name]="form.controls.name.value || 'معاينة'" [color]="form.controls.color.value" /></span></label>
+              <label class="check-row"><input type="checkbox" formControlName="isDelivery">
+                <span>حالة تسليم — عند تحويل الطلب إليها يُثبَّت توقيع رئيس القسم على ورقة التسليم</span></label>
             }
           </div>
           <footer class="modal-actions">
@@ -86,6 +88,8 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
     .segmented { justify-self: start; flex-wrap: wrap; }
     .color-row { display: flex; align-items: center; gap: 14px; }
     .color-row input { width: 56px; height: 40px; padding: 4px; cursor: pointer; }
+    .check-row { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; cursor: pointer; }
+    .check-row input { width: 18px; height: 18px; margin-top: 2px; }
   `]
 })
 export class MaintenanceSettingsPage {
@@ -111,7 +115,8 @@ export class MaintenanceSettingsPage {
   form = inject(FormBuilder).nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', Validators.maxLength(500)],
-    color: ['#3B82F6']
+    color: ['#3B82F6'],
+    isDelivery: [false]
   });
 
   constructor() {
@@ -137,7 +142,7 @@ export class MaintenanceSettingsPage {
 
   openForm(item: MaintenanceLookup | null) {
     this.editing.set(item); this.formError.set('');
-    this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6' });
+    this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6', isDelivery: !!item?.isDelivery });
     this.formOpen.set(true);
   }
 
@@ -149,7 +154,7 @@ export class MaintenanceSettingsPage {
     const meta = this.meta();
     const body: Partial<MaintenanceLookup> = { name: v.name.trim() };
     if (meta.description) body.description = v.description.trim();
-    if (meta.color) body.color = v.color.toUpperCase();
+    if (meta.color) { body.color = v.color.toUpperCase(); body.isDelivery = v.isDelivery; }
 
     const item = this.editing();
     this.saving.set(true); this.formError.set('');

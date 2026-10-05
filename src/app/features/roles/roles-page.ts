@@ -10,6 +10,7 @@ import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
 import { ConfirmService } from '../../shared/ui/confirm.service';
 import { PageActions } from '../../shared/ui/page-actions';
+import { normalizePlaceText } from '../../core/utils/places';
 
 type ModalType = 'create' | 'edit';
 
@@ -22,10 +23,11 @@ interface PermissionSection { key: string; title: string; groups: PermissionGrou
  */
 const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; title: string; names: string[] }[] }[] = [
   { key: 'vacations', title: 'الإجازات', groups: [
-    { key: 'vac-own', title: 'طلبات الإجازة', names: ['ViewVacations', 'CreateVacation', 'CancelVacation'] },
+    { key: 'vac-own', title: 'طلبات الإجازة', names: ['ViewVacations', 'CreateVacation', 'CancelVacation', 'PrintVacation'] },
     { key: 'vac-view', title: 'الاطلاع على إجازات الآخرين', names: ['ViewDepartmentVacations', 'ViewBranchVacations'] },
     { key: 'vac-approve', title: 'الموافقة على الإجازات', names: ['ApproveVacationFirst', 'ApproveVacationFinal'] },
-    { key: 'vacation-types', title: 'أنواع الإجازات', names: ['ViewVacationTypes', 'CreateVacationType', 'EditVacationType', 'DeleteVacationType'] }
+    { key: 'vacation-types', title: 'أنواع الإجازات', names: ['ViewVacationTypes', 'CreateVacationType', 'EditVacationType', 'DeleteVacationType'] },
+    { key: 'holidays', title: 'العطل الرسمية', names: ['ViewHolidays', 'CreateHoliday', 'EditHoliday', 'DeleteHoliday'] }
   ] },
   { key: 'tasks', title: 'المهام', groups: [
     { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'HandleUnitTasks'] },
@@ -38,7 +40,8 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
     { key: 'maint-lookups', title: 'جداول الصيانة (أنواع الأجهزة والشركات والأعطال والحالات)', names: ['ViewMaintenanceLookups', 'CreateMaintenanceLookup', 'EditMaintenanceLookup', 'DeleteMaintenanceLookup'] }
   ] },
   { key: 'general', title: 'عام', groups: [
-    { key: 'notifications', title: 'الإشعارات', names: ['ViewNotifications'] }
+    { key: 'notifications', title: 'الإشعارات', names: ['ViewNotifications'] },
+    { key: 'signature', title: 'التوقيع الإلكتروني', names: ['ManageMySignature'] }
   ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
     { key: 'devices', title: 'المواقع والأجهزة والتركيبات', names: ['ViewDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice'] }
@@ -70,6 +73,14 @@ export class RolesPage {
   private confirm = inject(ConfirmService);
 
   roles = signal<Role[]>([]);
+  /** بحث في الأدوار: باسم الدور، أو باسم صلاحية يملكها أو وصفها العربي (مثل «اعتماد» أو ApproveVacationFinal) */
+  search = signal('');
+  filteredRoles = computed(() => {
+    const q = normalizePlaceText(this.search());
+    if (!q) return this.roles();
+    const has = (text: string | null | undefined) => normalizePlaceText(text ?? '').includes(q);
+    return this.roles().filter(r => has(r.name) || (r.permissions ?? []).some(p => has(p.name) || has(p.description)));
+  });
   permissions = signal<Permission[]>([]);
   selectedRole = signal<Role | null>(null);
   activeModal = signal<ModalType | null>(null);

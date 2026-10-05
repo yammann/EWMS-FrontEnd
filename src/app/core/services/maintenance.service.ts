@@ -93,5 +93,6 @@ export class MaintenanceService {
 
   // ─────────── توقيعي (يُطبع على ورقة التسليم) ───────────
   mySignature() { return this.api.get<{ image: string | null }>('/Auth/Signature'); }
-  saveSignature(image: string | null) { return this.api.put<{ message: string }>('/Auth/Signature', { image }); }
+  /** نسخة توقيع جديدة (أو إيقاف التوقيع إن كانت null) — تحتاج كلمة مرور المستخدم */
+  saveSignature(image: string | null, password: string) { return this.api.put<{ message: string }>('/Auth/Signature', { image, password }); }
 }

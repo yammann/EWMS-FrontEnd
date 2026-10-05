@@ -109,8 +109,15 @@
         <h2>قائمة الأدوار</h2>
         <p>اضغط أيقونة التعديل لتغيير صلاحيات دور، أو الحذف لإزالته.</p>
       </div>
-      <span class="pill">{{ roles().length }} دور</span>
+      <span class="pill">{{ search() ? filteredRoles().length + ' من ' + roles().length : roles().length }} دور</span>
     </div>
+
+    @if (!loading() && roles().length) {
+      <div class="roles-search">
+        <input type="search" placeholder="بحث باسم الدور أو بصلاحية يملكها…" [value]="search()"
+               (input)="search.set($any($event.target).value)" aria-label="بحث في الأدوار">
+      </div>
+    }
 
     @if (loading()) {
       <div class="skeleton-list">
@@ -120,6 +127,9 @@
           </div>
         }
       </div>
+    } @else if (roles().length && !filteredRoles().length) {
+      <div class="empty-state"><p>لا توجد أدوار مطابقة لـ «{{ search() }}».</p>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="search.set('')">مسح البحث</button></div>
     } @else if (roles().length) {
       <div class="table-wrap">
         <table class="roles-table">
@@ -132,7 +142,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (role of roles(); track role.id) {
+            @for (role of filteredRoles(); track role.id) {
               <tr [class.selected]="selectedRole()?.id === role.id">
                 <td>
                   <div class="role-cell-name">

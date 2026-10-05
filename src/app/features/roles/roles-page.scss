@@ -291,3 +291,6 @@
   .permissions-grid { grid-template-columns: 1fr; }
   .permission-chips { display: none; }
 }
+/* بحث الأدوار */
+.roles-search { margin: 0 0 16px; }
+.roles-search input { width: 100%; max-width: 420px; }

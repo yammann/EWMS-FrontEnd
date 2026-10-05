@@ -12,8 +12,10 @@ export const AppPermission = {
   // كل صلاحية تحمل حدّها: ViewVacations = إجازاتي، وقسمي/فرعي بصلاحيتين منفصلتين، والموافقة مرحلتان لإجازات فرعه
   ViewVacations: 'ViewVacations', ViewDepartmentVacations: 'ViewDepartmentVacations', ViewBranchVacations: 'ViewBranchVacations',
   CreateVacation: 'CreateVacation', CancelVacation: 'CancelVacation',
-  ApproveVacationFirst: 'ApproveVacationFirst', ApproveVacationFinal: 'ApproveVacationFinal',
+  ApproveVacationFirst: 'ApproveVacationFirst', ApproveVacationFinal: 'ApproveVacationFinal', PrintVacation: 'PrintVacation',
   ViewVacationTypes: 'ViewVacationTypes', CreateVacationType: 'CreateVacationType', EditVacationType: 'EditVacationType', DeleteVacationType: 'DeleteVacationType',
+  // العطل الرسمية: لا تُحسب من مدة الإجازة (مع الجمعة)
+  ViewHolidays: 'ViewHolidays', CreateHoliday: 'CreateHoliday', EditHoliday: 'EditHoliday', DeleteHoliday: 'DeleteHoliday',
 
   // لوحات المتابعة: لوحة وحدة المستخدم وما تحتها
   ViewBranchDashboard: 'ViewBranchDashboard', ViewDepartmentDashboard: 'ViewDepartmentDashboard', ViewOfficeDashboard: 'ViewOfficeDashboard',
@@ -33,6 +35,8 @@ export const AppPermission = {
   ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
 
   ViewDepartmentMaintenance: 'ViewDepartmentMaintenance', SignMaintenanceReceipt: 'SignMaintenanceReceipt',
+  // التوقيع الإلكتروني: رفعه وتغييره بكلمة المرور، ويُحفظ مع القرارات الموقَّعة
+  ManageMySignature: 'ManageMySignature',
   ViewMaintenanceRequests: 'ViewMaintenanceRequests', CreateMaintenanceRequest: 'CreateMaintenanceRequest',
   EditMaintenanceRequest: 'EditMaintenanceRequest', ChangeMaintenanceStatus: 'ChangeMaintenanceStatus', ViewMaintenanceStats: 'ViewMaintenanceStats',
   DeleteMaintenanceRequest: 'DeleteMaintenanceRequest',

@@ -5,15 +5,17 @@ import { ToastService } from '../../shared/ui/toast.service';
 const WIDTH = 560, HEIGHT = 200;
 
 /**
- * توقيعي الإلكتروني (لرئيس القسم): يُرسم بالفأرة/اللمس أو تُرفع صورته، ويُطبع على ورقة تسليم طلب الصيانة.
- * يُحفظ PNG بخلفية شفافة وبحجم ثابت صغير.
+ * توقيعي الإلكتروني (ManageMySignature): يُرسم بالفأرة/اللمس أو تُرفع صورته، ويُحفظ PNG بخلفية شفافة وبحجم ثابت صغير.
+ * كل حفظ نسخة جديدة، والنسخة الحالية تُحفظ مع كل قرار أوقّعه (الاعتماد النهائي للإجازة، الرفض) فلا تتغير الأوراق القديمة.
+ * الحفظ والحذف يطلبان كلمة المرور (قرار المستخدم 2026-10-04).
  */
 @Component({
   selector: 'app-signature-panel', standalone: true,
   template: `
     <section class="panel">
-      <div class="panel-heading"><div><span class="panel-kicker">رئيس القسم</span><h2>توقيعي الإلكتروني</h2>
-        <p>يُطبع على ورقة تسليم الأجهزة بعد الصيانة. ارسم توقيعك في المربع أو ارفع صورته.</p></div></div>
+      <div class="panel-heading"><div><span class="panel-kicker">الهوية</span><h2>توقيعي الإلكتروني</h2>
+        <p>يُحفظ مع قراراتك الموقَّعة (الاعتماد النهائي للإجازات والرفض) ويُطبع على الأوراق. ارسم توقيعك في المربع أو ارفع صورته.
+          تغيير التوقيع لاحقاً لا يغيّر الأوراق التي وقّعتها سابقاً.</p></div></div>
 
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
@@ -23,11 +25,15 @@ const WIDTH = 560, HEIGHT = 200;
         @if (empty() && !loading()) { <span class="placeholder" aria-hidden="true">وقّع هنا</span> }
       </div>
 
+      <label class="form-field password">كلمة المرور (لتأكيد حفظ التوقيع أو حذفه)
+        <input type="password" autocomplete="current-password" [value]="password()" (input)="password.set($any($event.target).value)">
+      </label>
+
       <div class="actions">
-        <button type="button" class="btn" (click)="save()" [disabled]="saving() || loading() || !dirty()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ التوقيع' }}</button>
+        <button type="button" class="btn" (click)="save()" [disabled]="saving() || loading() || !dirty() || !password()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ التوقيع' }}</button>
         <label class="btn btn-ghost upload">رفع صورة<input type="file" accept="image/png,image/jpeg" (change)="upload($event)" hidden></label>
         <button type="button" class="btn btn-ghost" (click)="clear()" [disabled]="empty() || saving()">مسح</button>
-        @if (saved()) { <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="saving()">حذف التوقيع المحفوظ</button> }
+        @if (saved()) { <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="saving() || !password()">حذف التوقيع المحفوظ</button> }
         <span class="state">{{ loading() ? 'جارٍ التحميل…' : saved() ? (dirty() ? 'تعديلات غير محفوظة' : '✓ توقيعك محفوظ') : 'لا يوجد توقيع محفوظ' }}</span>
       </div>
     </section>`,
@@ -38,6 +44,7 @@ const WIDTH = 560, HEIGHT = 200;
     .placeholder { position: absolute; inset: 0; display: grid; place-items: center; color: #b8b8c0; font-size: 18px; pointer-events: none; }
     .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
     .upload { cursor: pointer; }
+    .password { max-width: 320px; margin-top: 14px; }
     .state { font-size: 12px; color: var(--ink-500); margin-inline-start: auto; }
   `]
 })
@@ -53,6 +60,7 @@ export class SignaturePanel {
   empty = signal(true);
   dirty = signal(false);
   saved = signal(false);
+  password = signal('');
 
   private drawing = false;
   private last: { x: number; y: number } | null = null;
@@ -129,15 +137,14 @@ export class SignaturePanel {
   }
 
   remove() {
-    this.ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    this.empty.set(true);
-    this.send(null, 'تم حذف التوقيع');
+    this.send(null, 'تم حذف التوقيع', () => { this.ctx.clearRect(0, 0, WIDTH, HEIGHT); this.empty.set(true); });
   }
 
-  private send(image: string | null, message: string) {
+  private send(image: string | null, message: string, done?: () => void) {
+    if (!this.password()) { this.error.set('أدخل كلمة المرور لتأكيد التغيير'); return; }
     this.saving.set(true); this.error.set('');
-    this.service.saveSignature(image).subscribe({
-      next: () => { this.saving.set(false); this.saved.set(!!image); this.dirty.set(false); this.toast.success(message); },
+    this.service.saveSignature(image, this.password()).subscribe({
+      next: () => { this.saving.set(false); this.saved.set(!!image); this.dirty.set(false); this.password.set(''); done?.(); this.toast.success(message); },
       error: e => { this.saving.set(false); this.error.set(e.message); }
     });
   }

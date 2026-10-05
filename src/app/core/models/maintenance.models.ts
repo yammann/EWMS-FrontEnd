@@ -4,6 +4,8 @@ export interface MaintenanceLookup {
   name: string;
   description?: string;
   color?: string;
+  /** حالات الطلب فقط: دخولها يثبّت موقّع ورقة التسليم وتوقيعه */
+  isDelivery?: boolean;
 }
 
 export type MaintenanceStatus = MaintenanceLookup & { color: string };
@@ -131,8 +133,12 @@ export interface MaintenanceActivity {
 
 export interface MaintenancePrint {
   request: MaintenanceRequest;
+  /** بعد التسليم: الموقّع كما ثُبِّت لحظة التسليم؛ قبله: الموقّع المتوقع */
   managerName: string;
+  /** التوقيع المثبَّت لحظة التسليم (null قبل التسليم، أو إن لم يكن للموقّع توقيع وقتها) */
   managerSignature: string | null;
+  delivered: boolean;
+  deliveredAt: string | null;
 }
 
 export interface MaintenanceCount { id: number; name: string; color: string | null; count: number; }

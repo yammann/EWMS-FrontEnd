@@ -16,6 +16,11 @@ export const routes: Routes = [
     path: 'maintenance/print/:id/:kind', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests },
     loadComponent: () => import('./features/maintenance/request-print-page').then(m => m.MaintenancePrintPage)
   },
+  // نموذج طلب الإجازة الورقي — خارج الإطار العام
+  {
+    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation },
+    loadComponent: () => import('./features/vacations/vacation-print-page').then(m => m.VacationPrintPage)
+  },
   {
     path: '',
     component: MainLayout,
@@ -95,6 +100,10 @@ export const routes: Routes = [
       {
         path: 'vacation-types', canActivate: [permissionGuard], data: { anyPermission: MANAGE_VACATION_TYPES },
         loadComponent: () => import('./features/vacations/vacation-types-page').then(m => m.VacationTypesPage)
+      },
+      {
+        path: 'vacations/holidays', canActivate: [permissionGuard], data: { permission: AppPermission.ViewHolidays },
+        loadComponent: () => import('./features/vacations/holidays-page').then(m => m.HolidaysPage)
       },
 
       // إدارة الهيكل والمستخدمين: الصفحة تُفتح بصلاحية العرض، وأزرار الإضافة/التعديل/الحذف كلٌّ بصلاحيته
