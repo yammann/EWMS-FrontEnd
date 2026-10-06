@@ -81,6 +81,14 @@ export const routes: Routes = [
             loadComponent: () => import('./features/maintenance/devices-page').then(m => m.MaintenanceDevicesPage)
           },
           {
+            path: 'parts', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSpareParts },
+            loadComponent: () => import('./features/maintenance/spare-parts-page').then(m => m.MaintenanceSparePartsPage)
+          },
+          {
+            path: 'parts/report', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSparePartReports },
+            loadComponent: () => import('./features/maintenance/spare-parts-report-page').then(m => m.MaintenanceSparePartsReportPage)
+          },
+          {
             path: 'tasks', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceTasks },
             loadComponent: () => import('./features/maintenance/tasks-page').then(m => m.MaintenanceTasksPage)
           },

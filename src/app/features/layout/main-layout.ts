@@ -69,6 +69,8 @@ export class MainLayout {
       { id: 'maintenance', title: 'الصيانة', items: [
         can(AppPermission.ViewMaintenanceRequests) && { path: '/maintenance/requests', label: 'طلبات الصيانة', icon: 'wrench' },
         can(AppPermission.ViewMaintenanceDevices) && { path: '/maintenance/devices', label: 'أجهزة الصيانة', icon: 'device' },
+        can(AppPermission.ViewSpareParts) && { path: '/maintenance/parts', label: 'قطع الغيار', icon: 'box', exact: true },
+        can(AppPermission.ViewSparePartReports) && { path: '/maintenance/parts/report', label: 'تقارير قطع الغيار', icon: 'chart' },
         can(AppPermission.ViewMyMaintenanceRequests) && { path: '/maintenance/mine', label: 'أجهزتي في الصيانة', icon: 'user' },
         can(AppPermission.ViewMaintenanceTasks) && { path: '/maintenance/tasks', label: 'مهام الصيانة', icon: 'clipboard' },
         can(AppPermission.ViewMaintenanceStats) && { path: '/maintenance/stats', label: 'إحصائيات الصيانة', icon: 'chart' },

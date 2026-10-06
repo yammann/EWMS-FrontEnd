@@ -7,6 +7,7 @@ import {
   MaintenanceRequestFilter, MaintenanceRequestInput, MaintenanceStats, MaintenanceTask, MaintenanceTaskInput,
   PagedResult, TechnicianOption
 } from '../models/maintenance.models';
+import { NamedRef, RequestParts, SparePart, SparePartFilter, SparePartInput, SparePartMovement, SparePartReport } from '../models/spare-part.models';
 
 function query(params: object): string {
   const q = new URLSearchParams();
@@ -50,7 +51,15 @@ export class MaintenanceService {
       deleteDevice: has(AppPermission.DeleteMaintenanceDevice),
       createLookup: has(AppPermission.CreateMaintenanceLookup),
       editLookup: has(AppPermission.EditMaintenanceLookup),
-      deleteLookup: has(AppPermission.DeleteMaintenanceLookup)
+      deleteLookup: has(AppPermission.DeleteMaintenanceLookup),
+      viewParts: has(AppPermission.ViewSpareParts),
+      createPart: has(AppPermission.CreateSparePart),
+      editPart: has(AppPermission.EditSparePart),
+      deletePart: has(AppPermission.DeleteSparePart),
+      receiveParts: has(AppPermission.ReceiveSpareParts),
+      adjustParts: has(AppPermission.AdjustSparePartStock),
+      issueParts: has(AppPermission.IssueSparePart),
+      viewPartReports: has(AppPermission.ViewSparePartReports)
     };
   });
 
@@ -129,6 +138,35 @@ export class MaintenanceService {
   deleteLookup(kind: MaintenanceLookupKind, id: number) {
     return this.api.delete<{ message: string }>(`${MAINTENANCE_LOOKUPS[kind].api}/Delete/${id}`);
   }
+
+  // ─────────── مخزون قطع الغيار (مخزون لكل قسم) ───────────
+  /** الأقسام التي أدير مخزونها (قسمي، ومدير النظام كلها) */
+  partDepartments() { return this.api.get<NamedRef[]>('/SpareParts/Departments'); }
+  parts(filter: SparePartFilter) { return this.api.get<PagedResult<SparePart>>('/SpareParts/GetAll' + query(filter)); }
+  part(id: number) { return this.api.get<SparePart>(`/SpareParts/Get/${id}`); }
+  createPart(body: SparePartInput) { return this.api.post<SparePart>('/SpareParts/Create', body); }
+  updatePart(id: number, body: SparePartInput) { return this.api.put<SparePart>(`/SpareParts/Update/${id}`, body); }
+  deletePart(id: number) { return this.api.delete<{ message: string }>(`/SpareParts/Delete/${id}`); }
+  receivePart(id: number, body: { quantity: number; unitCost: number; date: string | null; source: string }) {
+    return this.api.post<SparePart>(`/SpareParts/Receive/${id}`, body);
+  }
+  adjustPart(id: number, body: { delta: number; reason: string }) { return this.api.post<SparePart>(`/SpareParts/Adjust/${id}`, body); }
+  partMovements(id: number, page = 1, pageSize = 20) {
+    return this.api.get<PagedResult<SparePartMovement>>(`/SpareParts/Movements/${id}` + query({ page, pageSize }));
+  }
+  partReport(filter: { departmentId?: number | null; from?: string; to?: string }) {
+    return this.api.get<SparePartReport>('/SpareParts/Report' + query(filter));
+  }
+  /** قطع الطلب وتكلفة الجهاز على مدى عمره */
+  requestParts(requestId: number) { return this.api.get<RequestParts>(`/SpareParts/Request/${requestId}`); }
+  /** قطع مخزون قسم الطلب المتوفرة (المتوافقة مع الجهاز أولاً) */
+  availableParts(requestId: number, search: string) {
+    return this.api.get<SparePart[]>(`/SpareParts/Request/${requestId}/Available` + query({ search }));
+  }
+  issuePart(requestId: number, body: { sparePartId: number; quantity: number }) {
+    return this.api.post<RequestParts>(`/SpareParts/Request/${requestId}/Issue`, body);
+  }
+  returnPart(requestPartId: number) { return this.api.delete<RequestParts>(`/SpareParts/RequestPart/${requestPartId}`); }
 
   // ─────────── توقيعي (يُطبع على ورقة التسليم) ───────────
   mySignature() { return this.api.get<{ image: string | null }>('/Auth/Signature'); }
