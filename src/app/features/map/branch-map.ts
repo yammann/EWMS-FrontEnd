@@ -2,7 +2,8 @@ import { Component, DestroyRef, ElementRef, afterNextRender, computed, inject, s
 import { Router, RouterLink } from '@angular/router';
 import { DeviceService, formatCoords } from '../../core/services/device.service';
 import { BranchMap, MapBranchOption, MapSite } from '../../core/models/device.models';
-import { GovernorateFeature, governorateOf } from '../../core/utils/geo';
+import { GovernorateFeature } from '../../core/utils/geo';
+import { ToastService } from '../../shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */
@@ -28,6 +29,7 @@ let lastView: { branchId: number; focus: string | null } | null = null;
 export class BranchMapComponent {
   private service = inject(DeviceService);
   private router = inject(Router);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   private pinned = viewChild<ElementRef<HTMLElement>>('pinned');
   private sheet = viewChild<ElementRef<HTMLElement>>('sheet');
@@ -43,13 +45,10 @@ export class BranchMapComponent {
 
   layer = computed(() => this.data()?.devicesLayer ?? null);
 
-  /** المحافظة (code) لكل موقع — من إحداثياته */
+  /** المحافظة (code) لكل موقع — يحددها الخادم من الإحداثيات ويحفظها مع الموقع (مصدر واحد) */
   private siteGov = computed(() => {
     const result = new Map<number, string>();
-    for (const s of this.layer()?.sites ?? []) {
-      const gov = governorateOf(s.latitude, s.longitude, this.features());
-      if (gov) result.set(s.id, gov.properties.code);
-    }
+    for (const s of this.layer()?.sites ?? []) if (s.governorateCode) result.set(s.id, s.governorateCode);
     return result;
   });
 
@@ -173,8 +172,12 @@ export class BranchMapComponent {
     lastView = { branchId: this.branchId(), focus: code };
   }
 
-  /** صفحة تفاصيل الموقع */
+  /** صفحة تفاصيل الموقع — لمن يملك عرض توثيق الأجهزة فقط (الخريطة وحدها لا تكفي لفتحها) */
   openSite(id: number) {
+    if (!this.service.access().canView) {
+      this.toast.info('تفاصيل المواقع وأجهزتها تحتاج صلاحية عرض توثيق الأجهزة');
+      return;
+    }
     this.router.navigate(['/devices/sites', id]);
   }
 

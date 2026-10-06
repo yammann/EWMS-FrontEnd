@@ -47,7 +47,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
     { key: 'signature', title: 'التوقيع الإلكتروني', names: ['ManageMySignature'] }
   ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
-    { key: 'devices', title: 'المواقع والأجهزة والتركيبات', names: ['ViewDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice'] }
+    { key: 'devices', title: 'المواقع والأجهزة والتركيبات', names: ['ViewDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
   ] },
   { key: 'dashboards', title: 'لوحات المتابعة', groups: [
     { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard', 'ViewBranchMap'] }

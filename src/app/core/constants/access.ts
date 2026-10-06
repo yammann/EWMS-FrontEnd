@@ -33,6 +33,8 @@ export const AppPermission = {
 
   // توثيق الأجهزة (Devices/MyAccess يعيد نفس النتيجة من صلاحيات الدور)
   ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
+  // إظهار كلمات سر الأجهزة ونسخها (يُسجَّل كل إظهار) — مستقلة عن العرض
+  RevealDevicePasswords: 'RevealDevicePasswords',
 
   ViewDepartmentMaintenance: 'ViewDepartmentMaintenance', SignMaintenanceReceipt: 'SignMaintenanceReceipt',
   // التوقيع الإلكتروني: رفعه وتغييره بكلمة المرور، ويُحفظ مع القرارات الموقَّعة
@@ -77,7 +79,7 @@ export const VACATION_STATS: readonly AppPermissionName[] = [AppPermission.ViewD
 export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
   AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser, AppPermission.HandleUnitTasks
 ];
-/** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس DeviceAccessService في الباكاند) */
+/** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس سياسة AnyDeviceView في الباكاند) */
 export const DEVICE_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
 ];

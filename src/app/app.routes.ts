@@ -47,7 +47,7 @@ export const routes: Routes = [
 
       // توثيق الأجهزة: الحماية بصلاحيات الدور، مثل بقية الخدمات.
       {
-        // من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس DeviceAccessService في الباكاند)
+        // من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس سياسة AnyDeviceView في الباكاند)
         path: 'devices', canActivate: [permissionGuard],
         data: { anyPermission: DEVICE_ACCESS },
         children: [

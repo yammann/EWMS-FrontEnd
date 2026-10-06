@@ -2,7 +2,6 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { DeviceService, formatCoords } from '../../core/services/device.service';
 import { CoordinatePicker, Coordinates } from '../map/coordinate-picker';
 import { Site } from '../../core/models/device.models';
@@ -10,10 +9,12 @@ import { GOVERNORATES } from '../../core/constants/governorates';
 import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
 import { ConfirmService } from '../../shared/ui/confirm.service';
+import { formatPhone, isValidPhone, normalizePhone } from '../../core/utils/phone';
+import { DeviceHistory } from './device-ui';
 
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */
 @Component({
-  selector: 'app-sites-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, CoordinatePicker, Modal],
+  selector: 'app-sites-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -28,7 +29,7 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
       @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
       <div class="toolbar">
-        <input class="search" type="search" placeholder="بحث باسم الموقع أو الوصف…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="بحث">
+        <input class="search" type="search" placeholder="بحث باسم الموقع أو الوصف أو المسؤول…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="بحث">
         <select [value]="governorate()" (change)="setGovernorate($any($event.target).value)" aria-label="تصفية حسب المحافظة">
           <option value="">كل المحافظات</option>
           @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
@@ -41,21 +42,23 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
         @else if (!filtered().length) { <p class="empty-state">{{ search() || governorate() ? 'لا توجد نتائج' : 'لا توجد مواقع بعد' }}</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>الموقع</th><th>المحافظة</th><th>الإحداثيات</th><th>الوصف</th><th>الأجهزة المركّبة</th>@if (access().canEdit || access().canDelete) { <th class="actions-th"></th> }</tr></thead>
+            <thead><tr><th>الموقع</th><th>المحافظة</th><th>الإحداثيات</th><th>المسؤول</th><th>الأجهزة المركّبة</th><th class="actions-th"></th></tr></thead>
             <tbody>
               @for (s of filtered(); track s.id) {
                 <tr>
-                  <td><a class="cell-link cell-strong" [routerLink]="['/devices/sites', s.id]" title="تفاصيل الموقع">{{ s.name }}</a></td>
+                  <td><a class="cell-link cell-strong" [routerLink]="['/devices/sites', s.id]" title="تفاصيل الموقع">{{ s.name }}</a>@if (s.description) { <small>{{ s.description }}</small> }</td>
                   <td>{{ s.governorateName || "—" }}</td>
                   <td>@if (coords(s.latitude, s.longitude); as c) { <span class="mono">{{ c }}</span> } @else { <span class="missing">⚠ بلا إحداثيات</span> }</td>
-                  <td class="wrap">{{ s.description || '—' }}</td>
-                  <td><a class="cell-link" [routerLink]="['/devices/installations']" [queryParams]="{ siteId: s.id }">{{ deviceCounts().get(s.id) ?? 0 }} جهاز ←</a></td>
-                  @if (access().canEdit || access().canDelete) {
-                    <td><div class="row-actions">
-                      @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(s)">تعديل</button> }
-                      @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(s)">حذف</button> }
-                    </div></td>
-                  }
+                  <td>@if (s.contactName || s.contactPhone || s.responsibleParty) {
+                      {{ s.contactName || '—' }}@if (s.contactPhone) { <small class="mono" dir="ltr">{{ phone(s.contactPhone) }}</small> }@if (s.responsibleParty) { <small>{{ s.responsibleParty }}</small> }
+                    } @else { <span class="muted-cell">—</span> }</td>
+                  <td><a class="cell-link" [routerLink]="['/devices/installations']" [queryParams]="{ siteId: s.id }">{{ s.installationsCount }} تركيب ←</a>
+                    @if (s.installationsCount !== s.activeInstallationsCount) { <small>{{ s.activeInstallationsCount }} يعمل</small> }</td>
+                  <td><div class="row-actions">
+                    <button class="btn btn-ghost btn-sm" type="button" (click)="history.set(s)">السجل</button>
+                    @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(s)">تعديل</button> }
+                    @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(s)">حذف</button> }
+                  </div></td>
                 </tr>
               }
             </tbody>
@@ -71,6 +74,12 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
               @if (formError()) { <p class="alert alert-error" role="alert">{{ formError() }}</p> }
               <label class="form-field"><span class="form-label">اسم الموقع</span><input formControlName="name" maxlength="100"></label>
               <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="2" maxlength="500"></textarea></label>
+              <div class="form-grid-2">
+                <label class="form-field"><span class="form-label">مسؤول الموقع <small class="hint">(اختياري)</small></span><input formControlName="contactName" maxlength="100"></label>
+                <label class="form-field"><span class="form-label">هاتف المسؤول <small class="hint">(اختياري)</small></span><input formControlName="contactPhone" dir="ltr" maxlength="20" inputmode="tel" placeholder="0933 123 456">
+                  @if (form.controls.contactPhone.invalid) { <small class="form-error">رقم غير صحيح — جوال 09 ثم 8 أرقام، أو أرضي مع رمز المحافظة</small> }</label>
+                <label class="form-field full"><span class="form-label">الجهة المسؤولة <small class="hint">(اختياري — فرع أو قسم أو جهة خارجية)</small></span><input formControlName="responsibleParty" maxlength="150"></label>
+              </div>
               <div class="form-field"><span class="form-label">مكان الموقع على الخريطة <small class="hint">(تُحدَّد المحافظة تلقائياً من النقطة)</small></span>
                 <app-coordinate-picker [latitude]="form.value.latitude ?? null" [longitude]="form.value.longitude ?? null" (picked)="setCoords($event)" />
               </div>
@@ -82,7 +91,10 @@ import { ConfirmService } from '../../shared/ui/confirm.service';
           </form>
       </app-modal>
     }
-`
+
+    @if (history(); as h) { <app-device-history kind="site" [entityId]="h.id" [title]="h.name" (closed)="history.set(null)" /> }
+`,
+  styles: [`td small { display: block; color: var(--ink-500); }`]
 })
 export class SitesPage {
   private service = inject(DeviceService);
@@ -91,10 +103,11 @@ export class SitesPage {
   private router = inject(Router);
   access = this.service.access;
   coords = formatCoords;
+  phone = formatPhone;
 
   sites = signal<Site[]>([]);
   governorates = GOVERNORATES;
-  deviceCounts = signal(new Map<number, number>());
+  history = signal<Site | null>(null);
   search = signal('');
   governorate = signal('');
   loading = signal(false); saving = signal(false);
@@ -105,7 +118,7 @@ export class SitesPage {
     const q = this.search().trim().toLowerCase();
     const governorate = this.governorate();
     return this.sites().filter(s => (!governorate || s.governorateCode === governorate)
-      && (!q || s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q)));
+      && (!q || [s.name, s.description, s.contactName, s.responsibleParty].some(f => (f ?? '').toLowerCase().includes(q))));
   });
 
   form = inject(FormBuilder).group({
@@ -113,7 +126,10 @@ export class SitesPage {
     description: ['', Validators.maxLength(500)],
     // الإحداثيات إجبارية (خريطة سوريا) — تُحدَّد بالنقر على الخريطة أو يدوياً
     latitude: [null as number | null, Validators.required],
-    longitude: [null as number | null, Validators.required]
+    longitude: [null as number | null, Validators.required],
+    contactName: ['', Validators.maxLength(100)],
+    contactPhone: ['', (c: { value: string | null }) => isValidPhone(c.value ?? '') ? null : { phone: true }],
+    responsibleParty: ['', Validators.maxLength(150)]
   });
 
   setCoords(c: Coordinates) { this.form.patchValue(c); }
@@ -130,25 +146,24 @@ export class SitesPage {
 
   load() {
     this.loading.set(true); this.error.set('');
-    forkJoin({ sites: this.service.sites(), installations: this.service.installations() }).subscribe({
-      next: r => {
-        this.sites.set(r.sites);
-        this.deviceCounts.set(this.service.countBy(r.installations, i => i.siteId));
-        this.loading.set(false);
-      },
+    this.service.sites().subscribe({
+      next: sites => { this.sites.set(sites); this.loading.set(false); },
       error: e => { this.error.set(e.message); this.loading.set(false); }
     });
   }
 
   openForm(s: Site | null) {
     this.editing.set(s); this.formError.set('');
-    this.form.reset({ name: s?.name ?? '', description: s?.description ?? '', latitude: s?.latitude ?? null, longitude: s?.longitude ?? null });
+    this.form.reset({
+      name: s?.name ?? '', description: s?.description ?? '', latitude: s?.latitude ?? null, longitude: s?.longitude ?? null,
+      contactName: s?.contactName ?? '', contactPhone: s?.contactPhone ?? '', responsibleParty: s?.responsibleParty ?? ''
+    });
     this.formOpen.set(true);
   }
 
   closeForm() { if (!this.saving()) this.formOpen.set(false); }
   async askDelete(s: Site) {
-    if (!await this.confirm.ask(`حذف الموقع «${s.name}»؟ لا يمكن حذف موقع مركّب فيه أجهزة.`, 'حذف')) return;
+    if (!await this.confirm.ask(`حذف الموقع «${s.name}»؟ لا يمكن حذف موقع فيه تركيبات.`, 'حذف')) return;
     this.service.deleteSite(s.id).subscribe({
       next: () => { this.toast.success('تم الحذف'); this.load(); },
       error: e => this.toast.error(e.message)
@@ -159,8 +174,12 @@ export class SitesPage {
   save() {
     if (this.form.invalid || this.saving()) return;
     const v = this.form.getRawValue();
-    const body = { name: (v.name ?? '').trim(), description: (v.description ?? '').trim(), latitude: v.latitude!, longitude: v.longitude! };
     const s = this.editing();
+    const body = {
+      name: (v.name ?? '').trim(), description: (v.description ?? '').trim(), latitude: v.latitude!, longitude: v.longitude!,
+      contactName: (v.contactName ?? '').trim(), contactPhone: normalizePhone(v.contactPhone ?? ''), responsibleParty: (v.responsibleParty ?? '').trim(),
+      rowVersion: s?.rowVersion ?? null
+    };
     this.saving.set(true); this.formError.set('');
     (s ? this.service.updateSite(s.id, body) : this.service.createSite(body)).subscribe({
       next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
