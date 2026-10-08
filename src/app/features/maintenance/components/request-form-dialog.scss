@@ -1,0 +1,24 @@
+.group { border: 0; padding: 0; margin: 0 0 18px; min-width: 0; }
+.group:last-child { margin-bottom: 0; }
+.group legend { padding: 0; margin-bottom: 10px; font-size: 12px; font-weight: 700; color: var(--brand-700); }
+.with-btn { display: flex; gap: 8px; align-items: center; }
+.suggest-wrap { position: relative; flex: 1; min-width: 0; }
+.suggest-wrap input { width: 100%; }
+.suggest { position: absolute; z-index: 30; inset-inline: 0; top: calc(100% + 4px); margin: 0; padding: 6px; list-style: none; max-height: 280px; overflow: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
+.suggest button { width: 100%; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: baseline; padding: 8px 12px; text-align: start; background: transparent; color: inherit; font-weight: 400; box-shadow: none; border-radius: var(--radius-md); min-height: 0; }
+.suggest button:hover:not(:disabled) { background: var(--fill); transform: none; box-shadow: none; }
+.suggest .sn { font-weight: 800; color: var(--ink-900); }
+.suggest .sg-meta { font-size: 13px; color: var(--ink-700); }
+.suggest small { grid-column: 1 / -1; color: var(--ink-500); font-size: 11.5px; }
+.with-btn input { flex: 1; min-width: 0; }
+.device-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px;
+  border-radius: var(--radius-lg); background: var(--brand-50); }
+.device-info { display: grid; gap: 2px; min-width: 0; }
+.device-info .serial { font-size: 12px; color: var(--brand-800); font-weight: 700; }
+.device-info small { color: var(--ink-500); }
+.not-found { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
+.top-gap { margin-top: 12px; }
+.matches { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.ext-note { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+.footer-note { margin-inline-end: auto; font-size: 12px; color: var(--ink-500); }

@@ -29,19 +29,7 @@ import { WorkTaskCard } from '@features/work-tasks';
     } @else {
       <p class="empty-inline">{{ emptyText() }}</p>
     }`,
-  styles: [`
-    .task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-    .task-card { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: inherit; text-decoration: none; transition: border-color .15s ease, box-shadow .15s ease; }
-    .task-card:hover { border-color: var(--brand-500); box-shadow: var(--shadow-md); }
-    .task-card:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
-    .task-icon { flex: none; width: 40px; height: 40px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--brand-50); font-size: 20px; }
-    .task-text { flex: 1; display: grid; gap: 4px; min-width: 0; }
-    .task-text strong { font-size: 14px; color: var(--ink-900); }
-    .task-text span { font-size: 12px; color: var(--ink-500); line-height: 1.6; overflow-wrap: anywhere; }
-    .task-text small { font-size: 11px; color: var(--ink-400); }
-    .task-go { color: var(--brand-600); font-weight: 800; align-self: center; }
-    .empty-inline { margin: 0; padding: 18px; text-align: center; color: var(--ink-400); font-size: 13px; border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
-  `]
+  styleUrl: './dashboard-widgets-task-cards.scss'
 })
 export class TaskCards {
   tasks = input.required<WorkTaskCard[]>();
@@ -93,37 +81,7 @@ export class ActionsTable {
 /** جدول إجازات مختصر (بانتظار القرار / في إجازة الآن وقريباً / آخر طلباتي) */
 @Component({
   selector: 'app-vacation-rows', standalone: true, imports: [CommonModule],
-  template: `
-    @if (rows().length) {
-      <div class="table-wrap"><table class="compact">
-        <thead><tr>
-          @if (showEmployee()) { <th>الموظف</th> }
-          @if (showDepartment()) { <th>القسم</th> }
-          @if (showOffice()) { <th>المكتب</th> }
-          <th>النوع</th><th>الفترة</th><th>الأيام</th>
-          @if (showStatus()) { <th>الحالة</th> }
-        </tr></thead>
-        <tbody>
-          @for (v of rows(); track v.id) {
-            <tr>
-              @if (showEmployee()) { <td><strong class="cell-strong">{{ v.employeeName }}</strong></td> }
-              @if (showDepartment()) { <td>{{ v.departmentName }}</td> }
-              @if (showOffice()) { <td>{{ v.officeName || '—' }}</td> }
-              <td>{{ v.vacationTypeName }}<small>{{ v.paymentStatusAr }}</small></td>
-              <td class="nowrap">{{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }}
-                @if (isNow(v)) { <small class="now">في إجازة الآن</small> }
-              </td>
-              <td>{{ v.vacDayCount }}</td>
-              @if (showStatus()) {
-                <td><span class="status-badge" [class.status-active]="v.status === 'Approved'" [class.status-pending]="v.status.startsWith('Pending')" [class.status-rejected]="v.status === 'Rejected'" [class.status-draft]="v.status === 'Cancelled'"><span class="status-badge-dot"></span>{{ v.statusAr }}</span></td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table></div>
-    } @else {
-      <p class="empty-inline">{{ emptyText() }}</p>
-    }`,
+  templateUrl: './dashboard-widgets-vacation-rows.html',
   styleUrl: '../styles/dashboard-table.scss'
 })
 export class VacationRows {

@@ -1,0 +1,59 @@
+  <div class="page">
+    <app-page-header eyebrow="الصيانة" heading="إحصائيات الصيانة" subtitle="أرقام الطلبات والمهام ضمن نطاقك">
+<button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </app-page-header>
+
+    <app-alert [message]="error()" />
+
+    @if (stats(); as s) {
+      <section class="stats-4" aria-label="ملخص">
+        <app-stat-tile label="طلبات الصيانة" [value]="s.totalRequests" icon="🧾" tone="green" [hint]="s.requestsThisMonth + ' هذا الشهر'" />
+        <app-stat-tile label="متوسط مدة الإصلاح" [value]="hours(s.averageRepairHours)" icon="⏱" tone="blue" hint="من بدء العمل إلى الإنجاز" />
+        <app-stat-tile label="مهام الصيانة" [value]="s.totalTasks" icon="🛠" tone="purple" [hint]="s.tasksThisMonth + ' هذا الشهر'" />
+        <app-stat-tile label="الفنيون" [value]="s.byTechnician.length" icon="👥" tone="orange" hint="لهم طلبات مسجّلة" />
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><div><h2>الطلبات حسب الحالة</h2></div></div>
+        <app-maint-bars [items]="s.byStatus" [limit]="20" />
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><div><h2>الطلبات المستلمة في آخر 6 أشهر</h2></div></div>
+        <div class="months" role="img" [attr.aria-label]="monthsLabel()">
+          @for (m of s.monthly; track m.year + '-' + m.month) {
+            <div class="month" [attr.title]="monthName(m.month) + ' ' + m.year + ': ' + m.count">
+              <span class="n">{{ m.count }}</span>
+              <span class="col"><span [style.height.%]="100 * m.count / monthMax()"></span></span>
+              <span class="m">{{ monthName(m.month) }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><div><h2>الطلبات حسب الفني</h2></div></div>
+        <app-maint-bars [items]="s.byTechnician" [limit]="12" />
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><div><h2>أكثر الأعطال تكراراً</h2></div></div>
+        <app-maint-bars [items]="s.byDamageType" />
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><div><h2>الطلبات حسب نوع الجهاز</h2></div></div>
+        <app-maint-bars [items]="s.byDeviceType" />
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><div><h2>الطلبات حسب الشركة المصنّعة</h2></div></div>
+        <app-maint-bars [items]="s.byCompany" />
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><div><h2>مهام الصيانة حسب الموظف</h2></div></div>
+        <app-maint-bars [items]="s.tasksByUser" [limit]="12" />
+      </section>
+    } @else if (loading()) { <app-empty-state panel>جارٍ التحميل…</app-empty-state> }
+  </div>

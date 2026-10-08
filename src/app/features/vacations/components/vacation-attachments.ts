@@ -11,49 +11,8 @@ import { Modal } from '@shared/ui/modal';
  */
 @Component({
   selector: 'app-vacation-attachments', standalone: true, imports: [Modal],
-  template: `
-    @if (attachments().length) {
-      <div class="att">
-        <span class="label">المرفقات ({{ attachments().length }})</span>
-        <div class="chips">
-          @for (a of attachments(); track a.id) {
-            <button type="button" class="chip" (click)="open(a)" [title]="'عرض ' + a.fileName">
-              <span aria-hidden="true">{{ a.contentType === 'application/pdf' ? '📄' : '🖼' }}</span>
-              <span class="name">{{ a.fileName }}</span><span class="size">{{ size(a.size) }}</span>
-            </button>
-          }
-        </div>
-      </div>
-    }
-
-    @if (current(); as a) {
-      <app-modal [heading]="a.fileName" size="lg" (closed)="close()">
-        <div class="modal-body viewer">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
-          @else if (!url()) { <p class="muted" role="status">جارٍ التحميل…</p> }
-          @else if (a.contentType === 'application/pdf') { <iframe [src]="safeUrl()" title="معاينة الملف"></iframe> }
-          @else { <img [src]="safeUrl()" [alt]="a.fileName"> }
-        </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close()">إغلاق</button>
-          <button type="button" (click)="download(a)" [disabled]="!url()">تنزيل</button>
-        </footer>
-      </app-modal>
-    }`,
-  styles: [`
-    .att { display: grid; gap: 6px; margin: 8px 0; }
-    .label { font-size: 12px; color: var(--ink-500); font-weight: 700; }
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; max-width: 100%; padding: 0 10px;
-      border-radius: 999px; background: var(--fill); color: var(--ink-800); font-size: 12px; font-weight: 600; box-shadow: none; }
-    .chip:hover:not(:disabled) { transform: none; background: var(--fill-strong); box-shadow: none; }
-    .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
-    .size { color: var(--ink-500); font-weight: 400; }
-    .viewer { display: grid; place-items: center; min-height: 320px; }
-    .viewer iframe { width: 100%; height: 70vh; border: 0; border-radius: var(--radius-md); background: #fff; }
-    .viewer img { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); }
-    .muted { color: var(--ink-500); }
-  `]
+  templateUrl: './vacation-attachments.html',
+  styleUrl: './vacation-attachments.scss'
 })
 export class VacationAttachments implements OnDestroy {
   private service = inject(VacationService);

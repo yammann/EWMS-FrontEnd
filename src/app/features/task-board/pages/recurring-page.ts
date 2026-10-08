@@ -85,54 +85,7 @@ export class TemplateDialog implements OnInit {
 /** نافذة مهمة دورية: قالب + جهة + جدول */
 @Component({
   selector: 'app-recurrence-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
-  template: `
-    <app-modal [heading]="recurrence() ? 'تعديل المهمة الدورية' : 'مهمة دورية جديدة'" size="lg" [busy]="saving()" (closed)="closed.emit()">
-      <form (ngSubmit)="save()">
-        <div class="modal-body form-stack">
-          <app-alert [message]="error()" />
-          <label class="form-field"><span class="form-label">القالب</span>
-            <select name="template" [(ngModel)]="templateId">
-              <option [ngValue]="0">اختر قالباً</option>
-              @for (t of templates(); track t.id) { <option [ngValue]="t.id">{{ t.name }} — {{ t.title }}</option> }
-            </select>
-            @if (!templates().length) { <small class="form-hint">أنشئ قالباً أولاً من قائمة القوالب.</small> }</label>
-
-          @if (kinds().length > 1) {
-            <label class="form-field"><span class="form-label">نوع الجهة</span>
-              <select name="kind" [ngModel]="kind()" (ngModelChange)="chooseKind($event)">
-                @for (k of kinds(); track k) { <option [value]="k">{{ targetLabel[k] }}</option> }
-              </select></label>
-          }
-          <label class="form-field"><span class="form-label">إسناد إلى {{ targetLabel[kind()] }}</span>
-            <select name="target" [(ngModel)]="targetId">
-              <option [ngValue]="0">{{ loadingTargets() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel[kind()] }}</option>
-              @for (t of targets(); track t.id) { <option [ngValue]="t.id">{{ t.name }}</option> }
-            </select></label>
-
-          <div class="two">
-            <label class="form-field"><span class="form-label">التكرار</span>
-              <select name="frequency" [(ngModel)]="frequency">
-                <option [ngValue]="1">{{ freq[1] }}</option><option [ngValue]="2">{{ freq[2] }}</option><option [ngValue]="3">{{ freq[3] }}</option>
-              </select></label>
-            @if (frequency === 2) {
-              <label class="form-field"><span class="form-label">يوم الأسبوع</span>
-                <select name="dow" [(ngModel)]="dayOfWeek">@for (d of weekDays; track $index) { <option [ngValue]="$index">{{ d }}</option> }</select></label>
-            } @else if (frequency === 3) {
-              <label class="form-field"><span class="form-label">يوم الشهر <small class="muted">(31 = آخر يوم في الشهر القصير)</small></span>
-                <input name="dom" type="number" min="1" max="31" [(ngModel)]="dayOfMonth"></label>
-            }
-          </div>
-          <div class="two">
-            <label class="form-field"><span class="form-label">البدء من</span><input name="start" type="date" [(ngModel)]="startDate"></label>
-            <label class="form-field"><span class="form-label">الانتهاء <small class="muted">(اختياري)</small></span><input name="end" type="date" [(ngModel)]="endDate" [min]="startDate"></label>
-          </div>
-          <label class="form-field"><span class="form-label">مدة التسليم <small class="muted">(أيام من يوم الإنشاء — فارغ = مدة القالب)</small></span>
-            <input name="due" type="number" min="0" max="365" [(ngModel)]="dueAfterDays"></label>
-          <p class="note">تُنشأ المهمة تلقائياً بصلاحياتك وقت التنفيذ؛ إن فقدتَ الصلاحية أو حُذفت الجهة تتوقف المهمة الدورية ويصلك إشعار.</p>
-        </div>
-        <app-form-actions [busy]="saving()" [disabled]="!templateId || !targetId" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
-      </form>
-    </app-modal>`,
+  templateUrl: './recurring-page-recurrence-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
@@ -208,66 +161,7 @@ export class RecurrenceDialog implements OnInit {
 @Component({
   selector: 'app-recurring-tasks-page', standalone: true, imports: [PageHeader, Alert, DatePipe, TemplateDialog, RecurrenceDialog],
   styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
-  template: `
-    <div class="page">
-      <app-page-header eyebrow="إدارة المهام" heading="المهام الدورية والقوالب" subtitle="القوالب خاصة بك. المهمة الدورية تُنشئ مهمة جديدة من قالب في كل موعد دون تدخل منك." />
-      <app-alert [message]="error()" />
-
-      <section class="panel">
-        <div class="panel-heading row"><div><h2>المهام الدورية</h2></div>
-          <button class="btn" type="button" (click)="editRecurrence.set(null); recurrenceOpen.set(true)" [disabled]="!templates().length">+ مهمة دورية</button></div>
-        @if (!templates().length) { <p class="muted">أنشئ قالباً أولاً ثم جدولته كمهمة دورية.</p> }
-        @else if (!recurrences().length) { <p class="muted">لا توجد مهام دورية بعد.</p> }
-        @else {
-          <ul class="cards">
-            @for (r of recurrences(); track r.id) {
-              <li class="card" [class.off]="!r.isActive">
-                <div class="head">
-                  <strong>{{ r.templateName }}</strong>
-                  <span class="chip" [class.on]="r.isActive">{{ r.isActive ? 'نشطة' : 'متوقفة' }}</span>
-                </div>
-                <p class="line">{{ r.taskTitle }} ← {{ r.targetTypeAr }}: <strong>{{ r.targetName }}</strong></p>
-                <p class="line">{{ r.scheduleAr }}@if (r.isActive && r.nextRunDate) { — القادمة: {{ r.nextRunDate | date:'yyyy/MM/dd' }} }
-                  @if (r.endDate) { — حتى {{ r.endDate | date:'yyyy/MM/dd' }} }</p>
-                @if (r.lastRunAt) { <p class="line muted">آخر إنشاء: {{ r.lastRunAt | date:'yyyy/MM/dd HH:mm' }}
-                  @if (r.lastTaskId) { — <a href="javascript:void 0" (click)="openTask(r.lastTaskId)">فتح المهمة</a> }</p> }
-                @if (r.lastError) { <p class="alert alert-error err" role="alert">توقفت: {{ r.lastError }}</p> }
-                <div class="actions">
-                  <button type="button" class="btn btn-ghost btn-sm" (click)="toggle(r)">{{ r.isActive ? 'إيقاف' : 'استئناف' }}</button>
-                  <button type="button" class="btn btn-ghost btn-sm" (click)="runNow(r)">إنشاء الآن</button>
-                  <button type="button" class="btn btn-ghost btn-sm" (click)="editRecurrence.set(r); recurrenceOpen.set(true)">تعديل</button>
-                  <button type="button" class="btn btn-danger btn-sm" (click)="removeRecurrence(r)">حذف</button>
-                </div>
-              </li>
-            }
-          </ul>
-        }
-      </section>
-
-      <section class="panel">
-        <div class="panel-heading row"><div><h2>قوالبي</h2><p class="muted">تُستعمل عند إنشاء مهمة جديدة من نافذة «مهمة جديدة»، وفي المهام الدورية.</p></div>
-          <button class="btn" type="button" (click)="editTemplate.set(null); templateOpen.set(true)">+ قالب</button></div>
-        @if (!templates().length) { <p class="muted">لا توجد قوالب بعد.</p> }
-        @else {
-          <ul class="cards">
-            @for (t of templates(); track t.id) {
-              <li class="card">
-                <div class="head"><strong>{{ t.name }}</strong><span class="chip">{{ t.priorityAr }}</span></div>
-                <p class="line">{{ t.title }}</p>
-                <p class="line muted">@if (t.defaultDueDays !== null) { تسليم بعد {{ t.defaultDueDays }} يوم · } {{ t.items.length }} بند تحقق</p>
-                <div class="actions">
-                  <button type="button" class="btn btn-ghost btn-sm" (click)="editTemplate.set(t); templateOpen.set(true)">تعديل</button>
-                  <button type="button" class="btn btn-danger btn-sm" (click)="removeTemplate(t)">حذف</button>
-                </div>
-              </li>
-            }
-          </ul>
-        }
-      </section>
-    </div>
-
-    @if (templateOpen()) { <app-template-dialog [template]="editTemplate()" (saved)="templateSaved()" (closed)="templateOpen.set(false)" /> }
-    @if (recurrenceOpen()) { <app-recurrence-dialog [recurrence]="editRecurrence()" [templates]="templates()" (saved)="recurrenceSaved()" (closed)="recurrenceOpen.set(false)" /> }`,
+  templateUrl: './recurring-page-recurring-tasks-page.html',
   styles: [`
     .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }

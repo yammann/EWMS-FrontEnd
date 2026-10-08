@@ -1,0 +1,72 @@
+<app-modal heading="توقيعي الإلكتروني" subheading="ارسم توقيعك أو ارفع صورته" [busy]="busy()" (closed)="closed.emit()">
+  <div class="modal-body sig">
+    @if (error() || localError()) { <p class="alert alert-error" role="alert">{{ error() || localError() }}</p> }
+
+    <div class="tabs" role="tablist" aria-label="طريقة التوقيع" [class.second]="method() === 'upload'">
+      <span class="pill" aria-hidden="true"></span>
+      <button type="button" role="tab" [attr.aria-selected]="method() === 'draw'" [attr.tabindex]="method() === 'draw' ? 0 : -1" autofocus
+              (click)="setMethod('draw')" (keydown)="tabKeys($event)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>رسم</button>
+      <button type="button" role="tab" [attr.aria-selected]="method() === 'upload'" [attr.tabindex]="method() === 'upload' ? 0 : -1"
+              (click)="setMethod('upload')" (keydown)="tabKeys($event)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L5 21"/></svg>رفع صورة</button>
+    </div>
+
+    <div class="toolbar">
+      @if (method() === 'draw') {
+        <div class="tools">
+          <button type="button" class="ghost-btn" (click)="undo()" [disabled]="!strokes().length || busy()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>تراجع</button>
+          <button type="button" class="ghost-btn" (click)="clear()" [disabled]="!strokes().length || busy()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4-4L14 6l7 7-8 8Z"/><path d="M22 21H7"/></svg>مسح</button>
+        </div>
+        <div class="inks" role="radiogroup" aria-label="لون الحبر">
+          @for (ink of inks; track ink.value) {
+            <button type="button" role="radio" [attr.aria-checked]="color() === ink.value" [attr.aria-label]="ink.name" [title]="ink.name"
+                    [class.on]="color() === ink.value" (click)="color.set(ink.value)"><span [style.background]="ink.value"></span></button>
+          }
+        </div>
+      } @else {
+        <span class="hint">صورة أو مسح ضوئي لتوقيعك على ورقة بيضاء</span>
+      }
+    </div>
+
+    <div class="surface" #surface>
+      @if (method() === 'draw') {
+        <canvas #canvas role="img" aria-label="مساحة رسم التوقيع"
+                (pointerdown)="down($event)" (pointermove)="moveTo($event)" (pointerup)="end()" (pointercancel)="end()"></canvas>
+        <div class="rule" aria-hidden="true">
+          <div class="line"></div>
+          <p class="rule-hint" [class.hidden]="strokes().length || drawing()">وقّع فوق الخط</p>
+        </div>
+      } @else if (image(); as img) {
+        <div class="preview">
+          <img [src]="img" alt="التوقيع المرفوع">
+          <div class="tools">
+            <button type="button" class="ghost-btn" (click)="file.click()" [disabled]="busy()">استبدال</button>
+            <button type="button" class="ghost-btn" (click)="image.set(null)" [disabled]="busy()">إزالة</button>
+          </div>
+        </div>
+      } @else {
+        <button type="button" class="drop" [class.over]="over()" (click)="file.click()"
+                (dragover)="$event.preventDefault(); over.set(true)" (dragleave)="over.set(false)" (drop)="dropped($event)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L5 21"/></svg>
+          <strong>{{ reading() ? 'جارٍ قراءة الصورة…' : 'اسحب الصورة إلى هنا أو اخترها' }}</strong>
+          <small>PNG أو JPG — يُزال بياض الورق تلقائياً</small>
+        </button>
+      }
+      <input #file type="file" accept="image/png,image/jpeg" hidden (change)="picked($event)">
+    </div>
+
+    <p class="consent">بتوقيعي إلكترونياً أُقرّ بأن هذا التوقيع يُعتمد على الأوراق التي أوقّعها في النظام، وأن تغييره لاحقاً لا يغيّر ما وقّعته سابقاً.</p>
+
+    <label class="form-field password"><span class="form-label">كلمة المرور (لتأكيد اعتماد التوقيع)</span>
+      <input #t1 type="password" autocomplete="current-password" [value]="password()" (input)="password.set(t1.value)"
+             (keydown.enter)="accept()"></label>
+  </div>
+  <footer class="modal-actions">
+    <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">إلغاء</button>
+    <button type="button" (click)="accept()" [disabled]="!ready() || !password() || busy()">
+      {{ busy() ? 'جارٍ الحفظ…' : '✓ اعتماد التوقيع' }}</button>
+  </footer>
+</app-modal>

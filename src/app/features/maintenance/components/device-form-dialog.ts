@@ -17,51 +17,7 @@ const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim()
 @Component({
   selector: 'app-device-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal],
   styleUrl: '../../../shared/styles/devices.scss',
-  template: `
-    <app-modal [heading]="device() ? 'تعديل جهاز الصيانة' : 'إضافة جهاز صيانة'" [subheading]="device()?.serialNumber ?? 'جهاز يُحضَر للصيانة برقمه التسلسلي'"
-               [busy]="saving()" (closed)="closed.emit()">
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="modal-body form-stack">
-          <app-alert [message]="error()" />
-          @if (!lookups().deviceTypes.length || !lookups().companies.length) {
-            <p class="alert alert-warning" role="status">أضف أنواع الأجهزة والشركات المصنّعة من «إعدادات الصيانة» أولاً.</p>
-          }
-
-          <div class="form-grid-2">
-            <label class="form-field"><span class="form-label">الرقم التسلسلي</span>
-              <input formControlName="serialNumber" dir="ltr" maxlength="100" autocomplete="off" spellcheck="false"
-                     (copy)="block($event)" (cut)="block($event)" (paste)="block($event)" (drop)="block($event)" (contextmenu)="block($event)">
-              @if (form.controls.serialNumber.touched && form.controls.serialNumber.invalid) { <small class="form-error">الرقم التسلسلي مطلوب</small> }
-            </label>
-            @if (needsConfirm()) {
-              <label class="form-field"><span class="form-label">تأكيد الرقم التسلسلي</span>
-                <input formControlName="serialConfirm" dir="ltr" maxlength="100" autocomplete="off" spellcheck="false"
-                       (copy)="block($event)" (cut)="block($event)" (paste)="block($event)" (drop)="block($event)" (contextmenu)="block($event)">
-                @if (form.hasError('serialMismatch') && form.controls.serialConfirm.touched) { <small class="form-error">الرقمان غير متطابقين</small> }
-              </label>
-            }
-          </div>
-          @if (needsConfirm()) { <p class="hint-line">اكتب الرقم مرتين يدوياً — النسخ واللصق معطّلان في هذين الحقلين.</p> }
-          @if (pasteBlocked()) { <p class="form-error" role="status">النسخ واللصق غير مسموح — اكتب الرقم بنفسك.</p> }
-
-          <div class="form-grid-2">
-            <label class="form-field"><span class="form-label">نوع الجهاز</span>
-              <select formControlName="deviceTypeId"><option [ngValue]="0">اختر النوع</option>
-                @for (x of lookups().deviceTypes; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</select></label>
-            <label class="form-field"><span class="form-label">الشركة المصنّعة</span>
-              <select formControlName="deviceCompanyId"><option [ngValue]="0">اختر الشركة</option>
-                @for (x of lookups().companies; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</select></label>
-            <label class="form-field"><span class="form-label">اسم الجهاز <small class="hint">(اختياري)</small></span><input formControlName="name" maxlength="200"></label>
-            <label class="form-field"><span class="form-label">الموديل <small class="hint">(اختياري)</small></span><input formControlName="model" dir="ltr" maxlength="100"></label>
-          </div>
-          <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="2" maxlength="1000"></textarea></label>
-        </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : (device() ? 'حفظ التعديلات' : 'إضافة الجهاز') }}</button>
-        </footer>
-      </form>
-    </app-modal>`,
+  templateUrl: './device-form-dialog.html',
   styles: [`
     .hint-line { margin: -6px 0 0; font-size: 12px; color: var(--ink-500); }
   `]

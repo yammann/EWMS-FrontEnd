@@ -10,33 +10,7 @@ import { FormActions } from '@shared/ui/form-actions';
 /** تعديل بند: العنوان والملاحظة والموعد والتكرار والأهمية (المهمة المرتبطة تُعرض للاطلاع) */
 @Component({
   selector: 'app-todo-item-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
-  template: `
-    <app-modal heading="تعديل البند" [busy]="saving()" (closed)="closed.emit()">
-      <form (ngSubmit)="save()">
-        <div class="modal-body form-stack">
-          <app-alert [message]="error()" />
-          <label class="form-field"><span class="form-label">العنوان</span>
-            <input name="title" [maxlength]="limits.titleLength" [(ngModel)]="title" autofocus autocomplete="off"></label>
-          <label class="form-field"><span class="form-label">ملاحظة <small class="muted">(اختياري)</small></span>
-            <textarea name="note" rows="3" [maxlength]="limits.noteLength" [(ngModel)]="note"></textarea></label>
-          <div class="two">
-            <label class="form-field"><span class="form-label">الموعد <small class="muted">(اختياري — منه تأتي «اليوم» والتذكيرات)</small></span>
-              <input name="due" type="date" [(ngModel)]="due"></label>
-            <label class="form-field"><span class="form-label">التكرار</span>
-              <select name="repeat" [(ngModel)]="repeat" [disabled]="!due">
-                <option value="None">بلا تكرار</option>
-                @for (r of repeats; track r.key) { <option [value]="r.key">{{ r.label }}</option> }
-              </select>
-              @if (!due) { <small class="form-hint">يحتاج التكرار موعداً.</small> }</label>
-          </div>
-          <label class="check"><input name="important" type="checkbox" [(ngModel)]="important"> ★ مهم</label>
-          @if (item().linkedTask; as t) {
-            <p class="linked">مرتبط بمهمة في لوحة المهام: <strong>{{ t.available ? t.title : 'مهمة غير متاحة لك' }}</strong>@if (t.available) { — {{ t.statusAr }} }</p>
-          }
-        </div>
-        <app-form-actions [busy]="saving()" [disabled]="!title.trim()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
-      </form>
-    </app-modal>`,
+  templateUrl: './todo-item-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 560px) { .two { grid-template-columns: 1fr; } }

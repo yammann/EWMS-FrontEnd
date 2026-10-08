@@ -10,50 +10,8 @@ import { governorateName } from '@core/constants/governorates';
  */
 @Component({
   selector: 'app-place-search', standalone: true,
-  template: `
-    <div class="place-search">
-      <label class="form-label" [attr.for]="inputId">ابحث عن مكان <small class="hint">(مدينة، بلدة، قرية، حي)</small></label>
-      <div class="box">
-        <input #t1 [id]="inputId" type="search" role="combobox" autocomplete="off" placeholder="مثال: المزة، حلب، جرمانا…"
-               [value]="query()" aria-autocomplete="list" [attr.aria-expanded]="open()" [attr.aria-controls]="inputId + '-list'"
-               [attr.aria-activedescendant]="active() >= 0 ? inputId + '-opt-' + active() : null"
-               (input)="onInput(t1.value)" (focus)="onFocus()" (keydown)="onKey($event)" (blur)="close()">
-        @if (open()) {
-          <ul class="results" role="listbox" [id]="inputId + '-list'">
-            @if (loading()) { <li class="note" role="status">جارٍ تحميل أسماء الأماكن…</li> }
-            @else if (error()) { <li class="note error" role="alert">{{ error() }}</li> }
-            @else if (!results().length) { <li class="note">لا توجد نتائج لـ «{{ query() }}»</li> }
-            @else {
-              @for (p of results(); track $index) {
-                <li role="option" [id]="inputId + '-opt-' + $index" [class.on]="$index === active()" [attr.aria-selected]="$index === active()"
-                    (mousedown)="$event.preventDefault(); choose(p)" (mouseenter)="active.set($index)">
-                  <span class="name">{{ p.nameAr || p.nameEn }}@if (p.nameAr && p.nameEn) { <small dir="ltr">{{ p.nameEn }}</small> }</span>
-                  <span class="meta">{{ typeLabel[p.type] }} · {{ governorateName(p.governorate) }}</span>
-                </li>
-              }
-            }
-          </ul>
-        }
-      </div>
-      <small class="credit">{{ attribution }}</small>
-    </div>`,
-  styles: [`
-    .place-search { display: grid; gap: 6px; }
-    .box { position: relative; }
-    .box input { width: 100%; }
-    .hint { color: var(--ink-400); font-weight: 400; }
-    .results { position: absolute; inset-inline: 0; top: calc(100% + 4px); z-index: 20; margin: 0; padding: 4px; list-style: none;
-      max-height: 280px; overflow-y: auto; border: 1px solid var(--border-strong); border-radius: var(--radius-md);
-      background: var(--surface); box-shadow: var(--shadow-md, 0 8px 24px rgb(0 0 0 / .12)); }
-    .results li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; }
-    .results li.on { background: var(--fill); }
-    .results .name { font-weight: 700; color: var(--ink-900); }
-    .results .name small { margin-inline-start: 8px; font-weight: 400; color: var(--ink-400); }
-    .results .meta { flex: none; font-size: 12px; color: var(--ink-500); }
-    .results .note { cursor: default; color: var(--ink-500); font-size: 13px; }
-    .results .note.error { color: var(--danger-600); }
-    .credit { font-size: 11px; color: var(--ink-400); }
-  `]
+  templateUrl: './place-search.html',
+  styleUrl: './place-search.scss'
 })
 export class PlaceSearch {
   private places = inject(PlacesService);

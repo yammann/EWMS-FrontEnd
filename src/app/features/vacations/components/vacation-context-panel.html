@@ -1,0 +1,68 @@
+<div class="ctx">
+  <button type="button" class="toggle" [attr.aria-expanded]="open()" (click)="toggle()">
+    <span class="chev" [class.on]="open()" aria-hidden="true">‹</span> {{ open() ? 'إخفاء سجل الموظف' : 'عرض سجل الموظف' }}
+  </button>
+
+  @if (open()) {
+    @if (loading()) { <p class="muted" role="status">جارٍ التحميل…</p> }
+    @else if (error()) { <p class="form-error" role="alert">{{ error() }} <button type="button" class="btn btn-ghost btn-sm" (click)="load()">إعادة المحاولة</button></p> }
+    @else if (data(); as c) {
+      <div class="tiles">
+        <div class="tile">
+          <span class="label">آخر إجازة</span>
+          @if (c.lastVacation; as l) {
+            <strong>{{ l.vacationTypeName }}</strong>
+            <span>{{ l.startVac | date:'yyyy/MM/dd' }} — {{ l.endVac | date:'yyyy/MM/dd' }} · {{ days(l.vacDayCount) }}</span>
+            <span class="muted">{{ c.daysSinceLastVacation === 0 ? 'في إجازة الآن' : 'قبل ' + days(c.daysSinceLastVacation ?? 0) }}</span>
+          } @else { <span class="muted">لا توجد إجازات معتمدة سابقة</span> }
+          @if (c.upcomingApproved.length; as n) {
+            <span class="upcoming">معتمدة قادمة: {{ vacations(n) }} — أقربها {{ c.upcomingApproved[0].startVac | date:'yyyy/MM/dd' }} ({{ days(c.upcomingApproved[0].vacDayCount) }})</span>
+          }
+        </div>
+
+        <div class="tile">
+          <span class="label">الشهر الجاري</span>
+          <strong>{{ vacations(c.monthApprovedCount) }}</strong>
+          <span>أيام العمل المعتمدة: {{ days(c.monthApprovedDays) }}</span>
+        </div>
+
+        <div class="tile">
+          <span class="label">الدفع لو اعتُمد الآن</span>
+          @if (!c.typeIsPaid) {
+            <strong>غير مدفوعة</strong><span class="muted">نوع الإجازة غير مدفوع — {{ days(c.projectedWorkingDays) }}</span>
+          } @else {
+            <strong>{{ c.projectedPaidDays }} مدفوع @if (c.projectedUnpaidDays) { · {{ c.projectedUnpaidDays }} غير مدفوع }</strong>
+            @for (q of c.monthlyQuota; track q.year + '-' + q.month) {
+              <span class="muted">الرصيد المدفوع {{ q.month }}/{{ q.year }}: استُخدم {{ q.paidUsed }} من {{ c.maxPaidDaysPerMonth }}</span>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="block">
+        <h4>زملاء {{ c.departmentName ? 'قسم ' + c.departmentName : 'القسم' }} في إجازة خلال نفس الفترة
+          <span class="count">{{ c.colleaguesOnLeaveCount }} من {{ c.departmentActiveUsers }}</span></h4>
+        @if (c.colleaguesOnLeave.length) {
+          <ul>
+            @for (x of c.colleaguesOnLeave; track x.id) {
+              <li><strong>{{ x.userName }}</strong> · {{ x.vacationTypeName }} · {{ x.startVac | date:'MM/dd' }} — {{ x.endVac | date:'MM/dd' }}
+                <span class="status-badge" [class.status-active]="x.status === 'Approved'" [class.status-pending]="x.status !== 'Approved'">{{ x.statusAr }}</span></li>
+            }
+          </ul>
+        } @else { <p class="muted">لا أحد من القسم في إجازة خلال هذه الفترة.</p> }
+      </div>
+
+      <div class="block">
+        <h4>طلبات أخرى معلّقة للموظف <span class="count">{{ c.otherPending.length }}</span></h4>
+        @if (c.otherPending.length) {
+          <ul>
+            @for (x of c.otherPending; track x.id) {
+              <li>{{ x.vacationTypeName }} · {{ x.startVac | date:'yyyy/MM/dd' }} — {{ x.endVac | date:'yyyy/MM/dd' }} · {{ days(x.vacDayCount) }}
+                <span class="status-badge status-pending">{{ x.statusAr }}</span></li>
+            }
+          </ul>
+        } @else { <p class="muted">لا توجد.</p> }
+      </div>
+    }
+  }
+</div>

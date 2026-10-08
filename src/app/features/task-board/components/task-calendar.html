@@ -1,0 +1,36 @@
+<section class="cal" aria-label="تقويم المهام">
+  <header class="cal-head">
+    <div class="nav">
+      <button type="button" class="btn btn-ghost btn-sm" (click)="shift(-1)" aria-label="الشهر السابق">›</button>
+      <h2>{{ monthName() }}</h2>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="shift(1)" aria-label="الشهر التالي">‹</button>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="today()">اليوم</button>
+    @if (noDue()) { <small class="muted">{{ noDue() }} مهمة بلا موعد لا تظهر هنا</small> }
+  </header>
+
+  <div class="grid" role="grid">
+    @for (d of dayNames; track d) { <div class="dow" role="columnheader">{{ d }}</div> }
+    @for (c of cells(); track c.key) {
+      <div class="cell" role="gridcell" [class.out]="!c.inMonth" [class.today]="c.today" [class.sel]="selected() === c.key" (click)="select(c)">
+        <span class="num">{{ c.date.getDate() }}</span>
+        @for (t of c.tasks.slice(0, 3); track t.id) {
+          <button type="button" class="chip s-{{ t.status }}" [class.late]="t.isOverdue" (click)="open(t, $event)" [attr.title]="t.title + ' — ' + t.statusAr">{{ t.title }}</button>
+        }
+        @if (c.tasks.length > 3) { <small class="more">+{{ c.tasks.length - 3 }} أخرى</small> }
+      </div>
+    }
+  </div>
+
+  @if (selectedCell(); as c) {
+    <div class="day">
+      <h3>{{ c.date.getDate() }} {{ monthNames[c.date.getMonth()] }} — {{ c.tasks.length }} مهمة</h3>
+      <ul>
+        @for (t of c.tasks; track t.id) {
+          <li><button type="button" (click)="open(t, $event)"><span class="dot s-{{ t.status }}"></span><span class="t">{{ t.title }}</span>
+            <small>{{ t.targetName }} · {{ t.statusAr }}@if (t.isOverdue) { · متأخرة }</small></button></li>
+        } @empty { <li class="muted">لا مهام في هذا اليوم.</li> }
+      </ul>
+    </div>
+  }
+</section>

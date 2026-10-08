@@ -1,0 +1,29 @@
+<app-modal [heading]="'حركات: ' + part().name" [subheading]="'الرصيد ' + (part().quantity | qty) + ' ' + part().unit + ' · ' + part().departmentName"
+           size="lg" (closed)="closed.emit()">
+  <div class="modal-body">
+    <app-alert [message]="error()" />
+    @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!rows().length) { <app-empty-state>لا توجد حركات بعد — ابدأ بـ«إدخال»</app-empty-state> }
+    @else {
+      <div class="table-wrap"><table>
+        <thead><tr><th>التاريخ</th><th>الحركة</th><th>الكمية</th><th>سعر الوحدة</th><th>الرصيد بعدها</th><th>التفاصيل</th><th>بواسطة</th></tr></thead>
+        <tbody>
+          @for (m of rows(); track m.id) {
+            <tr>
+              <td>{{ m.date | date:'yyyy/MM/dd' }}<small>{{ m.createdAt | utc | date:'HH:mm' }}</small></td>
+              <td><span class="mv mv-{{ m.type }}">{{ m.typeAr }}</span></td>
+              <td class="num" [class.neg]="m.quantity < 0">{{ m.quantity > 0 ? '+' : '' }}{{ m.quantity | qty }}</td>
+              <td class="num">{{ m.unitCost | money }}</td>
+              <td class="num">{{ m.balanceAfter | qty }}</td>
+              <td>@if (m.maintenanceRequestId) { <a [routerLink]="['/maintenance/requests', m.maintenanceRequestId]" (click)="closed.emit()" class="mono">{{ m.requestNumber }}</a> }
+                  {{ m.note }}@if (!m.note && !m.maintenanceRequestId) { — }</td>
+              <td>{{ m.userName }}</td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="load($event)" />
+    }
+  </div>
+  <footer class="modal-actions"><button type="button" class="ghost" (click)="closed.emit()">إغلاق</button></footer>
+</app-modal>

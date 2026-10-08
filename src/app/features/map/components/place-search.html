@@ -1,0 +1,26 @@
+<div class="place-search">
+  <label class="form-label" [attr.for]="inputId">ابحث عن مكان <small class="hint">(مدينة، بلدة، قرية، حي)</small></label>
+  <div class="box">
+    <input #t1 [id]="inputId" type="search" role="combobox" autocomplete="off" placeholder="مثال: المزة، حلب، جرمانا…"
+           [value]="query()" aria-autocomplete="list" [attr.aria-expanded]="open()" [attr.aria-controls]="inputId + '-list'"
+           [attr.aria-activedescendant]="active() >= 0 ? inputId + '-opt-' + active() : null"
+           (input)="onInput(t1.value)" (focus)="onFocus()" (keydown)="onKey($event)" (blur)="close()">
+    @if (open()) {
+      <ul class="results" role="listbox" [id]="inputId + '-list'">
+        @if (loading()) { <li class="note" role="status">جارٍ تحميل أسماء الأماكن…</li> }
+        @else if (error()) { <li class="note error" role="alert">{{ error() }}</li> }
+        @else if (!results().length) { <li class="note">لا توجد نتائج لـ «{{ query() }}»</li> }
+        @else {
+          @for (p of results(); track $index) {
+            <li role="option" [id]="inputId + '-opt-' + $index" [class.on]="$index === active()" [attr.aria-selected]="$index === active()"
+                (mousedown)="$event.preventDefault(); choose(p)" (mouseenter)="active.set($index)">
+              <span class="name">{{ p.nameAr || p.nameEn }}@if (p.nameAr && p.nameEn) { <small dir="ltr">{{ p.nameEn }}</small> }</span>
+              <span class="meta">{{ typeLabel[p.type] }} · {{ governorateName(p.governorate) }}</span>
+            </li>
+          }
+        }
+      </ul>
+    }
+  </div>
+  <small class="credit">{{ attribution }}</small>
+</div>

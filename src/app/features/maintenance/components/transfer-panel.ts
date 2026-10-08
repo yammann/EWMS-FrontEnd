@@ -20,79 +20,8 @@ import { FormActions } from '@shared/ui/form-actions';
  */
 @Component({
   selector: 'app-transfer-panel', standalone: true, imports: [FormActions, Alert, UtcPipe, DatePipe, Modal],
-  template: `
-    @if (pending(); as t) {
-      <section class="panel transfer" role="status">
-        <div class="head">
-          <span class="badge">طلب تحويل</span>
-          <div>
-            <strong>{{ t.requestedByName }} يطلب تحويل هذا الطلب{{ t.suggestedUserName ? ' إلى ' + t.suggestedUserName : '' }}</strong>
-            <small>{{ t.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }} · {{ t.statusAr }}</small>
-          </div>
-        </div>
-        <p class="reason"><b>السبب:</b> {{ t.reason }}</p>
-
-        @if (canDecide()) {
-          <app-alert [message]="error()" />
-          <div class="decide">
-            <label class="form-field"><span class="form-label">يُحوَّل إلى</span>
-              <select #t1 [value]="target()" (change)="target.set(+t1.value)" [disabled]="busy()">
-                <option [value]="0">اختر الموظف</option>
-                @for (u of assignees(); track u.id) {
-                  <option [value]="u.id" [selected]="u.id === target()" [disabled]="u.id === request().userId">{{ u.fullName }}{{ u.id === request().userId ? ' (الحالي)' : '' }}{{ u.id === t.suggestedUserId ? ' — المقترح' : '' }}</option>
-                }
-              </select>
-            </label>
-            <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span>
-              <input #t2 [value]="note()" (input)="note.set(t2.value)" maxlength="500" [disabled]="busy()">
-            </label>
-          </div>
-          <div class="actions">
-            <button type="button" class="btn" (click)="decide(true)" [disabled]="busy() || !target() || target() === request().userId">قبول ونقل الطلب</button>
-            <button type="button" class="btn btn-danger" (click)="decide(false)" [disabled]="busy()">رفض</button>
-          </div>
-        } @else {
-          <p class="muted">بانتظار قرار رئيس القسم.</p>
-        }
-      </section>
-    } @else if (request().canRequestTransfer) {
-      <div class="ask-row">
-        <button type="button" class="btn btn-ghost btn-sm" (click)="openAsk()">طلب تحويل إلى موظف آخر</button>
-      </div>
-    }
-
-    @if (askOpen()) {
-      <app-modal heading="طلب تحويل الطلب" [subheading]="request().number + ' — يقرّره رئيس القسم'" [busy]="busy()" (closed)="askOpen.set(false)">
-        <form (submit)="$event.preventDefault(); ask()">
-          <div class="modal-body form-stack">
-            <app-alert [message]="error()" />
-            <label class="form-field"><span class="form-label">سبب التحويل</span>
-              <textarea #t3 rows="3" maxlength="500" [value]="reason()" (input)="reason.set(t3.value)" placeholder="مثلاً: العطل خارج اختصاصي، أو لدي إجازة"></textarea>
-            </label>
-            <label class="form-field"><span class="form-label">زميل مقترح <small class="hint">(اختياري)</small></span>
-              <select #t4 (change)="suggested.set(+t4.value)">
-                <option [value]="0">بلا اقتراح — يختار رئيس القسم</option>
-                @for (u of colleagues(); track u.id) { <option [value]="u.id">{{ u.fullName }}</option> }
-              </select>
-            </label>
-          </div>
-          <app-form-actions [busy]="busy()" [disabled]="!reason().trim()" label="إرسال الطلب" busyLabel="جارٍ الإرسال…" (dismissed)="askOpen.set(false)" />
-        </form>
-      </app-modal>
-    }`,
-  styles: [`
-    .transfer { border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
-    .head { display: flex; align-items: flex-start; gap: 12px; }
-    .head div { display: grid; gap: 2px; }
-    .head small { color: var(--ink-500); font-size: 12px; }
-    .badge { flex: none; padding: 3px 10px; border-radius: 999px; background: var(--accent); color: var(--on-brand); font-size: 12px; font-weight: 700; }
-    .reason { margin: 10px 0; white-space: pre-line; }
-    .decide { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-    .muted { margin: 0; color: var(--ink-500); font-size: 13px; }
-    .ask-row { display: flex; justify-content: flex-end; margin: -6px 0 12px; }
-    @media (max-width: 720px) { .decide { grid-template-columns: 1fr; } }
-  `]
+  templateUrl: './transfer-panel-transfer-panel.html',
+  styleUrl: './transfer-panel-transfer-panel.scss'
 })
 export class TransferPanel {
   private service = inject(MaintenanceService);

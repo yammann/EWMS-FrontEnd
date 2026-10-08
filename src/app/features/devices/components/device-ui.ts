@@ -135,49 +135,7 @@ export class DeviceHistory implements OnInit {
  */
 @Component({
   selector: 'app-installations-import', standalone: true, imports: [Alert, Modal],
-  template: `
-    <app-modal heading="استيراد التركيبات من Excel" subheading="معاينة أولاً — لا يُحفظ شيء قبل تأكيدك" size="lg" [busy]="busy()" (closed)="closed.emit()">
-      <div class="modal-body form-stack">
-        <app-alert [message]="error()" />
-        <ol class="steps">
-          <li>نزّل <button type="button" class="link-btn" (click)="template()">قالب الاستيراد</button> واملأه (الأعمدة الحمراء مطلوبة، وتعليمات في الورقة الثانية).</li>
-          <li>المواقع يجب أن تكون مضافة مسبقاً بنفس الاسم؛ الأجهزة الجديدة تُضاف إلى الكتالوج تلقائياً.</li>
-          <li>ارفع الملف للمعاينة، ثم استورد الأسطر الصالحة.</li>
-        </ol>
-        <label class="form-field"><span class="form-label">ملف Excel (‎.xlsx، حتى 2000 سطر)</span>
-          <input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="picked($event)" [disabled]="busy()"></label>
-
-        @if (report(); as r) {
-          <div class="summary" role="status">
-            <span><strong>{{ r.total }}</strong> سطر</span>
-            <span class="ok"><strong>{{ r.valid }}</strong> صالح</span>
-            <span class="bad"><strong>{{ r.total - r.valid }}</strong> مرفوض</span>
-            @if (r.newDevices.length) { <span>أجهزة جديدة للكتالوج: {{ r.newDevices.join('، ') }}</span> }
-            @if (!r.dryRun) { <span class="ok">✓ استُورد {{ r.imported }} تركيباً</span> }
-          </div>
-          <div class="table-wrap"><table>
-            <thead><tr><th>السطر</th><th>النتيجة</th><th>الموقع</th><th>الجهاز</th><th>IP</th><th>ملاحظة</th></tr></thead>
-            <tbody>
-              @for (row of r.rows; track row.row) {
-                <tr [class.rejected]="!row.ok">
-                  <td>{{ row.row }}</td><td>{{ row.ok ? '✓ صالح' : '✕ مرفوض' }}</td>
-                  <td>{{ row.site || '—' }}</td><td>{{ row.device || '—' }}</td><td class="mono">{{ row.ip || '—' }}</td>
-                  <td class="wrap">{{ row.message || '—' }}</td>
-                </tr>
-              }
-            </tbody>
-          </table></div>
-        }
-      </div>
-      <footer class="modal-actions">
-        <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">{{ report() && !report()!.dryRun ? 'إغلاق' : 'إلغاء' }}</button>
-        @if (report(); as r) {
-          @if (r.dryRun) {
-            <button type="button" (click)="commit()" [disabled]="!r.valid || busy()">{{ busy() ? 'جارٍ الاستيراد…' : 'استيراد ' + r.valid + ' سطراً صالحاً' }}</button>
-          }
-        }
-      </footer>
-    </app-modal>`,
+  templateUrl: './device-ui-installations-import.html',
   styles: [`
     .steps { margin: 0; padding-inline-start: 20px; display: grid; gap: 4px; font-size: 13px; color: var(--ink-600); }
     .link-btn { display: inline; min-height: 0; padding: 0; border: 0; background: none; color: var(--brand-700); font-weight: 700; text-decoration: underline; box-shadow: none; }

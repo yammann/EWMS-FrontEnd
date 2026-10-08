@@ -1,0 +1,58 @@
+<div class="page">
+  <header class="n-head">
+    <div class="n-id">
+      <span class="n-badge" aria-hidden="true"><app-icon name="bell" /></span>
+      <div>
+        <h1>الإشعارات</h1>
+        <p class="n-sub">@if (unread()) { <span class="n-pill">{{ unread() }} غير مقروءة</span> } @else { <span>لا إشعارات غير مقروءة</span> }
+          <span class="n-dot" aria-hidden="true"></span><span>تحديثات الطلبات والمهام والمفكرة والصيانة</span></p>
+      </div>
+    </div>
+    <div class="n-actions">
+      <button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button>
+      <button class="btn" (click)="markAll()" [disabled]="saving() || !unread()">تعليم الكل كمقروء</button>
+    </div>
+  </header>
+
+  <app-alert [message]="error()" />
+  @if (desktopPermission() === 'default') {
+    <p class="alert alert-success">فعّل إشعارات سطح المكتب لتصلك التنبيهات حتى عندما تكون في تبويب أو برنامج آخر.
+      <button class="btn btn-sm" (click)="enableDesktop()">تفعيل إشعارات سطح المكتب</button></p>
+  } @else if (desktopPermission() === 'denied') {
+    <p class="alert alert-warning">إشعارات سطح المكتب محظورة في المتصفح. يمكنك السماح بها من إعدادات الموقع (رمز القفل بجانب العنوان).</p>
+  }
+
+  <div class="n-pills" role="group" aria-label="تصفية الإشعارات">
+    <button type="button" class="p" [class.on]="!unreadOnly()" [attr.aria-pressed]="!unreadOnly()" (click)="setFilter(false)">الكل</button>
+    <button type="button" class="p" [class.on]="unreadOnly()" [attr.aria-pressed]="unreadOnly()" (click)="setFilter(true)">غير المقروءة<span class="n">({{ unread() }})</span></button>
+  </div>
+
+  @if (loading() && !items().length) { <div class="panel empty-state" role="status">جارٍ تحميل الإشعارات…</div> }
+  @else if (!items().length && !error()) {
+    <div class="panel empty-state"><div class="n-empty" aria-hidden="true">🔔</div><h3>{{ unreadOnly() ? 'كل شيء مقروء' : 'لا توجد إشعارات' }}</h3>
+      <p class="muted">{{ unreadOnly() ? 'لا إشعارات جديدة بانتظارك.' : 'ستظهر هنا تحديثات طلباتك ومهامك عند حدوثها.' }}</p></div>
+  } @else {
+    @for (g of groups(); track g.title) {
+      <section class="n-group">
+        <h2>{{ g.title }}</h2>
+        <ul class="n-list">
+          @for (n of g.items; track n.id) {
+            <li class="n-card" [class.unread]="!n.isRead">
+              <button type="button" class="n-main" (click)="open(n)">
+                <span class="n-ico {{ kind(n).tone }}" aria-hidden="true">{{ kind(n).icon }}</span>
+                <span class="n-text">
+                  <strong>{{ n.title }}</strong>
+                  <span class="msg">{{ n.message }}</span>
+                  <small>{{ ago(n.createdAt) || (n.createdAt | date:'yyyy/MM/dd HH:mm') }}</small>
+                </span>
+                @if (!n.isRead) { <span class="n-unread" aria-label="غير مقروء"></span> }
+              </button>
+              @if (!n.isRead) { <button class="n-read" type="button" (click)="markRead(n)" [disabled]="saving()" title="تعليم كمقروء" aria-label="تعليم كمقروء">✓</button> }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+    <app-pager [page]="page()" [pageSize]="size()" [total]="total()" (pageChange)="goTo($event)" (sizeChange)="setSize($event)" />
+  }
+</div>

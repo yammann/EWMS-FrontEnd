@@ -24,52 +24,8 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
  */
 @Component({
   selector: 'app-task-links', standalone: true, imports: [FormsModule],
-  template: `
-    @if (links().length) {
-      <ul class="links">
-        @for (l of links(); track l.id) {
-          <li [class.na]="!l.available">
-            <span class="kind">{{ l.entityTypeAr }}</span>
-            @if (route(l); as r) { <a class="label" href="javascript:void 0" (click)="go(r)">{{ l.label }}</a> }
-            @else { <span class="label">{{ l.label }}</span> }
-            @if (l.canRemove && canEdit()) { <button type="button" class="x" (click)="remove(l)" [disabled]="busy()" [attr.aria-label]="'حذف رابط ' + l.label" title="حذف">×</button> }
-          </li>
-        }
-      </ul>
-    } @else { <p class="muted">لا توجد روابط.</p> }
-
-    @if (canEdit()) {
-      <form class="add" (ngSubmit)="add()">
-        <select name="type" [(ngModel)]="type" aria-label="نوع السجل">
-          <option value="MaintenanceRequest">{{ labels.MaintenanceRequest }}</option>
-          <option value="Vacation">{{ labels.Vacation }}</option>
-          @if (canSites()) { <option value="Site">{{ labels.Site }}</option> }
-        </select>
-        @if (type === 'Site') {
-          <select name="site" [(ngModel)]="siteId" aria-label="الموقع">
-            <option [ngValue]="0">اختر الموقع</option>
-            @for (s of sites(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
-          </select>
-        } @else {
-          <input name="ref" [(ngModel)]="reference" maxlength="40" [placeholder]="type === 'Vacation' ? 'رقم الإجازة: VAC-2026-00005' : 'رقم الطلب: MR-2026-00012'" autocomplete="off">
-        }
-        <button type="submit" class="btn btn-sm" [disabled]="busy() || (type === 'Site' ? !siteId : !reference.trim())">ربط</button>
-      </form>
-      @if (error()) { <p class="alert alert-error err" role="alert">{{ error() }}</p> }
-    }`,
-  styles: [`
-    .links { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
-    .links li { display: flex; align-items: center; gap: 8px; padding: 6px 12px; min-height: 40px; border-radius: var(--radius-md); background: var(--fill); font-size: 13px; }
-    .links li.na { color: var(--ink-400); }
-    .kind { flex: none; padding: 1px 8px; border-radius: var(--radius-full); background: var(--brand-50); color: var(--brand-700); font-size: 11px; font-weight: 800; }
-    .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
-    a.label { color: var(--brand-700); }
-    .x { min-height: 28px; width: 28px; padding: 0; background: transparent; color: var(--ink-500); font-size: 18px; box-shadow: none; }
-    .add { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; }
-    .add select, .add input { min-width: 0; }
-    .muted { margin: 0 0 8px; color: var(--ink-500); font-size: 13px; }
-    .err { margin: 8px 0 0; }
-  `]
+  templateUrl: './task-links-task-links.html',
+  styleUrl: './task-links-task-links.scss'
 })
 export class TaskLinks implements OnInit {
   private service = inject(AssignedTaskService);

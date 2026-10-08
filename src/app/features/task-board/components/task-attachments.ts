@@ -22,70 +22,8 @@ export function fileIcon(contentType: string): string {
  */
 @Component({
   selector: 'app-task-attachments', standalone: true, imports: [Modal],
-  template: `
-    @if (attachments().length) {
-      <ul class="files">
-        @for (a of attachments(); track a.id) {
-          <li>
-            <button type="button" class="file" (click)="open(a)" [title]="canPreview(a) ? 'معاينة ' + a.fileName : 'تنزيل ' + a.fileName">
-              <span class="ico" aria-hidden="true">{{ icon(a.contentType) }}</span>
-              <span class="meta"><span class="name">{{ a.fileName }}</span><small>{{ size(a.size) }} · {{ a.uploadedByName }}</small></span>
-            </button>
-            @if (a.canDelete && !readonly()) {
-              <button type="button" class="del" (click)="remove(a)" [disabled]="busy()" [attr.aria-label]="'حذف ' + a.fileName" title="حذف">🗑</button>
-            }
-          </li>
-        }
-      </ul>
-    } @else if (readonly() || !canAttach()) {
-      <p class="muted">لا توجد مرفقات.</p>
-    }
-
-    @if (canAttach() && !readonly()) {
-      <div class="drop" [class.over]="over()" (dragover)="$event.preventDefault(); over.set(true)" (dragleave)="over.set(false)" (drop)="dropped($event)">
-        <input #picker type="file" multiple hidden [accept]="accept" (change)="picked($event)">
-        <button type="button" class="btn btn-ghost btn-sm" (click)="picker.click()" [disabled]="busy() || remaining() <= 0">
-          {{ busy() ? progressText() || 'جارٍ الرفع…' : '+ إرفاق ملف' }}</button>
-        <small>{{ remaining() > 0 ? 'أو اسحب الملفات إلى هنا — PDF وصور وWord وExcel وPowerPoint حتى 10MB (متبقٍّ ' + remaining() + ' من ' + max + ')' : 'بلغت الحد الأقصى ' + max + ' ملفات' }}</small>
-      </div>
-    }
-    @if (problem()) { <p class="alert alert-error problem" role="alert">{{ problem() }}</p> }
-
-    @if (current(); as a) {
-      <app-modal [heading]="a.fileName" size="lg" (closed)="close()">
-        <div class="modal-body viewer">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
-          @else if (!url()) { <p class="muted" role="status">جارٍ التحميل…</p> }
-          @else if (a.contentType === 'application/pdf') { <iframe [src]="safeUrl()" title="معاينة الملف"></iframe> }
-          @else { <img [src]="safeUrl()" [alt]="a.fileName"> }
-        </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close()">إغلاق</button>
-          <button type="button" (click)="download(a)" [disabled]="!url()">تنزيل</button>
-        </footer>
-      </app-modal>
-    }`,
-  styles: [`
-    .files { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
-    .files li { display: flex; align-items: center; gap: 6px; }
-    .file { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 44px; padding: 6px 12px; text-align: start;
-      border-radius: var(--radius-md); background: var(--fill); color: var(--ink-800); box-shadow: none; font-weight: 600; font-size: 13px; }
-    .file:hover:not(:disabled) { background: var(--fill-strong); transform: none; box-shadow: none; }
-    .ico { font-size: 20px; flex: none; }
-    .meta { display: grid; min-width: 0; }
-    .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .meta small { color: var(--ink-500); font-weight: 400; font-size: 11.5px; }
-    .del { min-height: 36px; width: 36px; padding: 0; border-radius: var(--radius-md); background: transparent; color: var(--danger-700); box-shadow: none; }
-    .del:hover:not(:disabled) { background: var(--danger-50); transform: none; box-shadow: none; }
-    .drop { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); }
-    .drop.over { background: var(--brand-50); border-color: var(--brand-600); }
-    .drop small { color: var(--ink-500); font-size: 11.5px; }
-    .problem { margin: 8px 0 0; }
-    .muted { margin: 0; color: var(--ink-500); font-size: 13px; }
-    .viewer { display: grid; place-items: center; min-height: 320px; }
-    .viewer iframe { width: 100%; height: 70vh; border: 0; border-radius: var(--radius-md); background: #fff; }
-    .viewer img { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); }
-  `]
+  templateUrl: './task-attachments.html',
+  styleUrl: './task-attachments.scss'
 })
 export class TaskAttachments implements OnDestroy {
   private service = inject(AssignedTaskService);

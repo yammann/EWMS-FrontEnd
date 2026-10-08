@@ -1,0 +1,47 @@
+<app-modal [heading]="recurrence() ? 'تعديل المهمة الدورية' : 'مهمة دورية جديدة'" size="lg" [busy]="saving()" (closed)="closed.emit()">
+  <form (ngSubmit)="save()">
+    <div class="modal-body form-stack">
+      <app-alert [message]="error()" />
+      <label class="form-field"><span class="form-label">القالب</span>
+        <select name="template" [(ngModel)]="templateId">
+          <option [ngValue]="0">اختر قالباً</option>
+          @for (t of templates(); track t.id) { <option [ngValue]="t.id">{{ t.name }} — {{ t.title }}</option> }
+        </select>
+        @if (!templates().length) { <small class="form-hint">أنشئ قالباً أولاً من قائمة القوالب.</small> }</label>
+
+      @if (kinds().length > 1) {
+        <label class="form-field"><span class="form-label">نوع الجهة</span>
+          <select name="kind" [ngModel]="kind()" (ngModelChange)="chooseKind($event)">
+            @for (k of kinds(); track k) { <option [value]="k">{{ targetLabel[k] }}</option> }
+          </select></label>
+      }
+      <label class="form-field"><span class="form-label">إسناد إلى {{ targetLabel[kind()] }}</span>
+        <select name="target" [(ngModel)]="targetId">
+          <option [ngValue]="0">{{ loadingTargets() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel[kind()] }}</option>
+          @for (t of targets(); track t.id) { <option [ngValue]="t.id">{{ t.name }}</option> }
+        </select></label>
+
+      <div class="two">
+        <label class="form-field"><span class="form-label">التكرار</span>
+          <select name="frequency" [(ngModel)]="frequency">
+            <option [ngValue]="1">{{ freq[1] }}</option><option [ngValue]="2">{{ freq[2] }}</option><option [ngValue]="3">{{ freq[3] }}</option>
+          </select></label>
+        @if (frequency === 2) {
+          <label class="form-field"><span class="form-label">يوم الأسبوع</span>
+            <select name="dow" [(ngModel)]="dayOfWeek">@for (d of weekDays; track $index) { <option [ngValue]="$index">{{ d }}</option> }</select></label>
+        } @else if (frequency === 3) {
+          <label class="form-field"><span class="form-label">يوم الشهر <small class="muted">(31 = آخر يوم في الشهر القصير)</small></span>
+            <input name="dom" type="number" min="1" max="31" [(ngModel)]="dayOfMonth"></label>
+        }
+      </div>
+      <div class="two">
+        <label class="form-field"><span class="form-label">البدء من</span><input name="start" type="date" [(ngModel)]="startDate"></label>
+        <label class="form-field"><span class="form-label">الانتهاء <small class="muted">(اختياري)</small></span><input name="end" type="date" [(ngModel)]="endDate" [min]="startDate"></label>
+      </div>
+      <label class="form-field"><span class="form-label">مدة التسليم <small class="muted">(أيام من يوم الإنشاء — فارغ = مدة القالب)</small></span>
+        <input name="due" type="number" min="0" max="365" [(ngModel)]="dueAfterDays"></label>
+      <p class="note">تُنشأ المهمة تلقائياً بصلاحياتك وقت التنفيذ؛ إن فقدتَ الصلاحية أو حُذفت الجهة تتوقف المهمة الدورية ويصلك إشعار.</p>
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="!templateId || !targetId" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>

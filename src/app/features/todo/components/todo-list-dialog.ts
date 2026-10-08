@@ -10,39 +10,7 @@ import { FormActions } from '@shared/ui/form-actions';
 /** نافذة إنشاء قائمة أو تعديلها: الاسم والوصف واللون والرمز */
 @Component({
   selector: 'app-todo-list-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
-  template: `
-    <app-modal [heading]="list() ? 'تعديل القائمة' : 'قائمة جديدة'" [busy]="saving()" (closed)="closed.emit()">
-      <form (ngSubmit)="save()">
-        <div class="modal-body form-stack">
-          <app-alert [message]="error()" />
-          <label class="form-field"><span class="form-label">اسم القائمة</span>
-            <input name="name" [maxlength]="limits.nameLength" [(ngModel)]="name" placeholder="مثال: مهام الأسبوع" autofocus autocomplete="off"></label>
-          <label class="form-field"><span class="form-label">الوصف <small class="muted">(اختياري)</small></span>
-            <textarea name="description" rows="3" [maxlength]="limits.descriptionLength" [(ngModel)]="description"></textarea></label>
-
-          <fieldset class="form-field">
-            <legend class="form-label">اللون</legend>
-            <div class="swatches" role="radiogroup" aria-label="لون القائمة">
-              @for (c of colors; track c.key) {
-                <button type="button" class="swatch" role="radio" [attr.aria-checked]="color === c.key" [class.on]="color === c.key"
-                        [style.background]="c.css" [attr.aria-label]="c.label" [title]="c.label" (click)="color = color === c.key ? '' : c.key"></button>
-              }
-            </div>
-          </fieldset>
-
-          <fieldset class="form-field">
-            <legend class="form-label">الرمز <small class="muted">(اختياري)</small></legend>
-            <div class="icons" role="radiogroup" aria-label="رمز القائمة">
-              @for (i of icons; track i) {
-                <button type="button" class="ico" role="radio" [attr.aria-checked]="icon === i" [class.on]="icon === i" (click)="icon = icon === i ? '' : i">{{ i }}</button>
-              }
-              <input class="own" name="icon" maxlength="8" [(ngModel)]="icon" placeholder="أو اكتب رمزاً" aria-label="رمز مخصص" autocomplete="off">
-            </div>
-          </fieldset>
-        </div>
-        <app-form-actions [busy]="saving()" [disabled]="!name.trim()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
-      </form>
-    </app-modal>`,
+  templateUrl: './todo-list-dialog.html',
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .swatches, .icons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

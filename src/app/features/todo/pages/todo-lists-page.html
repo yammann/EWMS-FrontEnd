@@ -1,0 +1,130 @@
+<div class="page">
+  <header class="t-head">
+    <div class="t-id">
+      <span class="t-badge" aria-hidden="true"><app-icon name="clipboard" /></span>
+      <div class="t-title">
+        <h1>مفكرتي</h1>
+        <p class="t-sub">
+          <span>{{ dateText }}</span><span class="t-dot" aria-hidden="true"></span>
+          @if (todayTotal()) { <span class="t-pill">{{ todayTotal() }} مستحقة اليوم</span> }
+          @else { <span>قوائم ومهام شخصية لا يراها غيرك</span> }
+        </p>
+      </div>
+    </div>
+    <div class="t-actions">
+      <button type="button" class="btn btn-ghost" (click)="reload()" [disabled]="loading()">تحديث</button>
+      @if (canCreate()) { <button type="button" class="btn" (click)="openForm(null)">+ قائمة جديدة</button> }
+    </div>
+  </header>
+
+  <section class="t-tiles" aria-label="ملخص المفكرة">
+    <app-stat-tile label="القوائم" [value]="activeLists().length" icon="🗂️" tone="blue" [hint]="archivedCount() ? archivedCount() + ' مؤرشفة' : ''" />
+    <app-stat-tile label="بنود مفتوحة" [value]="openItems()" icon="⏳" tone="orange" hint="في كل قوائمي" />
+    <app-stat-tile label="مستحقة اليوم" [value]="today()?.todayCount ?? 0" icon="📅" tone="green" />
+    <app-stat-tile label="متأخرة" [value]="today()?.overdueCount ?? 0" icon="⏰" tone="red" [alert]="(today()?.overdueCount ?? 0) > 0" hint="تجاوزت موعدها" />
+  </section>
+
+  @if (lists().length && view() === 'lists') {
+    <div class="t-tools">
+      <label class="sr-only" for="todo-lists-search">بحث في القوائم</label>
+      <input #t1 id="todo-lists-search" type="search" placeholder="بحث بالاسم أو الوصف…" [value]="search()" (input)="search.set(t1.value)">
+    </div>
+  }
+
+  <div class="t-pills" role="tablist" aria-label="عرض المفكرة">
+    <button type="button" role="tab" class="p" [class.on]="view() === 'lists'" [attr.aria-selected]="view() === 'lists'" (click)="setView('lists')">قوائمي<span class="n">({{ activeLists().length }})</span></button>
+    <button type="button" role="tab" class="p" [class.on]="view() === 'today'" [attr.aria-selected]="view() === 'today'" (click)="setView('today')">اليوم<span class="n">({{ todayTotal() }})</span></button>
+    @if (view() === 'lists' && archivedCount()) {
+      <button type="button" class="p" [class.on]="showArchived()" [attr.aria-pressed]="showArchived()" (click)="showArchived.set(!showArchived())">المؤرشفة<span class="n">({{ archivedCount() }})</span></button>
+    }
+  </div>
+
+  <app-alert [message]="error()" />
+
+  @if (view() === 'today') {
+    @if (today(); as t) {
+      @if (!t.items.length) {
+        <div class="panel empty-state"><p>لا شيء مستحق اليوم ولا متأخر 🎉</p><small class="muted">أضف موعداً لأي بند ليظهر هنا في يومه.</small></div>
+      } @else {
+        @for (group of todayGroups(); track group.title) {
+          @if (group.items.length) {
+            <h2 class="t-group" [class.late]="group.late">{{ group.title }} <small>{{ group.items.length }}</small></h2>
+            <ul class="t-grid">
+              @for (i of group.items; track i.id) {
+                <li class="t-card click" [class.imp]="i.isImportant" (click)="openList(i.toDoListId)">
+                  <div class="t-row">
+                    <button type="button" class="t-tick" role="checkbox" aria-checked="false" [disabled]="!canEdit() || busy()"
+                            (click)="complete(i); $event.stopPropagation()" [attr.aria-label]="'إنجاز ' + i.title">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+                    </button>
+                    <div class="t-body">
+                      <h3 class="t-name">@if (i.isImportant) { <span class="t-star" aria-label="مهم">★</span> }{{ i.title }}</h3>
+                      <div class="t-meta">
+                        <span class="t-chip">{{ i.listIcon || '📋' }} {{ i.listName }}</span>
+                        <span class="t-chip" [class.late]="i.isOverdue" [class.today]="!i.isOverdue">📅 {{ i.isOverdue ? 'متأخر · ' + (i.dueDate | date:'MM/dd') : 'اليوم' }}</span>
+                        @if (i.repeatAr) { <span class="t-chip">🔁 {{ i.repeatAr }}</span> }
+                        @if (i.linkedTask?.available) { <span class="t-chip info">🔗 {{ i.linkedTask!.statusAr }}</span> }
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        }
+      }
+    } @else if (loading()) { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
+  } @else {
+    @if (loading() && !lists().length) {
+      <div class="panel empty-state" role="status">جارٍ التحميل…</div>
+    } @else {
+      <ul class="t-grid">
+        @for (l of pager.items(); track l.id) {
+          <li class="t-card click" [class.done]="l.isArchived" tabindex="0" role="button" (click)="open(l)" (keydown.enter)="open(l)" [attr.aria-label]="'فتح القائمة ' + l.name">
+            <div class="t-row">
+              <span class="l-icon" [style.--c]="color(l.color)" aria-hidden="true">{{ l.icon || '📋' }}</span>
+              <div class="t-body">
+                <h3 class="t-name">{{ l.name }}</h3>
+                @if (l.description) { <p class="t-note">{{ l.description }}</p> }
+              </div>
+              @if (canEdit() || canCreate() || canDelete()) {
+                <div class="t-more" (click)="$event.stopPropagation()">
+                  <button type="button" (click)="toggleMenu(l.id)" [attr.aria-expanded]="menuFor() === l.id" aria-haspopup="menu" [attr.aria-label]="'خيارات ' + l.name">⋮</button>
+                  @if (menuFor() === l.id) {
+                    <div class="t-menu" role="menu">
+                      @if (canEdit() && !l.isArchived) { <button type="button" role="menuitem" (click)="menuFor.set(null); togglePin(l)">{{ l.isPinned ? 'إلغاء التثبيت' : 'تثبيت' }}</button> }
+                      @if (canEdit() && !l.isArchived) { <button type="button" role="menuitem" (click)="menuFor.set(null); openForm(l)">تعديل</button> }
+                      @if (canCreate()) { <button type="button" role="menuitem" (click)="menuFor.set(null); duplicate(l)">نسخ القائمة</button> }
+                      @if (canEdit()) { <button type="button" role="menuitem" (click)="menuFor.set(null); toggleArchive(l)">{{ l.isArchived ? 'إعادة من الأرشيف' : 'أرشفة' }}</button> }
+                      @if (canDelete()) { <button type="button" role="menuitem" class="danger" (click)="menuFor.set(null); remove(l)">حذف</button> }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            <div class="l-bar" aria-hidden="true"><span [style.width.%]="percent(l)"></span></div>
+            <div class="t-meta">
+              <span class="t-chip" [class.ok]="l.itemsTotal > 0 && l.itemsDone === l.itemsTotal">{{ l.itemsTotal ? l.itemsDone + ' من ' + l.itemsTotal + ' منجزة' : 'قائمة فارغة' }}</span>
+              @if (l.itemsOverdue) { <span class="t-chip late">⏰ {{ l.itemsOverdue }} متأخرة</span> }
+              @else if (l.nextDueDate) { <span class="t-chip">📅 {{ l.nextDueDate | date:'MM/dd' }}</span> }
+              @if (l.isPinned) { <span class="t-chip" title="مثبّتة">📌</span> }
+              @if (l.isArchived) { <span class="t-chip">مؤرشفة</span> }
+              @if (l.ownerName !== me()) { <span class="t-chip info">{{ l.ownerName }}</span> }
+            </div>
+          </li>
+        } @empty {
+          @if (lists().length) { <li class="t-empty">لا نتائج مطابقة.</li> }
+        }
+        @if (canCreate()) {
+          <li class="t-card t-add" role="button" tabindex="0" (click)="openForm(null)" (keydown.enter)="openForm(null)" aria-label="قائمة جديدة">
+            <span class="plus" aria-hidden="true">+</span>
+            <strong>{{ lists().length ? 'قائمة جديدة' : 'أنشئ أول قائمة' }}</strong><small>لكل موضوع قائمة ببنودها ومواعيدها</small>
+          </li>
+        }
+      </ul>
+  <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    }
+  }
+</div>
+
+@if (formOpen()) { <app-todo-list-dialog [list]="editing()" (saved)="saved($event)" (closed)="formOpen.set(false)" /> }

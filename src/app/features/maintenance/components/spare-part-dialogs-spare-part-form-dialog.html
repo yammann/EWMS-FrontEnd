@@ -1,0 +1,37 @@
+<app-modal [heading]="part() ? 'تعديل قطعة غيار' : 'قطعة غيار جديدة'" [subheading]="part()?.departmentName ?? 'تُضاف برصيد صفر — ثم «إدخال» لاستلام الكميات'"
+           size="lg" [busy]="saving()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body">
+      <app-alert [message]="error()" />
+      <div class="form-grid-2">
+        @if (!part() && departments().length > 1) {
+          <label class="form-field full"><span class="form-label">مخزون القسم</span>
+            <select formControlName="departmentId"><option [ngValue]="0">اختر القسم</option>
+              @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }</select></label>
+        }
+        <label class="form-field"><span class="form-label">اسم القطعة</span><input formControlName="name" maxlength="200" autocomplete="off"></label>
+        <label class="form-field"><span class="form-label">رقم القطعة <small class="hint">(اختياري)</small></span><input formControlName="partNumber" maxlength="100" dir="ltr" autocomplete="off"></label>
+        <label class="form-field"><span class="form-label">الوحدة</span><input formControlName="unit" maxlength="30" list="part-units" placeholder="قطعة، متر، علبة…">
+          <datalist id="part-units"><option value="قطعة"></option><option value="متر"></option><option value="علبة"></option><option value="لتر"></option><option value="طقم"></option></datalist></label>
+        <label class="form-field"><span class="form-label">الحد الأدنى للتنبيه</span><input type="number" formControlName="minQuantity" min="0" step="0.01" dir="ltr">
+          <small class="hint">إشعار لمن يُدخل المخزون عند النزول تحته (0 = بلا تنبيه)</small>
+          @if (form.controls.minQuantity.invalid) { <small class="form-error">رقم موجب بخانتين عشريتين على الأكثر</small> }</label>
+        <label class="form-field full"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="2" maxlength="1000"></textarea></label>
+      </div>
+
+      <fieldset class="compat"><legend>التوافق <small class="hint">(اختياري — يقدّم القطعة أولاً عند الصرف على هذه الأجهزة)</small></legend>
+        <div class="compat-grid">
+          <div><span class="form-label">أنواع الأجهزة</span>
+            <div class="checks">@for (t of deviceTypes(); track t.id) {
+              <label><input type="checkbox" [checked]="typeIds().has(t.id)" (change)="toggle(typeIds, t.id)"> {{ t.name }}</label>
+            } @empty { <span class="hint">لا توجد أنواع</span> }</div></div>
+          <div><span class="form-label">الشركات</span>
+            <div class="checks">@for (c of companies(); track c.id) {
+              <label><input type="checkbox" [checked]="companyIds().has(c.id)" (change)="toggle(companyIds, c.id)"> {{ c.name }}</label>
+            } @empty { <span class="hint">لا توجد شركات</span> }</div></div>
+        </div>
+      </fieldset>
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid || needsDepartment()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>

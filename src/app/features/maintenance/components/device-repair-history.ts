@@ -19,35 +19,7 @@ const FULL_SIZE = 100;
  */
 @Component({
   selector: 'app-device-repair-history', standalone: true, imports: [UtcPipe, DatePipe, RouterLink, StatusChip],
-  template: `
-    @if (loading() && !items().length) { <p class="muted" role="status">جارٍ تحميل السجل…</p> }
-    @else if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
-    @else {
-      <p class="summary">{{ summary() }}</p>
-      @if (items().length) {
-        <div class="table-wrap" [class.dim]="loading()"><table>
-          <thead><tr><th>رقم الطلب</th><th>تاريخ الاستلام</th><th>العميل</th><th>العطل</th><th>الحالة</th><th>الفني</th></tr></thead>
-          <tbody>
-            @for (r of items(); track r.id) {
-              <tr>
-                <td><a class="number mono" [routerLink]="['/maintenance/requests', r.id]" (click)="navigated.emit()">{{ r.number }}</a></td>
-                <td class="nowrap">{{ r.createdAt | utc | date:'yyyy/MM/dd' }}</td>
-                <td>{{ r.clientName }}</td>
-                <td>{{ r.damageTypeName }}</td>
-                <td><app-status-chip [name]="r.statusName" [color]="r.statusColor" /></td>
-                <td>{{ r.technicianName }}</td>
-              </tr>
-            }
-          </tbody>
-        </table></div>
-        @if (hiddenCount() > 0) {
-          <div class="more">
-            @if (!expanded()) { <button type="button" class="btn btn-ghost btn-sm" (click)="expanded.set(true)" [disabled]="loading()">عرض الكل ({{ others() }})</button> }
-            @else { <span class="muted">يُعرض أحدث {{ items().length }} من {{ others() }}.</span> }
-          </div>
-        }
-      }
-    }`,
+  templateUrl: './device-repair-history.html',
   styles: [`
     .summary { margin: 0 0 10px; font-size: 13px; color: var(--ink-600); }
     .muted { color: var(--ink-500); font-size: 13px; }

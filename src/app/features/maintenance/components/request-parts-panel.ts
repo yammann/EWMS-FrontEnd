@@ -18,64 +18,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-request-parts-panel', standalone: true, imports: [Alert, QtyPipe, MoneyPipe, UtcPipe, DatePipe, Modal],
   styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/maintenance.scss'],
-  template: `
-    @if (data(); as d) {
-      <section class="panel">
-        <div class="panel-heading">
-          <div><h2>قطع الغيار</h2><p>{{ d.items.length ? 'تكلفة قطع هذا الطلب ' + (d.total | money) : 'لم تُصرف قطع على هذا الطلب' }}{{ request().isClosed && d.items.length ? ' — مقفلة مع الطلب' : '' }}</p></div>
-          @if (d.canIssue && can().issueParts) { <button class="btn btn-sm" type="button" (click)="openIssue()">+ صرف قطعة</button> }
-        </div>
-
-        @if (d.items.length) {
-          <div class="table-wrap"><table>
-            <thead><tr><th>القطعة</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>صُرفت</th>@if (d.canIssue && can().issueParts) { <th class="actions-th"></th> }</tr></thead>
-            <tbody>
-              @for (p of d.items; track p.id) {
-                <tr>
-                  <td><span class="cell-strong">{{ p.partName }}</span>@if (p.partNumber) { <small class="mono">{{ p.partNumber }}</small> }</td>
-                  <td class="num">{{ p.quantity | qty }} {{ p.unit }}</td>
-                  <td class="num">{{ p.unitCost | money }}</td>
-                  <td class="num cell-strong">{{ p.total | money }}</td>
-                  <td>{{ p.issuedByName }}<small>{{ p.issuedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</small></td>
-                  @if (d.canIssue && can().issueParts) {
-                    <td><div class="row-actions"><button class="btn btn-ghost btn-sm" type="button" [disabled]="busy()" (click)="returnPart(p)">إعادة للمخزون</button></div></td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table></div>
-        }
-        <p class="lifetime">تكلفة قطع الجهاز على مدى عمره: <strong>{{ d.deviceLifetimeCost | money }}</strong></p>
-      </section>
-    }
-
-    @if (issueOpen()) {
-      <app-modal heading="صرف قطعة على الطلب" [subheading]="request().number + ' — من مخزون ' + request().departmentName" [busy]="busy()" (closed)="issueOpen.set(false)">
-        <div class="modal-body form-stack">
-          <app-alert [message]="issueError()" />
-          <label class="form-field"><span class="form-label">بحث في القطع المتوفرة</span>
-            <input #t1 type="search" [value]="search()" (input)="search.set(t1.value); findParts()" placeholder="الاسم أو رقم القطعة…" autocomplete="off"></label>
-          <div class="pick" role="listbox" aria-label="القطع المتوفرة">
-            @for (p of available(); track p.id) {
-              <button type="button" role="option" [class.on]="selected()?.id === p.id" [attr.aria-selected]="selected()?.id === p.id" (click)="select(p)">
-                <span><strong>{{ p.name }}</strong>@if (p.partNumber) { <small class="mono"> {{ p.partNumber }}</small> }</span>
-                <small>متوفر {{ p.quantity | qty }} {{ p.unit }} · {{ p.averageCost | money }}</small>
-              </button>
-            } @empty { <p class="hint">{{ loadingParts() ? 'جارٍ التحميل…' : 'لا توجد قطع متوفرة في مخزون قسم الطلب' }}</p> }
-          </div>
-          @if (selected(); as s) {
-            <label class="form-field"><span class="form-label">الكمية ({{ s.unit }}) — المتوفر {{ s.quantity | qty }}</span>
-              <input #t2 type="number" [value]="quantity()" (input)="quantity.set(+t2.value)" min="0.01" [max]="s.quantity" step="0.01" dir="ltr">
-              @if (quantityError()) { <small class="form-error">{{ quantityError() }}</small> }
-              @else { <small class="hint">التكلفة {{ quantity() * s.averageCost | money }} — بسعر المتوسط الحالي، ويُثبَّت على الطلب</small> }</label>
-          }
-        </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="issueOpen.set(false)" [disabled]="busy()">إلغاء</button>
-          <button type="button" (click)="issue()" [disabled]="!selected() || !!quantityError() || busy()">{{ busy() ? 'جارٍ الصرف…' : 'صرف' }}</button>
-        </footer>
-      </app-modal>
-    }`,
+  templateUrl: './request-parts-panel.html',
   styles: [`
     .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     td small { display: block; color: var(--ink-500); font-size: 11px; }

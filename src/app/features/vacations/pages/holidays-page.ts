@@ -18,50 +18,7 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
 @Component({
   selector: 'app-holidays-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, DatePipe, Pager],
   styleUrl: '../../../shared/styles/organization.scss',
-  template: `
-    <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">إعدادات الإجازات</span><h1>العطل الرسمية</h1><p class="muted">لا تُحسب من مدة الإجازة، مثل يوم الجمعة.</p></div>
-        <div class="actions">
-          <select #t1 [value]="year()" (change)="setYear(+t1.value)" aria-label="السنة">
-            @for (y of years; track y) { <option [value]="y">{{ y }}</option> }
-          </select>
-          <button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button>
-        </div>
-      </header>
-      <app-alert [message]="error()" />
-      @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
-      @if (editing() ? can().edit : can().create) {
-      <section class="panel"><div class="panel-heading"><h2>{{ editing() ? 'تعديل العطلة' : 'إضافة عطلة' }}</h2></div>
-        <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
-          <label class="form-field">الاسم<input formControlName="name" maxlength="100" placeholder="مثال: عيد الفطر"></label>
-          <label class="form-field">{{ editing() ? 'التاريخ' : 'من تاريخ' }}<input type="date" formControlName="startVac"></label>
-          @if (!editing()) { <label class="form-field">إلى تاريخ (اختياري)<input type="date" formControlName="endVac" [min]="form.controls.startVac.value"></label> }
-          @if (form.hasError('dateRange')) { <p class="form-error full-width">تاريخ النهاية يجب أن يساوي تاريخ البداية أو يليه.</p> }
-          @if (!editing()) { <p class="muted full-width">لعطلة من عدة أيام (كالعيد) حدّد المدة، فيُضاف يوم لكل تاريخ.</p> }
-          <div class="actions full-width"><button class="btn" type="submit" [disabled]="saving() || form.invalid">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ العطلة' }}</button>@if (editing()) { <button class="btn btn-ghost" type="button" (click)="reset()" [disabled]="saving()">إلغاء</button> }</div>
-        </form>
-      </section>
-      }
-      <section class="panel">
-        @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
-        @else if (!items().length && !error()) { <app-empty-state>لا توجد عطل رسمية مسجّلة لسنة {{ year() }}.</app-empty-state> }
-        @else {
-          <div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>العطلة</th><th>الإجراءات</th></tr></thead><tbody>
-            @for (h of pager.items(); track h.id) {
-              <tr>
-                <td>{{ h.date | date:'yyyy/MM/dd' }}</td>
-                <td>{{ dayName(h.date) }}@if (h.isFriday) { <small class="muted"> (جمعة أصلاً)</small> }</td>
-                <td>{{ h.name }}</td>
-                <td><div class="actions">@if (can().edit) { <button class="btn btn-ghost btn-sm" (click)="edit(h)" [disabled]="saving()">تعديل</button> }@if (can().delete) { <button class="btn btn-danger btn-sm" (click)="deleting.set(h)" [disabled]="saving()">حذف</button> }</div></td>
-              </tr>
-            }
-          </tbody></table></div>
-      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-        }
-        @if (deleting(); as h) { <div class="alert alert-warning">حذف عطلة «{{ h.name }}» ({{ h.date | date:'yyyy/MM/dd' }})؟ <button class="btn btn-danger" (click)="remove(h)" [disabled]="saving()">تأكيد الحذف</button><button class="btn btn-ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button></div> }
-      </section>
-    </div>`
+  templateUrl: './holidays-page.html'
 })
 export class HolidaysPage {
   pager = new Pagination(() => this.items());

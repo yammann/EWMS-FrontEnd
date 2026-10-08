@@ -27,19 +27,7 @@ const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان',
       </ul>
       @if (items().length > limit()) { <p class="more">و{{ items().length - limit() }} أخرى بأعداد أقل</p> }
     } @else { <p class="none">لا توجد بيانات</p> }`,
-  styles: [`
-    .bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-    li { display: grid; grid-template-columns: minmax(110px, 200px) 1fr 84px; align-items: center; gap: 14px; padding: 5px 8px; border-radius: var(--radius-sm); }
-    li:hover { background: var(--fill); }
-    .label { font-size: 13px; font-weight: 700; color: var(--ink-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .track { height: 10px; background: var(--fill); border-radius: 5px; overflow: hidden; }
-    .fill { display: block; height: 100%; min-width: 4px; background: var(--brand-600); border-radius: 5px; }
-    .value { font-size: 13px; font-weight: 700; color: var(--ink-900); text-align: left; font-variant-numeric: tabular-nums; }
-    .value small { margin-inline-start: 6px; font-size: 11px; font-weight: 400; color: var(--ink-400); }
-    .none, .more { margin: 0; text-align: center; color: var(--ink-400); font-size: 13px; }
-    .none { padding: 18px; border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
-    .more { padding-top: 10px; font-size: 12px; }
-  `]
+  styleUrl: './stats-page-maint-bars.scss'
 })
 export class MaintBars {
   items = input.required<MaintenanceCount[]>();
@@ -57,66 +45,7 @@ export class MaintBars {
 @Component({
   selector: 'app-maintenance-stats-page', standalone: true, imports: [PageHeader, EmptyState, Alert, StatTile, MaintBars],
   styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss'],
-  template: `
-    <div class="page">
-      <app-page-header eyebrow="الصيانة" heading="إحصائيات الصيانة" subtitle="أرقام الطلبات والمهام ضمن نطاقك">
-  <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-      </app-page-header>
-
-      <app-alert [message]="error()" />
-
-      @if (stats(); as s) {
-        <section class="stats-4" aria-label="ملخص">
-          <app-stat-tile label="طلبات الصيانة" [value]="s.totalRequests" icon="🧾" tone="green" [hint]="s.requestsThisMonth + ' هذا الشهر'" />
-          <app-stat-tile label="متوسط مدة الإصلاح" [value]="hours(s.averageRepairHours)" icon="⏱" tone="blue" hint="من بدء العمل إلى الإنجاز" />
-          <app-stat-tile label="مهام الصيانة" [value]="s.totalTasks" icon="🛠" tone="purple" [hint]="s.tasksThisMonth + ' هذا الشهر'" />
-          <app-stat-tile label="الفنيون" [value]="s.byTechnician.length" icon="👥" tone="orange" hint="لهم طلبات مسجّلة" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الطلبات حسب الحالة</h2></div></div>
-          <app-maint-bars [items]="s.byStatus" [limit]="20" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الطلبات المستلمة في آخر 6 أشهر</h2></div></div>
-          <div class="months" role="img" [attr.aria-label]="monthsLabel()">
-            @for (m of s.monthly; track m.year + '-' + m.month) {
-              <div class="month" [attr.title]="monthName(m.month) + ' ' + m.year + ': ' + m.count">
-                <span class="n">{{ m.count }}</span>
-                <span class="col"><span [style.height.%]="100 * m.count / monthMax()"></span></span>
-                <span class="m">{{ monthName(m.month) }}</span>
-              </div>
-            }
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الطلبات حسب الفني</h2></div></div>
-          <app-maint-bars [items]="s.byTechnician" [limit]="12" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>أكثر الأعطال تكراراً</h2></div></div>
-          <app-maint-bars [items]="s.byDamageType" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الطلبات حسب نوع الجهاز</h2></div></div>
-          <app-maint-bars [items]="s.byDeviceType" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الطلبات حسب الشركة المصنّعة</h2></div></div>
-          <app-maint-bars [items]="s.byCompany" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>مهام الصيانة حسب الموظف</h2></div></div>
-          <app-maint-bars [items]="s.tasksByUser" [limit]="12" />
-        </section>
-      } @else if (loading()) { <app-empty-state panel>جارٍ التحميل…</app-empty-state> }
-    </div>`,
+  templateUrl: './stats-page-maintenance-stats-page.html',
   styles: [`
     .months { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 14px; align-items: end; height: 220px; }
     .month { display: grid; grid-template-rows: auto 1fr auto; gap: 6px; height: 100%; justify-items: center; min-width: 0; }

@@ -21,61 +21,7 @@ import { trackRequest } from '@shared/ui/loader';
   selector: 'app-vacation-stats', standalone: true,
   imports: [Alert, RouterLink, StatTile, VacationRows, ActionsTable, CountBars],
   styleUrl: '../../../shared/styles/dashboard.scss',
-  template: `
-    <div class="page">
-      <header class="page-header">
-        <div>
-          <span class="eyebrow">الإجازات</span>
-          <h1>إحصائيات الإجازات</h1>
-          @if (data(); as d) { <p class="header-sub">{{ d.scopeName }}</p> }
-        </div>
-        <div class="header-actions">
-          @if (isAdmin()) {
-            <select #t1 [value]="branchId()" (change)="selectBranch(+t1.value)" aria-label="اختيار الفرع">
-              <option [value]="0">كل المؤسسة</option>
-              @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
-            </select>
-          }
-          <button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
-
-      <app-alert [message]="error()" />
-
-      @if (data(); as d) {
-        <section class="dash-stats" aria-label="ملخص الإجازات">
-          <app-stat-tile label="في إجازة اليوم" [value]="d.onLeaveToday" icon="🌴" tone="green" />
-          <app-stat-tile label="تبدأ خلال 7 أيام" [value]="d.upcomingLeavesCount" icon="📆" tone="blue" />
-          <app-stat-tile label="طلبات قيد الموافقة" [value]="d.pendingRequests" icon="⏳" tone="orange" [alert]="d.pendingRequests > 0" />
-          <app-stat-tile label="أيام إجازة معتمدة" [value]="d.approvedDaysThisMonth" icon="📅" tone="purple" hint="خلال هذا الشهر" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading">
-            <div><h2>{{ d.pendingStageLabel }}</h2><p>الأقدم أولاً</p></div>
-            @if (canReview()) { <a class="link" routerLink="/vacations/review">مراجعة الطلبات ←</a> }
-          </div>
-          <app-vacation-rows [rows]="d.pendingApprovals" [showDepartment]="true" [showOffice]="true" [showStatus]="true" emptyText="لا توجد طلبات قيد الموافقة" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>في إجازة الآن وخلال 7 أيام</h2></div></div>
-          <app-vacation-rows [rows]="d.onLeave" [showDepartment]="true" [showOffice]="true" emptyText="لا أحد في إجازة الآن أو خلال الأيام القادمة" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>الإجازات حسب النوع</h2><p>أيام الإجازات المعتمدة منذ بداية العام</p></div></div>
-          <app-count-bars [items]="d.vacationsByType" mode="days" emptyText="لا توجد إجازات معتمدة هذا العام بعد" />
-        </section>
-
-        <section class="panel">
-          <div class="panel-heading"><div><h2>آخر الإجراءات على الطلبات</h2></div></div>
-          <app-actions-table [actions]="d.recentActions" />
-        </section>
-      } @else if (loading()) {
-        <div class="panel skeleton" role="status">جارٍ تحميل إحصائيات الإجازات…</div>
-      }
-    </div>`
+  templateUrl: './vacation-stats-page.html'
 })
 export class VacationStatsPage {
   private service = inject(DashboardService);
