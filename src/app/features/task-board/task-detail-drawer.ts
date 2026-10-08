@@ -7,11 +7,12 @@ import { AssignedTaskDetail, TaskAttachment, TaskStatus, TASK_STATUS_LABEL } fro
 import { hasOpenModal } from '../../shared/ui/modal';
 import { ConfirmService } from '../../shared/ui/confirm.service';
 import { TaskAttachments } from './task-attachments';
+import { TaskLinks } from './task-links';
 import { TaskNoteDialog } from './task-note-dialog';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
-  selector: 'app-task-detail-drawer', standalone: true, imports: [CommonModule, FormsModule, TaskAttachments, TaskNoteDialog],
+  selector: 'app-task-detail-drawer', standalone: true, imports: [CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks],
   template: `
     <div class="drawer-backdrop" (click)="close.emit()"></div>
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="task-drawer-title">
@@ -102,6 +103,11 @@ import { TaskNoteDialog } from './task-note-dialog';
               }
             </section>
           }
+
+          <section>
+            <h3>السجلات المرتبطة</h3>
+            <app-task-links [taskId]="t.id" [canEdit]="(t.canEdit || t.canChangeStatus) && t.status !== 'Done'" />
+          </section>
 
           @if (t.subTasks.length || t.canDelegate) {
             <section>

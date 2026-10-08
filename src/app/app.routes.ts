@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permissionGuard } from './core/guards/permission.guard';
-import { APPROVE_VACATIONS, AppPermission, DASHBOARD_ACCESS, DEPARTMENT_DASHBOARD_ACCESS, DEVICE_ACCESS, OFFICE_DASHBOARD_ACCESS, WORK_TASK_VIEW, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS } from './core/constants/access';
+import { APPROVE_VACATIONS, AppPermission, DASHBOARD_ACCESS, DEPARTMENT_DASHBOARD_ACCESS, DEVICE_ACCESS, OFFICE_DASHBOARD_ACCESS, WORK_TASK_VIEW, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, TASK_ASSIGN } from './core/constants/access';
 import { MainLayout } from './features/layout/main-layout';
 
 /**
@@ -44,6 +44,8 @@ export const routes: Routes = [
       { path: 'notifications', canActivate: [permissionGuard], data: { permission: AppPermission.ViewNotifications }, loadComponent: () => import('./features/notifications/notifications-page').then(m => m.NotificationsPage) },
       // لوحة المهام المُسندة: تحتاج ViewTaskBoard، والإسناد والمتابعة بصلاحيات AssignTaskTo* / HandleUnitTasks
       { path: 'task-board', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskBoard }, loadComponent: () => import('./features/task-board/task-board-page').then(m => m.TaskBoardPage) },
+      { path: 'task-board/recurring', canActivate: [permissionGuard], data: { anyPermission: TASK_ASSIGN }, loadComponent: () => import('./features/task-board/recurring-page').then(m => m.RecurringTasksPage) },
+      { path: 'task-board/stats', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskStats }, loadComponent: () => import('./features/task-board/task-stats-page').then(m => m.TaskStatsPage) },
 
       // توثيق الأجهزة: الحماية بصلاحيات الدور، مثل بقية الخدمات.
       {

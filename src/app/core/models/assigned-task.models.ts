@@ -128,6 +128,52 @@ export interface TaskBoard {
   tasks: AssignedTaskCard[];
 }
 
+/** قالب مهمة شخصي */
+export interface TaskTemplate {
+  id: number; name: string; title: string; description: string;
+  priority: TaskPriority; priorityAr: string; defaultDueDays: number | null; items: string[];
+}
+export interface SaveTemplateRequest {
+  name: string; title: string; description: string; priority: number; defaultDueDays: number | null; items: string[];
+}
+
+export type RecurrenceFrequency = 1 | 2 | 3;
+export const FREQUENCY_LABEL: Record<RecurrenceFrequency, string> = { 1: 'يومي', 2: 'أسبوعي', 3: 'شهري' };
+export const WEEK_DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+export interface TaskRecurrence {
+  id: number; templateId: number; templateName: string; taskTitle: string;
+  targetType: TaskTargetKind; targetTypeAr: string; targetId: number; targetName: string;
+  frequency: RecurrenceFrequency; scheduleAr: string; dayOfWeek: number | null; dayOfMonth: number | null; dueAfterDays: number | null;
+  startDate: string; endDate: string | null; isActive: boolean; nextRunDate: string | null;
+  lastRunAt: string | null; lastTaskId: number | null; lastError: string | null;
+}
+export interface SaveRecurrenceRequest {
+  templateId: number; targetType: TaskTargetKind; targetId: number; frequency: number;
+  dayOfWeek: number | null; dayOfMonth: number | null; dueAfterDays: number | null; startDate: string; endDate: string | null;
+}
+
+export type TaskLinkType = 'MaintenanceRequest' | 'Vacation' | 'Site';
+export const LINK_TYPE_LABEL: Record<TaskLinkType, string> = { MaintenanceRequest: 'طلب صيانة', Vacation: 'إجازة', Site: 'موقع' };
+export interface TaskLink {
+  id: number; entityType: TaskLinkType; entityTypeAr: string; entityId: number;
+  label: string; available: boolean; canRemove: boolean; createdByName: string;
+}
+
+export interface TaskStatsGroup {
+  targetType: TaskTargetKind; targetTypeAr: string; name: string; total: number; done: number; open: number;
+  overdue: number; onTimeRate: number | null; avgDays: number | null; returned: number;
+}
+export interface TaskStats {
+  from: string; to: string; total: number; open: number; inReview: number; done: number; overdue: number;
+  onTimeRate: number | null; avgDays: number | null; returnedTasks: number;
+  byTarget: TaskStatsGroup[]; byMonth: { month: string; created: number; done: number }[];
+}
+
+export interface TaskExportFilter {
+  mode: TaskBoardMode; doneDays?: number; q?: string; priority?: string; overdueOnly?: boolean; dueFrom?: string; dueTo?: string;
+}
+
 export interface CreateTaskRequest {
   title: string;
   description: string;
@@ -137,6 +183,8 @@ export interface CreateTaskRequest {
   /** مطلوب إن كان لي أكثر من نوع إسناد — يُتجاهل في التفويض */
   targetType?: TaskTargetKind | null;
   parentTaskId: number | null;
+  /** بنود تحقق تُنشأ مع المهمة (من قالب أو يدوياً) */
+  checklistItems?: string[];
 }
 
 export interface UpdateTaskRequest {

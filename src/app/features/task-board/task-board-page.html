@@ -11,6 +11,9 @@
     </div>
     <div class="header-actions">
       @if (canCreate()) { <button class="btn" type="button" (click)="newTask()">+ مهمة جديدة</button> }
+      @if (canRecurring()) { <a class="btn btn-ghost" routerLink="/task-board/recurring">المهام الدورية والقوالب</a> }
+      @if (canStats()) { <a class="btn btn-ghost" routerLink="/task-board/stats">الإحصائيات</a> }
+      <button class="btn btn-ghost" type="button" (click)="exportExcel()" [disabled]="exporting() || !tasks().length">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button>
       <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
     </div>
   </header>
@@ -42,12 +45,39 @@
       @for (p of priorities; track p) { <option [value]="p">{{ priorityLabel[p] }}</option> }
     </select>
     <label class="check"><input type="checkbox" [checked]="overdueOnly()" (change)="overdueOnly.set($any($event.target).checked)"> المتأخرة فقط</label>
+    <div class="view-switch" role="group" aria-label="طريقة العرض">
+      <button type="button" [class.on]="view() === 'board'" [attr.aria-pressed]="view() === 'board'" (click)="setView('board')">اللوحة</button>
+      <button type="button" [class.on]="view() === 'calendar'" [attr.aria-pressed]="view() === 'calendar'" (click)="setView('calendar')">التقويم</button>
+    </div>
   </div>
+
+  <details class="more-filters" [open]="filtersActive()">
+    <summary>فلاتر إضافية@if (filtersActive()) { <span class="dotmark" aria-label="فلاتر مفعّلة"></span> }</summary>
+    <div class="filters-grid">
+      <label>المُسنِد
+        <select [value]="creatorFilter()" (change)="creatorFilter.set($any($event.target).value)">
+          <option value="">الكل</option>@for (c of creators(); track c) { <option [value]="c">{{ c }}</option> }
+        </select></label>
+      <label>الجهة المنفِّذة
+        <select [value]="targetFilter()" (change)="targetFilter.set($any($event.target).value)">
+          <option value="">الكل</option>@for (t of targets(); track t) { <option [value]="t">{{ t }}</option> }
+        </select></label>
+      <label>التسليم من <input type="date" [value]="dueFrom()" (change)="dueFrom.set($any($event.target).value)"></label>
+      <label>التسليم إلى <input type="date" [value]="dueTo()" (change)="dueTo.set($any($event.target).value)"></label>
+      <label>المنجزة المعروضة
+        <select [value]="doneDays()" (change)="setDoneDays(+$any($event.target).value)">
+          <option value="30">آخر 30 يوماً</option><option value="90">آخر 3 أشهر</option><option value="365">آخر سنة</option><option value="3650">الكل</option>
+        </select></label>
+      @if (filtersActive()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }
+    </div>
+  </details>
 
   @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
   @if (loading() && !tasks().length) {
     <div class="panel empty-state" role="status">جارٍ تحميل المهام…</div>
+  } @else if (view() === 'calendar') {
+    <app-task-calendar [tasks]="filtered()" (openTask)="open($event)" />
   } @else {
     <div class="board" cdkDropListGroup>
       @for (col of columns; track col.status) {

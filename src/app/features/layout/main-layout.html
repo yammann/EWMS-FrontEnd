@@ -28,7 +28,7 @@
         <div class="nav-group" [id]="'nav-' + section.id" [class.closed]="!collapsed() && !isOpen(section)">
           <div class="nav-group-inner">
             @for (item of section.items; track item.path) {
-              <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: !!item.exact }"
+              <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ paths: item.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
                  [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null"
                  [attr.tabindex]="!collapsed() && !isOpen(section) ? -1 : null">
                 <app-icon [name]="item.icon" /><span class="label">{{ item.label }}</span>

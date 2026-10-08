@@ -15,6 +15,7 @@ import { AssignDialog, StatusChip } from './maintenance-ui';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
 import { DeviceRepairHistory } from './device-repair-history';
 import { TransferPanel } from './transfer-panel';
+import { LinkedTasks } from '../task-board/task-links';
 import { RequestPartsPanel } from './request-parts-panel';
 
 const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4: '✎', 5: '⇢', 6: '✕', 7: '⚙', 8: '↩' };
@@ -25,7 +26,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
  */
 @Component({
   selector: 'app-maintenance-request-details', standalone: true,
-  imports: [DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel],
+  imports: [DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -104,6 +105,8 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
         </section>
 
         <app-request-parts-panel [request]="r" (changed)="load(false)" />
+
+        <app-linked-tasks entityType="MaintenanceRequest" [entityId]="r.id" />
 
         <section class="panel">
           <div class="panel-heading"><div><h2>سجل الطلب</h2><p>كل ما جرى على الطلب، الأحدث أولاً</p></div></div>

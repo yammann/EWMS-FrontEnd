@@ -2,15 +2,19 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, concatMap, from, last, tap } from 'rxjs';
 import { ApiService } from './api.service';
 import {
-  AssignedTaskCard, AssignedTaskDetail, CreateTaskRequest, TaskBoard, TaskBoardMode, TaskStatus,
-  TaskTargetKind, TaskTargetOption, TASK_STATUS_VALUE, UpdateTaskRequest
+  AssignedTaskCard, AssignedTaskDetail, CreateTaskRequest, SaveRecurrenceRequest, SaveTemplateRequest, TaskBoard, TaskBoardMode,
+  TaskExportFilter, TaskLink, TaskLinkType, TaskRecurrence, TaskStats, TaskStatus, TaskTargetKind, TaskTargetOption, TaskTemplate,
+  TASK_STATUS_VALUE, UpdateTaskRequest
 } from '../models/assigned-task.models';
 
 @Injectable({ providedIn: 'root' })
 export class AssignedTaskService {
   private api = inject(ApiService);
 
-  board(mode: TaskBoardMode) { return this.api.get<TaskBoard>(`/AssignedTasks/Board?mode=${mode}`); }
+  /** doneDays: عمر المنجزة المعروضة (الافتراضي 30 يوماً) */
+  board(mode: TaskBoardMode, doneDays?: number) {
+    return this.api.get<TaskBoard>(`/AssignedTasks/Board?mode=${mode}${doneDays ? `&doneDays=${doneDays}` : ''}`);
+  }
   get(id: number) { return this.api.get<AssignedTaskDetail>(`/AssignedTasks/Get/${id}`); }
   /** جهات الإسناد من نوع معيّن، أو جهات التفويض من مهمة واردة (parentTaskId) */
   targets(options: { type?: TaskTargetKind; parentTaskId?: number } = {}) {
@@ -48,6 +52,49 @@ export class AssignedTaskService {
 
   attachmentBlob(id: number) { return this.api.getBlob(`/AssignedTasks/Attachment/${id}`); }
   deleteAttachment(id: number) { return this.api.delete<AssignedTaskDetail>(`/AssignedTasks/Attachment/${id}`); }
+
+  // ─────────── التصدير ───────────
+  exportExcel(filter: TaskExportFilter) {
+    const p = new URLSearchParams({ mode: filter.mode });
+    if (filter.doneDays) p.set('doneDays', String(filter.doneDays));
+    if (filter.q) p.set('q', filter.q);
+    if (filter.priority) p.set('priority', filter.priority);
+    if (filter.overdueOnly) p.set('overdueOnly', 'true');
+    if (filter.dueFrom) p.set('dueFrom', filter.dueFrom);
+    if (filter.dueTo) p.set('dueTo', filter.dueTo);
+    return this.api.getBlob(`/AssignedTasks/Export?${p}`);
+  }
+
+  // ─────────── القوالب والمهام الدورية ───────────
+  templates() { return this.api.get<TaskTemplate[]>('/AssignedTasks/Templates'); }
+  createTemplate(body: SaveTemplateRequest) { return this.api.post<TaskTemplate>('/AssignedTasks/Templates', body); }
+  updateTemplate(id: number, body: SaveTemplateRequest) { return this.api.put<TaskTemplate>(`/AssignedTasks/Templates/${id}`, body); }
+  deleteTemplate(id: number) { return this.api.delete<{ message: string }>(`/AssignedTasks/Templates/${id}`); }
+
+  recurrences() { return this.api.get<TaskRecurrence[]>('/AssignedTasks/Recurrences'); }
+  createRecurrence(body: SaveRecurrenceRequest) { return this.api.post<TaskRecurrence>('/AssignedTasks/Recurrences', body); }
+  updateRecurrence(id: number, body: SaveRecurrenceRequest) { return this.api.put<TaskRecurrence>(`/AssignedTasks/Recurrences/${id}`, body); }
+  setRecurrenceActive(id: number, isActive: boolean) { return this.api.put<TaskRecurrence>(`/AssignedTasks/Recurrences/${id}/Active`, { isActive }); }
+  runRecurrenceNow(id: number) { return this.api.post<AssignedTaskDetail>(`/AssignedTasks/Recurrences/${id}/RunNow`, {}); }
+  deleteRecurrence(id: number) { return this.api.delete<{ message: string }>(`/AssignedTasks/Recurrences/${id}`); }
+
+  // ─────────── الروابط بالسجلات ───────────
+  links(taskId: number) { return this.api.get<TaskLink[]>(`/AssignedTasks/Links/${taskId}`); }
+  addLink(taskId: number, entityType: TaskLinkType, reference: string | null, entityId: number | null = null) {
+    return this.api.post<TaskLink[]>(`/AssignedTasks/Links/${taskId}`, { entityType, reference, entityId });
+  }
+  removeLink(linkId: number) { return this.api.delete<TaskLink[]>(`/AssignedTasks/Link/${linkId}`); }
+  byLink(entityType: TaskLinkType, entityId: number) {
+    return this.api.get<AssignedTaskCard[]>(`/AssignedTasks/ByLink?entityType=${entityType}&entityId=${entityId}`);
+  }
+
+  // ─────────── الإحصائيات ───────────
+  stats(from?: string, to?: string) {
+    const p = new URLSearchParams();
+    if (from) p.set('from', from);
+    if (to) p.set('to', to);
+    return this.api.get<TaskStats>(`/AssignedTasks/Stats?${p}`);
+  }
 
   // ─────────── قائمة التحقق و«أتولّى» ───────────
   addChecklistItem(id: number, text: string) { return this.api.post<AssignedTaskDetail>(`/AssignedTasks/Checklist/${id}`, { text }); }

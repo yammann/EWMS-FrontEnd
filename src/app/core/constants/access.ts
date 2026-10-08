@@ -29,7 +29,7 @@ export const AppPermission = {
   // لوحة المهام: ViewTaskBoard تفتح اللوحة (واستقبال ما أُسند للمستخدم شخصياً)؛ الإسناد والتولّي بصلاحيات
   ViewTaskBoard: 'ViewTaskBoard',
   AssignTaskToDepartment: 'AssignTaskToDepartment', AssignTaskToOffice: 'AssignTaskToOffice', AssignTaskToUser: 'AssignTaskToUser',
-  HandleUnitTasks: 'HandleUnitTasks',
+  HandleUnitTasks: 'HandleUnitTasks', ViewTaskStats: 'ViewTaskStats',
 
   // توثيق الأجهزة (Devices/MyAccess يعيد نفس النتيجة من صلاحيات الدور)
   ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
@@ -76,6 +76,11 @@ export const APPROVE_VACATIONS: readonly AppPermissionName[] = [AppPermission.Ap
 /** إحصائيات الإجازات: لمن يرى إجازات قسمه أو فرعه */
 export const VACATION_STATS: readonly AppPermissionName[] = [AppPermission.ViewDepartmentVacations, AppPermission.ViewBranchVacations];
 /** يتابع مهام وحدة (يُظهر تبويب "كل مهام نطاقي") */
+/** من يملك صلاحية إسناد: يدير قوالبه ومهامه الدورية */
+export const TASK_ASSIGN: readonly AppPermissionName[] = [
+  AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser
+];
+
 export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
   AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser, AppPermission.HandleUnitTasks
 ];

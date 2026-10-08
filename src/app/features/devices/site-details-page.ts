@@ -11,13 +11,14 @@ import { CopyText } from '../../shared/ui/secret-text';
 import { formatPhone } from '../../core/utils/phone';
 import { deviceUrl } from '../../core/utils/network';
 import { DeviceHistory, DevicePassword, InstallStatus } from './device-ui';
+import { LinkedTasks } from '../task-board/task-links';
 
 /**
  * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):
  * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory],
+  selector: 'app-site-details-page', standalone: true, imports: [RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -94,6 +95,8 @@ import { DeviceHistory, DevicePassword, InstallStatus } from './device-ui';
             </table></div>
           }
         </section>
+
+        <app-linked-tasks entityType="Site" [entityId]="s.id" />
 
         @if (deviceTypes().length) {
           <section class="panel">

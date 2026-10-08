@@ -152,6 +152,7 @@ export class NotificationService {
 export function notificationRoute(n: AppNotification, canReview: boolean): string {
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
+  if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
   if (n.relatedEntityType === 'MaintenanceRequest' && n.relatedEntityId) return `/maintenance/requests/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MyMaintenanceRequest' && n.relatedEntityId) return `/maintenance/mine?request=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'SparePart' && n.relatedEntityId) return `/maintenance/parts?part=${n.relatedEntityId}`;
