@@ -1,10 +1,11 @@
-import { DatePipe, Location } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VacationService } from '@core/services/vacation.service';
 import { VacationPrint } from '@core/models/vacation.models';
 import { Logo } from '@shared/ui/logo';
 import { daysAr } from '@core/utils/arabic-count';
+import { BackButton } from '@shared/ui/back-button';
 
 /** ترويسة نموذج طلب الإجازة: الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
 export const VACATION_PRINT_HEADER = {
@@ -19,10 +20,10 @@ export const VACATION_PRINT_HEADER = {
  * صفحة خارج الإطار العام، والورقة بألوان ثابتة (ورق أبيض) بصرف النظر عن مظهر التطبيق.
  */
 @Component({
-  selector: 'app-vacation-print', standalone: true, imports: [DatePipe, Logo],
+  selector: 'app-vacation-print', standalone: true, imports: [BackButton, DatePipe, Logo],
   template: `
     <div class="bar no-print">
-      <button type="button" class="btn btn-ghost" (click)="goBack()">→ رجوع</button>
+      <app-back-button />
       <button type="button" class="btn" (click)="print()" [disabled]="!data()">🖨 طباعة</button>
     </div>
 
@@ -168,7 +169,6 @@ export const VACATION_PRINT_HEADER = {
 export class VacationPrintPage {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private location = inject(Location);
 
   header = VACATION_PRINT_HEADER;
   days = daysAr;
@@ -185,8 +185,4 @@ export class VacationPrintPage {
 
   print() { window.print(); }
 
-  goBack() {
-    if (history.length > 1) this.location.back();
-    else this.router.navigate(['/profile']);
-  }
 }

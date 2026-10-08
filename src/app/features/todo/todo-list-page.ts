@@ -41,7 +41,6 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
           <div class="t-id">
             <span class="t-badge" aria-hidden="true">@if (l.icon) { {{ l.icon }} } @else { <app-icon name="clipboard" /> }</span>
             <div class="t-title">
-              <a class="t-back" routerLink="/todo-lists">‹ مفكرتي</a>
               <h1>{{ l.name }}@if (l.isArchived) { <span class="t-chip">مؤرشفة</span> }</h1>
               <p class="t-sub">
                 <span>{{ dateText }}</span><span class="t-dot" aria-hidden="true"></span>
@@ -168,7 +167,7 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
         @if (l.itemsTotal >= limits.maxItems && editable()) { <p class="t-hint">بلغت الحد الأقصى ({{ limits.maxItems }} بنداً).</p> }
         @if (l.isArchived) { <p class="t-hint">القائمة مؤرشفة: أعدها من صفحة مفكرتي لتعديل بنودها.</p> }
       } @else if (error()) {
-        <p class="alert alert-error" role="alert">{{ error() }}</p><a class="btn btn-ghost" routerLink="/todo-lists">رجوع إلى مفكرتي</a>
+        <p class="alert alert-error" role="alert">{{ error() }}</p>
       } @else { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
     </div>
 

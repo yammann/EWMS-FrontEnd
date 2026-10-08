@@ -11,7 +11,6 @@
 .t-sub { margin: 2px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-500); }
 .t-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-300); }
 .t-pill { padding: 2px 10px; border-radius: var(--radius-full); background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-100); font-size: 12px; font-weight: 800; }
-.t-back { display: inline-block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--brand-700); }
 .t-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .t-icon-btn { width: 42px; min-height: 42px; padding: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--ink-600); border: 1px solid var(--border-strong); box-shadow: var(--shadow-sm); font-size: 16px; }
 .t-icon-btn:hover:not(:disabled), .t-icon-btn.on { background: var(--fill); color: var(--ink-900); transform: none; box-shadow: var(--shadow-sm); }

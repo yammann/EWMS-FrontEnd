@@ -45,7 +45,10 @@
   <section class="workspace">
     <!-- النافبار: المظهر والإشعارات والملف الشخصي وتسجيل الخروج -->
     <header class="topbar">
-      <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
+      <div class="topbar-start">
+        <app-back-button />
+        <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
+      </div>
       <div class="topbar-actions">
         <app-appearance-menu />
         @if (canNotify()) {

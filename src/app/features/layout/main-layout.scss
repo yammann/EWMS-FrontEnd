@@ -213,6 +213,7 @@ nav a.active app-icon { color: var(--on-brand); }
   border-bottom: 1px solid var(--separator);
 }
 
+.topbar-start { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .greeting { font-size: 15px; color: var(--ink-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .greeting strong { color: var(--ink-900); font-weight: 700; }
 
@@ -319,7 +320,7 @@ nav a.active app-icon { color: var(--on-brand); }
 
   .topbar { padding: 0 16px; }
   .greeting { display: none; }
-  .topbar-actions { width: 100%; justify-content: flex-end; }
+  .topbar-actions { margin-inline-start: auto; justify-content: flex-end; }
 }
 
 @media (max-width: 560px) {

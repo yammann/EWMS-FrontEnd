@@ -6,6 +6,7 @@ import { MaintenancePrint } from '@core/models/maintenance.models';
 import { formatPhone } from '@core/utils/phone';
 import { Logo } from '@shared/ui/logo';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { BackButton } from '@shared/ui/back-button';
 
 /** ترويسة المطبوعات — عدّلها هنا عند اعتماد الترويسة الرسمية */
 export const PRINT_HEADER = {
@@ -22,10 +23,10 @@ type Kind = 'receipt' | 'delivery';
  * الورقة بألوان ثابتة (ورق أبيض) بصرف النظر عن مظهر التطبيق.
  */
 @Component({
-  selector: 'app-maintenance-print', standalone: true, imports: [UtcPipe, DatePipe, Logo],
+  selector: 'app-maintenance-print', standalone: true, imports: [BackButton, UtcPipe, DatePipe, Logo],
   template: `
     <div class="bar no-print">
-      <button type="button" class="btn btn-ghost" (click)="goBack()">→ رجوع</button>
+      <app-back-button [fallback]="backUrl" />
       <div class="kinds" role="tablist" aria-label="نوع الورقة">
         <button type="button" role="tab" [class.on]="kind() === 'receipt'" (click)="setKind('receipt')">إيصال الاستلام</button>
         <button type="button" role="tab" [class.on]="kind() === 'delivery'" (click)="setKind('delivery')">ورقة التسليم</button>
@@ -165,6 +166,8 @@ type Kind = 'receipt' | 'delivery';
 export class MaintenancePrintPage {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  /** وجهة الرجوع إن فُتحت الورقة برابط مباشر: صفحة الطلب نفسه */
+  backUrl = '/maintenance/requests/' + this.route.snapshot.paramMap.get('id');
   private location = inject(Location);
 
   header = PRINT_HEADER;
@@ -192,8 +195,4 @@ export class MaintenancePrintPage {
 
   print() { window.print(); }
 
-  goBack() {
-    if (history.length > 1) this.location.back();
-    else this.router.navigate(['/maintenance/requests', this.route.snapshot.paramMap.get('id')]);
-  }
 }

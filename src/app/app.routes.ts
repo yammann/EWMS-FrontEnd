@@ -13,12 +13,12 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('@features/auth/login/login.component').then(m => m.LoginComponent) },
   // صفحة طباعة خارج الإطار العام (بلا سايدبار): إيصال استلام / ورقة تسليم طلب صيانة
   {
-    path: 'maintenance/print/:id/:kind', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests },
+    path: 'maintenance/print/:id/:kind', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests, back: '/maintenance/requests' },
     loadComponent: () => import('@features/maintenance/request-print-page').then(m => m.MaintenancePrintPage)
   },
   // نموذج طلب الإجازة الورقي — خارج الإطار العام
   {
-    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation },
+    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation, back: '/profile' },
     loadComponent: () => import('@features/vacations/vacation-print-page').then(m => m.VacationPrintPage)
   },
   {
@@ -29,12 +29,12 @@ export const routes: Routes = [
     children: [
       // لوحة المتابعة حسب الدور، والتنقل بين لوحات الفرع/القسم/المكتب
       { path: '', canActivate: [permissionGuard], data: { anyPermission: DASHBOARD_ACCESS }, loadComponent: () => import('@features/dashboard/dashboard-home').then(m => m.DashboardHome) },
-      { path: 'dashboard/branch/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewBranchDashboard }, loadComponent: () => import('@features/dashboard/branch-dashboard').then(m => m.BranchDashboardPage) },
-      { path: 'dashboard/department/:id', canActivate: [permissionGuard], data: { anyPermission: DEPARTMENT_DASHBOARD_ACCESS }, loadComponent: () => import('@features/dashboard/department-dashboard').then(m => m.DepartmentDashboardPage) },
-      { path: 'dashboard/office/:id', canActivate: [permissionGuard], data: { anyPermission: OFFICE_DASHBOARD_ACCESS }, loadComponent: () => import('@features/dashboard/office-dashboard').then(m => m.OfficeDashboardPage) },
+      { path: 'dashboard/branch/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewBranchDashboard, back: '/' }, loadComponent: () => import('@features/dashboard/branch-dashboard').then(m => m.BranchDashboardPage) },
+      { path: 'dashboard/department/:id', canActivate: [permissionGuard], data: { anyPermission: DEPARTMENT_DASHBOARD_ACCESS, back: '/' }, loadComponent: () => import('@features/dashboard/department-dashboard').then(m => m.DepartmentDashboardPage) },
+      { path: 'dashboard/office/:id', canActivate: [permissionGuard], data: { anyPermission: OFFICE_DASHBOARD_ACCESS, back: '/' }, loadComponent: () => import('@features/dashboard/office-dashboard').then(m => m.OfficeDashboardPage) },
 
       // مهام العمل: صفحة كل مهمة "جاري العمل عليها" حالياً، والإدارة للسوبر ادمن
-      { path: 'tasks/:id', canActivate: [permissionGuard], data: { anyPermission: WORK_TASK_VIEW }, loadComponent: () => import('@features/work-tasks/task-placeholder-page').then(m => m.TaskPlaceholderPage) },
+      { path: 'tasks/:id', canActivate: [permissionGuard], data: { anyPermission: WORK_TASK_VIEW, back: '/' }, loadComponent: () => import('@features/work-tasks/task-placeholder-page').then(m => m.TaskPlaceholderPage) },
       {
         path: 'work-tasks', canActivate: [permissionGuard], data: { permission: AppPermission.ViewWorkTasks },
         loadComponent: () => import('@features/work-tasks/work-tasks-page').then(m => m.WorkTasksPage)
@@ -45,9 +45,9 @@ export const routes: Routes = [
       // لوحة المهام المُسندة: تحتاج ViewTaskBoard، والإسناد والمتابعة بصلاحيات AssignTaskTo* / HandleUnitTasks
       { path: 'task-board', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskBoard }, loadComponent: () => import('@features/task-board/task-board-page').then(m => m.TaskBoardPage) },
       { path: 'todo-lists', canActivate: [permissionGuard], data: { permission: AppPermission.ViewToDoLists }, loadComponent: () => import('@features/todo/todo-lists-page').then(m => m.TodoListsPage) },
-      { path: 'todo-lists/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewToDoLists }, loadComponent: () => import('@features/todo/todo-list-page').then(m => m.TodoListPage) },
-      { path: 'task-board/recurring', canActivate: [permissionGuard], data: { anyPermission: TASK_ASSIGN }, loadComponent: () => import('@features/task-board/recurring-page').then(m => m.RecurringTasksPage) },
-      { path: 'task-board/stats', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskStats }, loadComponent: () => import('@features/task-board/task-stats-page').then(m => m.TaskStatsPage) },
+      { path: 'todo-lists/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewToDoLists, back: '/todo-lists' }, loadComponent: () => import('@features/todo/todo-list-page').then(m => m.TodoListPage) },
+      { path: 'task-board/recurring', canActivate: [permissionGuard], data: { anyPermission: TASK_ASSIGN, back: '/task-board' }, loadComponent: () => import('@features/task-board/recurring-page').then(m => m.RecurringTasksPage) },
+      { path: 'task-board/stats', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskStats, back: '/task-board' }, loadComponent: () => import('@features/task-board/task-stats-page').then(m => m.TaskStatsPage) },
 
       // توثيق الأجهزة: الحماية بصلاحيات الدور، مثل بقية الخدمات.
       {
@@ -58,7 +58,7 @@ export const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'installations' },
           { path: 'installations', loadComponent: () => import('@features/devices/installations-page').then(m => m.InstallationsPage) },
           { path: 'sites', loadComponent: () => import('@features/devices/sites-page').then(m => m.SitesPage) },
-          { path: 'sites/:id', loadComponent: () => import('@features/devices/site-details-page').then(m => m.SiteDetailsPage) },
+          { path: 'sites/:id', data: { back: '/devices/sites' }, loadComponent: () => import('@features/devices/site-details-page').then(m => m.SiteDetailsPage) },
           { path: 'catalog', loadComponent: () => import('@features/devices/devices-catalog-page').then(m => m.DevicesCatalogPage) }
         ]
       },
@@ -73,7 +73,7 @@ export const routes: Routes = [
             loadComponent: () => import('@features/maintenance/requests-page').then(m => m.MaintenanceRequestsPage)
           },
           {
-            path: 'requests/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests },
+            path: 'requests/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests, back: '/maintenance/requests' },
             loadComponent: () => import('@features/maintenance/request-details-page').then(m => m.MaintenanceRequestDetailsPage)
           },
           {
@@ -89,7 +89,7 @@ export const routes: Routes = [
             loadComponent: () => import('@features/maintenance/spare-parts-page').then(m => m.MaintenanceSparePartsPage)
           },
           {
-            path: 'parts/report', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSparePartReports },
+            path: 'parts/report', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSparePartReports, back: '/maintenance/parts' },
             loadComponent: () => import('@features/maintenance/spare-parts-report-page').then(m => m.MaintenanceSparePartsReportPage)
           },
           {

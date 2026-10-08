@@ -43,3 +43,32 @@ test.describe('الجلسة', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 });
+
+test.describe('زر الرجوع الموحّد', () => {
+  test('يظهر في الشريط العلوي للصفحات الفرعية ويرجع للأب عند الفتح المباشر', async ({ page }) => {
+    await page.goto('/task-board/recurring');
+    const back = page.locator('.topbar').getByRole('button', { name: 'رجوع' });
+    await expect(back).toBeVisible();
+    await back.click();
+    await expect(page).toHaveURL(/\/task-board$/);
+  });
+
+  test('لا يظهر في الصفحات الرئيسية', async ({ page }) => {
+    await page.goto('/users');
+    await expect(page.locator('.topbar')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'رجوع' })).toHaveCount(0);
+  });
+
+  test('يرجع للصفحة السابقة داخل التطبيق', async ({ page }) => {
+    await page.goto('/task-board');
+    await page.goto('/task-board/stats');
+    const link = page.getByRole('link', { name: /الإحصاءات|إحصاءات/ }).first();
+    if (await link.count()) {
+      await page.goto('/task-board');
+      await link.click();
+      await expect(page).toHaveURL(/task-board\/stats/);
+      await page.locator('.topbar').getByRole('button', { name: 'رجوع' }).click();
+      await expect(page).toHaveURL(/\/task-board$/);
+    }
+  });
+});

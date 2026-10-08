@@ -11,6 +11,7 @@ import { TruncationTipService } from '@shared/ui/truncation-tip.service';
 import { Logo } from '@shared/ui/logo';
 import { Icon, IconName } from '@shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
+import { BackButton } from '@shared/ui/back-button';
 import { roleLabel } from '@core/utils/roles';
 import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN } from '@core/constants/access';
 
@@ -22,7 +23,7 @@ interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'devices' | 'a
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss'
 })

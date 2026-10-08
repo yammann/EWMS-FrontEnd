@@ -2,7 +2,6 @@ import { Pagination } from '@core/utils/pagination';
 import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeviceService, formatCoords } from '@core/services/device.service';
@@ -31,7 +30,6 @@ import { LinkedTasks } from '@features/task-board';
           @if (site(); as s) { <p class="muted">{{ s.governorateName ? 'محافظة ' + s.governorateName : '' }}</p> }
         </div>
         <div class="header-actions">
-          <button class="btn btn-ghost" type="button" (click)="goBack()">→ رجوع</button>
           @if (site(); as s) {
             <button class="btn btn-ghost" type="button" (click)="historyOpen.set(true)">سجل الموقع</button>
             <a class="btn" [routerLink]="['/devices/installations']" [queryParams]="{ siteId: s.id }">{{ access().canManage ? 'إدارة التركيبات' : 'صفحة التركيبات' }}</a>
@@ -143,7 +141,6 @@ export class SiteDetailsPage {
   private service = inject(DeviceService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private location = inject(Location);
 
   access = this.service.access;
   site = signal<Site | null>(null);
@@ -202,10 +199,5 @@ export class SiteDetailsPage {
     if (id !== this.site()?.id) this.router.navigate(['/devices/sites', id]);
   }
 
-  /** الرجوع للصفحة السابقة (الخريطة غالباً) — أو للوحة المتابعة إن فُتحت الصفحة مباشرة */
-  goBack() {
-    if (history.length > 1) this.location.back();
-    else this.router.navigateByUrl('/');
-  }
 
 }

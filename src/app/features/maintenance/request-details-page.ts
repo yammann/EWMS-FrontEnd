@@ -1,4 +1,4 @@
-import { DatePipe, Location } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -36,7 +36,6 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
           @if (request(); as r) { <p class="muted">{{ r.deviceTypeName }} {{ r.deviceCompanyName }}{{ r.model ? ' ' + r.model : '' }} — {{ r.clientName }}</p> }
         </div>
         <div class="header-actions">
-          <button class="btn btn-ghost" type="button" (click)="goBack()">→ رجوع</button>
           @if (request(); as r) {
             <a class="btn btn-ghost" [routerLink]="['/maintenance/print', r.id, 'receipt']">🖨 إيصال الاستلام</a>
             <a class="btn btn-ghost" [routerLink]="['/maintenance/print', r.id, 'delivery']">🖨 ورقة التسليم</a>
@@ -172,7 +171,6 @@ export class MaintenanceRequestDetailsPage {
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
   private router = inject(Router);
-  private location = inject(Location);
 
   stageLabel = stageLabel;
   isFinal = isFinalStage;
@@ -225,10 +223,6 @@ export class MaintenanceRequestDetailsPage {
 
   icon(a: MaintenanceActivity) { return ACTIVITY_ICON[a.type] ?? '•'; }
 
-  goBack() {
-    // العودة لنفس عرض القائمة (جدول/لوحة) إن جاء منها، وإلا لصفحة الطلبات
-    if (history.length > 1) this.location.back(); else this.router.navigate(['/maintenance/requests']);
-  }
 
   async setStatus(status: MaintenanceStatus) {
     const r = this.request();

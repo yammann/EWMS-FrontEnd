@@ -24,6 +24,7 @@ const ICONS = {
   device: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   sidebar: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/><path d="M17.5 8h1M17.5 11h1"/>',
+  back: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
   wrench: '<path d="M14.5 6.5a4 4 0 0 0 5 5L21 13l-8.5 8.5a2.1 2.1 0 0 1-3-3L18 10"/><path d="M14.5 6.5 17 4a5.5 5.5 0 0 0-7.2 7.2L3.6 17.4a2.1 2.1 0 0 0 3 3l6.2-6.2"/>',
   clipboard: '<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>',
