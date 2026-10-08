@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -10,7 +12,7 @@ import { DeviceHistory } from './device-ui';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
-  selector: 'app-devices-catalog-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, Modal, DeviceHistory],
+  selector: 'app-devices-catalog-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -34,7 +36,7 @@ import { DeviceHistory } from './device-ui';
           <div class="table-wrap"><table>
             <thead><tr><th>الجهاز</th><th>الموديل</th><th>الفئة</th><th>الشركة المصنّعة</th><th>التركيبات</th><th class="actions-th"></th></tr></thead>
             <tbody>
-              @for (d of filtered(); track d.id) {
+              @for (d of pager.items(); track d.id) {
                 <tr>
                   <td><span class="cell-strong">{{ d.name }}</span>@if (d.description) { <small>{{ d.description }}</small> }</td>
                   <td>@if (d.model) { <span class="mono">{{ d.model }}</span> } @else { <span class="muted-cell">—</span> }</td>
@@ -50,6 +52,7 @@ import { DeviceHistory } from './device-ui';
               }
             </tbody>
           </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
         }
       </section>
     </div>
@@ -81,6 +84,7 @@ import { DeviceHistory } from './device-ui';
   styles: [`td small { display: block; color: var(--ink-500); }`]
 })
 export class DevicesCatalogPage {
+  pager = new Pagination(() => this.filtered());
   private service = inject(DeviceService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);

@@ -3,6 +3,7 @@ import { Subject, Subscription, interval, tap, catchError, EMPTY } from 'rxjs';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { ApiService } from './api.service';
 import { AppNotification } from '../models/notification.models';
+import { PagedResult } from '../models/maintenance.models';
 
 // الاتصال اللحظي عبر SignalR هو الأساس؛ الاستعلام الدوري البطيء احتياط فقط (لو انقطع الاتصال)
 const HUB_URL = '/hubs/notifications';
@@ -32,6 +33,11 @@ export class NotificationService {
 
   my(unreadOnly = false) {
     return this.api.get<AppNotification[]>(`/Notifications/My?unreadOnly=${unreadOnly}`);
+  }
+
+  /** صفحة من إشعاراتي (الأحدث أولاً) مع العدد الكلي — لصفحة الإشعارات */
+  page(unreadOnly: boolean, page: number, pageSize: number) {
+    return this.api.get<PagedResult<AppNotification>>(`/Notifications/Page?unreadOnly=${unreadOnly}&page=${page}&pageSize=${pageSize}`);
   }
 
   refreshCount() {
@@ -153,6 +159,7 @@ export function notificationRoute(n: AppNotification, canReview: boolean): strin
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
+  if (n.relatedEntityType === 'ToDoList' && n.relatedEntityId) return `/todo-lists/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MaintenanceRequest' && n.relatedEntityId) return `/maintenance/requests/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MyMaintenanceRequest' && n.relatedEntityId) return `/maintenance/mine?request=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'SparePart' && n.relatedEntityId) return `/maintenance/parts?part=${n.relatedEntityId}`;

@@ -131,7 +131,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (branch of branches(); track branch.id) {
+            @for (branch of pager.items(); track branch.id) {
               <tr [class.selected]="selectedBranch()?.id === branch.id">
                 <td>
                   <div class="branch-cell-name">
@@ -183,6 +183,7 @@
           </tbody>
         </table>
       </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
     } @else {
       <div class="empty-state">
         <div class="empty-icon">

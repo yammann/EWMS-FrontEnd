@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -15,7 +17,7 @@ type ModalType = 'create' | 'edit';
 @Component({
   selector: 'app-branches-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal],
+  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './branches-page.html',
   styleUrl: './branches-page.scss'
 })
@@ -27,6 +29,7 @@ export class BranchesPage {
   private confirm = inject(ConfirmService);
 
   branches = signal<Branch[]>([]);
+  pager = new Pagination(() => this.branches());
   selectedBranch = signal<Branch | null>(null);
   activeModal = signal<ModalType | null>(null);
   loading = signal(true);

@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,7 +13,7 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
 
 /** العطل الرسمية: أيام لا تُحسب من مدة الإجازة، إضافة إلى الجمعة (العطلة الأسبوعية) */
 @Component({
-  selector: 'app-holidays-page', standalone: true, imports: [ReactiveFormsModule, DatePipe],
+  selector: 'app-holidays-page', standalone: true, imports: [ReactiveFormsModule, DatePipe, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
@@ -43,7 +45,7 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
         @else if (!items().length && !error()) { <p class="empty-state">لا توجد عطل رسمية مسجّلة لسنة {{ year() }}.</p> }
         @else {
           <div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>العطلة</th><th>الإجراءات</th></tr></thead><tbody>
-            @for (h of items(); track h.id) {
+            @for (h of pager.items(); track h.id) {
               <tr>
                 <td>{{ h.date | date:'yyyy/MM/dd' }}</td>
                 <td>{{ dayName(h.date) }}@if (h.isFriday) { <small class="muted"> (جمعة أصلاً)</small> }</td>
@@ -52,12 +54,14 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
               </tr>
             }
           </tbody></table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
         }
         @if (deleting(); as h) { <div class="alert alert-warning">حذف عطلة «{{ h.name }}» ({{ h.date | date:'yyyy/MM/dd' }})؟ <button class="btn btn-danger" (click)="remove(h)" [disabled]="saving()">تأكيد الحذف</button><button class="btn btn-ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button></div> }
       </section>
     </div>`
 })
 export class HolidaysPage {
+  pager = new Pagination(() => this.items());
   private auth = inject(AuthService);
   private service = inject(VacationService);
   can = computed(() => ({

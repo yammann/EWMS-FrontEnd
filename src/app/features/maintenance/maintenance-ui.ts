@@ -18,35 +18,8 @@ export class StatusChip {
   color = input<string | null | undefined>('');
 }
 
-/** ترقيم الصفحات: السابق / التالي مع عدد النتائج */
-@Component({
-  selector: 'app-pager', standalone: true,
-  template: `
-    @if (total() > 0) {
-      <nav class="pager" aria-label="ترقيم الصفحات">
-        <span class="info">{{ from() }}–{{ to() }} من {{ total() }}</span>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="pageChange.emit(page() - 1)" [disabled]="page() <= 1 || disabled()">السابق</button>
-        <span class="current">صفحة {{ page() }} من {{ pages() }}</span>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="pageChange.emit(page() + 1)" [disabled]="page() >= pages() || disabled()">التالي</button>
-      </nav>
-    }`,
-  styles: [`
-    .pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 16px; font-size: 12px; color: var(--ink-500); font-variant-numeric: tabular-nums; }
-    .info { margin-inline-end: auto; }
-    .current { font-weight: 700; color: var(--ink-700); }
-  `]
-})
-export class Pager {
-  page = input.required<number>();
-  pageSize = input.required<number>();
-  total = input.required<number>();
-  disabled = input(false);
-  pageChange = output<number>();
-
-  pages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
-  from = computed(() => (this.page() - 1) * this.pageSize() + 1);
-  to = computed(() => Math.min(this.total(), this.page() * this.pageSize()));
-}
+/** تقسيم الصفحات: المكوّن المشترك للمشروع (shared/ui/pager.ts) — يُعاد تصديره هنا لبقاء الاستيراد القديم يعمل */
+export { Pager } from '../../shared/ui/pager';
 
 /**
  * نقل طلب/مهمة صيانة إلى موظف آخر (صاحب صلاحية النقل: إلى موظفي قسمه، والسوبر ادمن: داخل قسم السجل).

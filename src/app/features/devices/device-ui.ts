@@ -89,7 +89,7 @@ export class InstallStatus {
               </li>
             }
           </ol>
-          <app-pager [page]="page()" [pageSize]="20" [total]="total()" [disabled]="loading()" (pageChange)="load($event)" />
+          <app-pager [sizes]="[]" [page]="page()" [pageSize]="20" [total]="total()" [disabled]="loading()" (pageChange)="load($event)" />
         }
       </div>
       <footer class="modal-actions"><button type="button" class="ghost" (click)="closed.emit()">إغلاق</button></footer>

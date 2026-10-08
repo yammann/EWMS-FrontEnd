@@ -109,13 +109,31 @@
         <h2>قائمة الأدوار</h2>
         <p>اضغط أيقونة التعديل لتغيير صلاحيات دور، أو الحذف لإزالته.</p>
       </div>
-      <span class="pill">{{ search() ? filteredRoles().length + ' من ' + roles().length : roles().length }} دور</span>
+      <span class="pill">{{ search() || pickedId() !== null ? filteredRoles().length + ' من ' + roles().length : roles().length }} دور</span>
     </div>
 
     @if (!loading() && roles().length) {
       <div class="roles-search">
-        <input type="search" placeholder="بحث باسم الدور أو بصلاحية يملكها…" [value]="search()"
-               (input)="search.set($any($event.target).value)" aria-label="بحث في الأدوار">
+        <div class="search-box">
+          <input type="search" placeholder="بحث باسم الدور أو بصلاحية يملكها…" [value]="search()" autocomplete="off"
+                 role="combobox" aria-autocomplete="list" [attr.aria-expanded]="suggestOpen() && suggestions().length > 0" aria-controls="roles-suggest"
+                 (input)="onSearchInput($any($event.target).value)" (keydown)="onSearchKey($event)" (focus)="suggestOpen.set(true)"
+                 (blur)="suggestOpen.set(false)" aria-label="بحث في الأدوار">
+          @if (suggestOpen() && suggestions().length) {
+            <ul class="suggest" id="roles-suggest" role="listbox" aria-label="الأدوار المطابقة">
+              <li class="suggest-head" aria-hidden="true">{{ suggestions().length }} مطابقة</li>
+              @for (s of suggestions(); track s.role.id; let i = $index) {
+                <li role="option" [attr.aria-selected]="i === activeSuggestion()">
+                  <button type="button" [class.active]="i === activeSuggestion()" (mousedown)="$event.preventDefault(); pickSuggestion(s.role)">
+                    <span class="s-name">{{ s.role.name }}</span>
+                    <small>{{ s.byName ? s.role.permissions.length + ' صلاحية' : 'بصلاحية: ' + s.via }}</small>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+        @if (pickedId() !== null) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearSearch()">إظهار كل الأدوار</button> }
       </div>
     }
 
@@ -129,7 +147,7 @@
       </div>
     } @else if (roles().length && !filteredRoles().length) {
       <div class="empty-state"><p>لا توجد أدوار مطابقة لـ «{{ search() }}».</p>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="search.set('')">مسح البحث</button></div>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="clearSearch()">مسح البحث</button></div>
     } @else if (roles().length) {
       <div class="table-wrap">
         <table class="roles-table">
@@ -142,7 +160,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (role of filteredRoles(); track role.id) {
+            @for (role of pager.items(); track role.id) {
               <tr [class.selected]="selectedRole()?.id === role.id">
                 <td>
                   <div class="role-cell-name">
@@ -242,6 +260,7 @@
           </tbody>
         </table>
       </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
     } @else {
       <div class="empty-state">
         <div class="empty-icon">

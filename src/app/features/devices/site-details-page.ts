@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
@@ -18,7 +20,7 @@ import { LinkedTasks } from '../task-board/task-links';
  * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks],
+  selector: 'app-site-details-page', standalone: true, imports: [RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -78,7 +80,7 @@ import { LinkedTasks } from '../task-board/task-links';
             <div class="table-wrap"><table>
               <thead><tr><th>الجهاز</th><th>الرقم التسلسلي</th><th>مكان التركيب</th><th>IP</th><th>Subnet</th><th>المستخدم</th><th>كلمة السر</th><th>الحالة</th><th>ملاحظات</th></tr></thead>
               <tbody>
-                @for (i of installations(); track i.id) {
+                @for (i of pager.items(); track i.id) {
                   <tr>
                     <td><strong class="cell-strong">{{ i.deviceName }}</strong>@if (i.deviceModel) { <small class="sub">{{ i.deviceModel }}</small> }</td>
                     <td>@if (i.sn) { <span class="mono">{{ i.sn }}</span> } @else { — }</td>
@@ -93,6 +95,7 @@ import { LinkedTasks } from '../task-board/task-links';
                 }
               </tbody>
             </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
           }
         </section>
 
@@ -136,6 +139,7 @@ import { LinkedTasks } from '../task-board/task-links';
   `]
 })
 export class SiteDetailsPage {
+  pager = new Pagination(() => this.installations());
   private service = inject(DeviceService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);

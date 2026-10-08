@@ -79,8 +79,6 @@ export interface RequestParts {
   total: number;
   /** تكلفة قطع الجهاز في كل طلباته */
   deviceLifetimeCost: number;
-  replacementCostThreshold: number | null;
-  overThreshold: boolean;
   canIssue: boolean;
 }
 
@@ -93,8 +91,6 @@ export interface DeviceCost {
   deviceTypeName: string;
   requestsCount: number;
   cost: number;
-  threshold: number | null;
-  overThreshold: boolean;
 }
 
 export interface SparePartReport {

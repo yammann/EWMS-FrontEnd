@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { NotificationToasts } from './notification-toasts';
 import { Toasts } from '../../shared/ui/toasts';
 import { ConfirmHost } from '../../shared/ui/confirm-host';
+import { TruncationTipService } from '../../shared/ui/truncation-tip.service';
 import { Logo } from '../../shared/ui/logo';
 import { Icon, IconName } from '../../shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
@@ -38,6 +39,7 @@ export class MainLayout {
   initial = computed(() => this.displayName().charAt(0).toUpperCase() || '؟');
 
   constructor() {
+    inject(TruncationTipService).start();      // تعليق النص الكامل للمقصوص في كل الصفحات
     // اتصال لحظي (SignalR) لاستقبال الإشعارات فور حدوثها
     // (لمن يملك ViewNotifications فقط — الباكاند يرفض الاتصال لغيره)
     effect(() => { if (this.canNotify()) untracked(() => this.notifications.start(() => this.auth.getToken() ?? '')); });
@@ -59,7 +61,7 @@ export class MainLayout {
       { id: 'main', title: '', items: [
         canAny(DASHBOARD_ACCESS) && { path: '/', label: 'لوحة المتابعة', icon: 'home', exact: true },
         can(AppPermission.ViewTaskBoard) && { path: '/task-board', label: 'لوحة المهام', icon: 'board', exact: true },
-        can(AppPermission.ViewToDoLists) && { path: '/todo-lists', label: 'قوائمي', icon: 'clipboard' },
+        can(AppPermission.ViewToDoLists) && { path: '/todo-lists', label: 'مفكرتي', icon: 'clipboard' },
         canAny(TASK_ASSIGN) && { path: '/task-board/recurring', label: 'المهام الدورية والقوالب', icon: 'calendar' },
         can(AppPermission.ViewTaskStats) && { path: '/task-board/stats', label: 'إحصائيات المهام', icon: 'chart' }
       ].filter(Boolean) as NavItem[] },

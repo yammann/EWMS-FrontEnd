@@ -258,7 +258,7 @@ export class SparePartStockDialog implements OnInit {
               }
             </tbody>
           </table></div>
-          <app-pager [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="load($event)" />
+          <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="load($event)" />
         }
       </div>
       <footer class="modal-actions"><button type="button" class="ghost" (click)="closed.emit()">إغلاق</button></footer>

@@ -7,7 +7,6 @@ export interface MaintenanceLookup {
   /** حالات الطلب فقط: المرحلة الثابتة التي تحدد سلوك الحالة (انظر MAINTENANCE_STAGES) */
   stage?: MaintenanceStage;
   /** أنواع الأجهزة فقط: حد «إصلاحه أغلى من استبداله» لتكلفة قطع الجهاز على مدى عمره (ل.س) */
-  replacementCostThreshold?: number | null;
 }
 
 /** مراحل ثابتة يفهمها النظام — الحالات أسماء وألوان، والمرحلة تحدد السلوك */
@@ -266,10 +265,10 @@ export interface MaintenanceStats {
 
 /** الجداول المساعدة الأربعة: المسار في الـ API وما تحتويه من حقول */
 export const MAINTENANCE_LOOKUPS = {
-  deviceTypes: { api: '/DeviceTypes', label: 'أنواع الأجهزة', single: 'نوع جهاز', description: false, color: false, threshold: true },
-  companies: { api: '/DeviceCompanies', label: 'الشركات المصنّعة', single: 'شركة مصنّعة', description: true, color: false, threshold: false },
-  damageTypes: { api: '/DamageTypes', label: 'أنواع الأعطال', single: 'نوع عطل', description: true, color: false, threshold: false },
-  statuses: { api: '/MaintenanceRequestStatuses', label: 'حالات الطلب', single: 'حالة طلب', description: false, color: true, threshold: false }
+  deviceTypes: { api: '/DeviceTypes', label: 'أنواع الأجهزة', single: 'نوع جهاز', description: false, color: false },
+  companies: { api: '/DeviceCompanies', label: 'الشركات المصنّعة', single: 'شركة مصنّعة', description: true, color: false },
+  damageTypes: { api: '/DamageTypes', label: 'أنواع الأعطال', single: 'نوع عطل', description: true, color: false },
+  statuses: { api: '/MaintenanceRequestStatuses', label: 'حالات الطلب', single: 'حالة طلب', description: false, color: true }
 } as const;
 
 export type MaintenanceLookupKind = keyof typeof MAINTENANCE_LOOKUPS;

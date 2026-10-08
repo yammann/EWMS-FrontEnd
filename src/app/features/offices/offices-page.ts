@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -17,7 +19,7 @@ type ModalType = 'create' | 'edit';
 @Component({
   selector: 'app-offices-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal],
+  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './offices-page.html',
   styleUrl: './offices-page.scss'
 })
@@ -36,6 +38,7 @@ export class OfficesPage {
   }));
 
   items = signal<Office[]>([]);
+  pager = new Pagination(() => this.items());
   departments = signal<Department[]>([]);
   selected = signal<Office | null>(null);
   activeModal = signal<ModalType | null>(null);

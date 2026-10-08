@@ -133,7 +133,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (department of departments(); track department.id) {
+            @for (department of pager.items(); track department.id) {
               <tr [class.selected]="selectedDepartment()?.id === department.id">
                 <td>
                   <div class="department-cell-name">
@@ -194,6 +194,7 @@
           </tbody>
         </table>
       </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
     } @else {
       <div class="empty-state">
         <div class="empty-icon">

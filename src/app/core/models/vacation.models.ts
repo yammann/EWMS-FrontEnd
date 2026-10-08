@@ -77,6 +77,8 @@ export interface VacationPrint {
   branchOpinion: string | null;
   signerName: string | null;
   signerSignature: string | null;
+  /** توقيع مقدّم الطلب كما كان لحظة التقديم؛ null = خانة فارغة (لا توقيع، أو إجازة قديمة) */
+  requesterSignature: string | null;
 }
 
 /** «سجل الموظف» قبل القرار (GET Vacations/ApprovalContext/{id}) */

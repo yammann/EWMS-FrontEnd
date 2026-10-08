@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -16,7 +18,7 @@ type ModalType = 'create' | 'edit';
 @Component({
   selector: 'app-departments-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal],
+  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './departments-page.html',
   styleUrl: './departments-page.scss'
 })
@@ -28,6 +30,7 @@ export class DepartmentsPage {
   private confirm = inject(ConfirmService);
 
   departments = signal<Department[]>([]);
+  pager = new Pagination(() => this.departments());
   branches = signal<Branch[]>([]);
   selectedDepartment = signal<Department | null>(null);
   activeModal = signal<ModalType | null>(null);

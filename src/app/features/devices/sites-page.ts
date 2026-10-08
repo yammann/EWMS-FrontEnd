@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,7 +16,7 @@ import { DeviceHistory } from './device-ui';
 
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */
 @Component({
-  selector: 'app-sites-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory],
+  selector: 'app-sites-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -44,7 +46,7 @@ import { DeviceHistory } from './device-ui';
           <div class="table-wrap"><table>
             <thead><tr><th>الموقع</th><th>المحافظة</th><th>الإحداثيات</th><th>المسؤول</th><th>الأجهزة المركّبة</th><th class="actions-th"></th></tr></thead>
             <tbody>
-              @for (s of filtered(); track s.id) {
+              @for (s of pager.items(); track s.id) {
                 <tr>
                   <td><a class="cell-link cell-strong" [routerLink]="['/devices/sites', s.id]" title="تفاصيل الموقع">{{ s.name }}</a>@if (s.description) { <small>{{ s.description }}</small> }</td>
                   <td>{{ s.governorateName || "—" }}</td>
@@ -63,6 +65,7 @@ import { DeviceHistory } from './device-ui';
               }
             </tbody>
           </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
         }
       </section>
     </div>
@@ -97,6 +100,7 @@ import { DeviceHistory } from './device-ui';
   styles: [`td small { display: block; color: var(--ink-500); }`]
 })
 export class SitesPage {
+  pager = new Pagination(() => this.filtered());
   private service = inject(DeviceService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);

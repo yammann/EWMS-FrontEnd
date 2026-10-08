@@ -22,6 +22,11 @@
 
 .col-body { display: grid; align-content: start; gap: 10px; min-height: 220px; padding: 6px 10px 12px; transition: background .15s ease; border-radius: 0 0 var(--radius-xl) var(--radius-xl); }
 .col-body.cdk-drop-list-receiving { background: color-mix(in srgb, var(--c) 12%, transparent); }
+.col-pager { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 12px 12px; padding: 4px; border-radius: var(--radius-full); background: var(--surface); border: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--ink-600); }
+.col-pager button { min-height: 30px; width: 30px; padding: 0; border-radius: 50%; background: transparent; color: var(--ink-700); font-size: 17px; box-shadow: none; }
+.col-pager button:hover:not(:disabled) { background: var(--fill); transform: none; box-shadow: none; }
+.col-pager button:disabled { opacity: .35; }
+.col-pager small { color: var(--ink-400); font-weight: 600; }
 .col-empty, .col-more { margin: 0; padding: 22px 8px; text-align: center; font-size: 12px; color: var(--ink-400); }
 .col-empty { border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
 .col-more { padding: 6px 8px; }

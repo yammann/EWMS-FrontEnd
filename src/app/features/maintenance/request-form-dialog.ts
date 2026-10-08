@@ -1,4 +1,6 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MaintenanceService } from '../../core/services/maintenance.service';
 import {
@@ -82,8 +84,23 @@ export interface RequestLookups {
             } @else {
               <label class="form-field"><span class="form-label">الرقم التسلسلي للجهاز</span>
                 <span class="with-btn">
-                  <input [value]="serialQuery()" (input)="serialQuery.set($any($event.target).value); notFound.set('')" (keydown.enter)="$event.preventDefault(); findDevice()"
-                         dir="ltr" maxlength="100" autocomplete="off" placeholder="اكتب الرقم ثم «بحث»">
+                  <span class="suggest-wrap">
+                    <input [value]="serialQuery()" (input)="typed($any($event.target).value)" (keydown.enter)="$event.preventDefault(); findDevice()"
+                           (keydown.escape)="suggestions.set([])" (blur)="closeSuggestions()"
+                           dir="ltr" maxlength="100" autocomplete="off" role="combobox" [attr.aria-expanded]="suggestions().length > 0"
+                           placeholder="ابدأ بكتابة الرقم التسلسلي — تظهر الأجهزة المطابقة">
+                    @if (suggestions().length) {
+                      <ul class="suggest" role="listbox">
+                        @for (d of suggestions(); track d.id) {
+                          <li><button type="button" role="option" (mousedown)="pickDevice(d, $event)">
+                            <span class="mono sn">{{ d.serialNumber }}</span>
+                            <span class="sg-meta">{{ d.name }}@if (d.model) { · {{ d.model }} }</span>
+                            <small>{{ d.deviceTypeName }}@if (d.deviceCompanyName) { · {{ d.deviceCompanyName }} }</small>
+                          </button></li>
+                        }
+                      </ul>
+                    }
+                  </span>
                   <button type="button" class="btn btn-sm" (click)="findDevice()" [disabled]="!serialQuery().trim() || searching()">{{ searching() ? 'جارٍ البحث…' : 'بحث' }}</button>
                 </span>
               </label>
@@ -140,6 +157,15 @@ export interface RequestLookups {
     .group:last-child { margin-bottom: 0; }
     .group legend { padding: 0; margin-bottom: 10px; font-size: 12px; font-weight: 700; color: var(--brand-700); }
     .with-btn { display: flex; gap: 8px; align-items: center; }
+    .suggest-wrap { position: relative; flex: 1; min-width: 0; }
+    .suggest-wrap input { width: 100%; }
+    .suggest { position: absolute; z-index: 30; inset-inline: 0; top: calc(100% + 4px); margin: 0; padding: 6px; list-style: none; max-height: 280px; overflow: auto;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
+    .suggest button { width: 100%; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: baseline; padding: 8px 12px; text-align: start; background: transparent; color: inherit; font-weight: 400; box-shadow: none; border-radius: var(--radius-md); min-height: 0; }
+    .suggest button:hover:not(:disabled) { background: var(--fill); transform: none; box-shadow: none; }
+    .suggest .sn { font-weight: 800; color: var(--ink-900); }
+    .suggest .sg-meta { font-size: 13px; color: var(--ink-700); }
+    .suggest small { grid-column: 1 / -1; color: var(--ink-500); font-size: 11.5px; }
     .with-btn input { flex: 1; min-width: 0; }
     .device-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px;
       border-radius: var(--radius-lg); background: var(--brand-50); }
@@ -175,6 +201,9 @@ export class RequestFormDialog implements OnInit {
   notFound = signal('');
   lookupError = signal('');
   addOpen = signal(false);
+  /** أجهزة مطابقة لما يُكتب في حقل الرقم التسلسلي (أول 6 بالبادئة) */
+  suggestions = signal<MaintenanceDevice[]>([]);
+  private typing$ = new Subject<string>();
   /** العميل: موظف (بحث تام بالاسم الكامل أو الرقم الذاتي) أو خارجي عند عدم العثور عليه */
   client = signal<MaintenanceClient | null>(null);
   external = signal(false);
@@ -200,6 +229,15 @@ export class RequestFormDialog implements OnInit {
   isFinal = isFinalStage;
   /** طلب جديد لا يُسجَّل في حالة نهائية (مُسلَّم / غير قابل للصيانة) — الباكاند يرفضه أيضاً */
   statusOptions = () => this.request() ? this.lookups().statuses : this.lookups().statuses.filter(s => !isFinalStage(s.stage));
+
+  constructor() {
+    this.typing$.pipe(
+      debounceTime(250), distinctUntilChanged(),
+      switchMap(q => q.length < 2 ? of([]) : this.service.devices({ serialNumber: q, pageSize: 6 }).pipe(
+        switchMap(r => of(r.items)), catchError(() => of([])))),
+      takeUntilDestroyed()
+    ).subscribe(list => this.suggestions.set(list));
+  }
 
   ngOnInit() {
     const r = this.request();
@@ -262,6 +300,21 @@ export class RequestFormDialog implements OnInit {
     this.client.set(null); this.external.set(false); this.matches.set([]);
     this.form.controls.clientName.setValue('');
   }
+
+  /** كل حرف يُكتب: يمسح «غير موجود»، ثم بعد توقف قصير تُجلب الأجهزة التي يبدأ رقمها بما كُتب */
+  typed(value: string) {
+    this.serialQuery.set(value); this.notFound.set('');
+    if (value.trim().length < 2) this.suggestions.set([]);
+    this.typing$.next(value.trim());
+  }
+
+  pickDevice(device: MaintenanceDevice, event: Event) {
+    event.preventDefault();                      // قبل blur كي لا تُغلق القائمة قبل النقر
+    this.suggestions.set([]); this.notFound.set(''); this.lookupError.set('');
+    this.device.set(device);
+  }
+
+  closeSuggestions() { setTimeout(() => this.suggestions.set([]), 120); }
 
   findDevice() {
     const serial = this.serialQuery().trim();

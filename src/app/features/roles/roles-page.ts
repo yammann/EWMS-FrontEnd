@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -31,7 +33,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
   ] },
   { key: 'tasks', title: 'المهام', groups: [
     { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'HandleUnitTasks', 'ViewTaskStats'] },
-    { key: 'todo-lists', title: 'قوائم المهام الشخصية (قوائمه هو فقط؛ البنود بصلاحية التعديل)', names: ['ViewToDoLists', 'CreateToDoList', 'EditToDoList', 'DeleteToDoList'] },
+    { key: 'todo-lists', title: 'مفكرتي — قوائم المهام الشخصية (قوائمه هو فقط؛ البنود والتثبيت والأرشفة بصلاحية التعديل)', names: ['ViewToDoLists', 'CreateToDoList', 'EditToDoList', 'DeleteToDoList'] },
     { key: 'work-tasks', title: 'مهام العمل', names: ['ViewMyWorkTasks', 'ViewWorkTasks', 'CreateWorkTask', 'EditWorkTask', 'DeleteWorkTask'] }
   ] },
   { key: 'maintenance', title: 'الصيانة', groups: [
@@ -65,11 +67,12 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
 @Component({
   selector: 'app-roles-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal],
+  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss'
 })
 export class RolesPage {
+  pager = new Pagination(() => this.filteredRoles());
   private ewms = inject(EwmsService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
@@ -79,12 +82,55 @@ export class RolesPage {
   roles = signal<Role[]>([]);
   /** بحث في الأدوار: باسم الدور، أو باسم صلاحية يملكها أو وصفها العربي (مثل «اعتماد» أو ApproveVacationFinal) */
   search = signal('');
-  filteredRoles = computed(() => {
+  /** دور اختير من قائمة الاقتراحات: يُعرض وحده في الجدول (يزول بالكتابة من جديد) */
+  pickedId = signal<number | null>(null);
+  suggestOpen = signal(false);
+  activeSuggestion = signal(-1);
+
+  /**
+   * المطابقة: أدوار اسمها يحوي النص؛ وإن لم يوجد دور بهذا الاسم فالأدوار التي تملك صلاحية تطابقه (باسمها أو وصفها العربي).
+   * هي نفسها ما يُعرض في الاقتراحات وفي الجدول، فلا يظهر دور لا يطابق.
+   */
+  private matched = computed(() => {
     const q = normalizePlaceText(this.search());
-    if (!q) return this.roles();
+    if (!q) return [];
     const has = (text: string | null | undefined) => normalizePlaceText(text ?? '').includes(q);
-    return this.roles().filter(r => has(r.name) || (r.permissions ?? []).some(p => has(p.name) || has(p.description)));
+    const byName = this.roles().filter(r => has(r.name));
+    if (byName.length) return byName.map(role => ({ role, byName: true, via: '' }));
+    return this.roles().filter(r => (r.permissions ?? []).some(p => has(p.name) || has(p.description)))
+      .map(role => ({
+        role, byName: false,
+        via: (role.permissions ?? []).filter(p => has(p.name) || has(p.description)).slice(0, 2).map(p => p.name).join('، ')
+      }));
   });
+  filteredRoles = computed(() => {
+    const picked = this.pickedId();
+    if (picked !== null) return this.roles().filter(r => r.id === picked);
+    return this.search().trim() ? this.matched().map(m => m.role) : this.roles();
+  });
+  /** اقتراحات تحت خانة البحث: المطابق فقط، حتى 8 */
+  suggestions = computed(() => this.pickedId() !== null ? [] : this.matched().slice(0, 8));
+
+  onSearchInput(value: string) {
+    this.pickedId.set(null); this.search.set(value);
+    this.suggestOpen.set(true); this.activeSuggestion.set(-1);
+  }
+
+  pickSuggestion(role: Role) {
+    this.pickedId.set(role.id); this.search.set(role.name);
+    this.suggestOpen.set(false); this.activeSuggestion.set(-1);
+  }
+
+  clearSearch() { this.pickedId.set(null); this.search.set(''); this.suggestOpen.set(false); }
+
+  onSearchKey(event: KeyboardEvent) {
+    const list = this.suggestions();
+    if (event.key === 'Escape') { this.suggestOpen.set(false); return; }
+    if (!list.length) return;
+    if (event.key === 'ArrowDown') { event.preventDefault(); this.suggestOpen.set(true); this.activeSuggestion.set((this.activeSuggestion() + 1) % list.length); }
+    else if (event.key === 'ArrowUp') { event.preventDefault(); this.activeSuggestion.set((this.activeSuggestion() - 1 + list.length) % list.length); }
+    else if (event.key === 'Enter' && this.activeSuggestion() >= 0) { event.preventDefault(); this.pickSuggestion(list[this.activeSuggestion()].role); }
+  }
   permissions = signal<Permission[]>([]);
   selectedRole = signal<Role | null>(null);
   activeModal = signal<ModalType | null>(null);

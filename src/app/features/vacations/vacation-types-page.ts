@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { AppPermission } from '../../core/constants/access';
@@ -6,7 +8,7 @@ import { VacationService } from '../../core/services/vacation.service';
 import { VacationType } from '../../core/models/vacation.models';
 
 @Component({
-  selector: 'app-vacation-types', standalone: true, imports: [ReactiveFormsModule],
+  selector: 'app-vacation-types', standalone: true, imports: [ReactiveFormsModule, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
@@ -27,12 +29,14 @@ import { VacationType } from '../../core/models/vacation.models';
       <section class="panel">
         @if (loading()) { <p class="empty-state">جارٍ التحميل…</p> }
         @else if (!items().length && !error()) { <p class="empty-state">لا توجد أنواع إجازات بعد.</p> }
-        @else { <div class="table-wrap"><table><thead><tr><th>النوع</th><th>الوصف</th><th>الدفع</th><th>الإجراءات</th></tr></thead><tbody>@for (v of items(); track v.id) { <tr><td>{{ v.name }}</td><td class="wrap">{{ v.description || '—' }}</td><td>{{ v.paymentTypeAr }}</td><td><div class="actions">@if (can().edit) { <button class="btn btn-ghost btn-sm" (click)="edit(v)" [disabled]="saving()">تعديل</button> }@if (can().delete) { <button class="btn btn-danger btn-sm" (click)="deleting.set(v)" [disabled]="saving()">حذف</button> }</div></td></tr> }</tbody></table></div> }
+        @else { <div class="table-wrap"><table><thead><tr><th>النوع</th><th>الوصف</th><th>الدفع</th><th>الإجراءات</th></tr></thead><tbody>@for (v of pager.items(); track v.id) { <tr><td>{{ v.name }}</td><td class="wrap">{{ v.description || '—' }}</td><td>{{ v.paymentTypeAr }}</td><td><div class="actions">@if (can().edit) { <button class="btn btn-ghost btn-sm" (click)="edit(v)" [disabled]="saving()">تعديل</button> }@if (can().delete) { <button class="btn btn-danger btn-sm" (click)="deleting.set(v)" [disabled]="saving()">حذف</button> }</div></td></tr> }</tbody></table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" /> }
         @if (deleting(); as v) { <div class="alert alert-warning">حذف «{{ v.name }}»؟ <button class="btn btn-danger" (click)="remove(v)" [disabled]="saving()">تأكيد الحذف</button><button class="btn btn-ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button></div> }
       </section>
     </div>`
 })
 export class VacationTypesPage {
+  pager = new Pagination(() => this.items());
   private auth = inject(AuthService);
   /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والنموذج والأزرار تظهر حسب الإضافة/التعديل/الحذف */
   can = computed(() => ({

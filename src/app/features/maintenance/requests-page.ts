@@ -19,11 +19,12 @@ import { PendingTransfersButton } from './transfer-panel';
 type View = 'table' | 'board';
 type SearchField = 'clientName' | 'serialNumber' | 'model';
 
-interface BoardColumn { status: MaintenanceStatus; items: MaintenanceRequest[]; total: number; }
+interface BoardColumn { status: MaintenanceStatus; items: MaintenanceRequest[]; total: number; page: number; }
 
 const PAGE_SIZE = 20;
 /** أقصى عدد بطاقات في عمود اللوحة (الأحدث أولاً) — الباقي يُعرض من الجدول */
-const BOARD_LIMIT = 50;
+/** بطاقات كل عمود في الصفحة الواحدة (لكل عمود تقسيم صفحاته) */
+const BOARD_LIMIT = 5;
 
 /**
  * طلبات الصيانة: جدول مع بحث وفلاتر وترقيم (من الخادم)، أو لوحة أعمدة بحسب الحالة
@@ -119,7 +120,7 @@ const BOARD_LIMIT = 50;
                 }
               </tbody>
             </table></div>
-            <app-pager [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+            <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
           }
         </section>
       } @else {
@@ -147,8 +148,14 @@ const BOARD_LIMIT = 50;
                       <div class="drop-ghost" *cdkDragPlaceholder></div>
                     </article>
                   } @empty { <p class="col-empty">لا توجد طلبات</p> }
-                  @if (col.total > col.items.length) { <p class="col-more">يُعرض أحدث {{ col.items.length }} من {{ col.total }} — الباقي في عرض الجدول</p> }
                 </div>
+                @if (col.total > boardLimit) {
+                  <nav class="col-pager" [attr.aria-label]="'صفحات ' + col.status.name">
+                    <button type="button" (click)="columnTo(col, col.page - 1)" [disabled]="col.page <= 1 || loading()" aria-label="الصفحة السابقة">‹</button>
+                    <span>{{ col.page }} / {{ columnPages(col) }} <small>({{ col.total }})</small></span>
+                    <button type="button" (click)="columnTo(col, col.page + 1)" [disabled]="col.page >= columnPages(col) || loading()" aria-label="الصفحة التالية">›</button>
+                  </nav>
+                }
               </section>
             }
           </div>
@@ -170,6 +177,7 @@ export class MaintenanceRequestsPage {
   utc = utcDate;
   phone = formatPhone;
   pageSize = PAGE_SIZE;
+  boardLimit = BOARD_LIMIT;
 
   lookups = signal<RequestLookups | null>(null);
   technicians = signal<TechnicianOption[]>([]);
@@ -249,10 +257,9 @@ export class MaintenanceRequestsPage {
     if (this.view() === 'board') {
       const statuses = this.lookups()?.statuses ?? [];
       if (!statuses.length) { this.columns.set([]); return of(null); }
-      return forkJoin(statuses.map(status =>
-        this.service.requests({ ...this.filter(), statusId: status.id, page: 1, pageSize: BOARD_LIMIT }).pipe(
-          map(r => ({ status, items: r.items, total: r.totalCount }))
-        ))).pipe(tap(columns => this.columns.set(columns)), catchError(fail));
+      // كل عمود يعرض صفحته الحالية (تبقى عند التحديث)
+      return forkJoin(statuses.map(status => this.loadColumn(status, this.columns().find(c => c.status.id === status.id)?.page ?? 1)))
+        .pipe(tap(columns => this.columns.set(columns)), catchError(fail));
     }
 
     return forkJoin([
@@ -262,8 +269,27 @@ export class MaintenanceRequestsPage {
     ]);
   }
 
+  /** صفحة واحدة من عمود؛ إن تجاوزت الأخيرة (بعد نقل بطاقات) تُجلب آخر صفحة موجودة */
+  private loadColumn(status: MaintenanceStatus, page: number): Observable<BoardColumn> {
+    return this.service.requests({ ...this.filter(), statusId: status.id, page, pageSize: BOARD_LIMIT }).pipe(
+      switchMap(r => !r.items.length && r.totalCount > 0 && page > 1
+        ? this.loadColumn(status, Math.ceil(r.totalCount / BOARD_LIMIT))
+        : of({ status, items: r.items, total: r.totalCount, page })));
+  }
+
+  columnPages(col: BoardColumn) { return Math.max(1, Math.ceil(col.total / BOARD_LIMIT)); }
+
+  /** ينتقل عمود واحد إلى صفحة أخرى دون المساس ببقية الأعمدة */
+  columnTo(col: BoardColumn, page: number) {
+    this.loading.set(true);
+    this.loadColumn(col.status, page).subscribe({
+      next: fresh => { this.columns.update(list => list.map(c => c.status.id === fresh.status.id ? fresh : c)); this.loading.set(false); },
+      error: e => { this.error.set(e.message); this.loading.set(false); }
+    });
+  }
+
   /** تغيّر فلتر: العودة لأول صفحة ثم التحميل بعد توقف الكتابة */
-  changed() { this.page.set(1); this.reload$.next(300); }
+  changed() { this.page.set(1); this.columns.update(list => list.map(c => ({ ...c, page: 1 }))); this.reload$.next(300); }
   refresh() { this.reload$.next(0); }
   goTo(page: number) { this.page.set(page); this.reload$.next(0); }
   setStatus(id: number) { this.statusId.set(id); this.page.set(1); this.reload$.next(0); }
@@ -309,7 +335,10 @@ export class MaintenanceRequestsPage {
       ...(final ? { isClosed: true, canChangeStatus: false, canEdit: false, canAssign: false, canRequestTransfer: false } : {})
     });
     this.service.changeStatus(request.id, to).subscribe({
-      next: () => this.toast.success(`${request.number} ← ${target.name}`),
+      next: () => {
+        this.toast.success(`${request.number} ← ${target.name}`);
+        for (const id of [from, to]) { const col = this.columns().find(c => c.status.id === id); if (col) this.columnTo(col, id === to ? 1 : col.page); }
+      },
       error: e => { this.move({ ...request, maintenanceRequestStatusId: to }, to, from, request); this.toast.error(e.message); }
     });
   }
@@ -318,7 +347,7 @@ export class MaintenanceRequestsPage {
     const moved = { ...request, ...changes };
     this.columns.update(columns => columns.map(c =>
       c.status.id === from ? { ...c, items: c.items.filter(r => r.id !== request.id), total: c.total - 1 }
-        : c.status.id === to ? { ...c, items: [moved, ...c.items], total: c.total + 1 }
+        : c.status.id === to ? { ...c, items: [moved, ...c.items].slice(0, BOARD_LIMIT), total: c.total + 1 }
           : c));
   }
 }

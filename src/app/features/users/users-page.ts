@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -21,7 +23,7 @@ type UserPlacement = { needsBranch: boolean; needsDepartment: boolean; needsOffi
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal],
+  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss'
 })
@@ -33,6 +35,7 @@ export class UsersPage {
   private confirm = inject(ConfirmService);
 
   users = signal<User[]>([]);
+  pager = new Pagination(() => this.users());
   branches = signal<Branch[]>([]);
   departments = signal<Department[]>([]);
   offices = signal<Office[]>([]);

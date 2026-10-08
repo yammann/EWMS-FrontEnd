@@ -22,10 +22,6 @@ import { Modal } from '../../shared/ui/modal';
           @if (d.canIssue && can().issueParts) { <button class="btn btn-sm" type="button" (click)="openIssue()">+ صرف قطعة</button> }
         </div>
 
-        @if (d.overThreshold) {
-          <p class="alert alert-error over" role="status">♻ تكلفة قطع هذا الجهاز على مدى عمره {{ money(d.deviceLifetimeCost) }} بلغت حد الاستبدال لنوعه ({{ money(d.replacementCostThreshold) }}) — إصلاحه صار أغلى من استبداله.</p>
-        }
-
         @if (d.items.length) {
           <div class="table-wrap"><table>
             <thead><tr><th>القطعة</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>صُرفت</th>@if (d.canIssue && can().issueParts) { <th class="actions-th"></th> }</tr></thead>
@@ -45,8 +41,7 @@ import { Modal } from '../../shared/ui/modal';
             </tbody>
           </table></div>
         }
-        <p class="lifetime">تكلفة قطع الجهاز على مدى عمره: <strong>{{ money(d.deviceLifetimeCost) }}</strong>
-          @if (d.replacementCostThreshold) { <span> · حد الاستبدال {{ money(d.replacementCostThreshold) }}</span> }</p>
+        <p class="lifetime">تكلفة قطع الجهاز على مدى عمره: <strong>{{ money(d.deviceLifetimeCost) }}</strong></p>
       </section>
     }
 
@@ -80,7 +75,6 @@ import { Modal } from '../../shared/ui/modal';
   styles: [`
     .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     td small { display: block; color: var(--ink-500); font-size: 11px; }
-    .over { margin: 0 0 12px; }
     .lifetime { margin: 12px 0 0; font-size: 13px; color: var(--ink-500); }
     .lifetime strong { color: var(--ink-900); }
     .pick { display: grid; gap: 6px; max-height: 260px; overflow: auto; }
@@ -166,7 +160,6 @@ export class RequestPartsPanel {
       next: d => {
         this.busy.set(false); this.issueOpen.set(false); this.data.set(d);
         this.toast.success(`صُرف ${qty(this.quantity())} ${s.unit} من «${s.name}»`);
-        if (d.overThreshold) this.toast.info('تكلفة هذا الجهاز بلغت حد الاستبدال لنوعه');
         this.changed.emit();
       },
       error: e => { this.busy.set(false); this.issueError.set(e.message); }

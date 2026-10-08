@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,7 +14,7 @@ import { StatusChip } from './maintenance-ui';
  * إشعار تغيّر الحالة يفتح الصفحة على الطلب (?request=ID) ويُبرزه.
  */
 @Component({
-  selector: 'app-my-maintenance-requests', standalone: true, imports: [DatePipe, StatusChip],
+  selector: 'app-my-maintenance-requests', standalone: true, imports: [DatePipe, StatusChip, Pager],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -30,7 +32,7 @@ import { StatusChip } from './maintenance-ui';
           <div class="table-wrap"><table>
             <thead><tr><th>رقم الطلب</th><th>الجهاز</th><th>الرقم التسلسلي</th><th>العطل</th><th>الحالة</th><th>الفني</th><th>تاريخ الاستلام</th><th>التسليم</th></tr></thead>
             <tbody>
-              @for (r of items(); track r.id) {
+              @for (r of pager.items(); track r.id) {
                 <tr [class.highlight]="r.id === highlight()">
                   <td><span class="mono">{{ r.number }}</span></td>
                   <td><span class="cell-strong">{{ r.deviceName || r.deviceTypeName }}</span><small>{{ r.deviceTypeName }} · {{ r.deviceCompanyName }}{{ r.model ? ' · ' + r.model : '' }}</small></td>
@@ -44,12 +46,14 @@ import { StatusChip } from './maintenance-ui';
               }
             </tbody>
           </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
         }
       </section>
     </div>`,
   styles: [`tr.highlight td { background: var(--brand-50); }`]
 })
 export class MaintenanceMyRequestsPage {
+  pager = new Pagination(() => this.items());
   private service = inject(MaintenanceService);
   utc = utcDate;
   items = signal<MyMaintenanceRequest[]>([]);

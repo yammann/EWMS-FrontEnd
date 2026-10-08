@@ -80,7 +80,7 @@ const PAGE_SIZE = 20;
               }
             </tbody>
           </table></div>
-          <app-pager [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+          <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
         }
       </section>
     </div>

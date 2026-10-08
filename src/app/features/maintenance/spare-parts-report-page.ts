@@ -47,7 +47,7 @@ function dateInput(d: Date): string {
           <app-stat-tile label="قيمة المخزون" [value]="money(r.stockValue)" icon="📦" tone="green" [hint]="r.partsCount + ' قطعة'" />
           <app-stat-tile label="تحت الحد الأدنى" [value]="r.lowStockCount" icon="⚠" tone="orange" hint="قطع تحتاج إدخالاً" />
           <app-stat-tile label="المصروف في الفترة" [value]="money(r.issuedCost)" icon="🧾" tone="blue" hint="قطع صُرفت على الطلبات" />
-          <app-stat-tile label="أجهزة بلغت حد الاستبدال" [value]="overCount()" icon="♻" tone="purple" hint="من الأعلى تكلفة" />
+          <app-stat-tile label="أجهزة بقطع مصروفة" [value]="r.deviceCosts.length" icon="🖥" tone="purple" hint="من الأعلى تكلفة" />
         </section>
 
         <section class="panel">
@@ -64,18 +64,17 @@ function dateInput(d: Date): string {
         </section>
 
         <section class="panel">
-          <div class="panel-heading"><div><h2>تكلفة الأجهزة على مدى عمرها</h2><p>أعلى 20 جهازاً تكلفة في قطع الغيار — والحد من «إعدادات الصيانة» لكل نوع جهاز</p></div></div>
+          <div class="panel-heading"><div><h2>تكلفة الأجهزة على مدى عمرها</h2><p>أعلى 20 جهازاً تكلفة في قطع الغيار</p></div></div>
           @if (!r.deviceCosts.length) { <p class="empty-state">لا توجد قطع مصروفة على أجهزة بعد</p> }
           @else {
             <div class="table-wrap"><table>
-              <thead><tr><th>الجهاز</th><th>النوع</th><th>طلبات بقطع</th><th>التكلفة</th><th>حد الاستبدال</th></tr></thead>
+              <thead><tr><th>الجهاز</th><th>النوع</th><th>طلبات بقطع</th><th>التكلفة</th></tr></thead>
               <tbody>@for (d of r.deviceCosts; track d.deviceMaintenanceId) {
-                <tr [class.over]="d.overThreshold">
+                <tr>
                   <td><span class="mono cell-strong">{{ d.serialNumber }}</span>@if (d.deviceName) { <small>{{ d.deviceName }}</small> }</td>
                   <td>{{ d.deviceTypeName }}</td>
                   <td class="num">{{ d.requestsCount }}</td>
                   <td class="num cell-strong">{{ money(d.cost) }}</td>
-                  <td>@if (d.threshold) { {{ money(d.threshold) }}@if (d.overThreshold) { <span class="over-badge">إصلاحه أغلى من استبداله</span> } } @else { <span class="muted-cell">—</span> }</td>
                 </tr>
               }</tbody>
             </table></div>
@@ -87,9 +86,6 @@ function dateInput(d: Date): string {
     .period { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
     .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     td small { display: block; color: var(--ink-500); }
-    tr.over td:first-child { box-shadow: inset -3px 0 0 var(--danger-700); }
-    .over-badge { display: inline-block; margin-inline-start: 6px; padding: 1px 8px; border-radius: var(--radius-full);
-      background: var(--danger-100); color: var(--danger-700); font-size: 11px; font-weight: 700; }
     a.btn { text-decoration: none; }
   `]
 })
@@ -107,7 +103,6 @@ export class MaintenanceSparePartsReportPage {
   report = signal<SparePartReport | null>(null);
   loading = signal(false);
   error = signal('');
-  overCount = computed(() => this.report()?.deviceCosts.filter(d => d.overThreshold).length ?? 0);
 
   constructor() {
     if (this.can().viewParts) this.service.partDepartments().subscribe({ next: d => this.departments.set(d), error: () => { } });

@@ -91,7 +91,8 @@ export const VACATION_PRINT_HEADER = {
         </div>
 
         <footer class="foot">
-          <span class="employee-sign">توقيع مقدم الطلب: <span class="line"></span></span>
+          <span class="employee-sign">توقيع مقدم الطلب:
+            <span class="sig-box">@if (d.requesterSignature) { <img [src]="d.requesterSignature" alt="توقيع مقدم الطلب"> }</span></span>
           <p class="copy">نسخة إلى:<br>- أرشيف {{ d.branchName }}</p>
         </footer>
       </article>
@@ -152,7 +153,8 @@ export const VACATION_PRINT_HEADER = {
     .foot { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; font-size: 12px; }
     .copy { margin: 0; }
     .employee-sign { order: 2; display: inline-flex; align-items: flex-end; gap: 6px; color: var(--soft); }
-    .employee-sign .line { display: inline-block; width: 45mm; border-bottom: 1px solid var(--soft); }
+    .employee-sign .sig-box { position: relative; display: inline-flex; align-items: flex-end; justify-content: center; width: 45mm; min-height: 14mm; border-bottom: 1px solid var(--soft); }
+    .employee-sign .sig-box img { height: 12mm; max-width: 100%; object-fit: contain; }
 
     @media print {
       @page { size: A4 portrait; margin: 8mm; }

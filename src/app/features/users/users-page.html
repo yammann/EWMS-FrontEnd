@@ -137,7 +137,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (user of users(); track user.id) {
+            @for (user of pager.items(); track user.id) {
               <tr [class.selected]="selectedUser()?.id === user.id">
                 <td>
                   <div class="user-cell-name">
@@ -223,6 +223,7 @@
           </tbody>
         </table>
       </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
     } @else {
       <div class="empty-state">
         <div class="empty-icon">

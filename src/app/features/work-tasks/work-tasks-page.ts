@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { AppPermission } from '../../core/constants/access';
@@ -12,7 +14,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
 
 /** إدارة مهام العمل لكل فرع وإسنادها لموظفيه (ManageWorkTasks — السوبر ادمن) */
 @Component({
-  selector: 'app-work-tasks-page', standalone: true, imports: [ReactiveFormsModule],
+  selector: 'app-work-tasks-page', standalone: true, imports: [ReactiveFormsModule, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
@@ -86,7 +88,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
           <div class="table-wrap"><table>
             <thead><tr><th>المهمة</th><th>الفرع</th><th>الحالة</th><th>المسؤولون</th><th>الإجراءات</th></tr></thead>
             <tbody>
-              @for (t of filtered(); track t.id) {
+              @for (t of pager.items(); track t.id) {
                 <tr>
                   <td><strong><span aria-hidden="true">{{ t.icon }}</span> {{ t.name }}</strong>@if (t.description) { <small>{{ t.description }}</small> }</td>
                   <td>{{ t.branchName }}</td>
@@ -97,6 +99,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
               }
             </tbody>
           </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
         }
         @if (deleting(); as t) {
           <div class="alert alert-warning"><span>حذف المهمة «{{ t.name }}»؟ ستُزال من لوحات كل الموظفين المسنَدة إليهم.</span>
@@ -123,6 +126,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
   `]
 })
 export class WorkTasksPage {
+  pager = new Pagination(() => this.filtered());
   private auth = inject(AuthService);
   /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والنموذج والأزرار تظهر حسب الإضافة/التعديل/الحذف */
   can = computed(() => ({

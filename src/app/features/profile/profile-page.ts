@@ -1,3 +1,5 @@
+import { Pagination } from '../../core/utils/pagination';
+import { Pager } from '../../shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,10 +36,11 @@ export function notInPast(control: AbstractControl) {
 
 @Component({
   selector: 'app-profile-page', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, SignaturePanel, VacationAttachments],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, SignaturePanel, VacationAttachments, Pager],
   templateUrl: './profile-page.html', styleUrl: '../shared/organization.scss'
 })
 export class ProfilePage {
+  pager = new Pagination(() => this.vacations());
   private service = inject(VacationService);
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
