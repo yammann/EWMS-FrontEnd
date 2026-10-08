@@ -28,6 +28,7 @@
 .prio.p-Urgent { background: var(--danger-50); color: var(--danger-700); border-color: var(--danger-100); }
 .st.s-Todo { background: var(--ink-100); color: var(--ink-700); }
 .st.s-InProgress { background: var(--info-50); color: var(--info-700); }
+.st.s-InReview { background: var(--warning-50); color: var(--warning-700); }
 .st.s-Done { background: var(--brand-50); color: var(--brand-700); }
 .overdue { background: var(--danger-100); color: var(--danger-700); }
 
@@ -35,12 +36,26 @@
 .link-btn:hover:not(:disabled) { background: none; box-shadow: none; transform: none; text-decoration: underline; }
 
 /* بديل لوحة المفاتيح عن السحب والإفلات */
-.status-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 4px; border-radius: var(--radius-lg); background: var(--ink-50); }
+.status-switch { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 4px; border-radius: var(--radius-lg); background: var(--ink-50); }
+.status-switch button { font-size: 12px; padding: 0 4px; }
+.status-switch button:disabled:not(.on) { opacity: .45; }
+.hint-line { margin: -8px 0 0; font-size: 12px; color: var(--warning-700); font-weight: 700; }
+.claim-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 13px; }
+.checklist { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 4px; }
+.checklist li { display: flex; align-items: center; gap: 6px; }
+.checklist label { flex: 1; display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 13px; cursor: pointer; }
+.checklist input { width: auto; }
+.checklist li.done span { text-decoration: line-through; color: var(--ink-400); }
+.checklist .x { min-height: 30px; width: 30px; padding: 0; background: transparent; color: var(--ink-400); font-size: 18px; box-shadow: none; }
+.checklist .x:hover:not(:disabled) { background: var(--danger-50); color: var(--danger-700); transform: none; box-shadow: none; }
+.inline-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.sub-h { margin-top: 16px !important; color: var(--ink-500); }
 .status-switch button { min-height: 38px; background: transparent; color: var(--ink-600); font-weight: 700; }
 .status-switch button:hover:not(:disabled) { background: var(--surface); box-shadow: none; transform: none; }
 .status-switch button.on { background: var(--surface); box-shadow: var(--shadow-md); }
 .status-switch button.on.s-Todo { color: var(--ink-900); }
 .status-switch button.on.s-InProgress { color: var(--info-700); }
+.status-switch button.on.s-InReview { color: var(--warning-700); }
 .status-switch button.on.s-Done { color: var(--brand-700); }
 
 .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }

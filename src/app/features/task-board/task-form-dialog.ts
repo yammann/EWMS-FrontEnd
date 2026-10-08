@@ -3,8 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Modal } from '../../shared/ui/modal';
 import { AssignedTaskService } from '../../core/services/assigned-task.service';
 import {
-  AssignedTaskDetail, TaskPriority, TaskTargetKind, TaskTargetOption, TaskTargetType, TASK_PRIORITY_LABEL, TASK_PRIORITY_VALUE
+  AssignedTaskDetail, TaskPriority, TaskTargetKind, TaskTargetOption, TaskTargetType, TASK_ATTACHMENTS, TASK_PRIORITY_LABEL, TASK_PRIORITY_VALUE,
+  attachmentProblem
 } from '../../core/models/assigned-task.models';
+import { fileSize } from '../vacations/vacation-attachments';
+import { fileIcon } from './task-attachments';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';
 
@@ -74,12 +77,29 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
               <span class="form-label">الوصف والتعليمات <small class="muted">(اختياري)</small></span>
               <textarea formControlName="description" rows="5" maxlength="4000" placeholder="ما المطلوب بالتحديد؟ أي ملاحظات أو معايير للإنجاز"></textarea>
             </label>
+
+            @if (mode() !== 'edit') {
+              <div class="form-field">
+                <span class="form-label">مرفقات <small class="muted">(اختياري — حتى {{ maxFiles }} ملفات، 10MB للملف: PDF وصور وWord وExcel وPowerPoint)</small></span>
+                <input #picker type="file" multiple hidden [accept]="accept" (change)="pick($event)">
+                @if (files().length) {
+                  <ul class="picked">
+                    @for (f of files(); track f) {
+                      <li><span aria-hidden="true">{{ icon(f.type) }}</span><span class="n">{{ f.name }}</span><small>{{ size(f.size) }}</small>
+                        <button type="button" class="x" (click)="dropFile(f)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name">×</button></li>
+                    }
+                  </ul>
+                }
+                <button type="button" class="btn btn-ghost btn-sm add-file" (click)="picker.click()" [disabled]="saving() || files().length >= maxFiles">+ إرفاق ملف</button>
+                @if (fileProblem()) { <small class="form-error">{{ fileProblem() }}</small> }
+              </div>
+            }
           </div>
 
           <footer class="modal-actions">
             <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
             <button type="submit" [disabled]="form.invalid || saving() || (mode() !== 'edit' && !form.value.targetId)">
-              {{ saving() ? 'جارٍ الحفظ…' : (mode() === 'edit' ? 'حفظ التعديلات' : 'إسناد المهمة') }}
+              {{ saving() ? (uploadText() || 'جارٍ الحفظ…') : (mode() === 'edit' ? 'حفظ التعديلات' : 'إسناد المهمة') }}
             </button>
           </footer>
         </form>
@@ -96,6 +116,12 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
     .seg.on.p-High { background: var(--warning-700); }
     .seg.on.p-Urgent { background: var(--danger-600); }
     .form-hint.warn { color: var(--warning-700); }
+    .picked { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 4px; }
+    .picked li { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: var(--radius-md); background: var(--fill); font-size: 13px; }
+    .picked .n { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .picked small { color: var(--ink-500); }
+    .picked .x { min-height: 28px; width: 28px; padding: 0; background: transparent; color: var(--ink-500); font-size: 18px; box-shadow: none; }
+    .add-file { justify-self: start; }
     .readonly-target { margin: 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--ink-50); font-size: 13px; color: var(--ink-600); }
   `]
 })
@@ -109,7 +135,17 @@ export class TaskFormDialog implements OnInit {
   /** أنواع الإسناد المتاحة لي (من اللوحة) — يظهر اختيار النوع إن كانت أكثر من واحد */
   targetTypes = input<TaskTargetType[]>([]);
   saved = output<AssignedTaskDetail>();
+  /** حُفظت المهمة لكن فشل رفع المرفقات (تبقى المهمة، وتُضاف الملفات من تفاصيلها) */
+  uploadFailed = output<string>();
   close = output<void>();
+
+  maxFiles = TASK_ATTACHMENTS.maxFiles;
+  accept = TASK_ATTACHMENTS.accept;
+  size = fileSize;
+  icon = fileIcon;
+  files = signal<File[]>([]);
+  fileProblem = signal('');
+  uploadText = signal('');
 
   priorities: TaskPriority[] = ['Low', 'Normal', 'High', 'Urgent'];
   priorityLabel = TASK_PRIORITY_LABEL;
@@ -153,6 +189,19 @@ export class TaskFormDialog implements OnInit {
     this.form.controls.targetId.valueChanges.subscribe(v => this.targetId.set(Number(v)));
   }
 
+  pick(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const chosen = [...(input.files ?? [])];
+    input.value = '';
+    this.fileProblem.set('');
+    if (this.files().length + chosen.length > this.maxFiles) { this.fileProblem.set(`الحد الأقصى ${this.maxFiles} ملفات للمهمة`); return; }
+    const bad = chosen.map(attachmentProblem).find(p => p);
+    if (bad) { this.fileProblem.set(bad); return; }
+    this.files.update(list => [...list, ...chosen]);
+  }
+
+  dropFile(file: File) { this.files.update(list => list.filter(f => f !== file)); }
+
   chooseKind(kind: TaskTargetKind) {
     if (this.kind() === kind && this.targets().length) return;
     this.kind.set(kind);
@@ -191,7 +240,16 @@ export class TaskFormDialog implements OnInit {
       });
 
     request.subscribe({
-      next: result => { this.saving.set(false); this.saved.emit(result); },
+      next: result => {
+        const files = this.files();
+        if (this.mode() === 'edit' || !files.length) { this.saving.set(false); this.saved.emit(result); return; }
+        // المهمة حُفظت: ترفع الملفات واحداً بعد الآخر، وأي فشل لا يلغي المهمة
+        this.uploadText.set(`رفع المرفقات 0 من ${files.length}…`);
+        this.service.attachSequentially(result.id, files, (done, total) => this.uploadText.set(`رفع المرفقات ${done} من ${total}…`)).subscribe({
+          next: withFiles => { this.saving.set(false); this.saved.emit(withFiles); },
+          error: err => { this.saving.set(false); this.saved.emit(result); this.uploadFailed.emit(err.message); }
+        });
+      },
       error: e => { this.saving.set(false); this.error.set(e.message); }
     });
   }

@@ -18,9 +18,28 @@ describe('Task board API contract', () => {
     service.changeStatus(7, 'InProgress').subscribe();
     const req = http.expectOne('/api/AssignedTasks/Status/7');
     expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual({ status: 2 });
+    expect(req.request.body).toEqual({ status: 2, note: null });
     req.flush({});
   });
+
+  it('sends the review status value and the return note', () => {
+    service.changeStatus(7, 'InReview').subscribe();
+    http.expectOne('/api/AssignedTasks/Status/7').flush({});
+    service.changeStatus(7, 'InProgress', 'ينقصها تقرير').subscribe();
+    const req = http.expectOne('/api/AssignedTasks/Status/7');
+    expect(req.request.body).toEqual({ status: 2, note: 'ينقصها تقرير' });
+    req.flush({});
+  });
+
+  it('uploads attachments one file per request, in order', () => {
+    const a = new File(['a'], 'a.pdf'), b = new File(['b'], 'b.png');
+    const progress: number[] = [];
+    service.attachSequentially(5, [a, b], done => progress.push(done)).subscribe();
+    http.expectOne('/api/AssignedTasks/Attachments/5').flush({});
+    http.expectOne('/api/AssignedTasks/Attachments/5').flush({});
+    expect(progress).toEqual([1, 2]);
+  });
+
 
   it('requests the board for the chosen view', () => {
     service.board('outgoing').subscribe();

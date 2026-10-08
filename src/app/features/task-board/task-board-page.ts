@@ -14,18 +14,21 @@ import {
 
 import { StatTile } from '../dashboard/dashboard-widgets';
 import { TaskDetailDrawer } from './task-detail-drawer';
+import { TaskNoteDialog } from './task-note-dialog';
+import { ConfirmService } from '../../shared/ui/confirm.service';
 import { TaskFormDialog, TaskFormMode } from './task-form-dialog';
 import { ToastService } from '../../shared/ui/toast.service';
 
 interface Column { status: TaskStatus; label: string; hint: string; }
 
 /**
- * لوحة المهام: ثلاثة أعمدة (لم تُنفَّذ / قيد التنفيذ / تم التنفيذ) وتغيير الحالة بالسحب والإفلات.
- * السحب متاح فقط للجهة المنفِّذة (canChangeStatus)، وبديله بلوحة المفاتيح أزرار الحالة داخل تفاصيل المهمة.
+ * لوحة المهام: أربعة أعمدة (لم تُنفَّذ / قيد التنفيذ / بانتظار المراجعة / تم التنفيذ) وتغيير الحالة بالسحب والإفلات.
+ * الإفلات مسموح فقط في الأعمدة التي يحسبها الخادم لكل بطاقة (allowedStatuses)، وبديله بلوحة المفاتيح أزرار الحالة داخل تفاصيل المهمة.
+ * «تم التنفيذ» تحتاج تأكيداً، وإعادة مهمة من المراجعة إلى التنفيذ بيد المُسنِد تحتاج سبباً.
  */
 @Component({
   selector: 'app-task-board', standalone: true,
-  imports: [CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog],
+  imports: [CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog, TaskNoteDialog],
   templateUrl: './task-board-page.html',
   styleUrl: './task-board-page.scss'
 })
@@ -34,10 +37,12 @@ export class TaskBoardPage {
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private confirm = inject(ConfirmService);
 
   columns: Column[] = [
     { status: 'Todo', label: TASK_STATUS_LABEL.Todo, hint: 'بانتظار البدء' },
     { status: 'InProgress', label: TASK_STATUS_LABEL.InProgress, hint: 'يجري العمل عليها' },
+    { status: 'InReview', label: TASK_STATUS_LABEL.InReview, hint: 'بانتظار اعتماد المُسنِد' },
     { status: 'Done', label: TASK_STATUS_LABEL.Done, hint: 'خلال آخر 30 يوماً' }
   ];
   priorityLabel = TASK_PRIORITY_LABEL;
@@ -59,6 +64,9 @@ export class TaskBoardPage {
   // التفاصيل والنماذج
   openTaskId = signal<number | null>(null);
   form = signal<{ mode: TaskFormMode; task: AssignedTaskDetail | null } | null>(null);
+  /** إعادة بطاقة من المراجعة إلى التنفيذ تنتظر كتابة السبب */
+  returning = signal<AssignedTaskCard | null>(null);
+  returnBusy = signal(false);
 
   /** تبويب "كل مهام نطاقي": لمن يملك صلاحية إسناد أو تولٍّ (يتحدّث من اللوحة نفسها) */
   private hasScope = signal(false);
@@ -75,7 +83,7 @@ export class TaskBoardPage {
   });
 
   byStatus = computed(() => {
-    const groups: Record<TaskStatus, AssignedTaskCard[]> = { Todo: [], InProgress: [], Done: [] };
+    const groups: Record<TaskStatus, AssignedTaskCard[]> = { Todo: [], InProgress: [], InReview: [], Done: [] };
     for (const t of this.filtered()) groups[t.status].push(t);
     return groups;
   });
@@ -85,7 +93,7 @@ export class TaskBoardPage {
     return {
       todo: all.filter(t => t.status === 'Todo').length,
       inProgress: all.filter(t => t.status === 'InProgress').length,
-      done: all.filter(t => t.status === 'Done').length,
+      inReview: all.filter(t => t.status === 'InReview').length,
       overdue: all.filter(t => t.isOverdue).length
     };
   });
@@ -123,22 +131,36 @@ export class TaskBoardPage {
   }
 
   // ─────────── السحب والإفلات ───────────
-  drop(event: CdkDragDrop<TaskStatus>) {
+  async drop(event: CdkDragDrop<TaskStatus>) {
     if (event.previousContainer === event.container) return;
     const task = event.item.data as AssignedTaskCard;
     const to = event.container.data;
-    const from = task.status;
 
+    // الإعادة من المراجعة بيد المُسنِد تُسأل عن السبب أولاً، و«تم التنفيذ» تُؤكَّد — وإن تراجع المستخدم تبقى البطاقة مكانها
+    if (task.status === 'InReview' && to === 'InProgress' && task.needsReturnNote) { this.returning.set(task); return; }
+    if (to === 'Done' && !(await this.confirm.ask(`اعتماد «${task.title}» «تم التنفيذ»؟ تُقفل بعدها ولا يمكن تغييرها.`, 'اعتماد'))) return;
+    this.move(task, to);
+  }
+
+  private move(task: AssignedTaskCard, to: TaskStatus, note?: string, done?: () => void) {
+    const from = task.status;
     // تحديث متفائل ثم التراجع إن رفض الخادم
     this.patch(task.id, { status: to, statusAr: TASK_STATUS_LABEL[to] });
-    this.service.changeStatus(task.id, to).subscribe({
-      next: updated => { this.patch(task.id, updated); this.toast.success(`«${task.title}» ← ${TASK_STATUS_LABEL[to]}`); },
-      error: e => { this.patch(task.id, { status: from, statusAr: TASK_STATUS_LABEL[from] }); this.toast.error(e.message); }
+    this.service.changeStatus(task.id, to, note).subscribe({
+      next: updated => { this.patch(task.id, updated); this.toast.success(`«${task.title}» ← ${TASK_STATUS_LABEL[to]}`); done?.(); },
+      error: e => { this.patch(task.id, { status: from, statusAr: TASK_STATUS_LABEL[from] }); this.toast.error(e.message); done?.(); }
     });
   }
 
-  /** يسمح بالإفلات فقط لمن يستطيع تغيير حالة المهمة */
-  canDrop = (drag: CdkDrag<AssignedTaskCard>) => drag.data.canChangeStatus;
+  returnWithNote(note: string) {
+    const task = this.returning();
+    if (!task) return;
+    this.returnBusy.set(true);
+    this.move(task, 'InProgress', note, () => { this.returnBusy.set(false); this.returning.set(null); });
+  }
+
+  /** يسمح بالإفلات فقط في أعمدة الحالات المسموحة لهذه البطاقة (يحسبها الخادم) */
+  canDrop = (drag: CdkDrag<AssignedTaskCard>, drop: CdkDropList<TaskStatus>) => drag.data.allowedStatuses.includes(drop.data);
 
   private patch(id: number, changes: Partial<AssignedTaskCard>) {
     this.tasks.update(list => list.map(t => t.id === id ? { ...t, ...changes } : t));
@@ -162,6 +184,8 @@ export class TaskBoardPage {
   private openForm(mode: TaskFormMode, task: AssignedTaskDetail | null) {
     this.form.set({ mode, task });
   }
+
+  uploadFailed(message: string) { this.toast.error(`حُفظت المهمة لكن تعذّر رفع المرفقات: ${message}`); }
 
   formSaved(result: AssignedTaskDetail) {
     const mode = this.form()?.mode;

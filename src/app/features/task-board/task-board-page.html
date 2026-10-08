@@ -4,7 +4,7 @@
       <span class="eyebrow">إدارة المهام</span>
       <h1>لوحة المهام</h1>
       <p class="header-sub">
-        @if (mode() === 'incoming') { المهام المُسندة إليك — اسحب البطاقة بين الأعمدة لتحديث حالتها }
+        @if (mode() === 'incoming') { المهام المُسندة إليك — اسحب البطاقة بين الأعمدة لتحديث حالتها — وعند الانتهاء أرسلها «للمراجعة» ليعتمدها المُسنِد }
         @else if (mode() === 'outgoing') { المهام التي أسندتَها — تابع تقدّم الجهات المنفِّذة }
         @else { كل المهام ضمن نطاقك }
       </p>
@@ -28,7 +28,7 @@
   <section class="dash-stats" aria-label="ملخص المهام">
     <app-stat-tile label="لم تُنفَّذ" [value]="counts().todo" icon="🗂️" tone="blue" />
     <app-stat-tile label="قيد التنفيذ" [value]="counts().inProgress" icon="⚙️" tone="purple" />
-    <app-stat-tile label="تم التنفيذ" [value]="counts().done" icon="✅" tone="green" hint="خلال آخر 30 يوماً" />
+    <app-stat-tile label="بانتظار المراجعة" [value]="counts().inReview" icon="🔎" tone="orange" hint="بانتظار اعتماد المُسنِد" />
     <app-stat-tile label="متأخرة" [value]="counts().overdue" icon="⏰" tone="red" [alert]="counts().overdue > 0" hint="تجاوزت تاريخ التسليم" />
   </section>
 
@@ -79,6 +79,7 @@
                   @if (mode() === 'incoming') { من: {{ t.createdByName }} }
                   @else { إلى: {{ t.targetName }} }
                 </p>
+                @if (t.claimedByName) { <p class="claimed">✋ يعمل عليها: {{ t.claimedByName }}</p> }
                 @if (t.subTasksTotal) {
                   <div class="sub" [attr.title]="t.subTasksDone + ' من ' + t.subTasksTotal + ' مهام فرعية منجزة'">
                     <span class="bar"><span [style.width.%]="100 * t.subTasksDone / t.subTasksTotal"></span></span>
@@ -87,7 +88,11 @@
                 }
                 <footer class="card-foot">
                   <small>{{ t.targetPath }}</small>
-                  @if (t.commentsCount) { <small class="comments">💬 {{ t.commentsCount }}</small> }
+                  <span class="badges">
+                    @if (t.checklistTotal) { <small [attr.title]="'قائمة التحقق: ' + t.checklistDone + ' من ' + t.checklistTotal" [class.all]="t.checklistDone === t.checklistTotal">☑ {{ t.checklistDone }}/{{ t.checklistTotal }}</small> }
+                    @if (t.attachmentsCount) { <small title="مرفقات">📎 {{ t.attachmentsCount }}</small> }
+                    @if (t.commentsCount) { <small class="comments">💬 {{ t.commentsCount }}</small> }
+                  </span>
                 </footer>
                 <div class="drop-ghost" *cdkDragPlaceholder></div>
               </article>
@@ -108,5 +113,10 @@
 
 @if (form(); as f) {
   <app-task-form-dialog [mode]="f.mode" [task]="f.task" [targetTypes]="targetTypes()"
-                        (saved)="formSaved($event)" (close)="form.set(null)" />
+                        (saved)="formSaved($event)" (uploadFailed)="uploadFailed($event)" (close)="form.set(null)" />
+}
+
+@if (returning(); as r) {
+  <app-task-note-dialog heading="إعادة المهمة للتنفيذ" [subheading]="r.title" [busy]="returnBusy()"
+                        (confirm)="returnWithNote($event)" (cancel)="returning.set(null)" />
 }
