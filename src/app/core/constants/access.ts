@@ -31,6 +31,9 @@ export const AppPermission = {
   AssignTaskToDepartment: 'AssignTaskToDepartment', AssignTaskToOffice: 'AssignTaskToOffice', AssignTaskToUser: 'AssignTaskToUser',
   HandleUnitTasks: 'HandleUnitTasks', ViewTaskStats: 'ViewTaskStats',
 
+  // قوائم المهام الشخصية: كل صلاحية على قوائمه هو فقط
+  ViewToDoLists: 'ViewToDoLists', CreateToDoList: 'CreateToDoList', EditToDoList: 'EditToDoList', DeleteToDoList: 'DeleteToDoList',
+
   // توثيق الأجهزة (Devices/MyAccess يعيد نفس النتيجة من صلاحيات الدور)
   ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
   // إظهار كلمات سر الأجهزة ونسخها (يُسجَّل كل إظهار) — مستقلة عن العرض

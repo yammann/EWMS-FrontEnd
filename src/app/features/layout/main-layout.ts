@@ -59,6 +59,7 @@ export class MainLayout {
       { id: 'main', title: '', items: [
         canAny(DASHBOARD_ACCESS) && { path: '/', label: 'لوحة المتابعة', icon: 'home', exact: true },
         can(AppPermission.ViewTaskBoard) && { path: '/task-board', label: 'لوحة المهام', icon: 'board', exact: true },
+        can(AppPermission.ViewToDoLists) && { path: '/todo-lists', label: 'قوائمي', icon: 'clipboard' },
         canAny(TASK_ASSIGN) && { path: '/task-board/recurring', label: 'المهام الدورية والقوالب', icon: 'calendar' },
         can(AppPermission.ViewTaskStats) && { path: '/task-board/stats', label: 'إحصائيات المهام', icon: 'chart' }
       ].filter(Boolean) as NavItem[] },

@@ -44,6 +44,8 @@ export const routes: Routes = [
       { path: 'notifications', canActivate: [permissionGuard], data: { permission: AppPermission.ViewNotifications }, loadComponent: () => import('./features/notifications/notifications-page').then(m => m.NotificationsPage) },
       // لوحة المهام المُسندة: تحتاج ViewTaskBoard، والإسناد والمتابعة بصلاحيات AssignTaskTo* / HandleUnitTasks
       { path: 'task-board', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskBoard }, loadComponent: () => import('./features/task-board/task-board-page').then(m => m.TaskBoardPage) },
+      { path: 'todo-lists', canActivate: [permissionGuard], data: { permission: AppPermission.ViewToDoLists }, loadComponent: () => import('./features/todo/todo-lists-page').then(m => m.TodoListsPage) },
+      { path: 'todo-lists/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewToDoLists }, loadComponent: () => import('./features/todo/todo-list-page').then(m => m.TodoListPage) },
       { path: 'task-board/recurring', canActivate: [permissionGuard], data: { anyPermission: TASK_ASSIGN }, loadComponent: () => import('./features/task-board/recurring-page').then(m => m.RecurringTasksPage) },
       { path: 'task-board/stats', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskStats }, loadComponent: () => import('./features/task-board/task-stats-page').then(m => m.TaskStatsPage) },
 

@@ -31,6 +31,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
   ] },
   { key: 'tasks', title: 'المهام', groups: [
     { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'HandleUnitTasks', 'ViewTaskStats'] },
+    { key: 'todo-lists', title: 'قوائم المهام الشخصية (قوائمه هو فقط؛ البنود بصلاحية التعديل)', names: ['ViewToDoLists', 'CreateToDoList', 'EditToDoList', 'DeleteToDoList'] },
     { key: 'work-tasks', title: 'مهام العمل', names: ['ViewMyWorkTasks', 'ViewWorkTasks', 'CreateWorkTask', 'EditWorkTask', 'DeleteWorkTask'] }
   ] },
   { key: 'maintenance', title: 'الصيانة', groups: [
