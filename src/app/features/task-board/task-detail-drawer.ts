@@ -8,11 +8,15 @@ import { hasOpenModal } from '../../shared/ui/modal';
 import { ConfirmService } from '../../shared/ui/confirm.service';
 import { TaskAttachments } from './task-attachments';
 import { TaskLinks } from './task-links';
+import { AuthService } from '../../core/services/auth.service';
+import { AppPermission } from '../../core/constants/access';
+import { ToastService } from '../../shared/ui/toast.service';
+import { AddToTodoDialog } from '../todo/add-to-todo-dialog';
 import { TaskNoteDialog } from './task-note-dialog';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
-  selector: 'app-task-detail-drawer', standalone: true, imports: [CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks],
+  selector: 'app-task-detail-drawer', standalone: true, imports: [CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
   template: `
     <div class="drawer-backdrop" (click)="close.emit()"></div>
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="task-drawer-title">
@@ -152,8 +156,9 @@ import { TaskNoteDialog } from './task-note-dialog';
           </section>
         </div>
 
-        @if (t.canEdit || t.canDelete) {
+        @if (t.canEdit || t.canDelete || canTodo()) {
           <footer class="drawer-foot">
+            @if (canTodo() && !confirmDelete()) { <button type="button" class="btn btn-ghost btn-sm todo-btn" (click)="todoOpen.set(true)" title="أضف هذه المهمة كبند في إحدى قوائم مفكرتي">أضف إلى مفكرتي</button> }
             @if (confirmDelete()) {
               <span>حذف المهمة نهائياً؟</span>
               <button type="button" class="btn btn-danger btn-sm" (click)="remove()" [disabled]="busy()">تأكيد الحذف</button>
@@ -170,6 +175,9 @@ import { TaskNoteDialog } from './task-note-dialog';
         <div class="drawer-body"><p class="muted" role="status">جارٍ التحميل…</p></div>
       }
     </aside>
+    @if (todoOpen() && task(); as t) {
+      <app-add-to-todo-dialog [taskId]="t.id" [taskTitle]="t.title" (done)="todoAdded()" (close)="todoOpen.set(false)" />
+    }
     @if (returning()) {
       <app-task-note-dialog heading="إعادة المهمة للتنفيذ" [subheading]="task()?.title ?? ''" [busy]="busy()"
         (confirm)="applyStatus('InProgress', $event)" (cancel)="returning.set(false)" />
@@ -179,6 +187,8 @@ import { TaskNoteDialog } from './task-note-dialog';
 export class TaskDetailDrawer {
   private service = inject(AssignedTaskService);
   private confirm = inject(ConfirmService);
+  private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   taskId = input.required<number>();
   close = output<void>();
@@ -195,6 +205,9 @@ export class TaskDetailDrawer {
   newItem = '';
   maxChecklist = 30;
   returning = signal(false);
+  todoOpen = signal(false);
+  canTodo = () => this.auth.hasPermission(AppPermission.EditToDoList) && this.auth.hasPermission(AppPermission.ViewToDoLists);
+  todoAdded() { this.todoOpen.set(false); this.toast.success('أُضيفت المهمة إلى مفكرتي'); }
   uploading = signal(false);
   progress = signal('');
   statuses: TaskStatus[] = ['Todo', 'InProgress', 'InReview', 'Done'];

@@ -18,6 +18,7 @@
 .drawer-body h2 { font-size: 20px; line-height: 1.5; }
 .drawer-body h3 { font-size: 14px; margin: 0 0 10px; }
 .drawer-body h3 small { font-size: 11px; color: var(--ink-400); font-weight: 600; margin-inline-start: 6px; }
+.todo-btn { margin-inline-end: auto; }
 .drawer-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 13px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
