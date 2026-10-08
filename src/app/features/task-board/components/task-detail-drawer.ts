@@ -14,6 +14,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { AddToTodoDialog } from '@features/todo';
 import { TaskNoteDialog } from './task-note-dialog';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
@@ -251,11 +252,7 @@ export class TaskDetailDrawer {
   /** ينفّذ طلباً يعيد تفصيل المهمة المحدَّث */
   private run(request: Observable<AssignedTaskDetail>, after?: () => void) {
     if (this.busy()) return;
-    this.busy.set(true); this.error.set('');
-    request.subscribe({
-      next: updated => { this.busy.set(false); this.task.set(updated); this.changed.emit(); after?.(); },
-      error: e => { this.busy.set(false); this.error.set(e.message); }
-    });
+    trackRequest(request, this.busy, this.error, updated => { this.task.set(updated); this.changed.emit(); after?.(); });
   }
 
   doneCount = (t: AssignedTaskDetail) => t.checklist.filter(i => i.isDone).length;
@@ -283,11 +280,7 @@ export class TaskDetailDrawer {
     const t = this.task();
     const text = this.comment.trim();
     if (!t || !text || this.busy()) return;
-    this.busy.set(true); this.error.set('');
-    this.service.comment(t.id, text).subscribe({
-      next: updated => { this.busy.set(false); this.comment = ''; this.task.set(updated); this.changed.emit(); },
-      error: e => { this.busy.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.comment(t.id, text), this.busy, this.error, updated => { this.comment = ''; this.task.set(updated); this.changed.emit(); });
   }
 
   remove() {

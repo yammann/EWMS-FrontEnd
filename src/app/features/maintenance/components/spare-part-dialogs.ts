@@ -12,6 +12,7 @@ import { MoneyPipe, QtyPipe, UtcPipe } from '@shared/pipes/format.pipes';
 import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { trackRequest } from '@shared/ui/loader';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };
 
@@ -119,11 +120,7 @@ export class SparePartFormDialog implements OnInit {
       deviceTypeIds: [...this.typeIds()], deviceCompanyIds: [...this.companyIds()]
     };
     const p = this.part();
-    this.saving.set(true); this.error.set('');
-    (p ? this.service.updatePart(p.id, body) : this.service.createPart(body)).subscribe({
-      next: r => { this.saving.set(false); this.saved.emit(r); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest((p ? this.service.updatePart(p.id, body) : this.service.createPart(body)), this.saving, this.error, r => { this.saved.emit(r); });
   }
 }
 
@@ -290,10 +287,6 @@ export class SparePartMovements implements OnInit {
   ngOnInit() { this.load(1); }
 
   load(page: number) {
-    this.page.set(page); this.loading.set(true); this.error.set('');
-    this.service.partMovements(this.part().id, page, this.pageSize).subscribe({
-      next: r => { this.rows.set(r.items); this.total.set(r.totalCount); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    this.page.set(page); trackRequest(this.service.partMovements(this.part().id, page, this.pageSize), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
   }
 }

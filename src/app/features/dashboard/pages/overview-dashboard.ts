@@ -12,6 +12,7 @@ import { ActivityList } from '../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { trackRequest } from '@shared/ui/loader';
 
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */
 @Component({
@@ -99,10 +100,6 @@ export class OverviewDashboardPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.overview().subscribe({
-      next: d => { this.data.set(d); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.overview(), this.loading, this.error, d => { this.data.set(d); });
   }
 }

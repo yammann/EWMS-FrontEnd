@@ -9,6 +9,7 @@ import { storePageSize, storedPageSize } from '@core/utils/pagination';
 import { Pager } from '@shared/ui/pager';
 import { Icon } from '@shared/ui/icon';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 type Tone = 'green' | 'blue' | 'orange' | 'purple' | 'red';
 interface Kind { icon: string; tone: Tone; }
@@ -220,11 +221,7 @@ export class NotificationsPage {
   }
 
   markAll() {
-    this.saving.set(true); this.error.set('');
-    this.service.markAllAsRead().subscribe({
-      next: () => { this.saving.set(false); this.page.set(1); this.load(); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.markAllAsRead(), this.saving, this.error, () => { this.page.set(1); this.load(); });
   }
 
   open(n: AppNotification) {

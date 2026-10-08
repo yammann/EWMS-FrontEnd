@@ -15,6 +15,7 @@ import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 const PAGE_SIZE = 25;
 
@@ -177,17 +178,7 @@ export class MaintenanceSparePartsPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.parts({
-      search: this.searchText().trim() || undefined,
-      departmentId: this.departmentId() || null,
-      deviceTypeId: this.deviceTypeId() || null,
-      lowStock: this.lowOnly() || undefined,
-      page: this.page(), pageSize: PAGE_SIZE
-    }).subscribe({
-      next: r => { this.rows.set(r.items); this.total.set(r.totalCount); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.parts({ search: this.searchText().trim() || undefined, departmentId: this.departmentId() || null, deviceTypeId: this.deviceTypeId() || null, lowStock: this.lowOnly() || undefined, page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
   }
 
   compat(p: SparePart) {

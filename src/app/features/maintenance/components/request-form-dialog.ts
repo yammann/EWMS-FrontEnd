@@ -11,6 +11,7 @@ import { Modal } from '@shared/ui/modal';
 import { isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceFormDialog } from './device-form-dialog';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 export interface RequestLookups {
   deviceTypes: MaintenanceLookup[];
@@ -365,10 +366,6 @@ export class RequestFormDialog implements OnInit {
       accessories: v.accessories.trim(), description: v.description.trim(),
       maintenanceRequestStatusId: v.maintenanceRequestStatusId
     };
-    this.saving.set(true); this.error.set('');
-    (r ? this.service.updateRequest(r.id, body) : this.service.createRequest(body)).subscribe({
-      next: result => { this.saving.set(false); this.saved.emit(result); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest((r ? this.service.updateRequest(r.id, body) : this.service.createRequest(body)), this.saving, this.error, result => { this.saved.emit(result); });
   }
 }

@@ -1,4 +1,4 @@
-import { DestroyRef, Signal, inject, signal } from '@angular/core';
+import { DestroyRef, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable, Subject, catchError, finalize, switchMap } from 'rxjs';
 import { errorMessage } from './page-actions';
@@ -39,4 +39,16 @@ export function loader<T>(source: () => Observable<T>, initial: T, opts: { immed
   const reload = () => trigger.next();
   if (opts.immediate !== false) { loading.set(true); queueMicrotask(reload); }
   return { data: data.asReadonly(), loading: loading.asReadonly(), error: error.asReadonly(), reload };
+}
+
+/**
+ * طلب واحد بنمط الصفحات الموحّد: يرفع مؤشر الانشغال ويصفّر الخطأ، ثم يطفئ المؤشر ويستدعي next عند النجاح،
+ * وعند الفشل يطفئ المؤشر ويضع رسالة الخطأ في إشارة الصفحة. (للطلبات التي لا تستحق loader() الكامل)
+ */
+export function trackRequest<T>(source: Observable<T>, busy: WritableSignal<boolean>, error: WritableSignal<string>, next: (value: T) => void) {
+  busy.set(true); error.set('');
+  source.subscribe({
+    next: value => { busy.set(false); next(value); },
+    error: e => { busy.set(false); error.set((e as { message?: string } | null)?.message ?? ''); }
+  });
 }

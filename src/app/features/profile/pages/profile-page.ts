@@ -20,6 +20,7 @@ import { AppPermission } from '@core/constants/access';
 import { SignaturePanel } from '../components/signature-panel';
 import { formatPhone } from '@core/utils/phone';
 import { utcDate } from '@core/utils/format';
+import { trackRequest } from '@shared/ui/loader';
 
 
 /** لا تقديم بأثر رجعي، واليوم الحالي مسموح (قرار المستخدم 2026-10-04) */
@@ -128,11 +129,7 @@ export class ProfilePage {
     });
   }
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.mine().subscribe({
-      next: value => { this.vacations.set(value); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.mine(), this.loading, this.error, value => { this.vacations.set(value); });
   }
   canCancel(v: Vacation) { return v.status === 'PendingManager' || v.status === 'PendingBranchManager'; }
   cancel(v: Vacation) {
@@ -146,17 +143,12 @@ export class ProfilePage {
   submit() {
     this.form.markAllAsTouched();
     if (this.form.invalid || this.saving() || this.typesLoading() || this.typesError()) return;
-    this.saving.set(true); this.submitError.set(''); this.success.set('');
-    this.service.create(this.form.getRawValue(), this.files()).subscribe({
-      next: created => {
-        this.saving.set(false); this.form.reset(); this.preview.set(null); this.files.set([]); this.filesError.set('');
+    this.success.set('');
+    trackRequest(this.service.create(this.form.getRawValue(), this.files()), this.saving, this.submitError, created => { this.form.reset(); this.preview.set(null); this.files.set([]); this.filesError.set('');
         const v = created[0];
         this.success.set(v
           ? `تم تقديم طلب الإجازة رقم ${v.requestNumber} (أيام العمل: ${daysAr(v.vacDayCount)}). الحالة: ${v.statusAr}. يُحدَّد الدفع عند الاعتماد النهائي.`
           : 'تم تقديم طلب الإجازة');
-        this.load();
-      },
-      error: e => { this.saving.set(false); this.submitError.set(e.message); }
-    });
+        this.load(); });
   }
 }

@@ -3,6 +3,7 @@ import { MaintenanceService } from '@features/maintenance';
 import { ToastService } from '@shared/ui/toast.service';
 import { SignaturePad } from './signature-pad';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /**
  * توقيعي الإلكتروني (ManageMySignature): بطاقة بالتوقيع الحالي، و«تغيير التوقيع» يفتح لوحة الرسم/الرفع في نافذة.
@@ -87,19 +88,11 @@ export class SignaturePanel {
   open() { this.padError.set(''); this.removing.set(false); this.padOpen.set(true); }
 
   save(result: { image: string; password: string }) {
-    this.saving.set(true); this.padError.set('');
-    this.service.saveSignature(result.image, result.password).subscribe({
-      next: () => { this.saving.set(false); this.padOpen.set(false); this.current.set(result.image); this.toast.success('اعتُمد توقيعك الجديد'); },
-      error: e => { this.saving.set(false); this.padError.set(e.message); }
-    });
+    trackRequest(this.service.saveSignature(result.image, result.password), this.saving, this.padError, () => { this.padOpen.set(false); this.current.set(result.image); this.toast.success('اعتُمد توقيعك الجديد'); });
   }
 
   remove() {
     if (!this.password() || this.saving()) return;
-    this.saving.set(true); this.error.set('');
-    this.service.saveSignature(null, this.password()).subscribe({
-      next: () => { this.saving.set(false); this.removing.set(false); this.password.set(''); this.current.set(null); this.toast.success('تم حذف التوقيع'); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.saveSignature(null, this.password()), this.saving, this.error, () => { this.removing.set(false); this.password.set(''); this.current.set(null); this.toast.success('تم حذف التوقيع'); });
   }
 }

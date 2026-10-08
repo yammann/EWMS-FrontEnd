@@ -10,6 +10,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /**
  * طلب تحويل طلب صيانة (قرار المستخدم 2026-10-05) — في صفحة الطلب:
@@ -143,20 +144,12 @@ export class TransferPanel {
 
   ask() {
     if (!this.reason().trim() || this.busy()) return;
-    this.busy.set(true); this.error.set('');
-    this.service.requestTransfer(this.request().id, { reason: this.reason().trim(), suggestedUserId: this.suggested() || null }).subscribe({
-      next: () => { this.busy.set(false); this.askOpen.set(false); this.toast.success('أُرسل طلب التحويل إلى رئيس القسم'); this.changed.emit(); },
-      error: e => { this.busy.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.requestTransfer(this.request().id, { reason: this.reason().trim(), suggestedUserId: this.suggested() || null }), this.busy, this.error, () => { this.askOpen.set(false); this.toast.success('أُرسل طلب التحويل إلى رئيس القسم'); this.changed.emit(); });
   }
 
   decide(approve: boolean) {
     const t = this.pending(); if (!t || this.busy()) return;
-    this.busy.set(true); this.error.set('');
-    this.service.decideTransfer(t.id, { approve, userId: approve ? this.target() : null, note: this.note().trim() || null }).subscribe({
-      next: () => { this.busy.set(false); this.note.set(''); this.toast.success(approve ? 'نُقل الطلب' : 'رُفض طلب التحويل'); this.changed.emit(); },
-      error: e => { this.busy.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.decideTransfer(t.id, { approve, userId: approve ? this.target() : null, note: this.note().trim() || null }), this.busy, this.error, () => { this.note.set(''); this.toast.success(approve ? 'نُقل الطلب' : 'رُفض طلب التحويل'); this.changed.emit(); });
   }
 }
 

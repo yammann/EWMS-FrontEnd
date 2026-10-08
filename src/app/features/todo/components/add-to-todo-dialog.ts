@@ -4,6 +4,7 @@ import { ToDoService } from '../data-access/todo.service';
 import { ToDoList } from '../data-access/todo.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /** إضافة مهمة من لوحة المهام إلى إحدى قوائم مفكرتي كبند مرتبط بها (تُظهر حالتها وتفتحها) */
 @Component({
@@ -55,10 +56,6 @@ export class AddToTodoDialog implements OnInit {
 
   save() {
     if (this.saving() || !this.listId) return;
-    this.saving.set(true); this.error.set('');
-    this.service.addTask(this.listId, this.taskId()).subscribe({
-      next: l => { this.saving.set(false); this.done.emit(l); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.addTask(this.listId, this.taskId()), this.saving, this.error, l => { this.done.emit(l); });
   }
 }

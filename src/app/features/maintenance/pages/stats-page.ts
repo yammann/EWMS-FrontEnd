@@ -7,6 +7,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 
@@ -146,10 +147,6 @@ export class MaintenanceStatsPage {
   monthName(month: number) { return MONTHS[month - 1] ?? ''; }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.stats().subscribe({
-      next: s => { this.stats.set(s); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.stats(), this.loading, this.error, s => { this.stats.set(s); });
   }
 }

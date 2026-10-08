@@ -16,6 +16,7 @@ import { StatusChip } from '../components/maintenance-ui';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
 
@@ -148,11 +149,8 @@ export class MaintenanceSettingsPage {
 
   load() {
     const kind = this.kind();
-    this.loading.set(true); this.error.set(''); this.items.set([]);
-    this.service.lookup(kind).subscribe({
-      next: list => { if (kind === this.kind()) { this.items.set(list); this.loading.set(false); } },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    this.items.set([]);
+    trackRequest(this.service.lookup(kind), this.loading, this.error, list => { if (kind === this.kind()) { this.items.set(list); } });
   }
 
   openForm(item: MaintenanceLookup | null) {
@@ -172,11 +170,7 @@ export class MaintenanceSettingsPage {
     if (meta.color) { body.color = v.color.toUpperCase(); body.stage = v.stage; }
 
     const item = this.editing();
-    this.saving.set(true); this.formError.set('');
-    (item ? this.service.updateLookup(this.kind(), item.id, body) : this.service.createLookup(this.kind(), body)).subscribe({
-      next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
-      error: e => { this.saving.set(false); this.formError.set(e.message); }
-    });
+    trackRequest((item ? this.service.updateLookup(this.kind(), item.id, body) : this.service.createLookup(this.kind(), body)), this.saving, this.formError, () => { this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); });
   }
 
   async askDelete(item: MaintenanceLookup) {

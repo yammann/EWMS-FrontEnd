@@ -8,6 +8,7 @@ import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 /**
  * تقارير قطع الغيار (قرار المستخدم 2026-10-05 — بلا نسب التكلفة للأقسام): قيمة المخزون، أكثر القطع صرفاً في الفترة،
@@ -106,10 +107,6 @@ export class MaintenanceSparePartsReportPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.partReport({ departmentId: this.departmentId() || null, from: this.from(), to: this.to() }).subscribe({
-      next: r => { this.report.set(r); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.partReport({ departmentId: this.departmentId() || null, from: this.from(), to: this.to() }), this.loading, this.error, r => { this.report.set(r); });
   }
 }

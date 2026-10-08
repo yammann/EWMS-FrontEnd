@@ -15,6 +15,7 @@ import { Icon } from '@shared/ui/icon';
 import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from '../components/todo-list-dialog';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 type View = 'lists' | 'today';
 
@@ -239,11 +240,7 @@ export class TodoListsPage {
   reload() { this.loadLists(); this.loadToday(); }
 
   private loadLists() {
-    this.loading.set(true); this.error.set('');
-    this.service.lists().subscribe({
-      next: l => { this.lists.set(l); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.lists(), this.loading, this.error, l => { this.lists.set(l); });
   }
 
   private loadToday() { this.service.today().subscribe({ next: t => this.today.set(t), error: e => this.error.set(e.message) }); }

@@ -16,6 +16,7 @@ import { TaskCards } from '../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { trackRequest } from '@shared/ui/loader';
 
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({
@@ -114,11 +115,7 @@ export class EmployeeDashboardPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.me().subscribe({
-      next: d => { this.data.set(d); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.me(), this.loading, this.error, d => { this.data.set(d); });
     if (this.canMyTasks()) this.workTasks.my().subscribe({ next: t => this.tasks.set(t), error: () => this.tasks.set([]) });
   }
 }

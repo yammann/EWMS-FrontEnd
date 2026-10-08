@@ -12,6 +12,7 @@ import { BranchMapComponent } from '@features/map';
 import { AppPermission } from '@core/constants/access';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { trackRequest } from '@shared/ui/loader';
 
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({
@@ -120,10 +121,6 @@ export class BranchDashboardPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.branch(this.id).subscribe({
-      next: d => { this.data.set(d); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.branch(this.id), this.loading, this.error, d => { this.data.set(d); });
   }
 }

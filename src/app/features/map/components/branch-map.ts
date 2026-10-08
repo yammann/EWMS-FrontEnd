@@ -5,6 +5,7 @@ import { BranchMap, MapBranchOption, MapSite } from '@features/devices';
 import { GovernorateFeature } from '@core/utils/geo';
 import { ToastService } from '@shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
+import { trackRequest } from '@shared/ui/loader';
 
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */
 const RAMP = ['var(--map-1)', 'var(--map-2)', 'var(--map-3)', 'var(--map-4)'];
@@ -159,11 +160,7 @@ export class BranchMapComponent {
     this.branchId.set(id);
     this.focus.set(focus);
     lastView = { branchId: id, focus };
-    this.loading.set(true); this.error.set('');
-    this.service.branchMap(id).subscribe({
-      next: map => { this.data.set(map); this.loading.set(false); },
-      error: e => { this.loading.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.branchMap(id), this.loading, this.error, map => { this.data.set(map); });
   }
 
   openGovernorate(code: string) {

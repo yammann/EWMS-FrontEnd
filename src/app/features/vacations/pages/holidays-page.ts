@@ -10,6 +10,7 @@ import { PublicHoliday } from '../data-access/vacation.models';
 import { vacationDateRange } from '../utils/vacation-validators';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { trackRequest } from '@shared/ui/loader';
 
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
@@ -86,11 +87,7 @@ export class HolidaysPage {
   dayName(date: string) { return DAY_NAMES[new Date(date.slice(0, 10) + 'T00:00:00').getDay()]; }
   setYear(y: number) { this.year.set(y); this.load(); }
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.holidays(this.year()).subscribe({
-      next: v => { this.items.set(v); this.loading.set(false); },
-      error: e => { this.loading.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.holidays(this.year()), this.loading, this.error, v => { this.items.set(v); });
   }
   reset() { this.editing.set(null); this.form.reset(); }
   edit(h: PublicHoliday) {
@@ -113,10 +110,7 @@ export class HolidaysPage {
   }
   remove(h: PublicHoliday) {
     if (this.saving()) return;
-    this.saving.set(true); this.error.set(''); this.success.set('');
-    this.service.deleteHoliday(h.id).subscribe({
-      next: () => { this.saving.set(false); this.deleting.set(null); if (this.editing() === h.id) this.reset(); this.success.set('تم حذف العطلة'); this.load(); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    this.success.set('');
+    trackRequest(this.service.deleteHoliday(h.id), this.saving, this.error, () => { this.deleting.set(null); if (this.editing() === h.id) this.reset(); this.success.set('تم حذف العطلة'); this.load(); });
   }
 }

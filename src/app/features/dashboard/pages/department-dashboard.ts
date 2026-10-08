@@ -14,6 +14,7 @@ import { ActivityList, TaskCards, TaskDistributionTable } from '../components/da
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { trackRequest } from '@shared/ui/loader';
 
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
@@ -135,11 +136,7 @@ export class DepartmentDashboardPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.department(this.id).subscribe({
-      next: d => { this.data.set(d); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.department(this.id), this.loading, this.error, d => { this.data.set(d); });
     if (this.isOwn()) this.tasks.my().subscribe({ next: t => this.myTasks.set(t), error: () => this.myTasks.set([]) });
   }
 }

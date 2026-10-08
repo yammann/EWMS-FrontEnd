@@ -11,6 +11,7 @@ import { Branch } from '@core/models/ewms.models';
 import { ActionsTable, CountBars, VacationRows } from '@features/dashboard';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /**
  * إحصائيات الإجازات للرؤساء — صفحة مستقلة عن لوحة المتابعة (الإجازات ميزة واحدة من التطبيق).
@@ -98,10 +99,6 @@ export class VacationStatsPage {
   selectBranch(id: number) { this.branchId.set(id); this.load(); }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.vacations(this.branchId() || null).subscribe({
-      next: d => { this.data.set(d); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.vacations(this.branchId() || null), this.loading, this.error, d => { this.data.set(d); });
   }
 }

@@ -18,6 +18,7 @@ import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 const PAGE_SIZE = 50;
 
@@ -277,11 +278,7 @@ export class InstallationsPage {
   goTo(page: number) { this.page.set(page); this.load(); }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.installations({ ...this.filter(), page: this.page(), pageSize: PAGE_SIZE }).subscribe({
-      next: r => { this.rows.set(r.items); this.total.set(r.totalCount); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.installations({ ...this.filter(), page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
   }
 
   export() {
@@ -342,10 +339,6 @@ export class InstallationsPage {
       macAddress: v.macAddress.trim(), port: v.port.trim(), vlan: v.vlan ? Number(v.vlan) : null, firmware: v.firmware.trim(),
       installDate: v.installDate || null, status: Number(v.status) as InstallationStatus, rowVersion: i?.rowVersion ?? null
     };
-    this.saving.set(true); this.formError.set('');
-    (i ? this.service.updateInstallation(i.id, body) : this.service.createInstallation(body)).subscribe({
-      next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
-      error: e => { this.saving.set(false); this.formError.set(e.message); }
-    });
+    trackRequest((i ? this.service.updateInstallation(i.id, body) : this.service.createInstallation(body)), this.saving, this.formError, () => { this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); });
   }
 }

@@ -16,6 +16,7 @@ import { DeviceHistory } from '../components/device-ui';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */
 @Component({
@@ -150,11 +151,7 @@ export class SitesPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.sites().subscribe({
-      next: sites => { this.sites.set(sites); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.sites(), this.loading, this.error, sites => { this.sites.set(sites); });
   }
 
   openForm(s: Site | null) {
@@ -185,11 +182,7 @@ export class SitesPage {
       contactName: (v.contactName ?? '').trim(), contactPhone: normalizePhone(v.contactPhone ?? ''), responsibleParty: (v.responsibleParty ?? '').trim(),
       rowVersion: s?.rowVersion ?? null
     };
-    this.saving.set(true); this.formError.set('');
-    (s ? this.service.updateSite(s.id, body) : this.service.createSite(body)).subscribe({
-      next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
-      error: e => { this.saving.set(false); this.formError.set(e.message); }
-    });
+    trackRequest((s ? this.service.updateSite(s.id, body) : this.service.createSite(body)), this.saving, this.formError, () => { this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); });
   }
 
 }

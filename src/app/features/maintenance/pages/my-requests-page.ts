@@ -12,6 +12,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 /**
  * «أجهزتي في الصيانة» (ViewMyMaintenanceRequests): طلبات الصيانة التي أنا عميلها — للمتابعة فقط.
@@ -72,10 +73,6 @@ export class MaintenanceMyRequestsPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.myRequests().subscribe({
-      next: list => { this.items.set(list); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.myRequests(), this.loading, this.error, list => { this.items.set(list); });
   }
 }

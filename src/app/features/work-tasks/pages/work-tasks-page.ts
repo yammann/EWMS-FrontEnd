@@ -13,6 +13,7 @@ import { roleLabel } from '@core/utils/roles';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧', '📁', '🧮', '🗂️', '📞'];
 
@@ -175,11 +176,7 @@ export class WorkTasksPage {
   }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.getAll().subscribe({
-      next: t => { this.tasks.set(t); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.getAll(), this.loading, this.error, t => { this.tasks.set(t); });
   }
 
   assigneeNames(t: WorkTask) { return t.assignees.map(a => a.fullName).join('، '); }
@@ -238,10 +235,7 @@ export class WorkTasksPage {
 
   remove(t: WorkTask) {
     if (this.saving()) return;
-    this.saving.set(true); this.error.set(''); this.success.set('');
-    this.service.delete(t.id).subscribe({
-      next: () => { this.saving.set(false); this.deleting.set(null); if (this.editing() === t.id) this.reset(); this.success.set('تم حذف المهمة'); this.load(); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    this.success.set('');
+    trackRequest(this.service.delete(t.id), this.saving, this.error, () => { this.deleting.set(null); if (this.editing() === t.id) this.reset(); this.success.set('تم حذف المهمة'); this.load(); });
   }
 }

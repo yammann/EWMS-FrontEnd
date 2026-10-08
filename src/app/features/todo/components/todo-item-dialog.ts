@@ -4,6 +4,7 @@ import { ToDoService } from '../data-access/todo.service';
 import { TODO_LIMITS, TODO_REPEAT_LABEL, TODO_REPEAT_VALUE, ToDoItem, ToDoList } from '../data-access/todo.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /** تعديل بند: العنوان والملاحظة والموعد والتكرار والأهمية (المهمة المرتبطة تُعرض للاطلاع) */
 @Component({
@@ -72,10 +73,6 @@ export class TodoItemDialog implements OnInit {
       ...(this.due ? { dueDate: this.due } : i.dueDate ? { clearDueDate: true } : {}),
       repeat: this.due ? TODO_REPEAT_VALUE[this.repeat] : 0
     };
-    this.saving.set(true); this.error.set('');
-    this.service.updateItem(i.id, change).subscribe({
-      next: l => { this.saving.set(false); this.saved.emit(l); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.updateItem(i.id, change), this.saving, this.error, l => { this.saved.emit(l); });
   }
 }

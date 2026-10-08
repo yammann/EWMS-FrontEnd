@@ -12,6 +12,7 @@ import { DeviceHistory } from '../components/device-ui';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
@@ -117,11 +118,7 @@ export class DevicesCatalogPage {
   constructor() { this.load(); }
 
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.devices().subscribe({
-      next: devices => { this.devices.set(devices); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.devices(), this.loading, this.error, devices => { this.devices.set(devices); });
   }
 
   openForm(d: Device | null) {
@@ -148,11 +145,7 @@ export class DevicesCatalogPage {
       name: v.name.trim(), model: v.model.trim(), description: v.description.trim(), category: v.category.trim(), manufacturer: v.manufacturer.trim(),
       rowVersion: d?.rowVersion ?? null
     };
-    this.saving.set(true); this.formError.set('');
-    (d ? this.service.updateDevice(d.id, body) : this.service.createDevice(body)).subscribe({
-      next: () => { this.saving.set(false); this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); },
-      error: e => { this.saving.set(false); this.formError.set(e.message); }
-    });
+    trackRequest((d ? this.service.updateDevice(d.id, body) : this.service.createDevice(body)), this.saving, this.formError, () => { this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); });
   }
 
 }

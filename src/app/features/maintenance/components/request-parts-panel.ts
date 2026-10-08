@@ -9,6 +9,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
 import { UtcPipe, MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /**
  * قطع الغيار المصروفة على طلب الصيانة: الصرف من مخزون قسم الطلب (المتوافقة مع الجهاز أولاً)، والإرجاع للمخزون،
@@ -157,15 +158,9 @@ export class RequestPartsPanel {
   issue() {
     const s = this.selected();
     if (!s || this.quantityError() || this.busy()) return;
-    this.busy.set(true); this.issueError.set('');
-    this.service.issuePart(this.request().id, { sparePartId: s.id, quantity: this.quantity() }).subscribe({
-      next: d => {
-        this.busy.set(false); this.issueOpen.set(false); this.data.set(d);
+    trackRequest(this.service.issuePart(this.request().id, { sparePartId: s.id, quantity: this.quantity() }), this.busy, this.issueError, d => { this.issueOpen.set(false); this.data.set(d);
         this.toast.success(`صُرف ${qty(this.quantity())} ${s.unit} من «${s.name}»`);
-        this.changed.emit();
-      },
-      error: e => { this.busy.set(false); this.issueError.set(e.message); }
-    });
+        this.changed.emit(); });
   }
 
   async returnPart(p: RequestPart) {

@@ -4,6 +4,7 @@ import { ToDoService } from '../data-access/todo.service';
 import { TODO_COLORS, TODO_ICONS, TODO_LIMITS, ToDoList } from '../data-access/todo.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /** نافذة إنشاء قائمة أو تعديلها: الاسم والوصف واللون والرمز */
 @Component({
@@ -79,10 +80,6 @@ export class TodoListDialog implements OnInit {
     if (this.saving() || !this.name.trim()) return;
     const body = { name: this.name.trim(), description: this.description.trim(), color: this.color, icon: this.icon.trim() };
     const l = this.list();
-    this.saving.set(true); this.error.set('');
-    (l ? this.service.update(l.id, body) : this.service.create(body)).subscribe({
-      next: saved => { this.saving.set(false); this.saved.emit(saved); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest((l ? this.service.update(l.id, body) : this.service.create(body)), this.saving, this.error, saved => { this.saved.emit(saved); });
   }
 }

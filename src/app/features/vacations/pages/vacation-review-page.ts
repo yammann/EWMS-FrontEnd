@@ -14,6 +14,7 @@ import { Vacation } from '../data-access/vacation.models';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 @Component({
   selector: 'app-vacation-review', standalone: true, imports: [PageHeader, EmptyState, Alert, CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
@@ -102,20 +103,12 @@ export class VacationReviewPage {
     });
   }
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.pending().subscribe({
-      next: v => { this.items.set(v); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    trackRequest(this.service.pending(), this.loading, this.error, v => { this.items.set(v); });
   }
   choose(v: Vacation, approve: boolean) { this.selected.set(v); this.approving.set(approve); this.form.reset(); this.error.set(''); this.success.set(''); }
   submit() {
     const v = this.selected();
     if (!v || this.saving() || this.form.invalid) return;
-    this.saving.set(true); this.error.set('');
-    this.service.approve(v.id, this.approving(), this.form.getRawValue().reason).subscribe({
-      next: result => { this.saving.set(false); this.selected.set(null); this.success.set(result.message); this.load(); if (this.teamLoaded) this.loadTeam(); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.approve(v.id, this.approving(), this.form.getRawValue().reason), this.saving, this.error, result => { this.selected.set(null); this.success.set(result.message); this.load(); if (this.teamLoaded) this.loadTeam(); });
   }
 }

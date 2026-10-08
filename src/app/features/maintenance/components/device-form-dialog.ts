@@ -4,6 +4,7 @@ import { MaintenanceService } from '../data-access/maintenance.service';
 import { MaintenanceDevice, MaintenanceLookup } from '../data-access/maintenance.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /** مقارنة الرقمين بعد حذف الفراغات وبلا تمييز لحالة الأحرف (الباكاند يعامل الرقم كذلك) */
 const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim().toUpperCase();
@@ -125,10 +126,6 @@ export class DeviceFormDialog implements OnInit {
       deviceTypeId: v.deviceTypeId, deviceCompanyId: v.deviceCompanyId
     };
     const d = this.device();
-    this.saving.set(true); this.error.set('');
-    (d ? this.service.updateDevice(d.id, body) : this.service.createDevice(body)).subscribe({
-      next: result => { this.saving.set(false); this.saved.emit(result); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest((d ? this.service.updateDevice(d.id, body) : this.service.createDevice(body)), this.saving, this.error, result => { this.saved.emit(result); });
   }
 }

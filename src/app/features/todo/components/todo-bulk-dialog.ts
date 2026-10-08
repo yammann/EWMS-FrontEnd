@@ -4,6 +4,7 @@ import { ToDoService } from '../data-access/todo.service';
 import { TODO_LIMITS, ToDoList } from '../data-access/todo.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
+import { trackRequest } from '@shared/ui/loader';
 
 /** إضافة عدة بنود دفعة واحدة: كل سطر بند (يناسب لصق نص منسوخ من رسالة أو محضر) */
 @Component({
@@ -52,10 +53,6 @@ export class TodoBulkDialog implements OnInit {
 
   save() {
     if (this.saving() || !this.titles().length) return;
-    this.saving.set(true); this.error.set('');
-    this.service.bulkAdd(this.list().id, this.titles()).subscribe({
-      next: l => { this.saving.set(false); this.saved.emit(l); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.bulkAdd(this.list().id, this.titles()), this.saving, this.error, l => { this.saved.emit(l); });
   }
 }

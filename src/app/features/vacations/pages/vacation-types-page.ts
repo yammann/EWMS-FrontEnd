@@ -9,6 +9,7 @@ import { VacationType } from '../data-access/vacation.models';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
+import { trackRequest } from '@shared/ui/loader';
 
 @Component({
   selector: 'app-vacation-types', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager],
@@ -55,8 +56,7 @@ export class VacationTypesPage {
   form = inject(FormBuilder).nonNullable.group({ name: ['', [Validators.required, Validators.maxLength(100)]], description: ['', Validators.maxLength(500)], isPaid: [true] });
   constructor() { this.load(); }
   load() {
-    this.loading.set(true); this.error.set('');
-    this.service.types().subscribe({ next: v => { this.items.set(v); this.loading.set(false); }, error: e => { this.loading.set(false); this.error.set(e.message); } });
+    trackRequest(this.service.types(), this.loading, this.error, v => { this.items.set(v); });
   }
   reset() { this.editing.set(null); this.form.reset(); }
   edit(v: VacationType) { this.editing.set(v.id); this.form.patchValue(v); }
@@ -73,10 +73,7 @@ export class VacationTypesPage {
   }
   remove(v: VacationType) {
     if (this.saving()) return;
-    this.saving.set(true); this.error.set(''); this.success.set('');
-    this.service.deleteType(v.id).subscribe({
-      next: () => { this.saving.set(false); this.deleting.set(null); if (this.editing() === v.id) this.reset(); this.success.set('تم حذف النوع'); this.load(); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
+    this.success.set('');
+    trackRequest(this.service.deleteType(v.id), this.saving, this.error, () => { this.deleting.set(null); if (this.editing() === v.id) this.reset(); this.success.set('تم حذف النوع'); this.load(); });
   }
 }

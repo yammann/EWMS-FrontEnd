@@ -8,6 +8,7 @@ import { Pager } from '@shared/ui/pager';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { trackRequest } from '@shared/ui/loader';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)
@@ -124,11 +125,7 @@ export class DeviceHistory implements OnInit {
   ngOnInit() { this.load(1); }
 
   load(page: number) {
-    this.page.set(page); this.loading.set(true); this.error.set('');
-    this.service.history(this.kind(), this.entityId(), page).subscribe({
-      next: r => { this.items.set(r.items); this.total.set(r.totalCount); this.loading.set(false); },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
-    });
+    this.page.set(page); trackRequest(this.service.history(this.kind(), this.entityId(), page), this.loading, this.error, r => { this.items.set(r.items); this.total.set(r.totalCount); });
   }
 }
 
@@ -221,10 +218,6 @@ export class InstallationsImport {
   private send(dryRun: boolean) {
     const file = this.file();
     if (!file) return;
-    this.busy.set(true); this.error.set('');
-    this.service.importInstallations(file, dryRun).subscribe({
-      next: r => { this.busy.set(false); this.report.set(r); if (!dryRun) this.imported.emit(r.imported); },
-      error: e => { this.busy.set(false); this.error.set(e.message); }
-    });
+    trackRequest(this.service.importInstallations(file, dryRun), this.busy, this.error, r => { this.report.set(r); if (!dryRun) this.imported.emit(r.imported); });
   }
 }
