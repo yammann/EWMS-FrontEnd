@@ -1,6 +1,6 @@
 import { Injectable, NgZone, inject, signal } from '@angular/core';
 import { Subject, Subscription, interval, tap, catchError, EMPTY } from 'rxjs';
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
+import type { HubConnection } from '@microsoft/signalr';
 import { ApiService } from '@core/services/api.service';
 import { AppNotification } from '@core/models/notification.models';
 import { PagedResult } from '@core/models/paged-result.model';
@@ -21,6 +21,8 @@ export class NotificationService {
   private api = inject(ApiService);
   private zone = inject(NgZone);
   private hub?: HubConnection;
+  /** SignalR (~70KB) يُحمَّل عند أول بدء اتصال فقط — خارج الحزمة الأولى (صفحة الدخول لا تحتاجه) */
+  private starting = false;
   private polling?: Subscription;
 
   unreadCount = signal(0);
@@ -56,8 +58,13 @@ export class NotificationService {
   /* =====================================================
    * الاتصال اللحظي
    * ===================================================== */
-  start(accessToken: () => string) {
-    if (this.hub) return;
+  async start(accessToken: () => string) {
+    if (this.hub || this.starting) return;
+    this.starting = true;
+    const { HubConnectionBuilder, HubConnectionState, LogLevel } = await import('@microsoft/signalr');
+    // أُوقفت الخدمة (تسجيل خروج) أثناء تحميل المكتبة
+    if (!this.starting) return;
+    this.starting = false;
 
     this.hub = new HubConnectionBuilder()
       .withUrl(HUB_URL, { accessTokenFactory: accessToken })
@@ -81,6 +88,7 @@ export class NotificationService {
   }
 
   stop() {
+    this.starting = false;
     this.polling?.unsubscribe();
     this.polling = undefined;
     this.hub?.stop();

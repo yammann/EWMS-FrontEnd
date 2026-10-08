@@ -5,7 +5,7 @@ import { APPROVE_VACATIONS, AppPermission, MANAGE_VACATION_TYPES, VACATION_STATS
 /** نموذج طلب الإجازة الورقي — خارج الإطار العام */
 export const VACATION_PRINT_ROUTES: Routes = [
   {
-    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation, back: '/profile' },
+    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation, back: '/profile', noPreload: true },
     loadComponent: () => import('./pages/vacation-print-page').then(m => m.VacationPrintPage)
   }
 ];

@@ -5,7 +5,7 @@ import { AppPermission, MANAGE_MAINTENANCE_LOOKUPS } from '@core/constants/acces
 /** صفحة طباعة خارج الإطار العام (بلا سايدبار): إيصال استلام / ورقة تسليم طلب صيانة */
 export const MAINTENANCE_PRINT_ROUTES: Routes = [
   {
-    path: 'maintenance/print/:id/:kind', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests, back: '/maintenance/requests' },
+    path: 'maintenance/print/:id/:kind', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests, back: '/maintenance/requests', noPreload: true },
     loadComponent: () => import('./pages/request-print-page').then(m => m.MaintenancePrintPage)
   }
 ];

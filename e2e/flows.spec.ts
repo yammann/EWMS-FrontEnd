@@ -96,3 +96,20 @@ test('الفروع: إنشاء فرع يظهر فوراً (إبطال التخز
   await page.getByRole('button', { name: /^(حذف|تأكيد|نعم)/ }).last().click();
   await expect(page.getByText(name)).toHaveCount(0);
 });
+
+// مخرج closed في النوافذ: الربط الخاطئ يُترجَم إلى مستمع DOM صامت بلا خطأ بناء، فنختبره فعلياً
+test('المهام الدورية: نافذة القالب تُفتح وتُغلق بـ Esc (ربط مخرج closed)', async ({ page }) => {
+  await page.goto('/task-board/recurring');
+  await page.getByRole('button', { name: '+ قالب' }).click();
+  await expect(page.locator('app-template-dialog')).toHaveCount(1);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('app-template-dialog')).toHaveCount(0);
+});
+
+test('مفكرتي: نافذة قائمة جديدة تُغلق بزر الإلغاء', async ({ page }) => {
+  await page.goto('/todo-lists');
+  await page.getByRole('button', { name: '+ قائمة جديدة' }).click();
+  await expect(page.getByPlaceholder('مثال: مهام الأسبوع')).toBeVisible();
+  await page.locator('app-todo-list-dialog').getByRole('button', { name: 'إلغاء' }).click();
+  await expect(page.locator('app-todo-list-dialog')).toHaveCount(0);
+});

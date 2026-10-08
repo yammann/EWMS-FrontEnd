@@ -31,5 +31,7 @@
 </section>
 
 @if (padOpen()) {
-  <app-signature-pad [busy]="saving()" [error]="padError()" (accepted)="save($event)" (closed)="padOpen.set(false)" />
+  @defer {
+    <app-signature-pad [busy]="saving()" [error]="padError()" (accepted)="save($event)" (closed)="padOpen.set(false)" />
+  }
 }
