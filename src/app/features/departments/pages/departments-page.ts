@@ -11,11 +11,8 @@ import { LookupsService } from '@core/services/lookups.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
-import { ToastService } from '@shared/ui/toast.service';
-import { ConfirmService } from '@shared/ui/confirm.service';
 import { PageActions } from '@shared/ui/page-actions';
-
-type ModalType = 'create' | 'edit';
+import { ModalCrud } from '@shared/ui/modal-crud';
 
 @Component({
   selector: 'app-departments-page',
@@ -29,14 +26,10 @@ export class DepartmentsPage {
   private lookups = inject(LookupsService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
-  private toast = inject(ToastService);
-  private confirm = inject(ConfirmService);
 
   departments = signal<Department[]>([]);
   pager = new Pagination(() => this.departments());
   branches = signal<Branch[]>([]);
-  selectedDepartment = signal<Department | null>(null);
-  activeModal = signal<ModalType | null>(null);
   private actions = new PageActions(() => this.load(true));
   saving = this.actions.saving;
 
@@ -55,6 +48,16 @@ export class DepartmentsPage {
   canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateDepartment));
   canEdit = computed(() => this.auth.hasPermission(AppPermission.EditDepartment));
   canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteDepartment));
+
+  crud = new ModalCrud({
+    actions: this.actions, noun: 'القسم', plural: 'الأقسام',
+    titles: { create: 'إنشاء قسم جديد', edit: 'تعديل القسم' },
+    can: { create: this.canCreate, edit: this.canEdit, delete: this.canDelete },
+    forms: { create: this.createForm, edit: this.editForm },
+    toEditValue: (d: Department) => ({ name: d.name, description: d.description, branchId: String(d.branchId) }),
+    toBody: v => { const f = new FormData(); f.append('Name', v.name ?? ''); f.append('Description', v.description ?? ''); f.append('BranchId', v.branchId ?? ''); return f; },
+    service: this.departmentService
+  });
 
   stats = computed(() => {
     const departments = this.departments();
@@ -84,107 +87,6 @@ export class DepartmentsPage {
 
   /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
   load(force = false) { this.force = force; this.data.reload(); }
-
-  /* =====================================================
-   * Modal control
-   * ===================================================== */
-  openCreate() {
-    if (!this.canCreate()) {
-      this.toast.show('لا تملك صلاحية إدارة الأقسام', 'error');
-      return;
-    }
-
-    this.selectedDepartment.set(null);
-    this.createForm.reset();
-    this.activeModal.set('create');
-  }
-
-  openEdit(department: Department) {
-    if (!this.canEdit()) {
-      this.toast.show('لا تملك صلاحية إدارة الأقسام', 'error');
-      return;
-    }
-
-    this.selectedDepartment.set(department);
-    this.editForm.patchValue({
-      name: department.name,
-      description: department.description,
-      branchId: String(department.branchId)
-    });
-    this.activeModal.set('edit');
-  }
-
-  closeModal() {
-    this.activeModal.set(null);
-  }
-
-  modalTitle(type: ModalType): string {
-    return type === 'create' ? 'إنشاء قسم جديد' : 'تعديل القسم';
-  }
-
-  /* =====================================================
-   * CRUD actions
-   * ===================================================== */
-  create() {
-    if (this.createForm.invalid) return;
-
-    const form = new FormData();
-    form.append('Name', this.createForm.value.name ?? '');
-    form.append('Description', this.createForm.value.description ?? '');
-    form.append('BranchId', this.createForm.value.branchId ?? '');
-
-    this.actions.run(
-      'create',
-      this.departmentService.create(form),
-      'تم إنشاء القسم بنجاح',
-      () => {
-        this.createForm.reset();
-        this.closeModal();
-      }
-    );
-  }
-
-  update() {
-    const department = this.selectedDepartment();
-    if (!department || this.editForm.invalid) return;
-
-    const form = new FormData();
-    form.append('Name', this.editForm.value.name ?? '');
-    form.append('Description', this.editForm.value.description ?? '');
-    form.append('BranchId', this.editForm.value.branchId ?? '');
-
-    this.actions.run(
-      'edit',
-      this.departmentService.update(department.id, form),
-      'تم تعديل القسم بنجاح',
-      () => this.closeModal()
-    );
-  }
-
-  deleteDepartment(department: Department) {
-    if (!this.canDelete()) {
-      this.toast.show('لا تملك صلاحية حذف الأقسام', 'error');
-      return;
-    }
-
-    this.confirm.ask(
-      `هل أنت متأكد من حذف القسم "${department.name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
-      'تأكيد الحذف'
-    ).then(confirmed => { if (confirmed) this.performDelete(department); });
-  }
-
-  private performDelete(department: Department) {
-    this.actions.run(
-      `delete-${department.id}`,
-      this.departmentService.delete(department.id),
-      'تم حذف القسم بنجاح',
-      () => {
-        if (this.selectedDepartment()?.id === department.id) {
-          this.selectedDepartment.set(null);
-        }
-      }
-    );
-  }
 
   /* =====================================================
    * Helpers

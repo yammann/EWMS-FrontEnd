@@ -11,11 +11,8 @@ import { LookupsService } from '@core/services/lookups.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
-import { ToastService } from '@shared/ui/toast.service';
-import { ConfirmService } from '@shared/ui/confirm.service';
 import { PageActions } from '@shared/ui/page-actions';
-
-type ModalType = 'create' | 'edit';
+import { ModalCrud } from '@shared/ui/modal-crud';
 
 /** المكاتب: زر «مكتب جديد» ونافذة منبثقة للإضافة والتعديل — نفس نمط صفحة الأقسام */
 @Component({
@@ -30,8 +27,6 @@ export class OfficesPage {
   private service = inject(OfficeService);
   private lookups = inject(LookupsService);
   private fb = inject(FormBuilder);
-  private toast = inject(ToastService);
-  private confirm = inject(ConfirmService);
 
   /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والأزرار تظهر حسب الإضافة/التعديل/الحذف */
   can = computed(() => ({
@@ -43,8 +38,6 @@ export class OfficesPage {
   items = signal<Office[]>([]);
   pager = new Pagination(() => this.items());
   departments = signal<Department[]>([]);
-  selected = signal<Office | null>(null);
-  activeModal = signal<ModalType | null>(null);
   private actions = new PageActions(() => this.load(true));
   saving = this.actions.saving;
 
@@ -60,6 +53,23 @@ export class OfficesPage {
     departmentId: ['', Validators.required]
   });
 
+  crud = new ModalCrud({
+    actions: this.actions, noun: 'المكتب', plural: 'المكاتب',
+    titles: { create: 'إنشاء مكتب جديد', edit: 'تعديل المكتب' },
+    can: { create: computed(() => this.can().create), edit: computed(() => this.can().edit), delete: computed(() => this.can().delete) },
+    forms: { create: this.createForm, edit: this.editForm },
+    createDefaults: { name: '', description: '', departmentId: '' },
+    toEditValue: (o: Office) => ({ name: o.name, description: o.description ?? '', departmentId: String(o.departmentId) }),
+    validate: v => (v.name ?? '').trim().length < 2 ? 'أدخل اسماً صحيحاً للمكتب' : null,
+    toBody: v => {
+      const f = new FormData();
+      f.append('Name', (v.name ?? '').trim()); f.append('Description', (v.description ?? '').trim()); f.append('DepartmentId', v.departmentId ?? '');
+      return f;
+    },
+    deleteWarning: 'لا يمكن حذف مكتب مرتبط بموظفين',
+    service: this.service
+  });
+
   /* =====================================================
    * Data loading
    * ===================================================== */
@@ -73,84 +83,4 @@ export class OfficesPage {
   /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
   load(force = false) { this.force = force; this.data.reload(); }
 
-  /* =====================================================
-   * Modal control
-   * ===================================================== */
-  openCreate() {
-    if (!this.can().create) {
-      this.toast.show('لا تملك صلاحية إضافة المكاتب', 'error');
-      return;
-    }
-    this.selected.set(null);
-    this.createForm.reset({ name: '', description: '', departmentId: '' });
-    this.activeModal.set('create');
-  }
-
-  openEdit(office: Office) {
-    if (!this.can().edit) {
-      this.toast.show('لا تملك صلاحية تعديل المكاتب', 'error');
-      return;
-    }
-    this.selected.set(office);
-    this.editForm.patchValue({
-      name: office.name,
-      description: office.description ?? '',
-      departmentId: String(office.departmentId)
-    });
-    this.activeModal.set('edit');
-  }
-
-  closeModal() { this.activeModal.set(null); }
-
-  modalTitle(type: ModalType): string {
-    return type === 'create' ? 'إنشاء مكتب جديد' : 'تعديل المكتب';
-  }
-
-  /* =====================================================
-   * CRUD actions
-   * ===================================================== */
-  create() {
-    if (this.createForm.invalid) return;
-    const v = this.createForm.getRawValue();
-    if ((v.name ?? '').trim().length < 2) { this.toast.show('أدخل اسماً صحيحاً للمكتب', 'error'); return; }
-
-    this.actions.run('create', this.service.create(this.body(v)), 'تم إنشاء المكتب بنجاح', () => {
-      this.createForm.reset();
-      this.closeModal();
-    });
-  }
-
-  update() {
-    const office = this.selected();
-    if (!office || this.editForm.invalid) return;
-    const v = this.editForm.getRawValue();
-    if ((v.name ?? '').trim().length < 2) { this.toast.show('أدخل اسماً صحيحاً للمكتب', 'error'); return; }
-
-    this.actions.run('edit', this.service.update(office.id, this.body(v)), 'تم تعديل المكتب بنجاح', () => this.closeModal());
-  }
-
-  deleteOffice(office: Office) {
-    if (!this.can().delete) {
-      this.toast.show('لا تملك صلاحية حذف المكاتب', 'error');
-      return;
-    }
-    this.confirm.ask(
-      `هل أنت متأكد من حذف المكتب "${office.name}"؟ لا يمكن حذف مكتب مرتبط بموظفين، ولا يمكن التراجع عن هذا الإجراء.`,
-      'تأكيد الحذف'
-    ).then(confirmed => { if (confirmed) this.performDelete(office); });
-  }
-
-  private performDelete(office: Office) {
-    this.actions.run(`delete-${office.id}`, this.service.delete(office.id), 'تم حذف المكتب بنجاح', () => {
-      if (this.selected()?.id === office.id) this.selected.set(null);
-    });
-  }
-
-  private body(v: { name: string | null; description: string | null; departmentId: string | null }) {
-    const form = new FormData();
-    form.append('Name', (v.name ?? '').trim());
-    form.append('Description', (v.description ?? '').trim());
-    form.append('DepartmentId', v.departmentId ?? '');
-    return form;
-  }
 }
