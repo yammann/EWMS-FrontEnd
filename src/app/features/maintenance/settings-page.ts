@@ -15,6 +15,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { StatusChip } from './maintenance-ui';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
 
@@ -23,16 +24,14 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
  * أنواع الأجهزة، الشركات المصنّعة، أنواع الأعطال، وحالات الطلب (بألوانها، وهي أعمدة لوحة الحالات).
  */
 @Component({
-  selector: 'app-maintenance-settings-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager],
+  selector: 'app-maintenance-settings-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة</span><h1>إعدادات الصيانة</h1><p class="muted">القوائم المستخدمة في طلبات الصيانة</p></div>
-        <div class="header-actions">
-          @if (can().createLookup) { <button class="btn" type="button" (click)="openForm(null)">+ {{ meta().single }}</button> }
-        </div>
-      </header>
+      <app-page-header eyebrow="الصيانة" heading="إعدادات الصيانة" subtitle="القوائم المستخدمة في طلبات الصيانة">
+  
+            @if (can().createLookup) { <button class="btn" type="button" (click)="openForm(null)">+ {{ meta().single }}</button> }
+      </app-page-header>
 
       <nav class="segmented" role="tablist" aria-label="القائمة">
         @for (k of kinds; track k) {

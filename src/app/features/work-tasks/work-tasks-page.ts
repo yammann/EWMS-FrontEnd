@@ -11,19 +11,19 @@ import { WorkTask } from '@core/models/work-task.models';
 import { roleLabel } from '@core/utils/roles';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧', '📁', '🧮', '🗂️', '📞'];
 
 /** إدارة مهام العمل لكل فرع وإسنادها لموظفيه (ManageWorkTasks — السوبر ادمن) */
 @Component({
-  selector: 'app-work-tasks-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, Pager],
+  selector: 'app-work-tasks-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الإدارة</span><h1>مهام العمل</h1><p class="muted">المهام الدورية لكل فرع (مثل إدارة المخزن) ومن المسؤول عنها. تظهر كبطاقات في لوحات المتابعة.</p></div>
+      <app-page-header eyebrow="الإدارة" heading="مهام العمل" subtitle="المهام الدورية لكل فرع (مثل إدارة المخزن) ومن المسؤول عنها. تظهر كبطاقات في لوحات المتابعة.">
         <button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button>
-      </header>
+      </app-page-header>
 
       <app-alert [message]="error()" />
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }

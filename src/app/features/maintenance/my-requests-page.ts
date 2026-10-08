@@ -11,20 +11,20 @@ import { StatusChip } from './maintenance-ui';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 /**
  * «أجهزتي في الصيانة» (ViewMyMaintenanceRequests): طلبات الصيانة التي أنا عميلها — للمتابعة فقط.
  * إشعار تغيّر الحالة يفتح الصفحة على الطلب (?request=ID) ويُبرزه.
  */
 @Component({
-  selector: 'app-my-maintenance-requests', standalone: true, imports: [EmptyState, Alert, UtcPipe, DatePipe, StatusChip, Pager],
+  selector: 'app-my-maintenance-requests', standalone: true, imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, StatusChip, Pager],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة</span><h1>أجهزتي في الصيانة</h1><p class="muted">أجهزتك التي سُلّمت لقسم الصيانة وحالتها — يصلك إشعار عند كل تغيير</p></div>
-        <div class="header-actions"><button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button></div>
-      </header>
+      <app-page-header eyebrow="الصيانة" heading="أجهزتي في الصيانة" subtitle="أجهزتك التي سُلّمت لقسم الصيانة وحالتها — يصلك إشعار عند كل تغيير">
+  <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 

@@ -17,6 +17,7 @@ import { DeviceHistory, DevicePassword, InstallStatus, InstallationsImport } fro
 import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 const PAGE_SIZE = 50;
 
@@ -33,21 +34,19 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-installations-page', standalone: true,
-  imports: [EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
+  imports: [PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">توثيق الأجهزة</span><h1>تركيبات الأجهزة</h1><p class="muted">الأجهزة المركّبة في مواقع المؤسسة وبيانات الاتصال بها</p></div>
-        <div class="header-actions">
-          @if (access().canCreate) {
-            <button class="btn" type="button" (click)="openForm(null)" [disabled]="!devices().length || !sites().length">+ تركيب جديد</button>
-            <button class="btn btn-ghost" type="button" (click)="importOpen.set(true)">استيراد Excel</button>
-          }
-          <button class="btn btn-ghost" type="button" (click)="export()" [disabled]="exporting() || !total()">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button>
-          <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="توثيق الأجهزة" heading="تركيبات الأجهزة" subtitle="الأجهزة المركّبة في مواقع المؤسسة وبيانات الاتصال بها">
+  
+            @if (access().canCreate) {
+              <button class="btn" type="button" (click)="openForm(null)" [disabled]="!devices().length || !sites().length">+ تركيب جديد</button>
+              <button class="btn btn-ghost" type="button" (click)="importOpen.set(true)">استيراد Excel</button>
+            }
+            <button class="btn btn-ghost" type="button" (click)="export()" [disabled]="exporting() || !total()">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button>
+            <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 

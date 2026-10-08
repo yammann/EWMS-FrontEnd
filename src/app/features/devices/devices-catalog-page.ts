@@ -11,20 +11,19 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { DeviceHistory } from './device-ui';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
-  selector: 'app-devices-catalog-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
+  selector: 'app-devices-catalog-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">توثيق الأجهزة</span><h1>الأجهزة</h1><p class="muted">أنواع وموديلات الأجهزة — الجهاز الواحد يمكن تركيبه عدة مرات في نفس الموقع أو في مواقع مختلفة</p></div>
-        <div class="header-actions">
-          @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)">+ جهاز جديد</button> }
-          <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="توثيق الأجهزة" heading="الأجهزة" subtitle="أنواع وموديلات الأجهزة — الجهاز الواحد يمكن تركيبه عدة مرات في نفس الموقع أو في مواقع مختلفة">
+  
+            @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)">+ جهاز جديد</button> }
+            <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 

@@ -5,6 +5,7 @@ import { TaskStats } from '@core/models/assigned-task.models';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -14,14 +15,13 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
  * وجدول لكل جهة (قسم/مكتب/موظف) وحركة الأشهر. الفترة تُحسب على تاريخ إنشاء المهمة.
  */
 @Component({
-  selector: 'app-task-stats-page', standalone: true, imports: [EmptyState, Alert, FormsModule, StatTile],
+  selector: 'app-task-stats-page', standalone: true, imports: [PageHeader, EmptyState, Alert, FormsModule, StatTile],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', '../maintenance/maintenance.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">إدارة المهام</span><h1>إحصائيات المهام</h1><p class="muted">أداء الجهات ضمن نطاقك — المهام التي أُنشئت خلال الفترة المحددة</p></div>
-        <div class="header-actions"><button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button></div>
-      </header>
+      <app-page-header eyebrow="إدارة المهام" heading="إحصائيات المهام" subtitle="أداء الجهات ضمن نطاقك — المهام التي أُنشئت خلال الفترة المحددة">
+  <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <div class="range">
         <label>من <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" [max]="to()"></label>

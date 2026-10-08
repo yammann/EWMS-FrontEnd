@@ -8,13 +8,16 @@ import { VacationService } from '@core/services/vacation.service';
 import { VacationType } from '@core/models/vacation.models';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 @Component({
-  selector: 'app-vacation-types', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, Pager],
+  selector: 'app-vacation-types', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
-      <header class="page-header"><div><span class="eyebrow">إعدادات الإجازات</span><h1>أنواع الإجازات</h1></div><button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button></header>
+      <app-page-header eyebrow="إعدادات الإجازات" heading="أنواع الإجازات">
+        <button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button>
+      </app-page-header>
       <app-alert [message]="error()" />
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
       @if (editing() ? can().edit : can().create) {

@@ -11,6 +11,7 @@ import { DeviceFormDialog } from './device-form-dialog';
 import { DeviceRepairHistory } from './device-repair-history';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 type SearchField = 'serialNumber' | 'model' | 'name';
 const PAGE_SIZE = 20;
@@ -21,17 +22,15 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-maintenance-devices-page', standalone: true,
-  imports: [EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
+  imports: [PageHeader, EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة</span><h1>أجهزة الصيانة</h1><p class="muted">كل جهاز برقمه التسلسلي، وسجل إصلاحاته كاملاً</p></div>
-        <div class="header-actions">
-          @if (can().createDevice) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!lookups()">+ جهاز جديد</button> }
-          <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="الصيانة" heading="أجهزة الصيانة" subtitle="كل جهاز برقمه التسلسلي، وسجل إصلاحاته كاملاً">
+  
+            @if (can().createDevice) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!lookups()">+ جهاز جديد</button> }
+            <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 

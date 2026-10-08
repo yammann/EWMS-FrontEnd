@@ -14,6 +14,7 @@ import { SparePartFormDialog, SparePartMovements, SparePartStockDialog } from '.
 import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 const PAGE_SIZE = 25;
 
@@ -23,18 +24,15 @@ const PAGE_SIZE = 25;
  */
 @Component({
   selector: 'app-spare-parts-page', standalone: true,
-  imports: [EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
+  imports: [PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة</span><h1>قطع الغيار</h1><p class="muted">مخزون {{ departments().length === 1 ? departments()[0].name : 'الأقسام' }} — الرصيد يتغيّر بالإدخال والصرف على الطلبات والتسوية</p></div>
-        <div class="header-actions">
-          @if (can().viewPartReports) { <a class="btn btn-ghost" routerLink="/maintenance/parts/report">تقارير القطع</a> }
-          @if (can().createPart) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!departments().length">+ قطعة جديدة</button> }
-          <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="الصيانة" heading="قطع الغيار" subtitle="مخزون {{ departments().length === 1 ? departments()[0].name : 'الأقسام' }} — الرصيد يتغيّر بالإدخال والصرف على الطلبات والتسوية">
+        @if (can().viewPartReports) { <a class="btn btn-ghost" routerLink="/maintenance/parts/report">تقارير القطع</a> }
+                  @if (can().createPart) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!departments().length">+ قطعة جديدة</button> }
+                  <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
       @if (departmentsLoaded() && !departments().length) {

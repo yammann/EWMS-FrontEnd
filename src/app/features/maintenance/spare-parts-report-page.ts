@@ -7,23 +7,22 @@ import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 /**
  * تقارير قطع الغيار (قرار المستخدم 2026-10-05 — بلا نسب التكلفة للأقسام): قيمة المخزون، أكثر القطع صرفاً في الفترة،
  * وأعلى الأجهزة تكلفة على مدى عمرها مع تنبيه «إصلاحه أغلى من استبداله» حسب حد نوع الجهاز.
  */
 @Component({
-  selector: 'app-spare-parts-report-page', standalone: true, imports: [EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
+  selector: 'app-spare-parts-report-page', standalone: true, imports: [PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة · قطع الغيار</span><h1>تقارير قطع الغيار</h1><p class="muted">المخزون، أكثر القطع صرفاً، وتكلفة الأجهزة على مدى عمرها</p></div>
-        <div class="header-actions">
-          @if (can().viewParts) { <a class="btn btn-ghost" routerLink="/maintenance/parts">قطع الغيار</a> }
-          <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="الصيانة · قطع الغيار" heading="تقارير قطع الغيار" subtitle="المخزون، أكثر القطع صرفاً، وتكلفة الأجهزة على مدى عمرها">
+  
+            @if (can().viewParts) { <a class="btn btn-ghost" routerLink="/maintenance/parts">قطع الغيار</a> }
+            <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <div class="filters">
         <div class="filters-row">

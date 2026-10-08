@@ -6,6 +6,7 @@ import { MaintenanceCount, MaintenanceStats, formatHours } from '@core/models/ma
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 
@@ -53,14 +54,13 @@ export class MaintBars {
  * الطلبات حسب الحالة والفني ونوع العطل والجهاز والشركة، حركة آخر 6 أشهر، ومهام الصيانة حسب الموظف.
  */
 @Component({
-  selector: 'app-maintenance-stats-page', standalone: true, imports: [EmptyState, Alert, StatTile, MaintBars],
+  selector: 'app-maintenance-stats-page', standalone: true, imports: [PageHeader, EmptyState, Alert, StatTile, MaintBars],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة</span><h1>إحصائيات الصيانة</h1><p class="muted">أرقام الطلبات والمهام ضمن نطاقك</p></div>
-        <div class="header-actions"><button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button></div>
-      </header>
+      <app-page-header eyebrow="الصيانة" heading="إحصائيات الصيانة" subtitle="أرقام الطلبات والمهام ضمن نطاقك">
+  <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 

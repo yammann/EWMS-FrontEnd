@@ -15,6 +15,7 @@ import { Pager } from '@shared/ui/pager';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 const PAGE_SIZE = 20;
 
@@ -23,17 +24,15 @@ const PAGE_SIZE = 20;
  * كل موظف يرى مهامه، ورئيس القسم مهام قسمه وله نقلها لموظف آخر، ورئيس الفرع يطّلع فقط.
  */
 @Component({
-  selector: 'app-maintenance-tasks-page', standalone: true, imports: [EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
+  selector: 'app-maintenance-tasks-page', standalone: true, imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة</span><h1>مهام الصيانة</h1><p class="muted">الأعمال الميدانية: أين نُفّذت، لمن، وما المطلوب وما أُنجز</p></div>
-        <div class="header-actions">
-          @if (can().createTask) { <button class="btn" type="button" (click)="openForm(null)">+ مهمة جديدة</button> }
-          <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="الصيانة" heading="مهام الصيانة" subtitle="الأعمال الميدانية: أين نُفّذت، لمن، وما المطلوب وما أُنجز">
+  
+            @if (can().createTask) { <button class="btn" type="button" (click)="openForm(null)">+ مهمة جديدة</button> }
+            <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 

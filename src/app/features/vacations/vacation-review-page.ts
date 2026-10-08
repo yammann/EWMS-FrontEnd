@@ -13,13 +13,16 @@ import { VacationService } from '@core/services/vacation.service';
 import { Vacation } from '@core/models/vacation.models';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 @Component({
-  selector: 'app-vacation-review', standalone: true, imports: [EmptyState, Alert, CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
+  selector: 'app-vacation-review', standalone: true, imports: [PageHeader, EmptyState, Alert, CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
-      <header class="page-header"><div><span class="eyebrow">سير الموافقات</span><h1>مراجعة الإجازات</h1><p class="muted">الطلبات التي تنتظر موافقتك حسب دورك وقسمك أو فرعك</p></div><button class="btn btn-ghost" (click)="refresh()" [disabled]="loading() || saving() || teamLoading()">تحديث</button></header>
+      <app-page-header eyebrow="سير الموافقات" heading="مراجعة الإجازات" subtitle="الطلبات التي تنتظر موافقتك حسب دورك وقسمك أو فرعك">
+        <button class="btn btn-ghost" (click)="refresh()" [disabled]="loading() || saving() || teamLoading()">تحديث</button>
+      </app-page-header>
       <div class="actions tabs" role="tablist">
         <button class="btn" role="tab" [class.btn-ghost]="tab() !== 'pending'" [attr.aria-selected]="tab() === 'pending'" (click)="tab.set('pending')">بانتظار قراري ({{ items().length }})</button>
         <button class="btn" role="tab" [class.btn-ghost]="tab() !== 'team'" [attr.aria-selected]="tab() === 'team'" (click)="showTeam()">كل إجازات فريقي</button>

@@ -17,6 +17,7 @@ import { PendingTransfersButton } from './transfer-panel';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 type View = 'table' | 'board';
 type SearchField = 'clientName' | 'serialNumber' | 'model';
@@ -34,18 +35,16 @@ const BOARD_LIMIT = 5;
  */
 @Component({
   selector: 'app-maintenance-requests-page', standalone: true,
-  imports: [EmptyState, Alert, UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
+  imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">الصيانة</span><h1>طلبات الصيانة</h1><p class="muted">الأجهزة المستلمة للإصلاح ومتابعة حالتها حتى التسليم</p></div>
-        <div class="header-actions">
-          @if (can().assignRequest) { <app-pending-transfers-button /> }
-          @if (can().createRequest) { <button class="btn" type="button" (click)="formOpen.set(true)" [disabled]="!lookups()">+ طلب جديد</button> }
-          <button class="btn btn-ghost" type="button" (click)="refresh()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="الصيانة" heading="طلبات الصيانة" subtitle="الأجهزة المستلمة للإصلاح ومتابعة حالتها حتى التسليم">
+  
+            @if (can().assignRequest) { <app-pending-transfers-button /> }
+            @if (can().createRequest) { <button class="btn" type="button" (click)="formOpen.set(true)" [disabled]="!lookups()">+ طلب جديد</button> }
+            <button class="btn btn-ghost" type="button" (click)="refresh()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 

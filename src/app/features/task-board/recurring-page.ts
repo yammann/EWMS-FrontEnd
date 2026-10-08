@@ -13,6 +13,7 @@ import { Modal } from '@shared/ui/modal';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { Alert } from '@shared/ui/alert';
+import { PageHeader } from '@shared/ui/page-header';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };
@@ -210,14 +211,11 @@ export class RecurrenceDialog implements OnInit {
 
 /** القوالب والمهام الدورية لمن يملك صلاحية إسناد: قوالب خاصة به، وجدولة إنشاء مهام تلقائياً */
 @Component({
-  selector: 'app-recurring-tasks-page', standalone: true, imports: [Alert, DatePipe, TemplateDialog, RecurrenceDialog],
+  selector: 'app-recurring-tasks-page', standalone: true, imports: [PageHeader, Alert, DatePipe, TemplateDialog, RecurrenceDialog],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">إدارة المهام</span><h1>المهام الدورية والقوالب</h1>
-          <p class="muted">القوالب خاصة بك. المهمة الدورية تُنشئ مهمة جديدة من قالب في كل موعد دون تدخل منك.</p></div>
-      </header>
+      <app-page-header eyebrow="إدارة المهام" heading="المهام الدورية والقوالب" subtitle="القوالب خاصة بك. المهمة الدورية تُنشئ مهمة جديدة من قالب في كل موعد دون تدخل منك." />
       <app-alert [message]="error()" />
 
       <section class="panel">

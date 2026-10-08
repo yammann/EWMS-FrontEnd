@@ -15,20 +15,19 @@ import { formatPhone, isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceHistory } from './device-ui';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PageHeader } from '@shared/ui/page-header';
 
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */
 @Component({
-  selector: 'app-sites-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
+  selector: 'app-sites-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
-      <header class="page-header">
-        <div><span class="eyebrow">توثيق الأجهزة</span><h1>المواقع</h1><p class="muted">مواقع التركيب — تُحدَّد محافظة كل موقع تلقائياً من مكانه على الخريطة</p></div>
-        <div class="header-actions">
-          @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)">+ موقع جديد</button> }
-          <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
-        </div>
-      </header>
+      <app-page-header eyebrow="توثيق الأجهزة" heading="المواقع" subtitle="مواقع التركيب — تُحدَّد محافظة كل موقع تلقائياً من مكانه على الخريطة">
+  
+            @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)">+ موقع جديد</button> }
+            <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+      </app-page-header>
 
       <app-alert [message]="error()" />
 
