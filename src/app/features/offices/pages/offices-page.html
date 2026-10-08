@@ -86,101 +86,25 @@
     <app-modal kicker="إجراء" [heading]="crud.modalTitle(modal)" [busy]="!!saving()" (closed)="crud.closeModal()">
 
         <div class="modal-body">
-
-          @switch (modal) {
-
-            <!-- CREATE -->
-            @case ('create') {
-              <form [formGroup]="createForm" (ngSubmit)="crud.create()" class="form-stack">
-                <div class="form-field">
-                  <label class="form-label" for="create-name">اسم المكتب</label>
-                  <input id="create-name" type="text" formControlName="name" maxlength="100"
-                         placeholder="مثال: مكتب المتابعة" autocomplete="off" />
-                  @if (createForm.controls.name.touched && createForm.controls.name.invalid) {
-                    <small class="form-error">أدخل اسماً لا يقل عن حرفين.</small>
-                  }
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label" for="create-dept">القسم</label>
-                  <select id="create-dept" formControlName="departmentId">
-                    <option value="">اختر القسم</option>
-                    @for (department of departments(); track department.id) {
-                      <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
-                    }
-                  </select>
-                  @if (createForm.controls.departmentId.touched && createForm.controls.departmentId.invalid) {
-                    <small class="form-error">اختر القسم التابع له المكتب.</small>
-                  }
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label" for="create-desc">الوصف</label>
-                  <textarea id="create-desc" formControlName="description" rows="3" maxlength="500"
-                            placeholder="وصف مختصر عن المكتب..."></textarea>
-                </div>
-
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="createForm.invalid || saving() === 'create'">
-                    @if (saving() === 'create') {
-                      <span class="button-spinner"></span>
-                      <span>جاري الإنشاء...</span>
-                    } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M12 5v14M5 12h14"></path>
-                      </svg>
-                      <span>إنشاء المكتب</span>
-                    }
-                  </button>
-                </div>
-              </form>
-            }
-
-            <!-- EDIT -->
-            @case ('edit') {
-              <form [formGroup]="editForm" (ngSubmit)="crud.update()" class="form-stack">
-                <div class="form-field">
-                  <label class="form-label" for="edit-name">اسم المكتب</label>
-                  <input id="edit-name" type="text" formControlName="name" maxlength="100" />
-                  @if (editForm.controls.name.touched && editForm.controls.name.invalid) {
-                    <small class="form-error">أدخل اسماً لا يقل عن حرفين.</small>
-                  }
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label" for="edit-dept">القسم</label>
-                  <select id="edit-dept" formControlName="departmentId">
-                    <option value="">اختر القسم</option>
-                    @for (department of departments(); track department.id) {
-                      <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
-                    }
-                  </select>
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label" for="edit-desc">الوصف</label>
-                  <textarea id="edit-desc" formControlName="description" rows="4" maxlength="500"></textarea>
-                </div>
-
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="editForm.invalid || saving() === 'edit'">
-                    @if (saving() === 'edit') {
-                      <span class="button-spinner"></span>
-                      <span>جاري الحفظ...</span>
-                    } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M20 6 9 17l-5-5"></path>
-                      </svg>
-                      <span>حفظ التعديل</span>
-                    }
-                  </button>
-                </div>
-              </form>
-            }
-          }
-
+          <app-entity-form [mode]="modal" [form]="modal === 'create' ? createForm : editForm" nameLabel="اسم المكتب"
+                           namePlaceholder="مثال: مكتب المتابعة" descPlaceholder="وصف مختصر عن المكتب..." createLabel="إنشاء المكتب" [iconed]="false" [nameMaxLength]="100" [descMaxLength]="500"
+                           [saving]="saving()" (submitted)="modal === 'create' ? crud.create() : crud.update()" (dismissed)="crud.closeModal()">
+            
+          <ng-container ngProjectAs="[before]" [formGroup]="modal === 'create' ? createForm : editForm">
+            <div class="form-field">
+              <label class="form-label" [attr.for]="modal + '-dept'">القسم</label>
+              <select [id]="modal + '-dept'" formControlName="departmentId">
+                <option value="">اختر القسم</option>
+                @for (department of departments(); track department.id) {
+                  <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
+                }
+              </select>
+              @if (modal === 'create' && createForm.controls.departmentId.touched && createForm.controls.departmentId.invalid) {
+                <small class="form-error">اختر القسم التابع له المكتب.</small>
+              }
+            </div>
+          </ng-container>
+          </app-entity-form>
         </div>
     </app-modal>
   }

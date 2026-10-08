@@ -27,7 +27,7 @@ export interface RequestLookups {
  */
 @Component({
   selector: 'app-request-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal, DeviceFormDialog],
-  styleUrls: ['../../../shared/styles/devices.scss', './request-form-dialog.scss'],
+  styleUrls: ['../../../shared/styles/data-tools.scss', './request-form-dialog.scss'],
   templateUrl: './request-form-dialog.html',
   
 })

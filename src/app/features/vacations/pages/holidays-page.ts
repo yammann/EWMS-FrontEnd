@@ -17,7 +17,7 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
 /** العطل الرسمية: أيام لا تُحسب من مدة الإجازة، إضافة إلى الجمعة (العطلة الأسبوعية) */
 @Component({
   selector: 'app-holidays-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, DatePipe, Pager],
-  styleUrl: '../../../shared/styles/organization.scss',
+  styleUrl: '../../../shared/styles/page-base.scss',
   templateUrl: './holidays-page.html'
 })
 export class HolidaysPage {

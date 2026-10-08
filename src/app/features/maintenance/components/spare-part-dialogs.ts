@@ -20,7 +20,7 @@ const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDe
 /** إضافة قطعة أو تعديل بياناتها — الكمية والسعر لا يُدخلان هنا (إدخال/تسوية فقط) */
 @Component({
   selector: 'app-spare-part-form-dialog', standalone: true, imports: [FormActions, Alert, ReactiveFormsModule, Modal],
-  styleUrl: '../../../shared/styles/devices.scss',
+  styleUrl: '../../../shared/styles/data-tools.scss',
   templateUrl: './spare-part-dialogs-spare-part-form-dialog.html',
   styles: [`
     .compat { border: 0; padding: 0; margin: 16px 0 0; min-width: 0; }
@@ -158,7 +158,7 @@ export class SparePartStockDialog implements OnInit {
 /** سجل حركات القطعة (لا يُحذف ولا يُعدَّل) */
 @Component({
   selector: 'app-spare-part-movements', standalone: true, imports: [EmptyState, Alert, UtcPipe, QtyPipe, MoneyPipe, DatePipe, RouterLink, Modal, Pager],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/maintenance.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './spare-part-dialogs-spare-part-movements.html',
   styles: [`
     table { min-width: 0; }   /* الجدول داخل النافذة: لا يفرض عرض 700px العام */

@@ -22,7 +22,7 @@ import { FormActions } from '@shared/ui/form-actions';
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */
 @Component({
   selector: 'app-sites-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss'],
   templateUrl: './sites-page.html',
   styles: [`td small { display: block; color: var(--ink-500); }`]
 })

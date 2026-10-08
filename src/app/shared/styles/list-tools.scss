@@ -1,4 +1,4 @@
-/* مشترك بين صفحات الصيانة (مع ../shared/organization.scss و ../devices/devices.scss) */
+/* أدوات القوائم: شريط فلاتر، مبدّل عرض، شبكة الحقائق، إحصاءات 4 أعمدة — مع page-base.scss و data-tools.scss */
 :host { display: block; }
 
 .stats-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }

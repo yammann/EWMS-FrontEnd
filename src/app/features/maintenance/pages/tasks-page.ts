@@ -26,7 +26,7 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-maintenance-tasks-page', standalone: true, imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './tasks-page.html',
   styles: [`
     .clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

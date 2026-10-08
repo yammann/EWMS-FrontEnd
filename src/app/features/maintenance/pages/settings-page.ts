@@ -27,7 +27,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
  */
 @Component({
   selector: 'app-maintenance-settings-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './settings-page.html',
   styles: [`
     .segmented { justify-self: start; flex-wrap: wrap; }

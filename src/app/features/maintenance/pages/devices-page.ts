@@ -24,7 +24,7 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-maintenance-devices-page', standalone: true,
   imports: [PageHeader, EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss', './requests-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './requests-page.scss'],
   templateUrl: './devices-page.html'
 })
 export class MaintenanceDevicesPage {

@@ -18,7 +18,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-branch-dashboard', standalone: true,
   imports: [EmptyState, Alert, RouterLink, NgTemplateOutlet, StatTile, TaskCards, TaskDistributionTable, ActivityList, BranchMapComponent],
-  styleUrl: '../../../shared/styles/dashboard.scss',
+  styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './branch-dashboard.html'
 })
 export class BranchDashboardPage {

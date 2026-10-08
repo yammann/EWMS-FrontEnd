@@ -13,7 +13,7 @@ import { trackRequest } from '@shared/ui/loader';
 
 @Component({
   selector: 'app-vacation-types', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager],
-  styleUrl: '../../../shared/styles/organization.scss',
+  styleUrl: '../../../shared/styles/page-base.scss',
   templateUrl: './vacation-types-page.html'
 })
 export class VacationTypesPage {

@@ -18,7 +18,7 @@ import { FormActions } from '@shared/ui/form-actions';
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
   selector: 'app-devices-catalog-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss'],
   templateUrl: './devices-catalog-page.html',
   styles: [`td small { display: block; color: var(--ink-500); }`]
 })

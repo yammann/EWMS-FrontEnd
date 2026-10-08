@@ -31,7 +31,7 @@ export function notInPast(control: AbstractControl) {
 @Component({
   selector: 'app-profile-page', standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, SignaturePanel, VacationAttachments, Pager],
-  templateUrl: './profile-page.html', styleUrl: '../../../shared/styles/organization.scss'
+  templateUrl: './profile-page.html', styleUrl: '../../../shared/styles/page-base.scss'
 })
 export class ProfilePage {
   pager = new Pagination(() => this.vacations());

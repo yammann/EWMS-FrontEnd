@@ -22,7 +22,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-office-dashboard', standalone: true,
   imports: [EmptyState, Alert, CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
-  styleUrl: '../../../shared/styles/dashboard.scss',
+  styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './office-dashboard.html'
 })
 export class OfficeDashboardPage {

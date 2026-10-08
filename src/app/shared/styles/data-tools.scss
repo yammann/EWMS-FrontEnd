@@ -1,6 +1,5 @@
-/* مشترك بين صفحات توثيق الأجهزة (مع ../shared/organization.scss) */
+/* أدوات الصفحات الجدولية: شريط أدوات، رقائق فلترة، خلايا الجدول، شبكة نماذج — مع page-base.scss */
 .page { gap: 20px; }
-.header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }

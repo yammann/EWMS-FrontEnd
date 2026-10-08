@@ -20,7 +20,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-vacation-stats', standalone: true,
   imports: [Alert, RouterLink, StatTile, VacationRows, ActionsTable, CountBars],
-  styleUrl: '../../../shared/styles/dashboard.scss',
+  styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './vacation-stats-page.html'
 })
 export class VacationStatsPage {

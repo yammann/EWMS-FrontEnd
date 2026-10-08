@@ -17,7 +17,7 @@ import { trackRequest } from '@shared/ui/loader';
  */
 @Component({
   selector: 'app-request-parts-panel', standalone: true, imports: [Alert, QtyPipe, MoneyPipe, UtcPipe, DatePipe, Modal],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/maintenance.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './request-parts-panel.html',
   styles: [`
     .num { font-variant-numeric: tabular-nums; white-space: nowrap; }

@@ -34,7 +34,7 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
 @Component({
   selector: 'app-todo-list-page', standalone: true,
   imports: [Alert, FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, TodoListDialog, TodoItemDialog, TodoBulkDialog],
-  styleUrls: ['../../../shared/styles/organization.scss', '../styles/todo.scss', '../styles/todo-cards.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../styles/todo.scss', '../styles/todo-cards.scss'],
   templateUrl: './todo-list-page.html',
   styles: [`
     .page { gap: 20px; }

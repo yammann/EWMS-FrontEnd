@@ -26,7 +26,7 @@ const PAGE_SIZE = 25;
 @Component({
   selector: 'app-spare-parts-page', standalone: true,
   imports: [PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss', './requests-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './requests-page.scss'],
   templateUrl: './spare-parts-page.html',
   styles: [`
     .num { font-variant-numeric: tabular-nums; white-space: nowrap; }

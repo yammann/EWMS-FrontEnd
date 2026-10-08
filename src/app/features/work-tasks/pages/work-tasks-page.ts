@@ -20,7 +20,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
 /** إدارة مهام العمل لكل فرع وإسنادها لموظفيه (ManageWorkTasks — السوبر ادمن) */
 @Component({
   selector: 'app-work-tasks-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager],
-  styleUrls: ['../../../shared/styles/organization.scss', './work-tasks-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', './work-tasks-page.scss'],
   templateUrl: './work-tasks-page.html',
   
 })

@@ -37,7 +37,7 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-installations-page', standalone: true,
   imports: [FormActions, PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss'],
   templateUrl: './installations-page.html',
   styles: [`
     .secret input { flex: 1; }

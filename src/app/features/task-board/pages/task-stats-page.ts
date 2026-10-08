@@ -17,7 +17,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
  */
 @Component({
   selector: 'app-task-stats-page', standalone: true, imports: [PageHeader, EmptyState, Alert, FormsModule, StatTile],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss', './task-stats-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './task-stats-page.scss'],
   templateUrl: './task-stats-page.html',
   
 })

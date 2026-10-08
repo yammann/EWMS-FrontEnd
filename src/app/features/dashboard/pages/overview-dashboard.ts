@@ -18,7 +18,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-overview-dashboard', standalone: true,
   imports: [EmptyState, Alert, RouterLink, NgTemplateOutlet, StatTile, ActivityList, BranchMapComponent],
-  styleUrl: '../../../shared/styles/dashboard.scss',
+  styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './overview-dashboard.html'
 })
 export class OverviewDashboardPage {

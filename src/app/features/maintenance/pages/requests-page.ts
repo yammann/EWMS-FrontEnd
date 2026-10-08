@@ -36,7 +36,7 @@ const BOARD_LIMIT = 5;
 @Component({
   selector: 'app-maintenance-requests-page', standalone: true,
   imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss', './requests-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './requests-page.scss'],
   templateUrl: './requests-page.html'
 })
 export class MaintenanceRequestsPage {

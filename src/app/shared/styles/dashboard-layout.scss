@@ -8,7 +8,6 @@
 .crumbs a:hover { text-decoration: underline; }
 
 .header-sub { margin-top: 6px; color: var(--ink-500); font-size: 13px; }
-.header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
 /* 4 بطاقات بعرض متساوٍ تملأ السطر: 4 ← 2 ← 1 حسب عرض الشاشة */
 .dash-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }

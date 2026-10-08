@@ -20,7 +20,7 @@ import { trackRequest } from '@shared/ui/loader';
  */
 @Component({
   selector: 'app-my-maintenance-requests', standalone: true, imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, StatusChip, Pager],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/maintenance.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './my-requests-page.html',
   styles: [`tr.highlight td { background: var(--brand-50); }`]
 })

@@ -16,7 +16,7 @@ import { trackRequest } from '@shared/ui/loader';
  */
 @Component({
   selector: 'app-spare-parts-report-page', standalone: true, imports: [PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss', './requests-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './requests-page.scss'],
   templateUrl: './spare-parts-report-page.html',
   styles: [`
     .period { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }

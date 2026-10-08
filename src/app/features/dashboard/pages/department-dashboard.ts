@@ -20,7 +20,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-department-dashboard', standalone: true,
   imports: [EmptyState, Alert, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
-  styleUrl: '../../../shared/styles/dashboard.scss',
+  styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './department-dashboard.html'
 })
 export class DepartmentDashboardPage {

@@ -16,7 +16,7 @@ const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim()
  */
 @Component({
   selector: 'app-device-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal],
-  styleUrl: '../../../shared/styles/devices.scss',
+  styleUrl: '../../../shared/styles/data-tools.scss',
   templateUrl: './device-form-dialog.html',
   styles: [`
     .hint-line { margin: -6px 0 0; font-size: 12px; color: var(--ink-500); }

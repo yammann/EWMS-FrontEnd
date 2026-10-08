@@ -48,7 +48,7 @@ function ago(iso: string): string {
  */
 @Component({
   selector: 'app-notifications-page', standalone: true, imports: [Alert, DatePipe, Pager, Icon],
-  styleUrls: ['../../../shared/styles/organization.scss', './notifications-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', './notifications-page.scss'],
   templateUrl: './notifications-page.html',
   
 })

@@ -160,7 +160,7 @@ export class RecurrenceDialog implements OnInit {
 /** القوالب والمهام الدورية لمن يملك صلاحية إسناد: قوالب خاصة به، وجدولة إنشاء مهام تلقائياً */
 @Component({
   selector: 'app-recurring-tasks-page', standalone: true, imports: [PageHeader, Alert, DatePipe, TemplateDialog, RecurrenceDialog],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss'],
   templateUrl: './recurring-page-recurring-tasks-page.html',
   styles: [`
     .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }

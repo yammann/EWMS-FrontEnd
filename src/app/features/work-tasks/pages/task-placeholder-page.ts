@@ -11,7 +11,7 @@ import { EmptyState } from '@shared/ui/empty-state';
  */
 @Component({
   selector: 'app-task-placeholder', standalone: true, imports: [EmptyState, RouterLink],
-  styleUrl: '../../../shared/styles/organization.scss',
+  styleUrl: '../../../shared/styles/page-base.scss',
   template: `
     <div class="page">
       @if (error()) {

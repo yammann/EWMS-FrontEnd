@@ -44,7 +44,7 @@ export class MaintBars {
  */
 @Component({
   selector: 'app-maintenance-stats-page', standalone: true, imports: [PageHeader, EmptyState, Alert, StatTile, MaintBars],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './stats-page-maintenance-stats-page.html',
   styles: [`
     .months { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 14px; align-items: end; height: 220px; }

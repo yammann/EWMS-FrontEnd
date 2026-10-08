@@ -22,7 +22,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-employee-dashboard', standalone: true,
   imports: [EmptyState, Alert, CommonModule, RouterLink, StatTile, TaskCards, NgTemplateOutlet, BranchMapComponent],
-  styleUrl: '../../../shared/styles/dashboard.scss',
+  styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './employee-dashboard.html'
 })
 export class EmployeeDashboardPage {

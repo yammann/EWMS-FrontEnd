@@ -1,4 +1,5 @@
 import { Pagination } from '@core/utils/pagination';
+import { EntityForm } from '@shared/ui/entity-form';
 import { RowActions } from '@shared/ui/row-actions';
 import { StatTile } from '@shared/ui/stat-tile';
 import { AdminHeader } from '@shared/ui/admin-header';
@@ -20,7 +21,7 @@ import { ModalCrud } from '@shared/ui/modal-crud';
 @Component({
   selector: 'app-departments-page',
   standalone: true,
-  imports: [RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './departments-page.html',
   styleUrl: './departments-page.scss'
 })

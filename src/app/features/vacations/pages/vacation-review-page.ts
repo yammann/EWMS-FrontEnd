@@ -18,7 +18,7 @@ import { trackRequest } from '@shared/ui/loader';
 
 @Component({
   selector: 'app-vacation-review', standalone: true, imports: [PageHeader, EmptyState, Alert, CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
-  styleUrl: '../../../shared/styles/organization.scss',
+  styleUrl: '../../../shared/styles/page-base.scss',
   templateUrl: './vacation-review-page.html'
 })
 export class VacationReviewPage {

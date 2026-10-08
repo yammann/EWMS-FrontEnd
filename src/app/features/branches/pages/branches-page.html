@@ -114,84 +114,14 @@
     <app-modal kicker="إجراء" [heading]="crud.modalTitle(modal)" [busy]="!!saving()" (closed)="crud.closeModal()">
 
         <div class="modal-body">
-
-          @switch (modal) {
-
-            <!-- CREATE -->
-            @case ('create') {
-              <form [formGroup]="createForm" (ngSubmit)="crud.create()" class="form-stack">
-                <div class="form-field">
-                  <label class="form-label" for="create-name">اسم الفرع</label>
-                  <div class="input-wrapper">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M3 21h18"></path>
-                      <path d="M5 21V5l7-3 7 3v16"></path>
-                    </svg>
-                    <input id="create-name" type="text" formControlName="name"
-                           placeholder="مثال: فرع دمشق" autocomplete="off" />
-                  </div>
-                  @if (createForm.controls.name.touched && createForm.controls.name.invalid) {
-                    <small class="form-error">أدخل اسماً لا يقل عن حرفين.</small>
-                  }
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label" for="create-desc">الوصف</label>
-                  <textarea id="create-desc" formControlName="description" rows="3"
-                            placeholder="وصف مختصر عن الفرع..."></textarea>
-                </div>
-
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="createForm.invalid || saving() === 'create'">
-                    @if (saving() === 'create') {
-                      <span class="button-spinner"></span>
-                      <span>جاري الإنشاء...</span>
-                    } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M12 5v14M5 12h14"></path>
-                      </svg>
-                      <span>إنشاء الفرع</span>
-                    }
-                  </button>
-                </div>
-              </form>
-            }
-
-            <!-- EDIT -->
-            @case ('edit') {
-              <form [formGroup]="editForm" (ngSubmit)="crud.update()" class="form-stack">
-                <div class="form-field">
-                  <label class="form-label" for="edit-name">اسم الفرع</label>
-                  <input id="edit-name" type="text" formControlName="name" />
-                  @if (editForm.controls.name.touched && editForm.controls.name.invalid) {
-                    <small class="form-error">أدخل اسماً لا يقل عن حرفين.</small>
-                  }
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label" for="edit-desc">الوصف</label>
-                  <textarea id="edit-desc" formControlName="description" rows="4"></textarea>
-                </div>
-
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="editForm.invalid || saving() === 'edit'">
-                    @if (saving() === 'edit') {
-                      <span class="button-spinner"></span>
-                      <span>جاري الحفظ...</span>
-                    } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M20 6 9 17l-5-5"></path>
-                      </svg>
-                      <span>حفظ التعديل</span>
-                    }
-                  </button>
-                </div>
-              </form>
-            }
-          }
-
+          <app-entity-form [mode]="modal" [form]="modal === 'create' ? createForm : editForm" nameLabel="اسم الفرع"
+                           namePlaceholder="مثال: فرع دمشق" descPlaceholder="وصف مختصر عن الفرع..." createLabel="إنشاء الفرع"
+                           [saving]="saving()" (submitted)="modal === 'create' ? crud.create() : crud.update()" (dismissed)="crud.closeModal()">
+            <svg nameIcon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V5l7-3 7 3v16"></path>
+            </svg>
+          </app-entity-form>
         </div>
     </app-modal>
   }

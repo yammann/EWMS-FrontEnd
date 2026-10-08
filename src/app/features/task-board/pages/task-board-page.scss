@@ -1,4 +1,4 @@
-@use '../../../shared/styles/dashboard.scss';
+@use '../../../shared/styles/dashboard-layout.scss';
 
 .tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-lg); background: var(--ink-100); justify-self: start; }
 .tabs button { min-height: 36px; padding: 0 16px; background: transparent; color: var(--ink-600); font-weight: 700; }

@@ -42,3 +42,18 @@ for (const [name, url] of PAGES) {
     });
   });
 }
+
+// نوافذ الإنشاء والتعديل في صفحات الإدارة (تُلتقط وهي مفتوحة)
+for (const [name, url] of [['branches', '/branches'], ['departments', '/departments'], ['offices', '/offices']] as const) {
+  for (const mode of ['create', 'edit'] as const) {
+    test(`نافذة ${name} ${mode}`, async ({ page }) => {
+      await page.goto(url);
+      await page.waitForLoadState('networkidle');
+      if (mode === 'create') await page.locator('button.new-btn').click();
+      else await page.locator('button.icon-btn.edit').first().click();
+      await page.locator('app-modal .modal').first().waitFor();
+      await page.waitForTimeout(500);
+      await expect(page).toHaveScreenshot(`modal-${name}-${mode}.png`, { animations: 'disabled', maxDiffPixelRatio: 0.004 });
+    });
+  }
+}

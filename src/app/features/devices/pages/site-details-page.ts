@@ -22,7 +22,7 @@ import { EmptyState } from '@shared/ui/empty-state';
  */
 @Component({
   selector: 'app-site-details-page', standalone: true, imports: [EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, Pager],
-  styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', './site-details-page.scss'],
+  styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './site-details-page.scss'],
   templateUrl: './site-details-page.html',
   
 })
