@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { WorkTask, WorkTaskCard, WorkTaskRequest } from '../models/work-task.models';
+import { WorkTask, WorkTaskCard, WorkTaskRequest } from '@core/models/work-task.models';
 
 @Injectable({ providedIn: 'root' })
 export class WorkTaskService {

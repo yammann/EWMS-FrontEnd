@@ -2,10 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { MaintenanceLookup, utcDate } from '../../core/models/maintenance.models';
-import { NamedRef, SparePart, SparePartMovement, money, qty, twoDecimals } from '../../core/models/spare-part.models';
-import { Modal } from '../../shared/ui/modal';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { MaintenanceLookup, utcDate } from '@core/models/maintenance.models';
+import { NamedRef, SparePart, SparePartMovement, money, qty, twoDecimals } from '@core/models/spare-part.models';
+import { Modal } from '@shared/ui/modal';
 import { Pager } from './maintenance-ui';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };

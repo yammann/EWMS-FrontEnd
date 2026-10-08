@@ -1,8 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AssignedTaskService } from '../../core/services/assigned-task.service';
-import { TaskStats } from '../../core/models/assigned-task.models';
-import { StatTile } from '../dashboard/dashboard-widgets';
+import { AssignedTaskService } from '@core/services/assigned-task.service';
+import { TaskStats } from '@core/models/assigned-task.models';
+import { StatTile } from '@features/dashboard/dashboard-widgets';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

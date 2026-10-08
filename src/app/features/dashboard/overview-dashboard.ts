@@ -1,13 +1,13 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { BranchMapComponent } from '../map/branch-map';
+import { BranchMapComponent } from '@features/map/branch-map';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { DashboardService } from '../../core/services/dashboard.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
-import { NotificationService } from '../../core/services/notification.service';
-import { OverviewDashboard } from '../../core/models/dashboard.models';
+import { DashboardService } from '@core/services/dashboard.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
+import { NotificationService } from '@core/services/notification.service';
+import { OverviewDashboard } from '@core/models/dashboard.models';
 import { ActivityList, StatTile } from './dashboard-widgets';
 
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */

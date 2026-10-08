@@ -1,10 +1,10 @@
 import { Component, OnDestroy, inject, input, output, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { AssignedTaskService } from '../../core/services/assigned-task.service';
-import { TASK_ATTACHMENTS, TaskAttachment, attachmentProblem } from '../../core/models/assigned-task.models';
-import { Modal } from '../../shared/ui/modal';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { fileSize } from '../vacations/vacation-attachments';
+import { AssignedTaskService } from '@core/services/assigned-task.service';
+import { TASK_ATTACHMENTS, TaskAttachment, attachmentProblem } from '@core/models/assigned-task.models';
+import { Modal } from '@shared/ui/modal';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { fileSize } from '@features/vacations/vacation-attachments';
 
 /** أيقونة حسب نوع الملف */
 export function fileIcon(contentType: string): string {

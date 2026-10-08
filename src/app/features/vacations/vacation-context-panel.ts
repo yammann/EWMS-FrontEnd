@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, input, signal } from '@angular/core';
-import { VacationService } from '../../core/services/vacation.service';
-import { VacationApprovalContext } from '../../core/models/vacation.models';
-import { daysAr, vacationsAr } from '../../core/utils/arabic-count';
+import { VacationService } from '@core/services/vacation.service';
+import { VacationApprovalContext } from '@core/models/vacation.models';
+import { daysAr, vacationsAr } from '@core/utils/arabic-count';
 
 /**
  * «سجل الموظف» داخل بطاقة طلب الإجازة قبل القرار (قرار المستخدم 2026-10-04): مطوي، ويُحمَّل عند أول فتح.

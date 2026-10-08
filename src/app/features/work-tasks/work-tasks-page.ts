@@ -1,14 +1,14 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { WorkTaskService } from '../../core/services/work-task.service';
-import { EwmsService } from '../../core/services/ewms.service';
-import { Branch, User } from '../../core/models/ewms.models';
-import { WorkTask } from '../../core/models/work-task.models';
-import { roleLabel } from '../../core/utils/roles';
+import { WorkTaskService } from '@core/services/work-task.service';
+import { EwmsService } from '@core/services/ewms.service';
+import { Branch, User } from '@core/models/ewms.models';
+import { WorkTask } from '@core/models/work-task.models';
+import { roleLabel } from '@core/utils/roles';
 
 const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧', '📁', '🧮', '🗂️', '📞'];
 

@@ -1,13 +1,13 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { DeviceService } from '../../core/services/device.service';
-import { DEVICE_CATEGORIES, Device } from '../../core/models/device.models';
-import { Modal } from '../../shared/ui/modal';
-import { ToastService } from '../../shared/ui/toast.service';
-import { ConfirmService } from '../../shared/ui/confirm.service';
+import { DeviceService } from '@core/services/device.service';
+import { DEVICE_CATEGORIES, Device } from '@core/models/device.models';
+import { Modal } from '@shared/ui/modal';
+import { ToastService } from '@shared/ui/toast.service';
+import { ConfirmService } from '@shared/ui/confirm.service';
 import { DeviceHistory } from './device-ui';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */

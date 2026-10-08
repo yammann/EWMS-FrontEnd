@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
 import { OverviewDashboardPage } from './overview-dashboard';
 import { BranchDashboardPage } from './branch-dashboard';
 import { DepartmentDashboardPage } from './department-dashboard';

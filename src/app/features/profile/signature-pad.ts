@@ -1,5 +1,5 @@
 import { Component, ElementRef, afterNextRender, computed, inject, input, output, signal, viewChild, DestroyRef } from '@angular/core';
-import { Modal } from '../../shared/ui/modal';
+import { Modal } from '@shared/ui/modal';
 import { InkPoint, InkStroke, cleanUpload, inkOnScreen, luminance, strokePath, strokesToPng, toRgb } from './signature-ink';
 
 type Method = 'draw' | 'upload';

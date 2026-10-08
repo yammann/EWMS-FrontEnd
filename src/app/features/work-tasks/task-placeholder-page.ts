@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { WorkTaskService } from '../../core/services/work-task.service';
-import { WorkTaskCard } from '../../core/models/work-task.models';
+import { WorkTaskService } from '@core/services/work-task.service';
+import { WorkTaskCard } from '@core/models/work-task.models';
 
 /**
  * صفحة مهمة العمل. صفحات المهام الفعلية (مثل المخزن: إدخال/إخراج/تقارير) ستُبنى لاحقاً

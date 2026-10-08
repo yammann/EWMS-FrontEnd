@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToDoService } from '../../core/services/todo.service';
-import { TODO_LIMITS, ToDoList } from '../../core/models/todo.models';
-import { Modal } from '../../shared/ui/modal';
+import { ToDoService } from '@core/services/todo.service';
+import { TODO_LIMITS, ToDoList } from '@core/models/todo.models';
+import { Modal } from '@shared/ui/modal';
 
 /** إضافة عدة بنود دفعة واحدة: كل سطر بند (يناسب لصق نص منسوخ من رسالة أو محضر) */
 @Component({

@@ -1,17 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AssignedTaskService } from '../../core/services/assigned-task.service';
+import { AssignedTaskService } from '@core/services/assigned-task.service';
 import { Observable } from 'rxjs';
-import { AssignedTaskDetail, TaskAttachment, TaskStatus, TASK_STATUS_LABEL } from '../../core/models/assigned-task.models';
-import { hasOpenModal } from '../../shared/ui/modal';
-import { ConfirmService } from '../../shared/ui/confirm.service';
+import { AssignedTaskDetail, TaskAttachment, TaskStatus, TASK_STATUS_LABEL } from '@core/models/assigned-task.models';
+import { hasOpenModal } from '@shared/ui/modal';
+import { ConfirmService } from '@shared/ui/confirm.service';
 import { TaskAttachments } from './task-attachments';
 import { TaskLinks } from './task-links';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
-import { ToastService } from '../../shared/ui/toast.service';
-import { AddToTodoDialog } from '../todo/add-to-todo-dialog';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
+import { ToastService } from '@shared/ui/toast.service';
+import { AddToTodoDialog } from '@features/todo/add-to-todo-dialog';
 import { TaskNoteDialog } from './task-note-dialog';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */

@@ -2,12 +2,12 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { NotificationService, notificationRoute } from '../../core/services/notification.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AppNotification } from '../../core/models/notification.models';
-import { storePageSize, storedPageSize } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
-import { Icon } from '../../shared/ui/icon';
+import { NotificationService, notificationRoute } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppNotification } from '@core/models/notification.models';
+import { storePageSize, storedPageSize } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
+import { Icon } from '@shared/ui/icon';
 
 type Tone = 'green' | 'blue' | 'orange' | 'purple' | 'red';
 interface Kind { icon: string; tone: Tone; }

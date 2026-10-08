@@ -1,9 +1,9 @@
 import { Component, DestroyRef, ElementRef, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { DeviceService, formatCoords } from '../../core/services/device.service';
-import { BranchMap, MapBranchOption, MapSite } from '../../core/models/device.models';
-import { GovernorateFeature } from '../../core/utils/geo';
-import { ToastService } from '../../shared/ui/toast.service';
+import { DeviceService, formatCoords } from '@core/services/device.service';
+import { BranchMap, MapBranchOption, MapSite } from '@core/models/device.models';
+import { GovernorateFeature } from '@core/utils/geo';
+import { ToastService } from '@shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { NewToDoItem, SaveToDoListRequest, ToDoItemChange, ToDoList, ToDoToday } from '../models/todo.models';
+import { NewToDoItem, SaveToDoListRequest, ToDoItemChange, ToDoList, ToDoToday } from '@core/models/todo.models';
 
 /** «مفكرتي»: قوائم المهام الشخصية وبنودها — كل عملية على البنود تُرجع القائمة كاملة بعد التحديث */
 @Injectable({ providedIn: 'root' })

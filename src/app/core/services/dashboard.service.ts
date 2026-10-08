@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
 import {
   BranchDashboard, DepartmentDashboard, EmployeeDashboard, OfficeDashboard, OverviewDashboard, VacationStats
-} from '../models/dashboard.models';
+} from '@core/models/dashboard.models';
 
 /** بدون id → نطاق المستخدم نفسه (الباكاند يتحقق من الصلاحية) */
 @Injectable({ providedIn: 'root' })

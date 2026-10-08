@@ -1,10 +1,10 @@
 import { DatePipe, Location } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { MaintenancePrint, utcDate } from '../../core/models/maintenance.models';
-import { formatPhone } from '../../core/utils/phone';
-import { Logo } from '../../shared/ui/logo';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { MaintenancePrint, utcDate } from '@core/models/maintenance.models';
+import { formatPhone } from '@core/utils/phone';
+import { Logo } from '@shared/ui/logo';
 
 /** ترويسة المطبوعات — عدّلها هنا عند اعتماد الترويسة الرسمية */
 export const PRINT_HEADER = {

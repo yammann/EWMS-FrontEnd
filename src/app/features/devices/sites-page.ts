@@ -1,17 +1,17 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DeviceService, formatCoords } from '../../core/services/device.service';
-import { CoordinatePicker, Coordinates } from '../map/coordinate-picker';
-import { Site } from '../../core/models/device.models';
-import { GOVERNORATES } from '../../core/constants/governorates';
-import { Modal } from '../../shared/ui/modal';
-import { ToastService } from '../../shared/ui/toast.service';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { formatPhone, isValidPhone, normalizePhone } from '../../core/utils/phone';
+import { DeviceService, formatCoords } from '@core/services/device.service';
+import { CoordinatePicker, Coordinates } from '@features/map/coordinate-picker';
+import { Site } from '@core/models/device.models';
+import { GOVERNORATES } from '@core/constants/governorates';
+import { Modal } from '@shared/ui/modal';
+import { ToastService } from '@shared/ui/toast.service';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { formatPhone, isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceHistory } from './device-ui';
 
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */

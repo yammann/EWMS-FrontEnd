@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { NotificationService, notificationRoute } from '../../core/services/notification.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AppNotification } from '../../core/models/notification.models';
+import { NotificationService, notificationRoute } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppNotification } from '@core/models/notification.models';
 
 // نوافذ منبثقة للإشعارات اللحظية (مثل إشعارات التطبيقات) — تختفي تلقائياً بعد ثوانٍ
 @Component({

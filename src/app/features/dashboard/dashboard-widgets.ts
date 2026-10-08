@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DashboardAction, DashboardActivity, DashboardCountItem, DashboardVacationRow, WorkTaskDistribution } from '../../core/models/dashboard.models';
-import { WorkTaskCard } from '../../core/models/work-task.models';
+import { DashboardAction, DashboardActivity, DashboardCountItem, DashboardVacationRow, WorkTaskDistribution } from '@core/models/dashboard.models';
+import { WorkTaskCard } from '@core/models/work-task.models';
 
 /* =====================================================
  * مكوّنات مشتركة بين لوحات المتابعة (الفرع/القسم/المكتب/الموظف/المؤسسة)

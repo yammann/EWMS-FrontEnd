@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, shareReplay } from 'rxjs';
-import { PLACES_URL, PlaceIndex, PlacesFile } from '../utils/places';
+import { PLACES_URL, PlaceIndex, PlacesFile } from '@core/utils/places';
 
 /** فهرس أسماء الأماكن السورية — يُحمَّل مرة واحدة عند أول بحث فقط (لا يؤثر على فتح أي صفحة) */
 @Injectable({ providedIn: 'root' })

@@ -1,13 +1,13 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
-import { VacationService } from '../../core/services/vacation.service';
-import { PublicHoliday } from '../../core/models/vacation.models';
-import { vacationDateRange } from '../profile/profile-page';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
+import { VacationService } from '@core/services/vacation.service';
+import { PublicHoliday } from '@core/models/vacation.models';
+import { vacationDateRange } from '@features/profile/profile-page';
 
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 

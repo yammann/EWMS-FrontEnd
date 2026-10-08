@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DeviceService, formatCoords } from './device.service';
 import { AuthService } from './auth.service';
-import { isMac, isSubnetMask, sameSubnet } from '../utils/network';
+import { isMac, isSubnetMask, sameSubnet } from '@core/utils/network';
 
 describe('Device inventory', () => {
   let service: DeviceService;

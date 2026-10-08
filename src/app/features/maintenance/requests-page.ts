@@ -4,14 +4,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Observable, Subject, catchError, forkJoin, map, of, switchMap, tap, timer } from 'rxjs';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { NotificationService } from '../../core/services/notification.service';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { NotificationService } from '@core/services/notification.service';
 import {
   MaintenanceCount, MaintenanceRequest, MaintenanceRequestFilter, MaintenanceStatus, TechnicianOption, finalStageConfirm, isFinalStage, utcDate
-} from '../../core/models/maintenance.models';
-import { formatPhone } from '../../core/utils/phone';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { ToastService } from '../../shared/ui/toast.service';
+} from '@core/models/maintenance.models';
+import { formatPhone } from '@core/utils/phone';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { ToastService } from '@shared/ui/toast.service';
 import { Pager, StatusChip } from './maintenance-ui';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
 import { PendingTransfersButton } from './transfer-panel';

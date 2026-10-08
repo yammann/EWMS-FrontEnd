@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnDestroy, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
-import { Box, GOVERNORATES_ATTRIBUTION, GovernorateFeature, ProjectedGovernorate, SyriaGeoService, SyriaProjection, projectSyria } from '../../core/utils/geo';
-import { STAMP_LANDMARKS, Stamp } from '../../shared/ui/stamp';
+import { Box, GOVERNORATES_ATTRIBUTION, GovernorateFeature, ProjectedGovernorate, SyriaGeoService, SyriaProjection, projectSyria } from '@core/utils/geo';
+import { STAMP_LANDMARKS, Stamp } from '@shared/ui/stamp';
 
 export interface MapPoint {
   id: number;

@@ -1,11 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
-import { DeviceService, saveBlob } from '../../core/services/device.service';
-import { DeviceInventoryLog, ImportReport, INSTALLATION_STATUSES } from '../../core/models/device.models';
-import { utcDate } from '../../core/models/maintenance.models';
-import { Modal } from '../../shared/ui/modal';
-import { ToastService } from '../../shared/ui/toast.service';
-import { Pager } from '../maintenance/maintenance-ui';
+import { DeviceService, saveBlob } from '@core/services/device.service';
+import { DeviceInventoryLog, ImportReport, INSTALLATION_STATUSES } from '@core/models/device.models';
+import { utcDate } from '@core/models/maintenance.models';
+import { Modal } from '@shared/ui/modal';
+import { ToastService } from '@shared/ui/toast.service';
+import { Pager } from '@features/maintenance/maintenance-ui';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)

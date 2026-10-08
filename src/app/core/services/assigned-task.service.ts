@@ -5,7 +5,7 @@ import {
   AssignedTaskCard, AssignedTaskDetail, CreateTaskRequest, SaveRecurrenceRequest, SaveTemplateRequest, TaskBoard, TaskBoardMode,
   TaskExportFilter, TaskLink, TaskLinkType, TaskRecurrence, TaskStats, TaskStatus, TaskTargetKind, TaskTargetOption, TaskTemplate,
   TASK_STATUS_VALUE, UpdateTaskRequest
-} from '../models/assigned-task.models';
+} from '@core/models/assigned-task.models';
 
 @Injectable({ providedIn: 'root' })
 export class AssignedTaskService {

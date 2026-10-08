@@ -2,17 +2,17 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
-import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
 import { NotificationToasts } from './notification-toasts';
-import { Toasts } from '../../shared/ui/toasts';
-import { ConfirmHost } from '../../shared/ui/confirm-host';
-import { TruncationTipService } from '../../shared/ui/truncation-tip.service';
-import { Logo } from '../../shared/ui/logo';
-import { Icon, IconName } from '../../shared/ui/icon';
+import { Toasts } from '@shared/ui/toasts';
+import { ConfirmHost } from '@shared/ui/confirm-host';
+import { TruncationTipService } from '@shared/ui/truncation-tip.service';
+import { Logo } from '@shared/ui/logo';
+import { Icon, IconName } from '@shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
-import { roleLabel } from '../../core/utils/roles';
-import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN } from '../../core/constants/access';
+import { roleLabel } from '@core/utils/roles';
+import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN } from '@core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
 

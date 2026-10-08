@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToDoService } from '../../core/services/todo.service';
-import { TODO_LIMITS, TODO_REPEAT_LABEL, TODO_REPEAT_VALUE, ToDoItem, ToDoList } from '../../core/models/todo.models';
-import { Modal } from '../../shared/ui/modal';
+import { ToDoService } from '@core/services/todo.service';
+import { TODO_LIMITS, TODO_REPEAT_LABEL, TODO_REPEAT_VALUE, ToDoItem, ToDoList } from '@core/models/todo.models';
+import { Modal } from '@shared/ui/modal';
 
 /** تعديل بند: العنوان والملاحظة والموعد والتكرار والأهمية (المهمة المرتبطة تُعرض للاطلاع) */
 @Component({

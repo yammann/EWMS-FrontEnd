@@ -1,8 +1,8 @@
 import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
-import { GovernorateFeature, governorateOf } from '../../core/utils/geo';
+import { GovernorateFeature, governorateOf } from '@core/utils/geo';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 import { PlaceSearch } from './place-search';
-import { Place } from '../../core/utils/places';
+import { Place } from '@core/utils/places';
 
 export interface Coordinates { latitude: number; longitude: number; }
 

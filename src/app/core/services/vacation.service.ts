@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { PublicHoliday, Vacation, VacationApprovalContext, VacationDaysPreview, VacationPrint, VacationType } from '../models/vacation.models';
+import { PublicHoliday, Vacation, VacationApprovalContext, VacationDaysPreview, VacationPrint, VacationType } from '@core/models/vacation.models';
 
 @Injectable({ providedIn: 'root' })
 export class VacationService {

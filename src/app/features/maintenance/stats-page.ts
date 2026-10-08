@@ -1,9 +1,9 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { MaintenanceCount, MaintenanceStats, formatHours } from '../../core/models/maintenance.models';
-import { StatTile } from '../dashboard/dashboard-widgets';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { NotificationService } from '@core/services/notification.service';
+import { MaintenanceCount, MaintenanceStats, formatHours } from '@core/models/maintenance.models';
+import { StatTile } from '@features/dashboard/dashboard-widgets';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 

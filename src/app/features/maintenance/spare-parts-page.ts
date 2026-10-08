@@ -2,12 +2,12 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject, debounceTime } from 'rxjs';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { MaintenanceLookup } from '../../core/models/maintenance.models';
-import { NamedRef, SparePart, money, qty } from '../../core/models/spare-part.models';
-import { ToastService } from '../../shared/ui/toast.service';
-import { ConfirmService } from '../../shared/ui/confirm.service';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { NotificationService } from '@core/services/notification.service';
+import { MaintenanceLookup } from '@core/models/maintenance.models';
+import { NamedRef, SparePart, money, qty } from '@core/models/spare-part.models';
+import { ToastService } from '@shared/ui/toast.service';
+import { ConfirmService } from '@shared/ui/confirm.service';
 import { Pager } from './maintenance-ui';
 import { SparePartFormDialog, SparePartMovements, SparePartStockDialog } from './spare-part-dialogs';
 

@@ -2,8 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
-import { Branch, Department, Office, Role, User } from '../models/ewms.models';
-import { AppPermission } from '../constants/access';
+import { Branch, Department, Office, Role, User } from '@core/models/ewms.models';
+import { AppPermission } from '@core/constants/access';
 
 @Injectable({ providedIn: 'root' })
 export class EwmsService {

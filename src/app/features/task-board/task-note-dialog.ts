@@ -1,6 +1,6 @@
 import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Modal } from '../../shared/ui/modal';
+import { Modal } from '@shared/ui/modal';
 
 /** نافذة صغيرة تطلب نصاً إجبارياً (سبب إعادة المهمة من المراجعة إلى التنفيذ) */
 @Component({

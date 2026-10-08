@@ -3,8 +3,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AssignedTaskService } from './assigned-task.service';
 import { notificationRoute } from './notification.service';
-import { AppNotification } from '../models/notification.models';
-import { linkRoute } from '../../features/task-board/task-links';
+import { AppNotification } from '@core/models/notification.models';
+import { linkRoute } from '@features/task-board/task-links';
 
 describe('Task board API contract', () => {
   let service: AssignedTaskService;

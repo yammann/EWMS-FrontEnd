@@ -3,11 +3,11 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { MaintenanceRequest, MaintenanceTransfer, TechnicianOption, utcDate } from '../../core/models/maintenance.models';
-import { ToastService } from '../../shared/ui/toast.service';
-import { Modal } from '../../shared/ui/modal';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { NotificationService } from '@core/services/notification.service';
+import { MaintenanceRequest, MaintenanceTransfer, TechnicianOption, utcDate } from '@core/models/maintenance.models';
+import { ToastService } from '@shared/ui/toast.service';
+import { Modal } from '@shared/ui/modal';
 
 /**
  * طلب تحويل طلب صيانة (قرار المستخدم 2026-10-05) — في صفحة الطلب:

@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToDoService } from '../../core/services/todo.service';
-import { ToDoList } from '../../core/models/todo.models';
-import { Modal } from '../../shared/ui/modal';
+import { ToDoService } from '@core/services/todo.service';
+import { ToDoList } from '@core/models/todo.models';
+import { Modal } from '@shared/ui/modal';
 
 /** إضافة مهمة من لوحة المهام إلى إحدى قوائم مفكرتي كبند مرتبط بها (تُظهر حالتها وتفتحها) */
 @Component({

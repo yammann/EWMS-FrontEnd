@@ -1,6 +1,6 @@
 import { Component, ElementRef, inject, signal } from '@angular/core';
-import { MODES, PALETTES, ThemeService } from '../../core/services/theme.service';
-import { Icon } from '../../shared/ui/icon';
+import { MODES, PALETTES, ThemeService } from '@core/services/theme.service';
+import { Icon } from '@shared/ui/icon';
 
 /** زر المظهر في النافبار: لوحة الألوان (كدوائر الهوية) + فاتح/داكن/تلقائي */
 @Component({

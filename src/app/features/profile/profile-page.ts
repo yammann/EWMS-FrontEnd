@@ -1,22 +1,22 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { VacationService } from '../../core/services/vacation.service';
-import { AuthService } from '../../core/services/auth.service';
-import { ApiService } from '../../core/services/api.service';
-import { User } from '../../core/models/ewms.models';
-import { VACATION_ATTACHMENTS, Vacation, VacationDaysPreview, VacationType } from '../../core/models/vacation.models';
-import { VacationAttachments, fileSize } from '../vacations/vacation-attachments';
-import { daysAr, fridaysAr, holidaysAr } from '../../core/utils/arabic-count';
-import { AppPermission } from '../../core/constants/access';
+import { VacationService } from '@core/services/vacation.service';
+import { AuthService } from '@core/services/auth.service';
+import { ApiService } from '@core/services/api.service';
+import { User } from '@core/models/ewms.models';
+import { VACATION_ATTACHMENTS, Vacation, VacationDaysPreview, VacationType } from '@core/models/vacation.models';
+import { VacationAttachments, fileSize } from '@features/vacations/vacation-attachments';
+import { daysAr, fridaysAr, holidaysAr } from '@core/utils/arabic-count';
+import { AppPermission } from '@core/constants/access';
 import { SignaturePanel } from './signature-panel';
-import { formatPhone } from '../../core/utils/phone';
-import { utcDate } from '../../core/models/maintenance.models';
+import { formatPhone } from '@core/utils/phone';
+import { utcDate } from '@core/models/maintenance.models';
 
 export function vacationDateRange(control: AbstractControl) {
   const { startVac, endVac } = control.value;

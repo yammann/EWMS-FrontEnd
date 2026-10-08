@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { MaintenanceDevice, MaintenanceLookup } from '../../core/models/maintenance.models';
-import { Modal } from '../../shared/ui/modal';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { MaintenanceDevice, MaintenanceLookup } from '@core/models/maintenance.models';
+import { Modal } from '@shared/ui/modal';
 
 /** مقارنة الرقمين بعد حذف الفراغات وبلا تمييز لحالة الأحرف (الباكاند يعامل الرقم كذلك) */
 const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim().toUpperCase();

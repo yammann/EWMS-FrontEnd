@@ -4,12 +4,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { switchMap } from 'rxjs';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { MaintenanceTask, TechnicianOption, nowLocalInput, toLocalInput, utcDate } from '../../core/models/maintenance.models';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { Modal } from '../../shared/ui/modal';
-import { ToastService } from '../../shared/ui/toast.service';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { NotificationService } from '@core/services/notification.service';
+import { MaintenanceTask, TechnicianOption, nowLocalInput, toLocalInput, utcDate } from '@core/models/maintenance.models';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { Modal } from '@shared/ui/modal';
+import { ToastService } from '@shared/ui/toast.service';
 import { AssignDialog, Pager } from './maintenance-ui';
 
 const PAGE_SIZE = 20;

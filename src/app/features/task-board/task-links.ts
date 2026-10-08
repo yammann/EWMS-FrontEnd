@@ -1,13 +1,13 @@
 import { Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AssignedTaskService } from '../../core/services/assigned-task.service';
-import { AuthService } from '../../core/services/auth.service';
-import { DeviceService } from '../../core/services/device.service';
-import { AppPermission, DEVICE_ACCESS } from '../../core/constants/access';
-import { AssignedTaskCard, LINK_TYPE_LABEL, TaskLink, TaskLinkType } from '../../core/models/assigned-task.models';
-import { Site } from '../../core/models/device.models';
-import { ConfirmService } from '../../shared/ui/confirm.service';
+import { AssignedTaskService } from '@core/services/assigned-task.service';
+import { AuthService } from '@core/services/auth.service';
+import { DeviceService } from '@core/services/device.service';
+import { AppPermission, DEVICE_ACCESS } from '@core/constants/access';
+import { AssignedTaskCard, LINK_TYPE_LABEL, TaskLink, TaskLinkType } from '@core/models/assigned-task.models';
+import { Site } from '@core/models/device.models';
+import { ConfirmService } from '@shared/ui/confirm.service';
 
 /** وجهة رابط سجل في نظامه (أو null إن لم تتوفر للمستخدم صفحة له) */
 export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: boolean): string | null {

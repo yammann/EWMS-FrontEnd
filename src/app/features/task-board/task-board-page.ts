@@ -3,22 +3,22 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { AssignedTaskService } from '../../core/services/assigned-task.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission, TASK_ASSIGN, TASK_OVERSIGHT } from '../../core/constants/access';
-import { NotificationService } from '../../core/services/notification.service';
+import { AssignedTaskService } from '@core/services/assigned-task.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission, TASK_ASSIGN, TASK_OVERSIGHT } from '@core/constants/access';
+import { NotificationService } from '@core/services/notification.service';
 import {
   AssignedTaskCard, AssignedTaskDetail, TaskBoardMode, TaskPriority, TaskStatus, TaskTargetType,
   TASK_PRIORITY_LABEL, TASK_STATUS_LABEL
-} from '../../core/models/assigned-task.models';
+} from '@core/models/assigned-task.models';
 
-import { StatTile } from '../dashboard/dashboard-widgets';
+import { StatTile } from '@features/dashboard/dashboard-widgets';
 import { TaskDetailDrawer } from './task-detail-drawer';
 import { TaskNoteDialog } from './task-note-dialog';
 import { TaskCalendar } from './task-calendar';
-import { ConfirmService } from '../../shared/ui/confirm.service';
+import { ConfirmService } from '@shared/ui/confirm.service';
 import { TaskFormDialog, TaskFormMode } from './task-form-dialog';
-import { ToastService } from '../../shared/ui/toast.service';
+import { ToastService } from '@shared/ui/toast.service';
 
 interface Column { status: TaskStatus; label: string; hint: string; }
 

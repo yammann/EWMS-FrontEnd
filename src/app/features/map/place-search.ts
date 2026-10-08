@@ -1,7 +1,7 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
-import { PlacesService } from '../../core/services/places.service';
-import { PLACES_ATTRIBUTION, PLACE_TYPE_LABEL, Place, PlaceIndex } from '../../core/utils/places';
-import { governorateName } from '../../core/constants/governorates';
+import { PlacesService } from '@core/services/places.service';
+import { PLACES_ATTRIBUTION, PLACE_TYPE_LABEL, Place, PlaceIndex } from '@core/utils/places';
+import { governorateName } from '@core/constants/governorates';
 
 /**
  * بحث بأسماء الأماكن السورية (بدون إنترنت): اكتب «المزة» أو «حلب» فتظهر قائمة نتائج مرتبة،

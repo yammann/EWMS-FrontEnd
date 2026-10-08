@@ -2,16 +2,16 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AssignedTaskService } from '../../core/services/assigned-task.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
+import { AssignedTaskService } from '@core/services/assigned-task.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
 import {
   FREQUENCY_LABEL, SaveRecurrenceRequest, SaveTemplateRequest, TaskPriority, TaskRecurrence, TaskTargetKind, TaskTargetOption, TaskTemplate,
   TASK_PRIORITY_LABEL, TASK_PRIORITY_VALUE, WEEK_DAYS
-} from '../../core/models/assigned-task.models';
-import { Modal } from '../../shared/ui/modal';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { ToastService } from '../../shared/ui/toast.service';
+} from '@core/models/assigned-task.models';
+import { Modal } from '@shared/ui/modal';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { ToastService } from '@shared/ui/toast.service';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };

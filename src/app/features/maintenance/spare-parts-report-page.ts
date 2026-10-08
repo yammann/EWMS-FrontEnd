@@ -1,8 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { NamedRef, SparePartReport, money, qty } from '../../core/models/spare-part.models';
-import { StatTile } from '../dashboard/dashboard-widgets';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { NamedRef, SparePartReport, money, qty } from '@core/models/spare-part.models';
+import { StatTile } from '@features/dashboard/dashboard-widgets';
 
 function dateInput(d: Date): string {
   const local = new Date(d);

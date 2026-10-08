@@ -1,11 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, debounceTime, forkJoin } from 'rxjs';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { MaintenanceDevice, MaintenanceLookup } from '../../core/models/maintenance.models';
-import { ToastService } from '../../shared/ui/toast.service';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { Modal } from '../../shared/ui/modal';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { MaintenanceDevice, MaintenanceLookup } from '@core/models/maintenance.models';
+import { ToastService } from '@shared/ui/toast.service';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { Modal } from '@shared/ui/modal';
 import { Pager } from './maintenance-ui';
 import { DeviceFormDialog } from './device-form-dialog';
 import { DeviceRepairHistory } from './device-repair-history';

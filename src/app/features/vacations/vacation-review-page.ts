@@ -1,16 +1,16 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { VacationContextPanel } from './vacation-context-panel';
 import { VacationAttachments } from './vacation-attachments';
-import { daysAr } from '../../core/utils/arabic-count';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
-import { VacationService } from '../../core/services/vacation.service';
-import { Vacation } from '../../core/models/vacation.models';
+import { daysAr } from '@core/utils/arabic-count';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
+import { VacationService } from '@core/services/vacation.service';
+import { Vacation } from '@core/models/vacation.models';
 
 @Component({
   selector: 'app-vacation-review', standalone: true, imports: [CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],

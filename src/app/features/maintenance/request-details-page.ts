@@ -3,19 +3,19 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { NotificationService } from '../../core/services/notification.service';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { NotificationService } from '@core/services/notification.service';
 import {
   MaintenanceActivity, MaintenanceRequest, MaintenanceStatus, finalStageConfirm, formatHours, isFinalStage, stageLabel, utcDate
-} from '../../core/models/maintenance.models';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { ToastService } from '../../shared/ui/toast.service';
-import { CopyText } from '../../shared/ui/secret-text';
+} from '@core/models/maintenance.models';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { ToastService } from '@shared/ui/toast.service';
+import { CopyText } from '@shared/ui/secret-text';
 import { AssignDialog, StatusChip } from './maintenance-ui';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
 import { DeviceRepairHistory } from './device-repair-history';
 import { TransferPanel } from './transfer-panel';
-import { LinkedTasks } from '../task-board/task-links';
+import { LinkedTasks } from '@features/task-board/task-links';
 import { RequestPartsPanel } from './request-parts-panel';
 
 const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4: '✎', 5: '⇢', 6: '✕', 7: '⚙', 8: '↩' };

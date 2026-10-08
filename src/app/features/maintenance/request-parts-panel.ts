@@ -1,11 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { MaintenanceRequest, utcDate } from '../../core/models/maintenance.models';
-import { RequestPart, RequestParts, SparePart, money, qty, twoDecimals } from '../../core/models/spare-part.models';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { ToastService } from '../../shared/ui/toast.service';
-import { Modal } from '../../shared/ui/modal';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { MaintenanceRequest, utcDate } from '@core/models/maintenance.models';
+import { RequestPart, RequestParts, SparePart, money, qty, twoDecimals } from '@core/models/spare-part.models';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { ToastService } from '@shared/ui/toast.service';
+import { Modal } from '@shared/ui/modal';
 
 /**
  * قطع الغيار المصروفة على طلب الصيانة: الصرف من مخزون قسم الطلب (المتوافقة مع الجهاز أولاً)، والإرجاع للمخزون،

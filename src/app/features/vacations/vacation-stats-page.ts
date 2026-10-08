@@ -1,14 +1,14 @@
-import { AppPermission } from '../../core/constants/access';
+import { AppPermission } from '@core/constants/access';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { DashboardService } from '../../core/services/dashboard.service';
-import { AuthService } from '../../core/services/auth.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { EwmsService } from '../../core/services/ewms.service';
-import { VacationStats } from '../../core/models/dashboard.models';
-import { Branch } from '../../core/models/ewms.models';
-import { ActionsTable, CountBars, StatTile, VacationRows } from '../dashboard/dashboard-widgets';
+import { DashboardService } from '@core/services/dashboard.service';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
+import { EwmsService } from '@core/services/ewms.service';
+import { VacationStats } from '@core/models/dashboard.models';
+import { Branch } from '@core/models/ewms.models';
+import { ActionsTable, CountBars, StatTile, VacationRows } from '@features/dashboard/dashboard-widgets';
 
 /**
  * إحصائيات الإجازات للرؤساء — صفحة مستقلة عن لوحة المتابعة (الإجازات ميزة واحدة من التطبيق).

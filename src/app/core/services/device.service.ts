@@ -2,12 +2,12 @@ import { Injectable, computed, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
-import { AppPermission, AppPermissionName } from '../constants/access';
+import { AppPermission, AppPermissionName } from '@core/constants/access';
 import {
   BranchMap, Device, DeviceAccess, DeviceInventoryLog, DeviceSite, ImportReport, InstallationFilter, InstallationStatus, IpInUse,
   MapBranchOption, Site
-} from '../models/device.models';
-import { PagedResult } from '../models/maintenance.models';
+} from '@core/models/device.models';
+import { PagedResult } from '@core/models/maintenance.models';
 
 function query(params: object): string {
   const q = new URLSearchParams();

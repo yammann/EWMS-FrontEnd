@@ -1,17 +1,17 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MaintenanceService } from '../../core/services/maintenance.service';
+import { MaintenanceService } from '@core/services/maintenance.service';
 import {
   MAINTENANCE_LOOKUPS, MAINTENANCE_STAGES, MaintenanceLookup, MaintenanceLookupKind, MaintenanceStage, isFinalStage, stageLabel
-} from '../../core/models/maintenance.models';
-import { money } from '../../core/models/spare-part.models';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { Modal } from '../../shared/ui/modal';
-import { ToastService } from '../../shared/ui/toast.service';
+} from '@core/models/maintenance.models';
+import { money } from '@core/models/spare-part.models';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { Modal } from '@shared/ui/modal';
+import { ToastService } from '@shared/ui/toast.service';
 import { StatusChip } from './maintenance-ui';
 
 const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];

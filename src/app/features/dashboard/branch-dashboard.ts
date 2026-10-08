@@ -2,13 +2,13 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DashboardService } from '../../core/services/dashboard.service';
-import { AuthService } from '../../core/services/auth.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { BranchDashboard } from '../../core/models/dashboard.models';
+import { DashboardService } from '@core/services/dashboard.service';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
+import { BranchDashboard } from '@core/models/dashboard.models';
 import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
-import { BranchMapComponent } from '../map/branch-map';
-import { AppPermission } from '../../core/constants/access';
+import { BranchMapComponent } from '@features/map/branch-map';
+import { AppPermission } from '@core/constants/access';
 
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({

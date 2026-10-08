@@ -1,8 +1,8 @@
 import { Component, OnDestroy, inject, input, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { VacationService } from '../../core/services/vacation.service';
-import { VacationAttachment } from '../../core/models/vacation.models';
-import { Modal } from '../../shared/ui/modal';
+import { VacationService } from '@core/services/vacation.service';
+import { VacationAttachment } from '@core/models/vacation.models';
+import { Modal } from '@shared/ui/modal';
 
 /** حجم مقروء: 1.2 MB / 340 KB */
 export function fileSize(bytes: number) {

@@ -1,10 +1,10 @@
 import { DatePipe, Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { VacationService } from '../../core/services/vacation.service';
-import { VacationPrint } from '../../core/models/vacation.models';
-import { Logo } from '../../shared/ui/logo';
-import { daysAr } from '../../core/utils/arabic-count';
+import { VacationService } from '@core/services/vacation.service';
+import { VacationPrint } from '@core/models/vacation.models';
+import { Logo } from '@shared/ui/logo';
+import { daysAr } from '@core/utils/arabic-count';
 
 /** ترويسة نموذج طلب الإجازة: الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
 export const VACATION_PRINT_HEADER = {

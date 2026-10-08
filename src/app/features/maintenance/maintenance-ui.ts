@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { TechnicianOption } from '../../core/models/maintenance.models';
-import { Modal } from '../../shared/ui/modal';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { TechnicianOption } from '@core/models/maintenance.models';
+import { Modal } from '@shared/ui/modal';
 
 /** شارة حالة الطلب بلونها المعرَّف في جدول الحالات (يعمل في الوضعين الفاتح والداكن) */
 @Component({
@@ -19,7 +19,7 @@ export class StatusChip {
 }
 
 /** تقسيم الصفحات: المكوّن المشترك للمشروع (shared/ui/pager.ts) — يُعاد تصديره هنا لبقاء الاستيراد القديم يعمل */
-export { Pager } from '../../shared/ui/pager';
+export { Pager } from '@shared/ui/pager';
 
 /**
  * نقل طلب/مهمة صيانة إلى موظف آخر (صاحب صلاحية النقل: إلى موظفي قسمه، والسوبر ادمن: داخل قسم السجل).

@@ -1,19 +1,19 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { DeviceService, formatCoords } from '../../core/services/device.service';
-import { DeviceSite, Site } from '../../core/models/device.models';
-import { StatTile } from '../dashboard/dashboard-widgets';
-import { MapPoint, SyriaSvgMap } from '../map/syria-svg-map';
-import { CopyText } from '../../shared/ui/secret-text';
-import { formatPhone } from '../../core/utils/phone';
-import { deviceUrl } from '../../core/utils/network';
+import { DeviceService, formatCoords } from '@core/services/device.service';
+import { DeviceSite, Site } from '@core/models/device.models';
+import { StatTile } from '@features/dashboard/dashboard-widgets';
+import { MapPoint, SyriaSvgMap } from '@features/map/syria-svg-map';
+import { CopyText } from '@shared/ui/secret-text';
+import { formatPhone } from '@core/utils/phone';
+import { deviceUrl } from '@core/utils/network';
 import { DeviceHistory, DevicePassword, InstallStatus } from './device-ui';
-import { LinkedTasks } from '../task-board/task-links';
+import { LinkedTasks } from '@features/task-board/task-links';
 
 /**
  * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):

@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { ConfirmService } from './confirm.service';
 import { ToastService } from './toast.service';
 import { PageActions, errorMessage } from './page-actions';
-import { roleLabel } from '../../core/utils/roles';
+import { roleLabel } from '@core/utils/roles';
 
 describe('ConfirmService', () => {
   it('resolves true on confirm and clears the dialog', async () => {

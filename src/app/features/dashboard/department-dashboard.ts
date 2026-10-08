@@ -1,15 +1,15 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { BranchMapComponent } from '../map/branch-map';
+import { BranchMapComponent } from '@features/map/branch-map';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DashboardService } from '../../core/services/dashboard.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
-import { NotificationService } from '../../core/services/notification.service';
-import { WorkTaskService } from '../../core/services/work-task.service';
-import { DepartmentDashboard } from '../../core/models/dashboard.models';
-import { WorkTaskCard } from '../../core/models/work-task.models';
+import { DashboardService } from '@core/services/dashboard.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
+import { NotificationService } from '@core/services/notification.service';
+import { WorkTaskService } from '@core/services/work-task.service';
+import { DepartmentDashboard } from '@core/models/dashboard.models';
+import { WorkTaskCard } from '@core/models/work-task.models';
 import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
 
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */

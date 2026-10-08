@@ -1,15 +1,15 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
-import { TASK_ASSIGN } from '../../core/constants/access';
-import { ToastService } from '../../shared/ui/toast.service';
-import { Modal } from '../../shared/ui/modal';
-import { AssignedTaskService } from '../../core/services/assigned-task.service';
+import { AuthService } from '@core/services/auth.service';
+import { TASK_ASSIGN } from '@core/constants/access';
+import { ToastService } from '@shared/ui/toast.service';
+import { Modal } from '@shared/ui/modal';
+import { AssignedTaskService } from '@core/services/assigned-task.service';
 import {
   AssignedTaskDetail, TaskPriority, TaskTargetKind, TaskTargetOption, TaskTargetType, TaskTemplate, TASK_ATTACHMENTS, TASK_PRIORITY_LABEL,
   TASK_PRIORITY_VALUE, attachmentProblem
-} from '../../core/models/assigned-task.models';
-import { fileSize } from '../vacations/vacation-attachments';
+} from '@core/models/assigned-task.models';
+import { fileSize } from '@features/vacations/vacation-attachments';
 import { fileIcon } from './task-attachments';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';

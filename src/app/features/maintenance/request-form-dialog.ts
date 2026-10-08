@@ -2,13 +2,13 @@ import { Component, OnInit, inject, input, output, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MaintenanceService } from '../../core/services/maintenance.service';
+import { MaintenanceService } from '@core/services/maintenance.service';
 import {
   MaintenanceClient, MaintenanceDevice, MaintenanceLookup, MaintenanceRequest, MaintenanceStatus, TechnicianOption, finalStageConfirm, isFinalStage
-} from '../../core/models/maintenance.models';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { Modal } from '../../shared/ui/modal';
-import { isValidPhone, normalizePhone } from '../../core/utils/phone';
+} from '@core/models/maintenance.models';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { Modal } from '@shared/ui/modal';
+import { isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceFormDialog } from './device-form-dialog';
 
 export interface RequestLookups {

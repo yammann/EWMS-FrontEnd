@@ -3,9 +3,9 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, map, of, switchMap, tap } from 'rxjs';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { MaintenanceRequest, utcDate } from '../../core/models/maintenance.models';
-import { daysAr, timesAr } from '../../core/utils/arabic-count';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { MaintenanceRequest, utcDate } from '@core/models/maintenance.models';
+import { daysAr, timesAr } from '@core/utils/arabic-count';
 import { StatusChip } from './maintenance-ui';
 
 /** أقصى عدد يُعرض بعد «عرض الكل» */

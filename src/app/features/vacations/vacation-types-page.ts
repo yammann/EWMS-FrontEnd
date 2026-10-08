@@ -1,11 +1,11 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { VacationService } from '../../core/services/vacation.service';
-import { VacationType } from '../../core/models/vacation.models';
+import { VacationService } from '@core/services/vacation.service';
+import { VacationType } from '@core/models/vacation.models';
 
 @Component({
   selector: 'app-vacation-types', standalone: true, imports: [ReactiveFormsModule, Pager],

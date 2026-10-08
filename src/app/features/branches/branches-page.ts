@@ -1,16 +1,16 @@
-import { Pagination } from '../../core/utils/pagination';
-import { Pager } from '../../shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Branch } from '../../core/models/ewms.models';
-import { EwmsService } from '../../core/services/ewms.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AppPermission } from '../../core/constants/access';
-import { Modal } from '../../shared/ui/modal';
-import { ToastService } from '../../shared/ui/toast.service';
-import { ConfirmService } from '../../shared/ui/confirm.service';
-import { PageActions } from '../../shared/ui/page-actions';
+import { Branch } from '@core/models/ewms.models';
+import { EwmsService } from '@core/services/ewms.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
+import { Modal } from '@shared/ui/modal';
+import { ToastService } from '@shared/ui/toast.service';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { PageActions } from '@shared/ui/page-actions';
 
 type ModalType = 'create' | 'edit';
 

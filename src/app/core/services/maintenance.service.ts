@@ -1,13 +1,13 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
-import { AppPermission } from '../constants/access';
+import { AppPermission } from '@core/constants/access';
 import {
   MAINTENANCE_LOOKUPS, MaintenanceActivity, MaintenanceClient, MaintenanceTransfer, MyMaintenanceRequest, MaintenanceDevice, MaintenanceDeviceFilter, MaintenanceDeviceInput, MaintenanceLookup, MaintenanceLookupKind, MaintenancePrint, MaintenanceRequest,
   MaintenanceRequestFilter, MaintenanceRequestInput, MaintenanceStats, MaintenanceTask, MaintenanceTaskInput,
   PagedResult, TechnicianOption
-} from '../models/maintenance.models';
-import { NamedRef, RequestParts, SparePart, SparePartFilter, SparePartInput, SparePartMovement, SparePartReport } from '../models/spare-part.models';
+} from '@core/models/maintenance.models';
+import { NamedRef, RequestParts, SparePart, SparePartFilter, SparePartInput, SparePartMovement, SparePartReport } from '@core/models/spare-part.models';
 
 function query(params: object): string {
   const q = new URLSearchParams();

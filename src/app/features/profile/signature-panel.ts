@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { MaintenanceService } from '../../core/services/maintenance.service';
-import { ToastService } from '../../shared/ui/toast.service';
+import { MaintenanceService } from '@core/services/maintenance.service';
+import { ToastService } from '@shared/ui/toast.service';
 import { SignaturePad } from './signature-pad';
 
 /**
