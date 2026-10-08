@@ -6,7 +6,7 @@ import { MaintenanceService } from '@core/services/maintenance.service';
 import { MaintenanceLookup, utcDate } from '@core/models/maintenance.models';
 import { NamedRef, SparePart, SparePartMovement, money, qty, twoDecimals } from '@core/models/spare-part.models';
 import { Modal } from '@shared/ui/modal';
-import { Pager } from './maintenance-ui';
+import { Pager } from '@shared/ui/pager';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };
 

@@ -11,7 +11,7 @@ import { TaskLinks } from './task-links';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { ToastService } from '@shared/ui/toast.service';
-import { AddToTodoDialog } from '@features/todo/add-to-todo-dialog';
+import { AddToTodoDialog } from '@features/todo';
 import { TaskNoteDialog } from './task-note-dialog';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */

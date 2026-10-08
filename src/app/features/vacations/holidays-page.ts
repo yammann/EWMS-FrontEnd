@@ -7,7 +7,7 @@ import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { VacationService } from '@core/services/vacation.service';
 import { PublicHoliday } from '@core/models/vacation.models';
-import { vacationDateRange } from '@features/profile/profile-page';
+import { vacationDateRange } from './vacation-validators';
 
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 

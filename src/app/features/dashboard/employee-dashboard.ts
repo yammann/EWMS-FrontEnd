@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgTemplateOutlet } from '@angular/common';
-import { BranchMapComponent } from '@features/map/branch-map';
+import { BranchMapComponent } from '@features/map';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -12,7 +12,8 @@ import { WorkTaskService } from '@core/services/work-task.service';
 import { EmployeeDashboard } from '@core/models/dashboard.models';
 import { WorkTaskCard } from '@core/models/work-task.models';
 import { roleLabel } from '@core/utils/roles';
-import { StatTile, TaskCards } from './dashboard-widgets';
+import { TaskCards } from './dashboard-widgets';
+import { StatTile } from '@shared/ui/stat-tile';
 
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({

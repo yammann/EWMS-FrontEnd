@@ -5,7 +5,7 @@ import { DeviceInventoryLog, ImportReport, INSTALLATION_STATUSES } from '@core/m
 import { utcDate } from '@core/models/maintenance.models';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
-import { Pager } from '@features/maintenance/maintenance-ui';
+import { Pager } from '@shared/ui/pager';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)

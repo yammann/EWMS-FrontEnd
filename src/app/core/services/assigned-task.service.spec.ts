@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { AssignedTaskService } from './assigned-task.service';
 import { notificationRoute } from './notification.service';
 import { AppNotification } from '@core/models/notification.models';
-import { linkRoute } from '@features/task-board/task-links';
+import { linkRoute } from '@features/task-board';
 
 describe('Task board API contract', () => {
   let service: AssignedTaskService;

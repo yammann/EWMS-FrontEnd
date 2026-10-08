@@ -10,7 +10,8 @@ import { MaintenanceTask, TechnicianOption, nowLocalInput, toLocalInput, utcDate
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
-import { AssignDialog, Pager } from './maintenance-ui';
+import { AssignDialog } from './maintenance-ui';
+import { Pager } from '@shared/ui/pager';
 
 const PAGE_SIZE = 20;
 

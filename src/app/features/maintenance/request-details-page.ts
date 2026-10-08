@@ -15,7 +15,7 @@ import { AssignDialog, StatusChip } from './maintenance-ui';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
 import { DeviceRepairHistory } from './device-repair-history';
 import { TransferPanel } from './transfer-panel';
-import { LinkedTasks } from '@features/task-board/task-links';
+import { LinkedTasks } from '@features/task-board';
 import { RequestPartsPanel } from './request-parts-panel';
 
 const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4: '✎', 5: '⇢', 6: '✕', 7: '⚙', 8: '↩' };

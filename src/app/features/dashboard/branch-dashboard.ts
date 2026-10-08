@@ -6,8 +6,9 @@ import { DashboardService } from '@core/services/dashboard.service';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { BranchDashboard } from '@core/models/dashboard.models';
-import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
-import { BranchMapComponent } from '@features/map/branch-map';
+import { ActivityList, TaskCards, TaskDistributionTable } from './dashboard-widgets';
+import { StatTile } from '@shared/ui/stat-tile';
+import { BranchMapComponent } from '@features/map';
 import { AppPermission } from '@core/constants/access';
 
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */

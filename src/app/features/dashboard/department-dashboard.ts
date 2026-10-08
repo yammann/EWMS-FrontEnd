@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { BranchMapComponent } from '@features/map/branch-map';
+import { BranchMapComponent } from '@features/map';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -10,7 +10,8 @@ import { NotificationService } from '@core/services/notification.service';
 import { WorkTaskService } from '@core/services/work-task.service';
 import { DepartmentDashboard } from '@core/models/dashboard.models';
 import { WorkTaskCard } from '@core/models/work-task.models';
-import { ActivityList, StatTile, TaskCards, TaskDistributionTable } from './dashboard-widgets';
+import { ActivityList, TaskCards, TaskDistributionTable } from './dashboard-widgets';
+import { StatTile } from '@shared/ui/stat-tile';
 
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({

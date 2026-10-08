@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DeviceService, formatCoords } from '@core/services/device.service';
-import { CoordinatePicker, Coordinates } from '@features/map/coordinate-picker';
+import { CoordinatePicker, Coordinates } from '@features/map';
 import { Site } from '@core/models/device.models';
 import { GOVERNORATES } from '@core/constants/governorates';
 import { Modal } from '@shared/ui/modal';

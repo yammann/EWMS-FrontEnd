@@ -12,7 +12,8 @@ import {
 import { formatPhone } from '@core/utils/phone';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
-import { Pager, StatusChip } from './maintenance-ui';
+import { StatusChip } from './maintenance-ui';
+import { Pager } from '@shared/ui/pager';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
 import { PendingTransfersButton } from './transfer-panel';
 

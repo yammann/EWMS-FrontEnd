@@ -7,13 +7,13 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeviceService, formatCoords } from '@core/services/device.service';
 import { DeviceSite, Site } from '@core/models/device.models';
-import { StatTile } from '@features/dashboard/dashboard-widgets';
-import { MapPoint, SyriaSvgMap } from '@features/map/syria-svg-map';
+import { StatTile } from '@shared/ui/stat-tile';
+import { MapPoint, SyriaSvgMap } from '@features/map';
 import { CopyText } from '@shared/ui/secret-text';
 import { formatPhone } from '@core/utils/phone';
 import { deviceUrl } from '@core/utils/network';
 import { DeviceHistory, DevicePassword, InstallStatus } from './device-ui';
-import { LinkedTasks } from '@features/task-board/task-links';
+import { LinkedTasks } from '@features/task-board';
 
 /**
  * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):

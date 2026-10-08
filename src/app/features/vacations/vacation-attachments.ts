@@ -2,12 +2,8 @@ import { Component, OnDestroy, inject, input, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { VacationService } from '@core/services/vacation.service';
 import { VacationAttachment } from '@core/models/vacation.models';
+import { fileSize } from '@core/utils/file-size';
 import { Modal } from '@shared/ui/modal';
-
-/** حجم مقروء: 1.2 MB / 340 KB */
-export function fileSize(bytes: number) {
-  return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
-}
 
 /**
  * مرفقات طلب إجازة: قائمة، ومعاينة داخل نافذة (صورة أو PDF)، وتنزيل.

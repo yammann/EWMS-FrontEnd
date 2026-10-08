@@ -12,7 +12,7 @@ import { ToDoList, ToDoToday, ToDoTodayItem, todoColor } from '@core/models/todo
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { Icon } from '@shared/ui/icon';
-import { StatTile } from '@features/dashboard/dashboard-widgets';
+import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from './todo-list-dialog';
 
 type View = 'lists' | 'today';

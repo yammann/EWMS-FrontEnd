@@ -6,7 +6,7 @@ import { MaintenanceDevice, MaintenanceLookup } from '@core/models/maintenance.m
 import { ToastService } from '@shared/ui/toast.service';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
-import { Pager } from './maintenance-ui';
+import { Pager } from '@shared/ui/pager';
 import { DeviceFormDialog } from './device-form-dialog';
 import { DeviceRepairHistory } from './device-repair-history';
 

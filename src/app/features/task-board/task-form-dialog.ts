@@ -9,7 +9,7 @@ import {
   AssignedTaskDetail, TaskPriority, TaskTargetKind, TaskTargetOption, TaskTargetType, TaskTemplate, TASK_ATTACHMENTS, TASK_PRIORITY_LABEL,
   TASK_PRIORITY_VALUE, attachmentProblem
 } from '@core/models/assigned-task.models';
-import { fileSize } from '@features/vacations/vacation-attachments';
+import { fileSize } from '@core/utils/file-size';
 import { fileIcon } from './task-attachments';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';

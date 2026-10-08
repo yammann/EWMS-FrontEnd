@@ -1,4 +1,5 @@
 import { Pagination } from '@core/utils/pagination';
+import { vacationDateRange } from '@features/vacations';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, computed } from '@angular/core';
@@ -11,17 +12,14 @@ import { AuthService } from '@core/services/auth.service';
 import { ApiService } from '@core/services/api.service';
 import { User } from '@core/models/ewms.models';
 import { VACATION_ATTACHMENTS, Vacation, VacationDaysPreview, VacationType } from '@core/models/vacation.models';
-import { VacationAttachments, fileSize } from '@features/vacations/vacation-attachments';
+import { VacationAttachments } from '@features/vacations';
+import { fileSize } from '@core/utils/file-size';
 import { daysAr, fridaysAr, holidaysAr } from '@core/utils/arabic-count';
 import { AppPermission } from '@core/constants/access';
 import { SignaturePanel } from './signature-panel';
 import { formatPhone } from '@core/utils/phone';
 import { utcDate } from '@core/models/maintenance.models';
 
-export function vacationDateRange(control: AbstractControl) {
-  const { startVac, endVac } = control.value;
-  return startVac && endVac && endVac < startVac ? { dateRange: true } : null;
-}
 
 /** تاريخ اليوم المحلي بصيغة yyyy-MM-dd (قيمة حقل date) */
 export function localToday() {

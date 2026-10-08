@@ -28,7 +28,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true, allowShortCircuit: true }],
       '@angular-eslint/no-output-native': 'warn',                        // close/cancel: يُعاد تسميتها في المرحلة 5
       'no-irregular-whitespace': ['error', { skipStrings: true, skipTemplates: true }],
-      'no-restricted-imports': ['warn', {
+      'no-restricted-imports': ['error', {
         patterns: [
           { group: ['../../*', '../../../*'], message: 'استعمل المسارات المستعارة @core / @shared / @features بدل الصعود أكثر من مستوى.' }
         ]
@@ -39,7 +39,7 @@ export default tseslint.config(
   {
     files: ['src/app/core/**/*.ts'],
     rules: {
-      'no-restricted-imports': ['warn', {
+      'no-restricted-imports': ['error', {
         patterns: [
           { group: ['@features/*', '@shared/ui/*'], message: 'core لا يعتمد على features ولا على مكوّنات shared/ui.' },
           { group: ['../../*'], message: 'استعمل @core / @shared.' }
@@ -50,7 +50,7 @@ export default tseslint.config(
   {
     files: ['src/app/shared/**/*.ts'],
     rules: {
-      'no-restricted-imports': ['warn', {
+      'no-restricted-imports': ['error', {
         patterns: [
           { group: ['@features/*'], message: 'shared لا يعتمد على features.' },
           { group: ['../../*'], message: 'استعمل @core / @shared.' }
@@ -61,7 +61,7 @@ export default tseslint.config(
   {
     files: ['src/app/features/**/*.ts'],
     rules: {
-      'no-restricted-imports': ['warn', {
+      'no-restricted-imports': ['error', {
         patterns: [
           { group: ['@features/*/*'], message: 'استورد من الواجهة العامة للميزة (@features/<ميزة>) لا من ملف داخلها.' },
           { group: ['../../*', '../../../*'], message: 'استعمل @core / @shared / @features بدل الصعود أكثر من مستوى.' }

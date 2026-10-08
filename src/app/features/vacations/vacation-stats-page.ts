@@ -8,7 +8,8 @@ import { NotificationService } from '@core/services/notification.service';
 import { EwmsService } from '@core/services/ewms.service';
 import { VacationStats } from '@core/models/dashboard.models';
 import { Branch } from '@core/models/ewms.models';
-import { ActionsTable, CountBars, StatTile, VacationRows } from '@features/dashboard/dashboard-widgets';
+import { ActionsTable, CountBars, VacationRows } from '@features/dashboard';
+import { StatTile } from '@shared/ui/stat-tile';
 
 /**
  * إحصائيات الإجازات للرؤساء — صفحة مستقلة عن لوحة المتابعة (الإجازات ميزة واحدة من التطبيق).

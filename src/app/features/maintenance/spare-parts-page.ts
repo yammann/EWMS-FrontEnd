@@ -8,7 +8,7 @@ import { MaintenanceLookup } from '@core/models/maintenance.models';
 import { NamedRef, SparePart, money, qty } from '@core/models/spare-part.models';
 import { ToastService } from '@shared/ui/toast.service';
 import { ConfirmService } from '@shared/ui/confirm.service';
-import { Pager } from './maintenance-ui';
+import { Pager } from '@shared/ui/pager';
 import { SparePartFormDialog, SparePartMovements, SparePartStockDialog } from './spare-part-dialogs';
 
 const PAGE_SIZE = 25;

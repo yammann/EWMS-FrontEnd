@@ -12,7 +12,7 @@ import { TODO_LIMITS, ToDoItem, ToDoList } from '@core/models/todo.models';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { Icon } from '@shared/ui/icon';
-import { StatTile } from '@features/dashboard/dashboard-widgets';
+import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from './todo-list-dialog';
 import { TodoItemDialog } from './todo-item-dialog';
 import { TodoBulkDialog } from './todo-bulk-dialog';

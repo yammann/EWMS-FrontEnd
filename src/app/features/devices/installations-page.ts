@@ -12,7 +12,7 @@ import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { CopyText } from '@shared/ui/secret-text';
-import { Pager } from '@features/maintenance/maintenance-ui';
+import { Pager } from '@shared/ui/pager';
 import { DeviceHistory, DevicePassword, InstallStatus, InstallationsImport } from './device-ui';
 
 const PAGE_SIZE = 50;

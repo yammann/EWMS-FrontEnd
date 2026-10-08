@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth.guard';
 import { permissionGuard } from '@core/guards/permission.guard';
 import { APPROVE_VACATIONS, AppPermission, DASHBOARD_ACCESS, DEPARTMENT_DASHBOARD_ACCESS, DEVICE_ACCESS, OFFICE_DASHBOARD_ACCESS, WORK_TASK_VIEW, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, TASK_ASSIGN } from '@core/constants/access';
-import { MainLayout } from '@features/layout/main-layout';
+import { MainLayout } from '@features/layout';
 
 /**
  * كل صفحة تُحمَّل عند فتحها فقط (loadComponent) — الحزمة الأولى تحتوي الإطار العام وصفحة الدخول فقط،

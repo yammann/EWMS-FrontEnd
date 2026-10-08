@@ -12,7 +12,7 @@ import {
   TASK_PRIORITY_LABEL, TASK_STATUS_LABEL
 } from '@core/models/assigned-task.models';
 
-import { StatTile } from '@features/dashboard/dashboard-widgets';
+import { StatTile } from '@shared/ui/stat-tile';
 import { TaskDetailDrawer } from './task-detail-drawer';
 import { TaskNoteDialog } from './task-note-dialog';
 import { TaskCalendar } from './task-calendar';
