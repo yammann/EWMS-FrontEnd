@@ -19,7 +19,7 @@ import { VacationType } from '../../core/models/vacation.models';
           <label class="form-field">الاسم<input formControlName="name" maxlength="100"></label>
           <label class="form-field">الوصف<input formControlName="description" maxlength="500"></label>
           <label class="form-field">الدفع<select formControlName="isPaid"><option [ngValue]="true">نوع مدفوع</option><option [ngValue]="false">نوع غير مدفوع</option></select></label>
-          <p class="muted full-width">قد يصبح الطلب غير مدفوع عند تجاوز الحد الشهري، حتى لو كان نوعه مدفوعاً.</p>
+          <p class="muted full-width">يُحدَّد الدفع عند الاعتماد النهائي: يومان مدفوعان في الشهر لكل الأنواع المدفوعة معاً، والباقي غير مدفوع.</p>
           <div class="actions full-width"><button class="btn" type="submit" [disabled]="saving() || form.invalid">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ النوع' }}</button>@if (editing()) { <button class="btn btn-ghost" type="button" (click)="reset()" [disabled]="saving()">إلغاء</button> }</div>
         </form>
       </section>

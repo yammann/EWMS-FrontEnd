@@ -156,6 +156,9 @@ export interface DashboardVacationRow {
   status: string;
   statusAr: string;
   isPaid: boolean;
+  paidDays: number;
+  unpaidDays: number;
+  paymentStatusAr: string;
 }
 
 export interface DashboardAction {

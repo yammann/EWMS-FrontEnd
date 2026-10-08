@@ -142,7 +142,7 @@ export class ActionsTable {
               @if (showEmployee()) { <td><strong class="cell-strong">{{ v.employeeName }}</strong></td> }
               @if (showDepartment()) { <td>{{ v.departmentName }}</td> }
               @if (showOffice()) { <td>{{ v.officeName || '—' }}</td> }
-              <td>{{ v.vacationTypeName }}<small>{{ v.isPaid ? 'مدفوعة' : 'غير مدفوعة' }}</small></td>
+              <td>{{ v.vacationTypeName }}<small>{{ v.paymentStatusAr }}</small></td>
               <td class="nowrap">{{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }}
                 @if (isNow(v)) { <small class="now">في إجازة الآن</small> }
               </td>

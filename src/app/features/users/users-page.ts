@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { formatPhone, isValidPhone, normalizePhone } from '../../core/utils/phone';
+import { utcDate } from '../../core/models/maintenance.models';
 import { forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Branch, Department, Office, Role, User } from '../../core/models/ewms.models';
@@ -40,11 +42,15 @@ export class UsersPage {
   loading = signal(true);
   private actions = new PageActions(() => this.load());
   saving = this.actions.saving;
+  phone = formatPhone;
+  utc = utcDate;
 
   createForm = this.fb.group({
     officeId: [''],
     fullName: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
+    personalIdNumber: ['', [Validators.maxLength(20), Validators.pattern(/^s*[A-Za-z0-9-]*s*$/)]],
+    phoneNumber: ['', (c: AbstractControl<string | null>) => isValidPhone(c.value) ? null : { phone: true }],
     password: ['', [Validators.required, Validators.minLength(6)]],
     roleId: ['', Validators.required],
     departmentId: [''],
@@ -55,6 +61,8 @@ export class UsersPage {
     officeId: [''],
     fullName: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
+    personalIdNumber: ['', [Validators.maxLength(20), Validators.pattern(/^s*[A-Za-z0-9-]*s*$/)]],
+    phoneNumber: ['', (c: AbstractControl<string | null>) => isValidPhone(c.value) ? null : { phone: true }],
     password: [''],
     roleId: ['', Validators.required],
     departmentId: [''],
@@ -134,6 +142,8 @@ export class UsersPage {
       officeId: user.officeId ? String(user.officeId) : '',
       fullName: user.fullName,
       email: user.email,
+      personalIdNumber: user.personalIdNumber ?? '',
+      phoneNumber: user.phoneNumber ?? '',
       password: '',
       roleId: String(user.roleId),
       departmentId: user.departmentId ? String(user.departmentId) : '',
@@ -164,6 +174,8 @@ export class UsersPage {
     const form = new FormData();
     form.append('FullName', this.createForm.value.fullName ?? '');
     form.append('Email', this.createForm.value.email ?? '');
+    form.append('PersonalIdNumber', (this.createForm.value.personalIdNumber ?? '').trim().toUpperCase());
+    form.append('PhoneNumber', normalizePhone(this.createForm.value.phoneNumber));
     form.append('Password', this.createForm.value.password ?? '');
     form.append('RoleId', this.createForm.value.roleId ?? '');
     this.appendPlacement(form, this.createForm);
@@ -186,6 +198,8 @@ export class UsersPage {
     const form = new FormData();
     form.append('FullName', this.editForm.value.fullName ?? '');
     form.append('Email', this.editForm.value.email ?? '');
+    form.append('PersonalIdNumber', (this.editForm.value.personalIdNumber ?? '').trim().toUpperCase());
+    form.append('PhoneNumber', normalizePhone(this.editForm.value.phoneNumber));
     form.append('RoleId', this.editForm.value.roleId ?? '');
     this.appendPlacement(form, this.editForm);
     form.append('IsActive', String(this.editForm.getRawValue().isActive ?? true));

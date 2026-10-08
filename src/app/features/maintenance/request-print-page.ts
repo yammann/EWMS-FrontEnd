@@ -34,9 +34,13 @@ type Kind = 'receipt' | 'delivery';
 
     @if (error()) { <p class="alert alert-error no-print" role="alert">{{ error() }}</p> }
     @if (data(); as d) {
-      @if (kind() === 'delivery' && !d.managerSignature) {
+      @if (kind() === 'delivery' && !d.delivered) {
         <p class="alert alert-warning no-print" role="status">
-          {{ d.managerName ? 'لم يرفع رئيس القسم (' + d.managerName + ') توقيعه بعد' : 'لا يوجد في قسم هذا الطلب من يملك صلاحية التوقيع على أوراق التسليم' }} — ستُطبع الورقة بخانة توقيع فارغة. يُرفع التوقيع من صفحة «ملفي الشخصي».
+          لم يُسلَّم الطلب بعد — يُثبَّت اسم رئيس القسم وتوقيعه عند تحويل الطلب إلى حالة من مرحلة «مُسلَّم»، وتُطبع الورقة الآن بخانة توقيع فارغة.
+        </p>
+      } @else if (kind() === 'delivery' && !d.managerSignature) {
+        <p class="alert alert-warning no-print" role="status">
+          {{ d.managerName ? 'لم يكن لرئيس القسم (' + d.managerName + ') توقيع مرفوع لحظة التسليم' : 'لم يكن في قسم هذا الطلب من يملك صلاحية التوقيع على أوراق التسليم لحظة التسليم' }} — تُطبع الورقة بخانة توقيع فارغة.
         </p>
       }
 
@@ -51,7 +55,7 @@ type Kind = 'receipt' | 'delivery';
             <dl>
               <div><dt>رقم الطلب</dt><dd class="ltr">{{ d.request.number }}</dd></div>
               <div><dt>{{ kind() === 'receipt' ? 'تاريخ الاستلام' : 'تاريخ التسليم' }}</dt>
-                <dd>{{ (kind() === 'receipt' ? utc(d.request.createdAt) : today) | date:'yyyy/MM/dd' }}</dd></div>
+                <dd>{{ (kind() === 'receipt' ? utc(d.request.createdAt) : (utc(d.deliveredAt) ?? today)) | date:'yyyy/MM/dd' }}</dd></div>
             </dl>
           </div>
         </header>

@@ -9,12 +9,20 @@
 .toolbar .search { flex: 1; min-width: 220px; }
 .toolbar .search input { width: 100%; }
 .toolbar select { width: auto; min-width: 160px; }
+.view-switch { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-lg); background: var(--ink-100); }
+.view-switch button { min-height: 32px; padding: 0 14px; background: transparent; color: var(--ink-600); font-weight: 700; box-shadow: none; }
+.view-switch button.on { background: var(--surface); color: var(--ink-900); box-shadow: var(--shadow-sm); }
+.more-filters { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); padding: 0 14px; }
+.more-filters summary { cursor: pointer; padding: 10px 0; font-size: 13px; font-weight: 700; color: var(--ink-600); }
+.more-filters .dotmark { display: inline-block; width: 8px; height: 8px; margin-inline-start: 8px; border-radius: 50%; background: var(--brand-600); }
+.filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; padding: 4px 0 14px; }
+.filters-grid label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ink-500); }
 .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-600); font-weight: 700; }
 .check input { width: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
-/* ─────────── اللوحة: 3 أعمدة ─────────── */
-.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+/* ─────────── اللوحة: 4 أعمدة ─────────── */
+.board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start; }
 .column { display: flex; flex-direction: column; min-width: 0; border-radius: var(--radius-xl); background: var(--ink-50); border: 1px solid var(--border); }
 .col-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 8px; padding: 14px 16px 10px; }
 .col-head h2 { font-size: 15px; margin: 0; }
@@ -22,6 +30,7 @@
 .col-dot { width: 10px; height: 10px; border-radius: 50%; }
 .c-Todo .col-dot { background: var(--ink-400); }
 .c-InProgress .col-dot { background: var(--info-500); }
+.c-InReview .col-dot { background: var(--warning-500); }
 .c-Done .col-dot { background: var(--brand-600); }
 .col-count { min-width: 26px; height: 22px; padding: 0 8px; display: grid; place-items: center; border-radius: var(--radius-full); background: var(--surface); border: 1px solid var(--border); font-size: 12px; font-weight: 800; color: var(--ink-700); }
 
@@ -61,6 +70,10 @@
 .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid var(--ink-100); }
 .card-foot small { font-size: 11px; color: var(--ink-400); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-foot .comments { flex: none; }
+.badges { display: inline-flex; gap: 8px; flex: none; }
+.badges small { color: var(--ink-500); font-weight: 700; }
+.badges small.all { color: var(--brand-700); }
+.claimed { margin: 0; font-size: 11px; color: var(--ink-600); font-weight: 700; }
 
 /* السحب */
 .cdk-drag-preview { box-shadow: var(--shadow-xl); border-radius: var(--radius-lg); }
@@ -72,5 +85,5 @@
 
 @media (max-width: 1000px) {
   /* على الشاشات الضيقة: الأعمدة جنباً لجنب مع تمرير أفقي (ضروري للسحب بين الأعمدة) */
-  .board { grid-template-columns: repeat(3, minmax(260px, 1fr)); overflow-x: auto; padding-bottom: 8px; }
+  .board { grid-template-columns: repeat(4, minmax(260px, 1fr)); overflow-x: auto; padding-bottom: 8px; }
 }

@@ -2,12 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AssignedTaskService } from '../../core/services/assigned-task.service';
-import { AssignedTaskDetail, TaskStatus, TASK_STATUS_LABEL } from '../../core/models/assigned-task.models';
+import { Observable } from 'rxjs';
+import { AssignedTaskDetail, TaskAttachment, TaskStatus, TASK_STATUS_LABEL } from '../../core/models/assigned-task.models';
 import { hasOpenModal } from '../../shared/ui/modal';
+import { ConfirmService } from '../../shared/ui/confirm.service';
+import { TaskAttachments } from './task-attachments';
+import { TaskLinks } from './task-links';
+import { TaskNoteDialog } from './task-note-dialog';
 
-/** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، المهام الفرعية، السجل والتعليقات */
+/** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
-  selector: 'app-task-detail-drawer', standalone: true, imports: [CommonModule, FormsModule],
+  selector: 'app-task-detail-drawer', standalone: true, imports: [CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks],
   template: `
     <div class="drawer-backdrop" (click)="close.emit()"></div>
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="task-drawer-title">
@@ -29,12 +34,24 @@ import { hasOpenModal } from '../../shared/ui/modal';
 
           @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
-          @if (t.canChangeStatus) {
+          @if (t.canChangeStatus || t.allowedStatuses.length) {
             <div class="status-switch" role="radiogroup" aria-label="حالة المهمة">
               @for (s of statuses; track s) {
                 <button type="button" class="s-{{ s }}" role="radio" [attr.aria-checked]="t.status === s" [class.on]="t.status === s"
-                        [disabled]="busy()" (click)="setStatus(s)">{{ statusLabel[s] }}</button>
+                        [disabled]="busy() || (t.status !== s && !t.allowedStatuses.includes(s))" (click)="setStatus(s)">{{ statusLabel[s] }}</button>
               }
+            </div>
+            @if (t.status === 'InReview') {
+              <p class="hint-line">{{ t.needsReturnNote ? 'بانتظار اعتمادك: اعتمدها «تم التنفيذ» أو أعدها للتنفيذ مع ذكر السبب.' : 'أُرسلت للمراجعة، بانتظار اعتماد المُسنِد.' }}</p>
+            }
+          }
+
+          @if (t.claimedByName || t.canClaim || t.canRelease) {
+            <div class="claim-row">
+              @if (t.claimedByName) { <span>يعمل عليها: <strong>{{ t.claimedByName }}</strong></span> }
+              @else { <span class="muted">لم يتولَّها أحد بعد</span> }
+              @if (t.canClaim) { <button type="button" class="btn btn-sm" [disabled]="busy()" (click)="claim(true)">أتولّى هذه المهمة</button> }
+              @if (t.canRelease) { <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="claim(false)">تخلّي عنها</button> }
             </div>
           }
 
@@ -48,6 +65,48 @@ import { hasOpenModal } from '../../shared/ui/modal';
           <section>
             <h3>الوصف</h3>
             <p class="desc">{{ t.description || 'لا يوجد وصف' }}</p>
+          </section>
+
+          @if (t.checklist.length || t.canManageChecklist) {
+            <section>
+              <h3>قائمة التحقق @if (t.checklist.length) { <small>{{ doneCount(t) }} من {{ t.checklist.length }}</small> }</h3>
+              @if (t.checklist.length) { <div class="progress" aria-hidden="true"><span [style.width.%]="100 * doneCount(t) / t.checklist.length"></span></div> }
+              <ul class="checklist">
+                @for (i of t.checklist; track i.id) {
+                  <li [class.done]="i.isDone">
+                    <label><input type="checkbox" [checked]="i.isDone" [disabled]="busy() || !t.canManageChecklist" (change)="toggleItem(i.id, $any($event.target).checked)">
+                      <span>{{ i.text }}</span></label>
+                    @if (t.canManageChecklist) {
+                      <button type="button" class="x" [disabled]="busy()" (click)="removeItem(i.id)" [attr.aria-label]="'حذف ' + i.text" title="حذف">×</button>
+                    }
+                  </li>
+                } @empty { <li class="muted">لا توجد بنود بعد.</li> }
+              </ul>
+              @if (t.canManageChecklist && t.checklist.length < maxChecklist) {
+                <form class="inline-form" (ngSubmit)="addItem()">
+                  <label class="sr-only" for="task-check-item">بند جديد</label>
+                  <input id="task-check-item" name="item" maxlength="200" [(ngModel)]="newItem" placeholder="أضف بنداً…" autocomplete="off">
+                  <button type="submit" class="btn btn-sm" [disabled]="busy() || !newItem.trim()">إضافة</button>
+                </form>
+              }
+            </section>
+          }
+
+          @if (t.attachments.length || t.canAttach || t.parentAttachments.length) {
+            <section>
+              <h3>المرفقات @if (t.attachments.length) { <small>{{ t.attachments.length }}</small> }</h3>
+              <app-task-attachments [attachments]="t.attachments" [canAttach]="t.canAttach" [busy]="uploading()" [progressText]="progress()"
+                (upload)="upload($event)" (removed)="removeAttachment($event)" />
+              @if (t.parentAttachments.length) {
+                <h3 class="sub-h">مرفقات المهمة الأصل (للاطلاع)</h3>
+                <app-task-attachments [attachments]="t.parentAttachments" [readonly]="true" />
+              }
+            </section>
+          }
+
+          <section>
+            <h3>السجلات المرتبطة</h3>
+            <app-task-links [taskId]="t.id" [canEdit]="(t.canEdit || t.canChangeStatus) && t.status !== 'Done'" />
           </section>
 
           @if (t.subTasks.length || t.canDelegate) {
@@ -110,11 +169,16 @@ import { hasOpenModal } from '../../shared/ui/modal';
       } @else {
         <div class="drawer-body"><p class="muted" role="status">جارٍ التحميل…</p></div>
       }
-    </aside>`,
+    </aside>
+    @if (returning()) {
+      <app-task-note-dialog heading="إعادة المهمة للتنفيذ" [subheading]="task()?.title ?? ''" [busy]="busy()"
+        (confirm)="applyStatus('InProgress', $event)" (cancel)="returning.set(false)" />
+    }`,
   styleUrl: './task-detail-drawer.scss'
 })
 export class TaskDetailDrawer {
   private service = inject(AssignedTaskService);
+  private confirm = inject(ConfirmService);
 
   taskId = input.required<number>();
   close = output<void>();
@@ -128,7 +192,12 @@ export class TaskDetailDrawer {
   busy = signal(false);
   confirmDelete = signal(false);
   comment = '';
-  statuses: TaskStatus[] = ['Todo', 'InProgress', 'Done'];
+  newItem = '';
+  maxChecklist = 30;
+  returning = signal(false);
+  uploading = signal(false);
+  progress = signal('');
+  statuses: TaskStatus[] = ['Todo', 'InProgress', 'InReview', 'Done'];
   statusLabel = TASK_STATUS_LABEL;
 
   constructor() {
@@ -146,15 +215,55 @@ export class TaskDetailDrawer {
     });
   }
 
-  setStatus(status: TaskStatus) {
+  async setStatus(status: TaskStatus) {
     const t = this.task();
     if (!t || t.status === status || this.busy()) return;
+    // إعادة من المراجعة بيد المُسنِد: السبب إجباري
+    if (t.status === 'InReview' && status === 'InProgress' && t.needsReturnNote) { this.returning.set(true); return; }
+    if (status === 'Done' && !(await this.confirm.ask('اعتماد المهمة «تم التنفيذ»؟ تُقفل بعدها ولا يمكن تغييرها.', 'اعتماد'))) return;
+    this.applyStatus(status);
+  }
+
+  applyStatus(status: TaskStatus, note?: string) {
+    const t = this.task();
+    if (!t || this.busy()) return;
     this.busy.set(true); this.error.set('');
-    this.service.changeStatus(t.id, status).subscribe({
-      next: () => { this.busy.set(false); this.load(); this.changed.emit(); },
+    this.service.changeStatus(t.id, status, note).subscribe({
+      next: () => { this.busy.set(false); this.returning.set(false); this.load(); this.changed.emit(); },
+      error: e => { this.busy.set(false); this.returning.set(false); this.error.set(e.message); }
+    });
+  }
+
+  /** ينفّذ طلباً يعيد تفصيل المهمة المحدَّث */
+  private run(request: Observable<AssignedTaskDetail>, after?: () => void) {
+    if (this.busy()) return;
+    this.busy.set(true); this.error.set('');
+    request.subscribe({
+      next: updated => { this.busy.set(false); this.task.set(updated); this.changed.emit(); after?.(); },
       error: e => { this.busy.set(false); this.error.set(e.message); }
     });
   }
+
+  doneCount = (t: AssignedTaskDetail) => t.checklist.filter(i => i.isDone).length;
+  addItem() {
+    const t = this.task(), text = this.newItem.trim();
+    if (t && text) this.run(this.service.addChecklistItem(t.id, text), () => this.newItem = '');
+  }
+  toggleItem(id: number, isDone: boolean) { this.run(this.service.updateChecklistItem(id, { isDone })); }
+  removeItem(id: number) { this.run(this.service.deleteChecklistItem(id)); }
+  claim(claim: boolean) { const t = this.task(); if (t) this.run(this.service.claim(t.id, claim)); }
+
+  upload(files: File[]) {
+    const t = this.task();
+    if (!t || this.uploading()) return;
+    this.uploading.set(true); this.error.set(''); this.progress.set(files.length > 1 ? `0 من ${files.length}` : '');
+    this.service.attachSequentially(t.id, files, (done, total) => this.progress.set(total > 1 ? `${done} من ${total}` : '')).subscribe({
+      next: updated => { this.uploading.set(false); this.progress.set(''); this.task.set(updated); this.changed.emit(); },
+      error: e => { this.uploading.set(false); this.progress.set(''); this.error.set(e.message); this.load(); this.changed.emit(); }
+    });
+  }
+
+  removeAttachment(a: TaskAttachment) { this.run(this.service.deleteAttachment(a.id)); }
 
   addComment() {
     const t = this.task();
@@ -178,6 +287,6 @@ export class TaskDetailDrawer {
   }
 
   icon(type: string) {
-    return ({ Created: '✚', StatusChanged: '⇄', Comment: '💬', Delegated: '↳', Edited: '✎' } as Record<string, string>)[type] ?? '•';
+    return ({ Created: '✚', StatusChanged: '⇄', Comment: '💬', Delegated: '↳', Edited: '✎', Attached: '📎', AttachmentRemoved: '🗑', Claimed: '✋', Released: '↩' } as Record<string, string>)[type] ?? '•';
   }
 }

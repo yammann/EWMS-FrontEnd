@@ -12,8 +12,10 @@ export const AppPermission = {
   // كل صلاحية تحمل حدّها: ViewVacations = إجازاتي، وقسمي/فرعي بصلاحيتين منفصلتين، والموافقة مرحلتان لإجازات فرعه
   ViewVacations: 'ViewVacations', ViewDepartmentVacations: 'ViewDepartmentVacations', ViewBranchVacations: 'ViewBranchVacations',
   CreateVacation: 'CreateVacation', CancelVacation: 'CancelVacation',
-  ApproveVacationFirst: 'ApproveVacationFirst', ApproveVacationFinal: 'ApproveVacationFinal',
+  ApproveVacationFirst: 'ApproveVacationFirst', ApproveVacationFinal: 'ApproveVacationFinal', PrintVacation: 'PrintVacation',
   ViewVacationTypes: 'ViewVacationTypes', CreateVacationType: 'CreateVacationType', EditVacationType: 'EditVacationType', DeleteVacationType: 'DeleteVacationType',
+  // العطل الرسمية: لا تُحسب من مدة الإجازة (مع الجمعة)
+  ViewHolidays: 'ViewHolidays', CreateHoliday: 'CreateHoliday', EditHoliday: 'EditHoliday', DeleteHoliday: 'DeleteHoliday',
 
   // لوحات المتابعة: لوحة وحدة المستخدم وما تحتها
   ViewBranchDashboard: 'ViewBranchDashboard', ViewDepartmentDashboard: 'ViewDepartmentDashboard', ViewOfficeDashboard: 'ViewOfficeDashboard',
@@ -27,21 +29,36 @@ export const AppPermission = {
   // لوحة المهام: ViewTaskBoard تفتح اللوحة (واستقبال ما أُسند للمستخدم شخصياً)؛ الإسناد والتولّي بصلاحيات
   ViewTaskBoard: 'ViewTaskBoard',
   AssignTaskToDepartment: 'AssignTaskToDepartment', AssignTaskToOffice: 'AssignTaskToOffice', AssignTaskToUser: 'AssignTaskToUser',
-  HandleUnitTasks: 'HandleUnitTasks',
+  HandleUnitTasks: 'HandleUnitTasks', ViewTaskStats: 'ViewTaskStats',
 
   // توثيق الأجهزة (Devices/MyAccess يعيد نفس النتيجة من صلاحيات الدور)
   ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
+  // إظهار كلمات سر الأجهزة ونسخها (يُسجَّل كل إظهار) — مستقلة عن العرض
+  RevealDevicePasswords: 'RevealDevicePasswords',
 
   ViewDepartmentMaintenance: 'ViewDepartmentMaintenance', SignMaintenanceReceipt: 'SignMaintenanceReceipt',
+  // التوقيع الإلكتروني: رفعه وتغييره بكلمة المرور، ويُحفظ مع القرارات الموقَّعة
+  ManageMySignature: 'ManageMySignature',
   ViewMaintenanceRequests: 'ViewMaintenanceRequests', CreateMaintenanceRequest: 'CreateMaintenanceRequest',
   EditMaintenanceRequest: 'EditMaintenanceRequest', ChangeMaintenanceStatus: 'ChangeMaintenanceStatus', ViewMaintenanceStats: 'ViewMaintenanceStats',
   DeleteMaintenanceRequest: 'DeleteMaintenanceRequest',
   AssignMaintenanceRequest: 'AssignMaintenanceRequest',
+  // الفني يطلب تحويل طلب مسند إليه إلى موظف آخر (يقرّره صاحب AssignMaintenanceRequest)
+  RequestMaintenanceTransfer: 'RequestMaintenanceTransfer',
+  // «أجهزتي في الصيانة»: طلبات أنا عميلها
+  ViewMyMaintenanceRequests: 'ViewMyMaintenanceRequests',
   ViewMaintenanceTasks: 'ViewMaintenanceTasks', CreateMaintenanceTask: 'CreateMaintenanceTask',
   EditMaintenanceTask: 'EditMaintenanceTask', DeleteMaintenanceTask: 'DeleteMaintenanceTask',
   AssignMaintenanceTask: 'AssignMaintenanceTask',
   ViewMaintenanceLookups: 'ViewMaintenanceLookups', CreateMaintenanceLookup: 'CreateMaintenanceLookup',
-  EditMaintenanceLookup: 'EditMaintenanceLookup', DeleteMaintenanceLookup: 'DeleteMaintenanceLookup'
+  EditMaintenanceLookup: 'EditMaintenanceLookup', DeleteMaintenanceLookup: 'DeleteMaintenanceLookup',
+  // أجهزة الصيانة: سجل مشترك للأجهزة برقمها التسلسلي (تقديم طلب يحتاج العرض، وجهاز جديد يحتاج الإضافة)
+  ViewMaintenanceDevices: 'ViewMaintenanceDevices', CreateMaintenanceDevice: 'CreateMaintenanceDevice',
+  EditMaintenanceDevice: 'EditMaintenanceDevice', DeleteMaintenanceDevice: 'DeleteMaintenanceDevice',
+  // مخزون قطع الغيار: مخزون لكل قسم، والصرف على طلبات الصيانة
+  ViewSpareParts: 'ViewSpareParts', CreateSparePart: 'CreateSparePart', EditSparePart: 'EditSparePart', DeleteSparePart: 'DeleteSparePart',
+  ReceiveSpareParts: 'ReceiveSpareParts', AdjustSparePartStock: 'AdjustSparePartStock',
+  IssueSparePart: 'IssueSparePart', ViewSparePartReports: 'ViewSparePartReports'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -59,10 +76,15 @@ export const APPROVE_VACATIONS: readonly AppPermissionName[] = [AppPermission.Ap
 /** إحصائيات الإجازات: لمن يرى إجازات قسمه أو فرعه */
 export const VACATION_STATS: readonly AppPermissionName[] = [AppPermission.ViewDepartmentVacations, AppPermission.ViewBranchVacations];
 /** يتابع مهام وحدة (يُظهر تبويب "كل مهام نطاقي") */
+/** من يملك صلاحية إسناد: يدير قوالبه ومهامه الدورية */
+export const TASK_ASSIGN: readonly AppPermissionName[] = [
+  AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser
+];
+
 export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
   AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser, AppPermission.HandleUnitTasks
 ];
-/** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس DeviceAccessService في الباكاند) */
+/** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس سياسة AnyDeviceView في الباكاند) */
 export const DEVICE_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
 ];

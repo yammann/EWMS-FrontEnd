@@ -132,6 +132,7 @@
               <th>المكتب</th><th>القسم</th>
               <th>الفرع</th>
               <th>الحالة</th>
+              <th>تاريخ الإضافة</th>
               <th class="actions-th">الإجراءات</th>
             </tr>
           </thead>
@@ -143,7 +144,13 @@
                     <div class="user-avatar">{{ (user.fullName || 'م').charAt(0) }}</div>
                     <div class="user-details">
                       <strong>{{ user.fullName || 'مستخدم بدون اسم' }}</strong>
-                      <small>{{ user.email }}</small>
+                      <small dir="ltr" class="user-email">{{ user.email }}</small>
+                      @if (user.personalIdNumber || user.phoneNumber) {
+                        <small class="user-extra">
+                          @if (user.personalIdNumber) { <span title="الرقم الذاتي">الرقم الذاتي: <bdi>{{ user.personalIdNumber }}</bdi></span> }
+                          @if (user.phoneNumber) { <span title="رقم التواصل">الهاتف: <bdi>{{ phone(user.phoneNumber) }}</bdi></span> }
+                        </small>
+                      }
                     </div>
                   </div>
                 </td>
@@ -181,6 +188,7 @@
                     </span>
                   }
                 </td>
+                <td class="nowrap">{{ utc(user.createdAt) | date:'yyyy/MM/dd' }}</td>
                 <td>
                   <div class="row-actions">
                     @if (canEdit()) {
@@ -271,6 +279,36 @@
                     </div>
                     @if (createForm.controls.email.touched && createForm.controls.email.invalid) {
                       <small class="form-error">أدخل بريداً إلكترونياً صحيحاً.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-personal-id">الرقم الذاتي</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                        <path d="M7 9h4M7 13h6M15 9h2"></path>
+                      </svg>
+                      <input id="create-personal-id" type="text" formControlName="personalIdNumber"
+                             placeholder="مثال: M201160" autocomplete="off" dir="ltr" maxlength="20" />
+                    </div>
+                    @if (createForm.controls.personalIdNumber.invalid) {
+                      <small class="form-error">حروف لاتينية وأرقام فقط، حتى 20 خانة.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-phone">رقم التواصل</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="2" width="12" height="20" rx="2.5"></rect>
+                        <path d="M11 18h2"></path>
+                      </svg>
+                      <input id="create-phone" type="tel" formControlName="phoneNumber"
+                             placeholder="09XXXXXXXX" autocomplete="off" dir="ltr" maxlength="20" />
+                    </div>
+                    @if (createForm.controls.phoneNumber.invalid) {
+                      <small class="form-error">رقم غير صحيح: جوال 09XXXXXXXX أو أرضي يبدأ بـ 0 ورمز المحافظة.</small>
                     }
                   </div>
 
@@ -371,6 +409,22 @@
                     <input id="edit-email" type="email" formControlName="email" dir="ltr" />
                     @if (editForm.controls.email.touched && editForm.controls.email.invalid) {
                       <small class="form-error">أدخل بريداً إلكترونياً صحيحاً.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-personal-id">الرقم الذاتي</label>
+                    <input id="edit-personal-id" type="text" formControlName="personalIdNumber" dir="ltr" maxlength="20" placeholder="مثال: M201160" />
+                    @if (editForm.controls.personalIdNumber.invalid) {
+                      <small class="form-error">حروف لاتينية وأرقام فقط، حتى 20 خانة.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-phone">رقم التواصل</label>
+                    <input id="edit-phone" type="tel" formControlName="phoneNumber" dir="ltr" maxlength="20" placeholder="09XXXXXXXX" />
+                    @if (editForm.controls.phoneNumber.invalid) {
+                      <small class="form-error">رقم غير صحيح: جوال 09XXXXXXXX أو أرضي يبدأ بـ 0 ورمز المحافظة.</small>
                     }
                   </div>
 

@@ -1,9 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MaintenanceService } from '../../core/services/maintenance.service';
-import { MAINTENANCE_LOOKUPS, MaintenanceLookup, MaintenanceLookupKind } from '../../core/models/maintenance.models';
+import {
+  MAINTENANCE_LOOKUPS, MAINTENANCE_STAGES, MaintenanceLookup, MaintenanceLookupKind, MaintenanceStage, isFinalStage, stageLabel
+} from '../../core/models/maintenance.models';
+import { money } from '../../core/models/spare-part.models';
 import { ConfirmService } from '../../shared/ui/confirm.service';
 import { Modal } from '../../shared/ui/modal';
 import { ToastService } from '../../shared/ui/toast.service';
@@ -37,18 +40,19 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
 
       <section class="panel">
         <div class="panel-heading"><div><h2>{{ meta().label }} <span class="count">({{ items().length }})</span></h2>
-          @if (meta().color) { <p>كل حالة تظهر عموداً في «لوحة الحالات» بلونها</p> }</div></div>
+          @if (meta().color) { <p>كل حالة تظهر عموداً في «لوحة الحالات» بلونها وبترتيب مراحلها. المرحلة تحدد السلوك: «قيد العمل» تسجّل وقت البدء، «جاهز للتسليم» وقت الإنجاز وتبلّغ العميل، و«مُسلَّم» / «غير قابل للصيانة» نهائيتان تُقفلان الطلب (ويُثبَّت في «مُسلَّم» توقيع ورقة التسليم).</p> }</div></div>
         @if (loading()) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
         @else if (!items().length) { <p class="empty-state">لا توجد عناصر بعد</p> }
         @else {
           <div class="table-wrap"><table>
-            <thead><tr><th>الاسم</th>@if (meta().description) { <th>الوصف</th> }@if (meta().color) { <th>اللون</th> }<th class="actions-th"></th></tr></thead>
+            <thead><tr><th>الاسم</th>@if (meta().description) { <th>الوصف</th> }@if (meta().color) { <th>اللون</th><th>المرحلة</th> }@if (meta().threshold) { <th>حد تكلفة الاستبدال</th> }<th class="actions-th"></th></tr></thead>
             <tbody>
               @for (item of items(); track item.id) {
                 <tr>
                   <td>@if (meta().color) { <app-status-chip [name]="item.name" [color]="item.color" /> } @else { <span class="cell-strong">{{ item.name }}</span> }</td>
                   @if (meta().description) { <td class="wrap">{{ item.description || '—' }}</td> }
-                  @if (meta().color) { <td><span class="mono">{{ item.color }}</span></td> }
+                  @if (meta().color) { <td><span class="mono">{{ item.color }}</span></td><td>{{ stageLabel(item.stage) }}@if (isFinal(item.stage)) { <span class="muted"> · نهائية</span> }</td> }
+                  @if (meta().threshold) { <td>{{ item.replacementCostThreshold ? money(item.replacementCostThreshold) : '—' }}</td> }
                   <td><div class="row-actions">
                     @if (can().editLookup) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(item)">تعديل</button> }
                     @if (can().deleteLookup) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(item)">حذف</button> }
@@ -73,6 +77,17 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
             @if (meta().color) {
               <label class="form-field"><span class="form-label">اللون</span>
                 <span class="color-row"><input type="color" formControlName="color"><app-status-chip [name]="form.controls.name.value || 'معاينة'" [color]="form.controls.color.value" /></span></label>
+              <label class="form-field"><span class="form-label">المرحلة</span>
+                <select formControlName="stage">
+                  @for (s of stages; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }
+                </select>
+                <small class="hint">{{ stageHint() }}</small></label>
+            }
+            @if (meta().threshold) {
+              <label class="form-field"><span class="form-label">حد تكلفة الاستبدال (ل.س) <small class="hint">(اختياري)</small></span>
+                <input type="number" formControlName="threshold" min="1" step="0.01" dir="ltr">
+                <small class="hint">حين تبلغ تكلفة قطع جهاز من هذا النوع على مدى عمره هذا المبلغ يُنبَّه رئيس القسم: «إصلاحه أغلى من استبداله»</small>
+                @if (form.controls.threshold.invalid) { <small class="form-error">مبلغ أكبر من صفر</small> }</label>
             }
           </div>
           <footer class="modal-actions">
@@ -96,6 +111,10 @@ export class MaintenanceSettingsPage {
 
   can = this.service.can;
   kinds = KINDS;
+  stages = MAINTENANCE_STAGES;
+  money = money;
+  stageLabel = stageLabel;
+  isFinal = isFinalStage;
   lookups = MAINTENANCE_LOOKUPS;
 
   kind = signal<MaintenanceLookupKind>('deviceTypes');
@@ -111,8 +130,12 @@ export class MaintenanceSettingsPage {
   form = inject(FormBuilder).nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', Validators.maxLength(500)],
-    color: ['#3B82F6']
+    color: ['#3B82F6'],
+    stage: [2 as MaintenanceStage],
+    threshold: [null as number | null, Validators.min(0.01)]
   });
+  private stageValue = toSignal(this.form.controls.stage.valueChanges, { initialValue: this.form.controls.stage.value });
+  stageHint = computed(() => MAINTENANCE_STAGES.find(s => s.value === this.stageValue())?.hint ?? '');
 
   constructor() {
     inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe(p => {
@@ -137,7 +160,7 @@ export class MaintenanceSettingsPage {
 
   openForm(item: MaintenanceLookup | null) {
     this.editing.set(item); this.formError.set('');
-    this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6' });
+    this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6', stage: item?.stage ?? 2, threshold: item?.replacementCostThreshold ?? null });
     this.formOpen.set(true);
   }
 
@@ -149,7 +172,8 @@ export class MaintenanceSettingsPage {
     const meta = this.meta();
     const body: Partial<MaintenanceLookup> = { name: v.name.trim() };
     if (meta.description) body.description = v.description.trim();
-    if (meta.color) body.color = v.color.toUpperCase();
+    if (meta.color) { body.color = v.color.toUpperCase(); body.stage = v.stage; }
+    if (meta.threshold) body.replacementCostThreshold = v.threshold ? Number(v.threshold) : null;
 
     const item = this.editing();
     this.saving.set(true); this.formError.set('');

@@ -14,6 +14,12 @@ export class ApiService {
       .pipe(catchError(this.handleError));
   }
 
+  /** ملف (مرفق) كـ Blob — يمر بمعترض رمز الدخول كبقية الطلبات */
+  getBlob(path: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, { responseType: 'blob' })
+      .pipe(catchError(this.handleError));
+  }
+
   post<T>(path: string, body: unknown): Observable<T> {
     return this.http.post<T>(`${this.baseUrl}${path}`, body)
       .pipe(catchError(this.handleError));

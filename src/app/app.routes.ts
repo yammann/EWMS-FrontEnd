@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permissionGuard } from './core/guards/permission.guard';
-import { APPROVE_VACATIONS, AppPermission, DASHBOARD_ACCESS, DEPARTMENT_DASHBOARD_ACCESS, DEVICE_ACCESS, OFFICE_DASHBOARD_ACCESS, WORK_TASK_VIEW, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS } from './core/constants/access';
+import { APPROVE_VACATIONS, AppPermission, DASHBOARD_ACCESS, DEPARTMENT_DASHBOARD_ACCESS, DEVICE_ACCESS, OFFICE_DASHBOARD_ACCESS, WORK_TASK_VIEW, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, TASK_ASSIGN } from './core/constants/access';
 import { MainLayout } from './features/layout/main-layout';
 
 /**
@@ -15,6 +15,11 @@ export const routes: Routes = [
   {
     path: 'maintenance/print/:id/:kind', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests },
     loadComponent: () => import('./features/maintenance/request-print-page').then(m => m.MaintenancePrintPage)
+  },
+  // نموذج طلب الإجازة الورقي — خارج الإطار العام
+  {
+    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation },
+    loadComponent: () => import('./features/vacations/vacation-print-page').then(m => m.VacationPrintPage)
   },
   {
     path: '',
@@ -39,10 +44,12 @@ export const routes: Routes = [
       { path: 'notifications', canActivate: [permissionGuard], data: { permission: AppPermission.ViewNotifications }, loadComponent: () => import('./features/notifications/notifications-page').then(m => m.NotificationsPage) },
       // لوحة المهام المُسندة: تحتاج ViewTaskBoard، والإسناد والمتابعة بصلاحيات AssignTaskTo* / HandleUnitTasks
       { path: 'task-board', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskBoard }, loadComponent: () => import('./features/task-board/task-board-page').then(m => m.TaskBoardPage) },
+      { path: 'task-board/recurring', canActivate: [permissionGuard], data: { anyPermission: TASK_ASSIGN }, loadComponent: () => import('./features/task-board/recurring-page').then(m => m.RecurringTasksPage) },
+      { path: 'task-board/stats', canActivate: [permissionGuard], data: { permission: AppPermission.ViewTaskStats }, loadComponent: () => import('./features/task-board/task-stats-page').then(m => m.TaskStatsPage) },
 
       // توثيق الأجهزة: الحماية بصلاحيات الدور، مثل بقية الخدمات.
       {
-        // من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس DeviceAccessService في الباكاند)
+        // من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس سياسة AnyDeviceView في الباكاند)
         path: 'devices', canActivate: [permissionGuard],
         data: { anyPermission: DEVICE_ACCESS },
         children: [
@@ -66,6 +73,22 @@ export const routes: Routes = [
           {
             path: 'requests/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests },
             loadComponent: () => import('./features/maintenance/request-details-page').then(m => m.MaintenanceRequestDetailsPage)
+          },
+          {
+            path: 'mine', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMyMaintenanceRequests },
+            loadComponent: () => import('./features/maintenance/my-requests-page').then(m => m.MaintenanceMyRequestsPage)
+          },
+          {
+            path: 'devices', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceDevices },
+            loadComponent: () => import('./features/maintenance/devices-page').then(m => m.MaintenanceDevicesPage)
+          },
+          {
+            path: 'parts', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSpareParts },
+            loadComponent: () => import('./features/maintenance/spare-parts-page').then(m => m.MaintenanceSparePartsPage)
+          },
+          {
+            path: 'parts/report', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSparePartReports },
+            loadComponent: () => import('./features/maintenance/spare-parts-report-page').then(m => m.MaintenanceSparePartsReportPage)
           },
           {
             path: 'tasks', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceTasks },
@@ -95,6 +118,10 @@ export const routes: Routes = [
       {
         path: 'vacation-types', canActivate: [permissionGuard], data: { anyPermission: MANAGE_VACATION_TYPES },
         loadComponent: () => import('./features/vacations/vacation-types-page').then(m => m.VacationTypesPage)
+      },
+      {
+        path: 'vacations/holidays', canActivate: [permissionGuard], data: { permission: AppPermission.ViewHolidays },
+        loadComponent: () => import('./features/vacations/holidays-page').then(m => m.HolidaysPage)
       },
 
       // إدارة الهيكل والمستخدمين: الصفحة تُفتح بصلاحية العرض، وأزرار الإضافة/التعديل/الحذف كلٌّ بصلاحيته

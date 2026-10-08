@@ -3,10 +3,11 @@ import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
 import { AppPermission } from '../constants/access';
 import {
-  MAINTENANCE_LOOKUPS, MaintenanceActivity, MaintenanceLookup, MaintenanceLookupKind, MaintenancePrint, MaintenanceRequest,
+  MAINTENANCE_LOOKUPS, MaintenanceActivity, MaintenanceClient, MaintenanceTransfer, MyMaintenanceRequest, MaintenanceDevice, MaintenanceDeviceFilter, MaintenanceDeviceInput, MaintenanceLookup, MaintenanceLookupKind, MaintenancePrint, MaintenanceRequest,
   MaintenanceRequestFilter, MaintenanceRequestInput, MaintenanceStats, MaintenanceTask, MaintenanceTaskInput,
   PagedResult, TechnicianOption
 } from '../models/maintenance.models';
+import { NamedRef, RequestParts, SparePart, SparePartFilter, SparePartInput, SparePartMovement, SparePartReport } from '../models/spare-part.models';
 
 function query(params: object): string {
   const q = new URLSearchParams();
@@ -37,14 +38,28 @@ export class MaintenanceService {
       viewStats: has(AppPermission.ViewMaintenanceStats),
       deleteRequest: has(AppPermission.DeleteMaintenanceRequest),
       assignRequest: has(AppPermission.AssignMaintenanceRequest),
+      requestTransfer: has(AppPermission.RequestMaintenanceTransfer),
+      viewMine: has(AppPermission.ViewMyMaintenanceRequests),
       viewTasks: has(AppPermission.ViewMaintenanceTasks),
       createTask: has(AppPermission.CreateMaintenanceTask),
       editTask: has(AppPermission.EditMaintenanceTask),
       deleteTask: has(AppPermission.DeleteMaintenanceTask),
       assignTask: has(AppPermission.AssignMaintenanceTask),
+      viewDevices: has(AppPermission.ViewMaintenanceDevices),
+      createDevice: has(AppPermission.CreateMaintenanceDevice),
+      editDevice: has(AppPermission.EditMaintenanceDevice),
+      deleteDevice: has(AppPermission.DeleteMaintenanceDevice),
       createLookup: has(AppPermission.CreateMaintenanceLookup),
       editLookup: has(AppPermission.EditMaintenanceLookup),
-      deleteLookup: has(AppPermission.DeleteMaintenanceLookup)
+      deleteLookup: has(AppPermission.DeleteMaintenanceLookup),
+      viewParts: has(AppPermission.ViewSpareParts),
+      createPart: has(AppPermission.CreateSparePart),
+      editPart: has(AppPermission.EditSparePart),
+      deletePart: has(AppPermission.DeleteSparePart),
+      receiveParts: has(AppPermission.ReceiveSpareParts),
+      adjustParts: has(AppPermission.AdjustSparePartStock),
+      issueParts: has(AppPermission.IssueSparePart),
+      viewPartReports: has(AppPermission.ViewSparePartReports)
     };
   });
 
@@ -67,6 +82,39 @@ export class MaintenanceService {
   assignees(departmentId?: number | null) {
     return this.api.get<TechnicianOption[]>('/MaintenanceRequests/Assignees' + query({ departmentId }));
   }
+
+  // ─────────── العميل ───────────
+  /** عميل موظف بمطابقة تامة للاسم الكامل أو الرقم الذاتي — قائمة فارغة = عميل من خارج المؤسسة */
+  clientLookup(text: string) { return this.api.get<MaintenanceClient[]>('/MaintenanceRequests/ClientLookup' + query({ query: text })); }
+  /** «أجهزتي في الصيانة» */
+  myRequests() { return this.api.get<MyMaintenanceRequest[]>('/MaintenanceRequests/Mine'); }
+
+  // ─────────── طلبات التحويل (الفني يطلب، ورئيس القسم يقرّر) ───────────
+  requestTransfer(requestId: number, body: { reason: string; suggestedUserId: number | null }) {
+    return this.api.post<MaintenanceTransfer>(`/MaintenanceRequests/TransferRequest/${requestId}`, body);
+  }
+  decideTransfer(transferId: number, body: { approve: boolean; userId: number | null; note: string | null }) {
+    return this.api.put<MaintenanceTransfer>(`/MaintenanceRequests/Transfer/${transferId}/Decide`, body);
+  }
+  /** طلب التحويل المعلّق لطلب (null إن لم يوجد) */
+  pendingTransfer(requestId: number) { return this.api.get<MaintenanceTransfer | null>(`/MaintenanceRequests/Transfer/${requestId}`); }
+  /** طلبات التحويل المعلّقة التي أستطيع البت فيها */
+  pendingTransfers() { return this.api.get<MaintenanceTransfer[]>('/MaintenanceRequests/Transfers/Pending'); }
+  /** زملاء قسمي (لاقتراح من يُحوَّل إليه الطلب) */
+  transferColleagues() { return this.api.get<TechnicianOption[]>('/MaintenanceRequests/Transfers/Colleagues'); }
+
+  // ─────────── أجهزة الصيانة (MaintenanceDevices) ───────────
+  devices(filter: MaintenanceDeviceFilter) {
+    return this.api.get<PagedResult<MaintenanceDevice>>('/MaintenanceDevices/GetAll' + query(filter));
+  }
+  device(id: number) { return this.api.get<MaintenanceDevice>(`/MaintenanceDevices/Get/${id}`); }
+  /** مطابقة تامة للرقم التسلسلي — 404 (status) إن لم يُسجَّل الجهاز بعد */
+  deviceBySerial(serialNumber: string) {
+    return this.api.get<MaintenanceDevice>('/MaintenanceDevices/BySerial' + query({ serialNumber }));
+  }
+  createDevice(body: MaintenanceDeviceInput) { return this.api.post<MaintenanceDevice>('/MaintenanceDevices/Create', body); }
+  updateDevice(id: number, body: MaintenanceDeviceInput) { return this.api.put<MaintenanceDevice>(`/MaintenanceDevices/Update/${id}`, body); }
+  deleteDevice(id: number) { return this.api.delete<{ message: string }>(`/MaintenanceDevices/Delete/${id}`); }
 
   // ─────────── المهام ───────────
   tasks(filter: { userId?: number | null; page?: number; pageSize?: number }) {
@@ -91,7 +139,37 @@ export class MaintenanceService {
     return this.api.delete<{ message: string }>(`${MAINTENANCE_LOOKUPS[kind].api}/Delete/${id}`);
   }
 
+  // ─────────── مخزون قطع الغيار (مخزون لكل قسم) ───────────
+  /** الأقسام التي أدير مخزونها (قسمي، ومدير النظام كلها) */
+  partDepartments() { return this.api.get<NamedRef[]>('/SpareParts/Departments'); }
+  parts(filter: SparePartFilter) { return this.api.get<PagedResult<SparePart>>('/SpareParts/GetAll' + query(filter)); }
+  part(id: number) { return this.api.get<SparePart>(`/SpareParts/Get/${id}`); }
+  createPart(body: SparePartInput) { return this.api.post<SparePart>('/SpareParts/Create', body); }
+  updatePart(id: number, body: SparePartInput) { return this.api.put<SparePart>(`/SpareParts/Update/${id}`, body); }
+  deletePart(id: number) { return this.api.delete<{ message: string }>(`/SpareParts/Delete/${id}`); }
+  receivePart(id: number, body: { quantity: number; unitCost: number; date: string | null; source: string }) {
+    return this.api.post<SparePart>(`/SpareParts/Receive/${id}`, body);
+  }
+  adjustPart(id: number, body: { delta: number; reason: string }) { return this.api.post<SparePart>(`/SpareParts/Adjust/${id}`, body); }
+  partMovements(id: number, page = 1, pageSize = 20) {
+    return this.api.get<PagedResult<SparePartMovement>>(`/SpareParts/Movements/${id}` + query({ page, pageSize }));
+  }
+  partReport(filter: { departmentId?: number | null; from?: string; to?: string }) {
+    return this.api.get<SparePartReport>('/SpareParts/Report' + query(filter));
+  }
+  /** قطع الطلب وتكلفة الجهاز على مدى عمره */
+  requestParts(requestId: number) { return this.api.get<RequestParts>(`/SpareParts/Request/${requestId}`); }
+  /** قطع مخزون قسم الطلب المتوفرة (المتوافقة مع الجهاز أولاً) */
+  availableParts(requestId: number, search: string) {
+    return this.api.get<SparePart[]>(`/SpareParts/Request/${requestId}/Available` + query({ search }));
+  }
+  issuePart(requestId: number, body: { sparePartId: number; quantity: number }) {
+    return this.api.post<RequestParts>(`/SpareParts/Request/${requestId}/Issue`, body);
+  }
+  returnPart(requestPartId: number) { return this.api.delete<RequestParts>(`/SpareParts/RequestPart/${requestPartId}`); }
+
   // ─────────── توقيعي (يُطبع على ورقة التسليم) ───────────
   mySignature() { return this.api.get<{ image: string | null }>('/Auth/Signature'); }
-  saveSignature(image: string | null) { return this.api.put<{ message: string }>('/Auth/Signature', { image }); }
+  /** نسخة توقيع جديدة (أو إيقاف التوقيع إن كانت null) — تحتاج كلمة مرور المستخدم */
+  saveSignature(image: string | null, password: string) { return this.api.put<{ message: string }>('/Auth/Signature', { image, password }); }
 }

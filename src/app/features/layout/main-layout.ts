@@ -11,7 +11,7 @@ import { Logo } from '../../shared/ui/logo';
 import { Icon, IconName } from '../../shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
 import { roleLabel } from '../../core/utils/roles';
-import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, DASHBOARD_ACCESS } from '../../core/constants/access';
+import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN } from '../../core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
 
@@ -58,15 +58,22 @@ export class MainLayout {
     const all: NavSection[] = [
       { id: 'main', title: '', items: [
         canAny(DASHBOARD_ACCESS) && { path: '/', label: 'لوحة المتابعة', icon: 'home', exact: true },
-        can(AppPermission.ViewTaskBoard) && { path: '/task-board', label: 'لوحة المهام', icon: 'board' }
+        can(AppPermission.ViewTaskBoard) && { path: '/task-board', label: 'لوحة المهام', icon: 'board', exact: true },
+        canAny(TASK_ASSIGN) && { path: '/task-board/recurring', label: 'المهام الدورية والقوالب', icon: 'calendar' },
+        can(AppPermission.ViewTaskStats) && { path: '/task-board/stats', label: 'إحصائيات المهام', icon: 'chart' }
       ].filter(Boolean) as NavItem[] },
       { id: 'vacations', title: 'الإجازات', items: [
         this.auth.canReviewVacations() && { path: '/vacations/review', label: 'مراجعة الإجازات', icon: 'check' },
         canAny(VACATION_STATS) && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
-        canAny(MANAGE_VACATION_TYPES) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' }
+        canAny(MANAGE_VACATION_TYPES) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' },
+        can(AppPermission.ViewHolidays) && { path: '/vacations/holidays', label: 'العطل الرسمية', icon: 'calendar' }
       ].filter(Boolean) as NavItem[] },
       { id: 'maintenance', title: 'الصيانة', items: [
         can(AppPermission.ViewMaintenanceRequests) && { path: '/maintenance/requests', label: 'طلبات الصيانة', icon: 'wrench' },
+        can(AppPermission.ViewMaintenanceDevices) && { path: '/maintenance/devices', label: 'أجهزة الصيانة', icon: 'device' },
+        can(AppPermission.ViewSpareParts) && { path: '/maintenance/parts', label: 'قطع الغيار', icon: 'box', exact: true },
+        can(AppPermission.ViewSparePartReports) && { path: '/maintenance/parts/report', label: 'تقارير قطع الغيار', icon: 'chart' },
+        can(AppPermission.ViewMyMaintenanceRequests) && { path: '/maintenance/mine', label: 'أجهزتي في الصيانة', icon: 'user' },
         can(AppPermission.ViewMaintenanceTasks) && { path: '/maintenance/tasks', label: 'مهام الصيانة', icon: 'clipboard' },
         can(AppPermission.ViewMaintenanceStats) && { path: '/maintenance/stats', label: 'إحصائيات الصيانة', icon: 'chart' },
         canAny(MANAGE_MAINTENANCE_LOOKUPS) && { path: '/maintenance/settings', label: 'إعدادات الصيانة', icon: 'gear' }
