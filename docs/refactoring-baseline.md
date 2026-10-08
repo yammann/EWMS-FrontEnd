@@ -22,3 +22,23 @@
 - `npm test` — vitest.
 - `npm run e2e` — Playwright (Chrome المثبّت): 27 صفحة بلا أخطاء كونسول/5xx + تدفقات (مفكرتي، بحث الأدوار، الإشعارات، الخروج).
   - يحتاج API على 7181 وخادم الواجهة (`E2E_BASE_URL`، الافتراضي 4200) و`E2E_ADMIN_PASSWORD` (لا تُحفظ في الشيفرة).
+
+## النتيجة النهائية (بعد المراحل 0–7)
+| المقياس | قبل | بعد |
+|---|---|---|
+| ملفات TS (بلا spec) / أسطر TS | 124 / 17,243 | 171 / 12,671 (−26%) — الأسطر انتقلت جزئياً إلى 54 ملف .html و24 .scss خارجي |
+| قوالب مضمّنة | 67 | 35 (الصغيرة فقط) |
+| `.subscribe(` / `loading.set(true)` | 215 / 43 | 161 / 13 |
+| `alert alert-error` المكرَّرة / `empty-state` المكرَّرة | 74 / 68 | 24 / 23 (والباقي عبر `app-alert` 51 و`app-empty-state` 42) |
+| `any` / `$any` | ~66 | 0 |
+| `strictTemplates` | معطّل | مفعّل |
+| ESLint | — | 0 أخطاء، 0 تحذيرات، حدود الطبقات أخطاء |
+| استيراد عابر للميزات من ملف داخلي | 8× dashboard-widgets، 5× map، … | 0 (واجهات `index.ts`) |
+| اختبارات الوحدة / Playwright | 68 / 0 | 100 / 59 (منها 21 مقارنة شكل) |
+| الحزمة الأولى (خام / منقول) | 455.79 / 117.51 kB | **410.67 / 112.38 kB** |
+| أكبر صفحة كسولة (task-board) | 97.8 kB | 49.0 kB |
+| التحميل المسبق | كل الصفحات (PreloadAllModules) | المسموحة للمستخدم فقط |
+| ميزانية الحزمة الأولى | 500 kB / 1 MB | 430 / 480 kB |
+
+الإضافات: زر رجوع موحّد (الشريط العلوي)، `app-page-header`، `app-form-actions`، `ModalCrud`، `loader`/`trackRequest`، `LookupsService`، `apiErrorInterceptor`،
+`PermissionPreloadStrategy`، حارس ربط المخرجات. التفاصيل في [ARCHITECTURE.md](ARCHITECTURE.md).
