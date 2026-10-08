@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-const re = /<div class="row-actions">\s*@if \(([^)]*\(\)[^)]*)\) \{\s*<button type="button" class="icon-btn edit" title="تعديل"\s*\(click\)="([^"]+)">[\s\S]*?<\/button>\s*\}\s*@if \(([^)]*\(\)[^)]*)\) \{\s*<button type="button" class="icon-btn danger" title="حذف"\s*\(click\)="([^"]+)"\s*\[disabled\]="([^"]+)">[\s\S]*?<\/button>\s*\}\s*<\/div>/g;
+const re = /<div class="row-actions">\s*@if \(([^)]*\(\)[^)]*)\) \{\s*<button type="button" class="icon-btn edit" title="تعديل"\s*\(click\)="([^"]+)">(?:(?!<\/button>)[\s\S])*<\/button>\s*\}\s*@if \(([^)]*\(\)[^)]*)\) \{\s*<button type="button" class="icon-btn danger" title="حذف"\s*\(click\)="([^"]+)"\s*\[disabled\]="([^"]+)">(?:(?!<\/button>)[\s\S])*<\/button>\s*\}\s*<\/div>/g;
 for (const feat of ['branches', 'departments', 'offices', 'users', 'roles']) {
   const f = path.resolve('src/app/features', feat, 'pages', `${feat}-page.html`);
   let s = fs.readFileSync(f, 'utf8'); let n = 0;
