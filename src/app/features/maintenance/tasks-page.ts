@@ -6,12 +6,13 @@ import { ActivatedRoute } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { NotificationService } from '@core/services/notification.service';
-import { MaintenanceTask, TechnicianOption, nowLocalInput, toLocalInput, utcDate } from '@core/models/maintenance.models';
+import { MaintenanceTask, TechnicianOption, nowLocalInput, toLocalInput } from '@core/models/maintenance.models';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { AssignDialog } from './maintenance-ui';
 import { Pager } from '@shared/ui/pager';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 const PAGE_SIZE = 20;
 
@@ -20,7 +21,7 @@ const PAGE_SIZE = 20;
  * كل موظف يرى مهامه، ورئيس القسم مهام قسمه وله نقلها لموظف آخر، ورئيس الفرع يطّلع فقط.
  */
 @Component({
-  selector: 'app-maintenance-tasks-page', standalone: true, imports: [DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
+  selector: 'app-maintenance-tasks-page', standalone: true, imports: [UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -58,7 +59,7 @@ const PAGE_SIZE = 20;
                   <td class="wrap"><span class="clamp">{{ t.requiredWork }}</span></td>
                   <td><span class="status-badge" [class.status-active]="state(t) === 'done'" [class.status-pending]="state(t) === 'running'" [class.status-draft]="state(t) === 'new'">{{ stateLabel[state(t)] }}</span></td>
                   <td>{{ t.userName }}</td>
-                  <td class="nowrap">{{ utc(t.createdAt) | date:'yyyy/MM/dd' }}</td>
+                  <td class="nowrap">{{ t.createdAt | utc | date:'yyyy/MM/dd' }}</td>
                   <td (click)="$event.stopPropagation()"><div class="row-actions">
                     @if (can().assignTask && t.canAssign) { <button class="btn btn-ghost btn-sm" type="button" (click)="assigning.set(t)">نقل</button> }
                     @if (can().deleteTask && t.canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(t)">حذف</button> }
@@ -120,7 +121,6 @@ export class MaintenanceTasksPage {
   private confirm = inject(ConfirmService);
 
   can = this.service.can;
-  utc = utcDate;
   pageSize = PAGE_SIZE;
   stateLabel = { new: 'لم تبدأ', running: 'قيد التنفيذ', done: 'منجزة' } as const;
 

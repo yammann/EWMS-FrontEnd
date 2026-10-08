@@ -2,9 +2,10 @@ import { DatePipe, Location } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MaintenanceService } from '@core/services/maintenance.service';
-import { MaintenancePrint, utcDate } from '@core/models/maintenance.models';
+import { MaintenancePrint } from '@core/models/maintenance.models';
 import { formatPhone } from '@core/utils/phone';
 import { Logo } from '@shared/ui/logo';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 /** ترويسة المطبوعات — عدّلها هنا عند اعتماد الترويسة الرسمية */
 export const PRINT_HEADER = {
@@ -21,7 +22,7 @@ type Kind = 'receipt' | 'delivery';
  * الورقة بألوان ثابتة (ورق أبيض) بصرف النظر عن مظهر التطبيق.
  */
 @Component({
-  selector: 'app-maintenance-print', standalone: true, imports: [DatePipe, Logo],
+  selector: 'app-maintenance-print', standalone: true, imports: [UtcPipe, DatePipe, Logo],
   template: `
     <div class="bar no-print">
       <button type="button" class="btn btn-ghost" (click)="goBack()">→ رجوع</button>
@@ -55,7 +56,7 @@ type Kind = 'receipt' | 'delivery';
             <dl>
               <div><dt>رقم الطلب</dt><dd class="ltr">{{ d.request.number }}</dd></div>
               <div><dt>{{ kind() === 'receipt' ? 'تاريخ الاستلام' : 'تاريخ التسليم' }}</dt>
-                <dd>{{ (kind() === 'receipt' ? utc(d.request.createdAt) : (utc(d.deliveredAt) ?? today)) | date:'yyyy/MM/dd' }}</dd></div>
+                <dd>{{ (kind() === 'receipt' ? (d.request.createdAt | utc) : ((d.deliveredAt | utc) ?? today)) | date:'yyyy/MM/dd' }}</dd></div>
             </dl>
           </div>
         </header>
@@ -81,7 +82,7 @@ type Kind = 'receipt' | 'delivery';
           <table><tbody>
             <tr><th>نوع العطل</th><td>{{ d.request.damageTypeName }}</td><th>الفني</th><td>{{ d.request.technicianName }}</td></tr>
             @if (kind() === 'delivery') {
-              <tr><th>حالة الطلب</th><td>{{ d.request.statusName }}</td><th>تاريخ الاستلام</th><td>{{ utc(d.request.createdAt) | date:'yyyy/MM/dd' }}</td></tr>
+              <tr><th>حالة الطلب</th><td>{{ d.request.statusName }}</td><th>تاريخ الاستلام</th><td>{{ d.request.createdAt | utc | date:'yyyy/MM/dd' }}</td></tr>
               <tr><th>بدء العمل</th><td>{{ d.request.startedAt ? (d.request.startedAt | date:'yyyy/MM/dd HH:mm') : '—' }}</td>
                 <th>الإنجاز</th><td>{{ d.request.completedAt ? (d.request.completedAt | date:'yyyy/MM/dd HH:mm') : '—' }}</td></tr>
             }
@@ -167,7 +168,6 @@ export class MaintenancePrintPage {
   private location = inject(Location);
 
   header = PRINT_HEADER;
-  utc = utcDate;
   phone = formatPhone;
   today = new Date();
 

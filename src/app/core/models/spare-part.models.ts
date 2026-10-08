@@ -104,16 +104,6 @@ export interface SparePartReport {
   deviceCosts: DeviceCost[];
 }
 
-/** مبلغ بالليرة السورية بلا كسور زائدة: 12,500 ل.س */
-export function money(value: number | null | undefined): string {
-  return value == null ? '—' : `${value.toLocaleString('en-US', { maximumFractionDigits: 2 })} ل.س`;
-}
-
-/** كمية بخانتين عشريتين على الأكثر */
-export function qty(value: number): string {
-  return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
-}
-
 /** يقبل رقماً بخانتين عشريتين على الأكثر */
 export function twoDecimals(value: number): boolean {
   return Math.abs(Math.round(value * 100) - value * 100) < 1e-6;   // 0.1 × 100 ليست 10 تماماً في الفاصلة العائمة

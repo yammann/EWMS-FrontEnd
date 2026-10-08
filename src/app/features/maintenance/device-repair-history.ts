@@ -4,9 +4,11 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, map, of, switchMap, tap } from 'rxjs';
 import { MaintenanceService } from '@core/services/maintenance.service';
-import { MaintenanceRequest, utcDate } from '@core/models/maintenance.models';
+import { MaintenanceRequest } from '@core/models/maintenance.models';
+import { utcDate } from '@core/utils/format';
 import { daysAr, timesAr } from '@core/utils/arabic-count';
 import { StatusChip } from './maintenance-ui';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 /** أقصى عدد يُعرض بعد «عرض الكل» */
 const FULL_SIZE = 100;
@@ -16,7 +18,7 @@ const FULL_SIZE = 100;
  * مشترك بين صفحة طلب الصيانة (يستثني الطلب المفتوح، آخر 10 + «عرض الكل») ونافذة سجل الجهاز في صفحة الأجهزة.
  */
 @Component({
-  selector: 'app-device-repair-history', standalone: true, imports: [DatePipe, RouterLink, StatusChip],
+  selector: 'app-device-repair-history', standalone: true, imports: [UtcPipe, DatePipe, RouterLink, StatusChip],
   template: `
     @if (loading() && !items().length) { <p class="muted" role="status">جارٍ تحميل السجل…</p> }
     @else if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
@@ -29,7 +31,7 @@ const FULL_SIZE = 100;
             @for (r of items(); track r.id) {
               <tr>
                 <td><a class="number mono" [routerLink]="['/maintenance/requests', r.id]" (click)="navigated.emit()">{{ r.number }}</a></td>
-                <td class="nowrap">{{ utc(r.createdAt) | date:'yyyy/MM/dd' }}</td>
+                <td class="nowrap">{{ r.createdAt | utc | date:'yyyy/MM/dd' }}</td>
                 <td>{{ r.clientName }}</td>
                 <td>{{ r.damageTypeName }}</td>
                 <td><app-status-chip [name]="r.statusName" [color]="r.statusColor" /></td>
@@ -64,7 +66,6 @@ export class DeviceRepairHistory {
   /** عند الانتقال إلى طلب (لإغلاق نافذة مثلاً) */
   navigated = output<void>();
 
-  utc = utcDate;
   expanded = signal(false);
   loading = signal(false);
   error = signal('');

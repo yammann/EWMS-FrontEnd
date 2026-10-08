@@ -8,7 +8,7 @@ import { MaintenanceService } from '@core/services/maintenance.service';
 import {
   MAINTENANCE_LOOKUPS, MAINTENANCE_STAGES, MaintenanceLookup, MaintenanceLookupKind, MaintenanceStage, isFinalStage, stageLabel
 } from '@core/models/maintenance.models';
-import { money } from '@core/models/spare-part.models';
+import { money } from '@core/utils/format';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';

@@ -5,11 +5,13 @@ import { Subject, debounceTime } from 'rxjs';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { NotificationService } from '@core/services/notification.service';
 import { MaintenanceLookup } from '@core/models/maintenance.models';
-import { NamedRef, SparePart, money, qty } from '@core/models/spare-part.models';
+import { NamedRef, SparePart } from '@core/models/spare-part.models';
+import { qty } from '@core/utils/format';
 import { ToastService } from '@shared/ui/toast.service';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { Pager } from '@shared/ui/pager';
 import { SparePartFormDialog, SparePartMovements, SparePartStockDialog } from './spare-part-dialogs';
+import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 
 const PAGE_SIZE = 25;
 
@@ -19,7 +21,7 @@ const PAGE_SIZE = 25;
  */
 @Component({
   selector: 'app-spare-parts-page', standalone: true,
-  imports: [RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
+  imports: [QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
@@ -71,10 +73,10 @@ const PAGE_SIZE = 25;
                 <tr [class.low]="p.isLow">
                   <td><span class="cell-strong">{{ p.name }}</span>@if (p.partNumber) { <small class="mono">{{ p.partNumber }}</small> }</td>
                   @if (departments().length > 1) { <td>{{ p.departmentName }}</td> }
-                  <td class="num"><span class="cell-strong">{{ qty(p.quantity) }}</span> {{ p.unit }}@if (p.isLow) { <span class="low-badge">تحت الحد</span> }</td>
-                  <td class="num">{{ p.minQuantity ? qty(p.minQuantity) : '—' }}</td>
-                  <td class="num">{{ money(p.averageCost) }}</td>
-                  <td class="num">{{ money(p.stockValue) }}</td>
+                  <td class="num"><span class="cell-strong">{{ p.quantity | qty }}</span> {{ p.unit }}@if (p.isLow) { <span class="low-badge">تحت الحد</span> }</td>
+                  <td class="num">{{ p.minQuantity ? (p.minQuantity | qty) : '—' }}</td>
+                  <td class="num">{{ p.averageCost | money }}</td>
+                  <td class="num">{{ p.stockValue | money }}</td>
                   <td class="compat">{{ compat(p) }}</td>
                   <td><div class="row-actions">
                     @if (can().receiveParts) { <button class="btn btn-sm" type="button" (click)="stock.set({ part: p, mode: 'receive' })">إدخال</button> }
@@ -117,7 +119,6 @@ export class MaintenanceSparePartsPage {
   private confirm = inject(ConfirmService);
 
   can = this.service.can;
-  money = money; qty = qty;
   pageSize = PAGE_SIZE;
 
   departments = signal<NamedRef[]>([]);

@@ -1,21 +1,17 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MaintenanceService } from '@core/services/maintenance.service';
-import { NamedRef, SparePartReport, money, qty } from '@core/models/spare-part.models';
+import { NamedRef, SparePartReport } from '@core/models/spare-part.models';
 import { StatTile } from '@shared/ui/stat-tile';
-
-function dateInput(d: Date): string {
-  const local = new Date(d);
-  local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
-  return local.toISOString().slice(0, 10);
-}
+import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
+import { localDateInput } from '@core/utils/format';
 
 /**
  * تقارير قطع الغيار (قرار المستخدم 2026-10-05 — بلا نسب التكلفة للأقسام): قيمة المخزون، أكثر القطع صرفاً في الفترة،
  * وأعلى الأجهزة تكلفة على مدى عمرها مع تنبيه «إصلاحه أغلى من استبداله» حسب حد نوع الجهاز.
  */
 @Component({
-  selector: 'app-spare-parts-report-page', standalone: true, imports: [RouterLink, StatTile],
+  selector: 'app-spare-parts-report-page', standalone: true, imports: [QtyPipe, MoneyPipe, RouterLink, StatTile],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
@@ -44,9 +40,9 @@ function dateInput(d: Date): string {
 
       @if (report(); as r) {
         <section class="stats-4" aria-label="ملخص">
-          <app-stat-tile label="قيمة المخزون" [value]="money(r.stockValue)" icon="📦" tone="green" [hint]="r.partsCount + ' قطعة'" />
+          <app-stat-tile label="قيمة المخزون" [value]="(r.stockValue | money)" icon="📦" tone="green" [hint]="r.partsCount + ' قطعة'" />
           <app-stat-tile label="تحت الحد الأدنى" [value]="r.lowStockCount" icon="⚠" tone="orange" hint="قطع تحتاج إدخالاً" />
-          <app-stat-tile label="المصروف في الفترة" [value]="money(r.issuedCost)" icon="🧾" tone="blue" hint="قطع صُرفت على الطلبات" />
+          <app-stat-tile label="المصروف في الفترة" [value]="(r.issuedCost | money)" icon="🧾" tone="blue" hint="قطع صُرفت على الطلبات" />
           <app-stat-tile label="أجهزة بقطع مصروفة" [value]="r.deviceCosts.length" icon="🖥" tone="purple" hint="من الأعلى تكلفة" />
         </section>
 
@@ -57,7 +53,7 @@ function dateInput(d: Date): string {
             <div class="table-wrap"><table>
               <thead><tr><th>القطعة</th><th>الكمية</th><th>التكلفة</th></tr></thead>
               <tbody>@for (u of r.mostUsed; track u.sparePartId) {
-                <tr><td class="cell-strong">{{ u.name }}</td><td class="num">{{ qty(u.quantity) }} {{ u.unit }}</td><td class="num">{{ money(u.cost) }}</td></tr>
+                <tr><td class="cell-strong">{{ u.name }}</td><td class="num">{{ u.quantity | qty }} {{ u.unit }}</td><td class="num">{{ u.cost | money }}</td></tr>
               }</tbody>
             </table></div>
           }
@@ -74,7 +70,7 @@ function dateInput(d: Date): string {
                   <td><span class="mono cell-strong">{{ d.serialNumber }}</span>@if (d.deviceName) { <small>{{ d.deviceName }}</small> }</td>
                   <td>{{ d.deviceTypeName }}</td>
                   <td class="num">{{ d.requestsCount }}</td>
-                  <td class="num cell-strong">{{ money(d.cost) }}</td>
+                  <td class="num cell-strong">{{ d.cost | money }}</td>
                 </tr>
               }</tbody>
             </table></div>
@@ -92,10 +88,9 @@ function dateInput(d: Date): string {
 export class MaintenanceSparePartsReportPage {
   private service = inject(MaintenanceService);
   can = this.service.can;
-  money = money; qty = qty;
 
-  today = dateInput(new Date());
-  from = signal(dateInput(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
+  today = localDateInput(new Date());
+  from = signal(localDateInput(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
   to = signal(this.today);
   departmentId = signal(0);
   departments = signal<NamedRef[]>([]);

@@ -6,15 +6,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { NotificationService } from '@core/services/notification.service';
-import { MyMaintenanceRequest, utcDate } from '@core/models/maintenance.models';
+import { MyMaintenanceRequest } from '@core/models/maintenance.models';
 import { StatusChip } from './maintenance-ui';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 /**
  * «أجهزتي في الصيانة» (ViewMyMaintenanceRequests): طلبات الصيانة التي أنا عميلها — للمتابعة فقط.
  * إشعار تغيّر الحالة يفتح الصفحة على الطلب (?request=ID) ويُبرزه.
  */
 @Component({
-  selector: 'app-my-maintenance-requests', standalone: true, imports: [DatePipe, StatusChip, Pager],
+  selector: 'app-my-maintenance-requests', standalone: true, imports: [UtcPipe, DatePipe, StatusChip, Pager],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -40,8 +41,8 @@ import { StatusChip } from './maintenance-ui';
                   <td>{{ r.damageTypeName }}</td>
                   <td><app-status-chip [name]="r.statusName" [color]="r.statusColor" /></td>
                   <td>{{ r.technicianName }}</td>
-                  <td class="nowrap">{{ utc(r.createdAt) | date:'yyyy/MM/dd' }}</td>
-                  <td class="nowrap">{{ r.deliveredAt ? (utc(r.deliveredAt) | date:'yyyy/MM/dd') : '—' }}</td>
+                  <td class="nowrap">{{ r.createdAt | utc | date:'yyyy/MM/dd' }}</td>
+                  <td class="nowrap">{{ r.deliveredAt ? (r.deliveredAt | utc | date:'yyyy/MM/dd') : '—' }}</td>
                 </tr>
               }
             </tbody>
@@ -55,7 +56,6 @@ import { StatusChip } from './maintenance-ui';
 export class MaintenanceMyRequestsPage {
   pager = new Pagination(() => this.items());
   private service = inject(MaintenanceService);
-  utc = utcDate;
   items = signal<MyMaintenanceRequest[]>([]);
   loading = signal(false);
   error = signal('');

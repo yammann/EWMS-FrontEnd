@@ -14,6 +14,7 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { CopyText } from '@shared/ui/secret-text';
 import { Pager } from '@shared/ui/pager';
 import { DeviceHistory, DevicePassword, InstallStatus, InstallationsImport } from './device-ui';
+import { localDateInput } from '@core/utils/format';
 
 const PAGE_SIZE = 50;
 
@@ -22,12 +23,6 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
   const { ip, subnetMask, gateway } = group.value as { ip: string; subnetMask: string; gateway: string };
   if (!gateway?.trim() || !isIpv4(ip) || !isSubnetMask(subnetMask) || !isIpv4(gateway)) return null;
   return sameSubnet(ip, gateway, subnetMask) ? null : { gatewaySubnet: true };
-}
-
-function todayInput(): string {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 10);
 }
 
 /**
@@ -193,7 +188,7 @@ export class InstallationsPage {
   pageSize = PAGE_SIZE;
   governorates = GOVERNORATES;
   statuses = INSTALLATION_STATUSES;
-  today = todayInput();
+  today = localDateInput();
   url = deviceUrl;
 
   rows = signal<DeviceSite[]>([]);

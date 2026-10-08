@@ -1,24 +1,26 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { MaintenanceService } from '@core/services/maintenance.service';
-import { MaintenanceRequest, utcDate } from '@core/models/maintenance.models';
-import { RequestPart, RequestParts, SparePart, money, qty, twoDecimals } from '@core/models/spare-part.models';
+import { MaintenanceRequest } from '@core/models/maintenance.models';
+import { RequestPart, RequestParts, SparePart, twoDecimals } from '@core/models/spare-part.models';
+import { qty } from '@core/utils/format';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
+import { UtcPipe, MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 
 /**
  * قطع الغيار المصروفة على طلب الصيانة: الصرف من مخزون قسم الطلب (المتوافقة مع الجهاز أولاً)، والإرجاع للمخزون،
  * وتكلفة الجهاز على مدى عمره مع تنبيه حد الاستبدال. بعد إغلاق الطلب تُقفل القطع.
  */
 @Component({
-  selector: 'app-request-parts-panel', standalone: true, imports: [DatePipe, Modal],
+  selector: 'app-request-parts-panel', standalone: true, imports: [QtyPipe, MoneyPipe, UtcPipe, DatePipe, Modal],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
     @if (data(); as d) {
       <section class="panel">
         <div class="panel-heading">
-          <div><h2>قطع الغيار</h2><p>{{ d.items.length ? 'تكلفة قطع هذا الطلب ' + money(d.total) : 'لم تُصرف قطع على هذا الطلب' }}{{ request().isClosed && d.items.length ? ' — مقفلة مع الطلب' : '' }}</p></div>
+          <div><h2>قطع الغيار</h2><p>{{ d.items.length ? 'تكلفة قطع هذا الطلب ' + (d.total | money) : 'لم تُصرف قطع على هذا الطلب' }}{{ request().isClosed && d.items.length ? ' — مقفلة مع الطلب' : '' }}</p></div>
           @if (d.canIssue && can().issueParts) { <button class="btn btn-sm" type="button" (click)="openIssue()">+ صرف قطعة</button> }
         </div>
 
@@ -29,10 +31,10 @@ import { Modal } from '@shared/ui/modal';
               @for (p of d.items; track p.id) {
                 <tr>
                   <td><span class="cell-strong">{{ p.partName }}</span>@if (p.partNumber) { <small class="mono">{{ p.partNumber }}</small> }</td>
-                  <td class="num">{{ qty(p.quantity) }} {{ p.unit }}</td>
-                  <td class="num">{{ money(p.unitCost) }}</td>
-                  <td class="num cell-strong">{{ money(p.total) }}</td>
-                  <td>{{ p.issuedByName }}<small>{{ utc(p.issuedAt) | date:'yyyy/MM/dd — HH:mm' }}</small></td>
+                  <td class="num">{{ p.quantity | qty }} {{ p.unit }}</td>
+                  <td class="num">{{ p.unitCost | money }}</td>
+                  <td class="num cell-strong">{{ p.total | money }}</td>
+                  <td>{{ p.issuedByName }}<small>{{ p.issuedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</small></td>
                   @if (d.canIssue && can().issueParts) {
                     <td><div class="row-actions"><button class="btn btn-ghost btn-sm" type="button" [disabled]="busy()" (click)="returnPart(p)">إعادة للمخزون</button></div></td>
                   }
@@ -41,7 +43,7 @@ import { Modal } from '@shared/ui/modal';
             </tbody>
           </table></div>
         }
-        <p class="lifetime">تكلفة قطع الجهاز على مدى عمره: <strong>{{ money(d.deviceLifetimeCost) }}</strong></p>
+        <p class="lifetime">تكلفة قطع الجهاز على مدى عمره: <strong>{{ d.deviceLifetimeCost | money }}</strong></p>
       </section>
     }
 
@@ -55,15 +57,15 @@ import { Modal } from '@shared/ui/modal';
             @for (p of available(); track p.id) {
               <button type="button" role="option" [class.on]="selected()?.id === p.id" [attr.aria-selected]="selected()?.id === p.id" (click)="select(p)">
                 <span><strong>{{ p.name }}</strong>@if (p.partNumber) { <small class="mono"> {{ p.partNumber }}</small> }</span>
-                <small>متوفر {{ qty(p.quantity) }} {{ p.unit }} · {{ money(p.averageCost) }}</small>
+                <small>متوفر {{ p.quantity | qty }} {{ p.unit }} · {{ p.averageCost | money }}</small>
               </button>
             } @empty { <p class="hint">{{ loadingParts() ? 'جارٍ التحميل…' : 'لا توجد قطع متوفرة في مخزون قسم الطلب' }}</p> }
           </div>
           @if (selected(); as s) {
-            <label class="form-field"><span class="form-label">الكمية ({{ s.unit }}) — المتوفر {{ qty(s.quantity) }}</span>
+            <label class="form-field"><span class="form-label">الكمية ({{ s.unit }}) — المتوفر {{ s.quantity | qty }}</span>
               <input type="number" [value]="quantity()" (input)="quantity.set(+$any($event.target).value)" min="0.01" [max]="s.quantity" step="0.01" dir="ltr">
               @if (quantityError()) { <small class="form-error">{{ quantityError() }}</small> }
-              @else { <small class="hint">التكلفة {{ money(quantity() * s.averageCost) }} — بسعر المتوسط الحالي، ويُثبَّت على الطلب</small> }</label>
+              @else { <small class="hint">التكلفة {{ quantity() * s.averageCost | money }} — بسعر المتوسط الحالي، ويُثبَّت على الطلب</small> }</label>
           }
         </div>
         <footer class="modal-actions">
@@ -90,7 +92,6 @@ export class RequestPartsPanel {
   private confirm = inject(ConfirmService);
   private toast = inject(ToastService);
   can = this.service.can;
-  money = money; qty = qty; utc = utcDate;
 
   request = input.required<MaintenanceRequest>();
   /** بعد الصرف أو الإرجاع (لتحديث سجل الطلب) */

@@ -3,12 +3,10 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { Observable, Subject, catchError, forkJoin, map, of, switchMap, tap, timer } from 'rxjs';
+import { Observable, Subject, catchError, forkJoin, of, switchMap, tap, timer } from 'rxjs';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { NotificationService } from '@core/services/notification.service';
-import {
-  MaintenanceCount, MaintenanceRequest, MaintenanceRequestFilter, MaintenanceStatus, TechnicianOption, finalStageConfirm, isFinalStage, utcDate
-} from '@core/models/maintenance.models';
+import { MaintenanceCount, MaintenanceRequest, MaintenanceRequestFilter, MaintenanceStatus, TechnicianOption, finalStageConfirm, isFinalStage } from '@core/models/maintenance.models';
 import { formatPhone } from '@core/utils/phone';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
@@ -16,6 +14,7 @@ import { StatusChip } from './maintenance-ui';
 import { Pager } from '@shared/ui/pager';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
 import { PendingTransfersButton } from './transfer-panel';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 type View = 'table' | 'board';
 type SearchField = 'clientName' | 'serialNumber' | 'model';
@@ -33,7 +32,7 @@ const BOARD_LIMIT = 5;
  */
 @Component({
   selector: 'app-maintenance-requests-page', standalone: true,
-  imports: [DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
+  imports: [UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
@@ -116,7 +115,7 @@ const BOARD_LIMIT = 5;
                     <td>{{ r.damageTypeName }}</td>
                     <td><app-status-chip [name]="r.statusName" [color]="r.statusColor" /></td>
                     <td>{{ r.technicianName }}</td>
-                    <td class="nowrap">{{ utc(r.createdAt) | date:'yyyy/MM/dd' }}<small>{{ utc(r.createdAt) | date:'HH:mm' }}</small></td>
+                    <td class="nowrap">{{ r.createdAt | utc | date:'yyyy/MM/dd' }}<small>{{ r.createdAt | utc | date:'HH:mm' }}</small></td>
                   </tr>
                 }
               </tbody>
@@ -142,7 +141,7 @@ const BOARD_LIMIT = 5;
                   @for (r of col.items; track r.id) {
                     <article class="card" cdkDrag [cdkDragData]="r" [cdkDragDisabled]="!draggable(r)" [class.draggable]="draggable(r)"
                              tabindex="0" role="button" (click)="open(r)" (keydown.enter)="open(r)" [attr.aria-label]="r.number + ' — ' + r.clientName">
-                      <div class="card-top"><span class="mono number">{{ r.number }}</span><small>{{ utc(r.createdAt) | date:'MM/dd' }}</small></div>
+                      <div class="card-top"><span class="mono number">{{ r.number }}</span><small>{{ r.createdAt | utc | date:'MM/dd' }}</small></div>
                       <h3>{{ r.deviceTypeName }} <span>{{ r.deviceCompanyName }}{{ r.model ? ' ' + r.model : '' }}</span></h3>
                       <p class="damage">{{ r.damageTypeName }}</p>
                       <footer class="card-foot"><small>{{ r.clientName }}</small><small class="tech">{{ r.technicianName }}</small></footer>
@@ -175,7 +174,6 @@ export class MaintenanceRequestsPage {
   private router = inject(Router);
 
   can = this.service.can;
-  utc = utcDate;
   phone = formatPhone;
   pageSize = PAGE_SIZE;
   boardLimit = BOARD_LIMIT;

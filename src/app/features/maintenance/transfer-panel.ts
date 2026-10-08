@@ -5,9 +5,10 @@ import { RouterLink } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { NotificationService } from '@core/services/notification.service';
-import { MaintenanceRequest, MaintenanceTransfer, TechnicianOption, utcDate } from '@core/models/maintenance.models';
+import { MaintenanceRequest, MaintenanceTransfer, TechnicianOption } from '@core/models/maintenance.models';
 import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 /**
  * طلب تحويل طلب صيانة (قرار المستخدم 2026-10-05) — في صفحة الطلب:
@@ -15,7 +16,7 @@ import { Modal } from '@shared/ui/modal';
  * - إن وُجد طلب معلّق: شريط بتفاصيله؛ ومن يملك نقل طلبات القسم (canAssign) يقبل (يختار الموظف، المقترح مختار مسبقاً) أو يرفض بملاحظة.
  */
 @Component({
-  selector: 'app-transfer-panel', standalone: true, imports: [DatePipe, Modal],
+  selector: 'app-transfer-panel', standalone: true, imports: [UtcPipe, DatePipe, Modal],
   template: `
     @if (pending(); as t) {
       <section class="panel transfer" role="status">
@@ -23,7 +24,7 @@ import { Modal } from '@shared/ui/modal';
           <span class="badge">طلب تحويل</span>
           <div>
             <strong>{{ t.requestedByName }} يطلب تحويل هذا الطلب{{ t.suggestedUserName ? ' إلى ' + t.suggestedUserName : '' }}</strong>
-            <small>{{ utc(t.createdAt) | date:'yyyy/MM/dd — HH:mm' }} · {{ t.statusAr }}</small>
+            <small>{{ t.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }} · {{ t.statusAr }}</small>
           </div>
         </div>
         <p class="reason"><b>السبب:</b> {{ t.reason }}</p>
@@ -101,7 +102,6 @@ export class TransferPanel {
   /** بعد إرسال طلب أو قرار — تعيد الصفحة تحميل الطلب */
   changed = output<void>();
 
-  utc = utcDate;
   pending = signal<MaintenanceTransfer | null>(null);
   assignees = signal<TechnicianOption[]>([]);
   colleagues = signal<TechnicianOption[]>([]);
@@ -161,7 +161,7 @@ export class TransferPanel {
 
 /** زر «طلبات تحويل بانتظارك (N)» في صفحة طلبات الصيانة — لمن يملك نقل طلبات القسم */
 @Component({
-  selector: 'app-pending-transfers-button', standalone: true, imports: [DatePipe, RouterLink, Modal],
+  selector: 'app-pending-transfers-button', standalone: true, imports: [UtcPipe, DatePipe, RouterLink, Modal],
   template: `
     @if (items().length) {
       <button type="button" class="btn btn-warn" (click)="open.set(true)">طلبات تحويل بانتظارك ({{ items().length }})</button>
@@ -178,7 +178,7 @@ export class TransferPanel {
                   <td>{{ t.requestedByName }}</td>
                   <td>{{ t.suggestedUserName || '—' }}</td>
                   <td class="wrap">{{ t.reason }}</td>
-                  <td class="nowrap">{{ utc(t.createdAt) | date:'yyyy/MM/dd' }}</td>
+                  <td class="nowrap">{{ t.createdAt | utc | date:'yyyy/MM/dd' }}</td>
                 </tr>
               }
             </tbody>
@@ -191,7 +191,6 @@ export class TransferPanel {
 })
 export class PendingTransfersButton {
   private service = inject(MaintenanceService);
-  utc = utcDate;
   items = signal<MaintenanceTransfer[]>([]);
   open = signal(false);
 

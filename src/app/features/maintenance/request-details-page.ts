@@ -5,9 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { NotificationService } from '@core/services/notification.service';
-import {
-  MaintenanceActivity, MaintenanceRequest, MaintenanceStatus, finalStageConfirm, formatHours, isFinalStage, stageLabel, utcDate
-} from '@core/models/maintenance.models';
+import { MaintenanceActivity, MaintenanceRequest, MaintenanceStatus, finalStageConfirm, formatHours, isFinalStage, stageLabel } from '@core/models/maintenance.models';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { CopyText } from '@shared/ui/secret-text';
@@ -17,6 +15,7 @@ import { DeviceRepairHistory } from './device-repair-history';
 import { TransferPanel } from './transfer-panel';
 import { LinkedTasks } from '@features/task-board';
 import { RequestPartsPanel } from './request-parts-panel';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4: '✎', 5: '⇢', 6: '✕', 7: '⚙', 8: '↩' };
 
@@ -26,7 +25,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
  */
 @Component({
   selector: 'app-maintenance-request-details', standalone: true,
-  imports: [DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
+  imports: [UtcPipe, DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -71,7 +70,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
           <dl class="facts">
             <div><dt>اسم العميل</dt><dd>{{ r.clientName }}</dd></div>
             <div><dt>الهاتف</dt><dd>@if (r.clientPhone) { <app-copy-text [value]="r.clientPhone" label="رقم الهاتف" /> } @else { — }</dd></div>
-            <div><dt>تاريخ الاستلام</dt><dd>{{ utc(r.createdAt) | date:'yyyy/MM/dd — HH:mm' }}</dd></div>
+            <div><dt>تاريخ الاستلام</dt><dd>{{ r.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }}</dd></div>
             <div><dt>نوع الجهاز</dt><dd>{{ r.deviceTypeName }}</dd></div>
             <div><dt>الشركة المصنّعة</dt><dd>{{ r.deviceCompanyName }}</dd></div>
             <div><dt>الموديل</dt><dd>{{ r.model || '—' }}</dd></div>
@@ -116,7 +115,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
               @for (a of activities(); track a.id) {
                 <li class="t-{{ a.type }}">
                   <span class="dot" aria-hidden="true">{{ icon(a) }}</span>
-                  <div><p><strong>{{ a.userName }}</strong> {{ a.text }}</p><time>{{ utc(a.createdAt) | date:'yyyy/MM/dd — HH:mm' }}</time></div>
+                  <div><p><strong>{{ a.userName }}</strong> {{ a.text }}</p><time>{{ a.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }}</time></div>
                 </li>
               }
             </ol>
@@ -175,7 +174,6 @@ export class MaintenanceRequestDetailsPage {
   private router = inject(Router);
   private location = inject(Location);
 
-  utc = utcDate;
   stageLabel = stageLabel;
   isFinal = isFinalStage;
   private can = this.service.can;

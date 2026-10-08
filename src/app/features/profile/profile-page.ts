@@ -1,4 +1,5 @@
 import { Pagination } from '@core/utils/pagination';
+import { localDateInput } from '@core/utils/format';
 import { vacationDateRange } from '@features/vacations';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
@@ -18,18 +19,12 @@ import { daysAr, fridaysAr, holidaysAr } from '@core/utils/arabic-count';
 import { AppPermission } from '@core/constants/access';
 import { SignaturePanel } from './signature-panel';
 import { formatPhone } from '@core/utils/phone';
-import { utcDate } from '@core/models/maintenance.models';
+import { utcDate } from '@core/utils/format';
 
-
-/** تاريخ اليوم المحلي بصيغة yyyy-MM-dd (قيمة حقل date) */
-export function localToday() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 /** لا تقديم بأثر رجعي، واليوم الحالي مسموح (قرار المستخدم 2026-10-04) */
 export function notInPast(control: AbstractControl) {
-  return control.value && control.value < localToday() ? { past: true } : null;
+  return control.value && control.value < localDateInput() ? { past: true } : null;
 }
 
 @Component({
@@ -71,7 +66,7 @@ export class ProfilePage {
     vacReason: ['', Validators.maxLength(500)]
   }, { validators: vacationDateRange });
 
-  today = localToday();
+  today = localDateInput();
   /** مرفقات الطلب الجديد: PDF أو JPG/PNG، حتى 3 × 5MB (يتحقق الباك أيضاً من محتوى الملف) */
   attachRules = VACATION_ATTACHMENTS;
   files = signal<File[]>([]);

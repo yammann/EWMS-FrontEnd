@@ -2,10 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { DeviceService, saveBlob } from '@core/services/device.service';
 import { DeviceInventoryLog, ImportReport, INSTALLATION_STATUSES } from '@core/models/device.models';
-import { utcDate } from '@core/models/maintenance.models';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { Pager } from '@shared/ui/pager';
+import { UtcPipe } from '@shared/pipes/format.pipes';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)
@@ -73,7 +73,7 @@ export class InstallStatus {
 
 /** سجل التغييرات لموقع أو جهاز أو تركيب (من غيّر ماذا ومتى، ومن أظهر كلمة السر) */
 @Component({
-  selector: 'app-device-history', standalone: true, imports: [DatePipe, Modal, Pager],
+  selector: 'app-device-history', standalone: true, imports: [UtcPipe, DatePipe, Modal, Pager],
   template: `
     <app-modal [heading]="'سجل: ' + title()" subheading="من غيّر ماذا ومتى — الأحدث أولاً" size="lg" (closed)="closed.emit()">
       <div class="modal-body">
@@ -84,7 +84,7 @@ export class InstallStatus {
           <ol class="log">
             @for (l of items(); track l.id) {
               <li class="a-{{ l.action }}">
-                <div class="head"><strong>{{ l.userName }}</strong> {{ l.actionAr }}<time>{{ utc(l.createdAt) | date:'yyyy/MM/dd — HH:mm' }}</time></div>
+                <div class="head"><strong>{{ l.userName }}</strong> {{ l.actionAr }}<time>{{ l.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }}</time></div>
                 @if (l.details) { <pre>{{ l.details }}</pre> }
               </li>
             }
@@ -107,7 +107,6 @@ export class InstallStatus {
 })
 export class DeviceHistory implements OnInit {
   private service = inject(DeviceService);
-  utc = utcDate;
 
   kind = input.required<'site' | 'device' | 'installation'>();
   entityId = input.required<number>();

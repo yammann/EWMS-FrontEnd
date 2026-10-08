@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { TechnicianOption } from '@core/models/maintenance.models';
 import { Modal } from '@shared/ui/modal';

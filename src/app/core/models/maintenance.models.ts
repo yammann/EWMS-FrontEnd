@@ -273,15 +273,6 @@ export const MAINTENANCE_LOOKUPS = {
 
 export type MaintenanceLookupKind = keyof typeof MAINTENANCE_LOOKUPS;
 
-/**
- * تواريخ النظام (الإنشاء/التعديل/السجل) تُحفظ UTC وتصل بلا منطقة زمنية — نضيف Z ليعرضها المتصفح بالتوقيت المحلي.
- * (تاريخا البدء والإنجاز يسجّلهما الخادم بتوقيته المحلي ويُعرضان كما هما.)
- */
-export function utcDate(value: string | null | undefined): Date | null {
-  if (!value) return null;
-  return new Date(/[zZ]|[+-]\d\d:\d\d$/.test(value) ? value : value + 'Z');
-}
-
 /** قيمة حقل datetime-local من تاريخ محفوظ (يُقص إلى الدقيقة) */
 export function toLocalInput(value: string | null | undefined): string {
   return value ? value.slice(0, 16) : '';

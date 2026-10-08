@@ -3,18 +3,15 @@ import { Component, OnInit, computed, inject, input, output, signal } from '@ang
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MaintenanceService } from '@core/services/maintenance.service';
-import { MaintenanceLookup, utcDate } from '@core/models/maintenance.models';
-import { NamedRef, SparePart, SparePartMovement, money, qty, twoDecimals } from '@core/models/spare-part.models';
+import { MaintenanceLookup } from '@core/models/maintenance.models';
+import { NamedRef, SparePart, SparePartMovement, twoDecimals } from '@core/models/spare-part.models';
+import { qty } from '@core/utils/format';
 import { Modal } from '@shared/ui/modal';
 import { Pager } from '@shared/ui/pager';
+import { MoneyPipe, QtyPipe, UtcPipe } from '@shared/pipes/format.pipes';
+import { localDateInput } from '@core/utils/format';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };
-
-function todayInput(): string {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 10);
-}
 
 /** إضافة قطعة أو تعديل بياناتها — الكمية والسعر لا يُدخلان هنا (إدخال/تسوية فقط) */
 @Component({
@@ -130,10 +127,10 @@ export class SparePartFormDialog implements OnInit {
 
 /** إدخال (استلام كمية بسعرها وتاريخها ومصدرها) أو تسوية (جرد / تالف) */
 @Component({
-  selector: 'app-spare-part-stock-dialog', standalone: true, imports: [ReactiveFormsModule, Modal],
+  selector: 'app-spare-part-stock-dialog', standalone: true, imports: [QtyPipe, MoneyPipe, ReactiveFormsModule, Modal],
   template: `
     <app-modal [heading]="(mode() === 'receive' ? 'إدخال: ' : 'تسوية: ') + part().name"
-               [subheading]="'الرصيد الحالي ' + qty(part().quantity) + ' ' + part().unit + ' · متوسط السعر ' + money(part().averageCost)"
+               [subheading]="'الرصيد الحالي ' + (part().quantity | qty) + ' ' + part().unit + ' · متوسط السعر ' + (part().averageCost | money)"
                [busy]="saving()" (closed)="closed.emit()">
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="modal-body form-stack">
@@ -141,7 +138,7 @@ export class SparePartFormDialog implements OnInit {
           @if (mode() === 'receive') {
             <label class="form-field"><span class="form-label">الكمية المستلمة ({{ part().unit }})</span><input type="number" formControlName="quantity" min="0.01" step="0.01" dir="ltr"></label>
             <label class="form-field"><span class="form-label">سعر الوحدة (ل.س)</span><input type="number" formControlName="unitCost" min="0" step="0.01" dir="ltr">
-              <small class="hint">يدخل في متوسط السعر المرجّح — بعده {{ money(newAverage()) }}</small></label>
+              <small class="hint">يدخل في متوسط السعر المرجّح — بعده {{ newAverage() | money }}</small></label>
             <label class="form-field"><span class="form-label">تاريخ الاستلام</span><input type="date" formControlName="date" [max]="today"></label>
             <label class="form-field"><span class="form-label">المصدر <small class="hint">(المورّد أو الجهة — اختياري)</small></span><input formControlName="note" maxlength="500"></label>
           } @else {
@@ -151,7 +148,7 @@ export class SparePartFormDialog implements OnInit {
             </div>
             <label class="form-field"><span class="form-label">{{ adjustKind() === 'count' ? 'الكمية الموجودة فعلاً' : 'الكمية التالفة' }} ({{ part().unit }})</span>
               <input type="number" formControlName="quantity" min="0" step="0.01" dir="ltr">
-              <small class="hint">الفرق: {{ deltaText() }} — الرصيد بعدها {{ qty(part().quantity + delta()) }}</small></label>
+              <small class="hint">الفرق: {{ deltaText() }} — الرصيد بعدها {{ part().quantity + delta() | qty }}</small></label>
             <label class="form-field"><span class="form-label">السبب</span><input formControlName="note" maxlength="500" [placeholder]="adjustKind() === 'count' ? 'جرد شهري…' : 'كسر أثناء التركيب…'"></label>
           }
           @if (form.controls.quantity.invalid && form.controls.quantity.touched) { <small class="form-error">كمية موجبة بخانتين عشريتين على الأكثر</small> }
@@ -166,8 +163,7 @@ export class SparePartFormDialog implements OnInit {
 })
 export class SparePartStockDialog implements OnInit {
   private service = inject(MaintenanceService);
-  money = money; qty = qty;
-  today = todayInput();
+  today = localDateInput();
 
   part = input.required<SparePart>();
   mode = input.required<'receive' | 'adjust'>();
@@ -181,7 +177,7 @@ export class SparePartStockDialog implements OnInit {
   form = inject(FormBuilder).group({
     quantity: [null as number | null, [Validators.required, Validators.min(0), decimal2]],
     unitCost: [null as number | null, [Validators.min(0), decimal2]],
-    date: [todayInput()],
+    date: [localDateInput()],
     note: ['', Validators.maxLength(500)]
   });
   private values = signal(this.form.getRawValue());
@@ -231,10 +227,10 @@ export class SparePartStockDialog implements OnInit {
 
 /** سجل حركات القطعة (لا يُحذف ولا يُعدَّل) */
 @Component({
-  selector: 'app-spare-part-movements', standalone: true, imports: [DatePipe, RouterLink, Modal, Pager],
+  selector: 'app-spare-part-movements', standalone: true, imports: [UtcPipe, QtyPipe, MoneyPipe, DatePipe, RouterLink, Modal, Pager],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
-    <app-modal [heading]="'حركات: ' + part().name" [subheading]="'الرصيد ' + qty(part().quantity) + ' ' + part().unit + ' · ' + part().departmentName"
+    <app-modal [heading]="'حركات: ' + part().name" [subheading]="'الرصيد ' + (part().quantity | qty) + ' ' + part().unit + ' · ' + part().departmentName"
                size="lg" (closed)="closed.emit()">
       <div class="modal-body">
         @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
@@ -246,11 +242,11 @@ export class SparePartStockDialog implements OnInit {
             <tbody>
               @for (m of rows(); track m.id) {
                 <tr>
-                  <td>{{ m.date | date:'yyyy/MM/dd' }}<small>{{ utc(m.createdAt) | date:'HH:mm' }}</small></td>
+                  <td>{{ m.date | date:'yyyy/MM/dd' }}<small>{{ m.createdAt | utc | date:'HH:mm' }}</small></td>
                   <td><span class="mv mv-{{ m.type }}">{{ m.typeAr }}</span></td>
-                  <td class="num" [class.neg]="m.quantity < 0">{{ m.quantity > 0 ? '+' : '' }}{{ qty(m.quantity) }}</td>
-                  <td class="num">{{ money(m.unitCost) }}</td>
-                  <td class="num">{{ qty(m.balanceAfter) }}</td>
+                  <td class="num" [class.neg]="m.quantity < 0">{{ m.quantity > 0 ? '+' : '' }}{{ m.quantity | qty }}</td>
+                  <td class="num">{{ m.unitCost | money }}</td>
+                  <td class="num">{{ m.balanceAfter | qty }}</td>
                   <td>@if (m.maintenanceRequestId) { <a [routerLink]="['/maintenance/requests', m.maintenanceRequestId]" (click)="closed.emit()" class="mono">{{ m.requestNumber }}</a> }
                       {{ m.note }}@if (!m.note && !m.maintenanceRequestId) { — }</td>
                   <td>{{ m.userName }}</td>
@@ -278,7 +274,6 @@ export class SparePartStockDialog implements OnInit {
 })
 export class SparePartMovements implements OnInit {
   private service = inject(MaintenanceService);
-  money = money; qty = qty; utc = utcDate;
   pageSize = 15;
 
   part = input.required<SparePart>();
