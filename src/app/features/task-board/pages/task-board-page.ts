@@ -60,6 +60,7 @@ export class TaskBoardPage {
   // الفلاتر (محلية على ما حمّله الخادم، عدا doneDays فيُعاد التحميل به)
   search = signal('');
   priorityFilter = signal<TaskPriority | ''>('');
+  setPriorityFilter(value: string) { this.priorityFilter.set(value as TaskPriority | ''); }
   overdueOnly = signal(false);
   creatorFilter = signal('');
   targetFilter = signal('');

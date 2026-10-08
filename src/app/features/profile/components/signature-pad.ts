@@ -21,7 +21,7 @@ const MAX_DATA_URL = 300_000;
 @Component({
   selector: 'app-signature-pad', standalone: true, imports: [Modal],
   template: `
-    <app-modal heading="توقيعي الإلكتروني" subheading="ارسم توقيعك أو ارفع صورته" [busy]="busy()" (closed)="cancel.emit()">
+    <app-modal heading="توقيعي الإلكتروني" subheading="ارسم توقيعك أو ارفع صورته" [busy]="busy()" (closed)="closed.emit()">
       <div class="modal-body sig">
         @if (error() || localError()) { <p class="alert alert-error" role="alert">{{ error() || localError() }}</p> }
 
@@ -84,11 +84,11 @@ const MAX_DATA_URL = 300_000;
         <p class="consent">بتوقيعي إلكترونياً أُقرّ بأن هذا التوقيع يُعتمد على الأوراق التي أوقّعها في النظام، وأن تغييره لاحقاً لا يغيّر ما وقّعته سابقاً.</p>
 
         <label class="form-field password"><span class="form-label">كلمة المرور (لتأكيد اعتماد التوقيع)</span>
-          <input type="password" autocomplete="current-password" [value]="password()" (input)="password.set($any($event.target).value)"
+          <input #t1 type="password" autocomplete="current-password" [value]="password()" (input)="password.set(t1.value)"
                  (keydown.enter)="accept()"></label>
       </div>
       <footer class="modal-actions">
-        <button type="button" class="ghost" (click)="cancel.emit()" [disabled]="busy()">إلغاء</button>
+        <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">إلغاء</button>
         <button type="button" (click)="accept()" [disabled]="!ready() || !password() || busy()">
           {{ busy() ? 'جارٍ الحفظ…' : '✓ اعتماد التوقيع' }}</button>
       </footer>
@@ -153,7 +153,7 @@ export class SignaturePad {
   error = input('');
   /** الصورة (data URL) وكلمة المرور */
   accepted = output<{ image: string; password: string }>();
-  cancel = output<void>();
+  closed = output<void>();
 
   inks = INKS;
   method = signal<Method>('draw');

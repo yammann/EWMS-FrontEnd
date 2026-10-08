@@ -81,7 +81,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
       <section class="panel">
         <div class="panel-heading">
           <h2>المهام ({{ filtered().length }})</h2>
-          <select [value]="filterBranch()" (change)="filterBranch.set(+$any($event.target).value)" aria-label="تصفية حسب الفرع">
+          <select #t1 [value]="filterBranch()" (change)="filterBranch.set(+t1.value)" aria-label="تصفية حسب الفرع">
             <option [value]="0">كل الفروع</option>
             @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
           </select>

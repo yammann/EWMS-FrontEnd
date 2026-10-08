@@ -13,10 +13,11 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
-  selector: 'app-devices-catalog-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
+  selector: 'app-devices-catalog-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
   styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
   template: `
     <div class="page">
@@ -30,7 +31,7 @@ import { trackRequest } from '@shared/ui/loader';
 
       <section class="panel">
         <div class="panel-heading"><h2>الأجهزة <span class="count">({{ filtered().length }})</span></h2>
-          <input class="search" type="search" placeholder="بحث بالاسم أو الموديل أو الفئة أو الشركة…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="بحث">
+          <input #t1 class="search" type="search" placeholder="بحث بالاسم أو الموديل أو الفئة أو الشركة…" [value]="search()" (input)="search.set(t1.value)" aria-label="بحث">
         </div>
         @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
         @else if (!filtered().length) { <app-empty-state>{{ search() ? 'لا توجد نتائج' : 'لا توجد أجهزة بعد' }}</app-empty-state> }
@@ -73,10 +74,7 @@ import { trackRequest } from '@shared/ui/loader';
               <p class="hint full">الرقم التسلسلي يُسجَّل لكل قطعة عند تركيبها (صفحة التركيبات).</p>
               <label class="form-field full"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="3" maxlength="500"></textarea></label>
             </div>
-            <footer class="modal-actions">
-              <button type="button" class="ghost" (click)="closeForm()" [disabled]="saving()">إلغاء</button>
-              <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-            </footer>
+            <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closeForm()" />
           </form>
       </app-modal>
     }

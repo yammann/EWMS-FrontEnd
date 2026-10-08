@@ -38,13 +38,13 @@
   <div class="toolbar">
     <label class="search">
       <span class="sr-only">بحث</span>
-      <input type="search" placeholder="بحث بالعنوان أو الجهة أو المُسنِد…" [value]="search()" (input)="search.set($any($event.target).value)">
+      <input #t1 type="search" placeholder="بحث بالعنوان أو الجهة أو المُسنِد…" [value]="search()" (input)="search.set(t1.value)">
     </label>
-    <select [value]="priorityFilter()" (change)="priorityFilter.set($any($event.target).value)" aria-label="تصفية حسب الأولوية">
+    <select #t2 [value]="priorityFilter()" (change)="setPriorityFilter(t2.value)" aria-label="تصفية حسب الأولوية">
       <option value="">كل الأولويات</option>
       @for (p of priorities; track p) { <option [value]="p">{{ priorityLabel[p] }}</option> }
     </select>
-    <label class="check"><input type="checkbox" [checked]="overdueOnly()" (change)="overdueOnly.set($any($event.target).checked)"> المتأخرة فقط</label>
+    <label class="check"><input #t3 type="checkbox" [checked]="overdueOnly()" (change)="overdueOnly.set(t3.checked)"> المتأخرة فقط</label>
     <div class="view-switch" role="group" aria-label="طريقة العرض">
       <button type="button" [class.on]="view() === 'board'" [attr.aria-pressed]="view() === 'board'" (click)="setView('board')">اللوحة</button>
       <button type="button" [class.on]="view() === 'calendar'" [attr.aria-pressed]="view() === 'calendar'" (click)="setView('calendar')">التقويم</button>
@@ -55,17 +55,17 @@
     <summary>فلاتر إضافية@if (filtersActive()) { <span class="dotmark" aria-label="فلاتر مفعّلة"></span> }</summary>
     <div class="filters-grid">
       <label>المُسنِد
-        <select [value]="creatorFilter()" (change)="creatorFilter.set($any($event.target).value)">
+        <select #t4 [value]="creatorFilter()" (change)="creatorFilter.set(t4.value)">
           <option value="">الكل</option>@for (c of creators(); track c) { <option [value]="c">{{ c }}</option> }
         </select></label>
       <label>الجهة المنفِّذة
-        <select [value]="targetFilter()" (change)="targetFilter.set($any($event.target).value)">
+        <select #t5 [value]="targetFilter()" (change)="targetFilter.set(t5.value)">
           <option value="">الكل</option>@for (t of targets(); track t) { <option [value]="t">{{ t }}</option> }
         </select></label>
-      <label>التسليم من <input type="date" [value]="dueFrom()" (change)="dueFrom.set($any($event.target).value)"></label>
-      <label>التسليم إلى <input type="date" [value]="dueTo()" (change)="dueTo.set($any($event.target).value)"></label>
+      <label>التسليم من <input #t6 type="date" [value]="dueFrom()" (change)="dueFrom.set(t6.value)"></label>
+      <label>التسليم إلى <input #t7 type="date" [value]="dueTo()" (change)="dueTo.set(t7.value)"></label>
       <label>المنجزة المعروضة
-        <select [value]="doneDays()" (change)="setDoneDays(+$any($event.target).value)">
+        <select #t8 [value]="doneDays()" (change)="setDoneDays(+t8.value)">
           <option value="30">آخر 30 يوماً</option><option value="90">آخر 3 أشهر</option><option value="365">آخر سنة</option><option value="3650">الكل</option>
         </select></label>
       @if (filtersActive()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }

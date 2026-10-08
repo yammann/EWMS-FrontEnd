@@ -25,8 +25,8 @@ export interface Coordinates { latitude: number; longitude: number; }
       <app-syria-svg-map [focus]="focus()" [points]="points()" [pickable]="true" [showStamp]="false" height="300px"
                          (governorateSelect)="focus.set($event)" (back)="focus.set(null)" (pick)="picked.emit($event)" (ready)="features.set($event)" />
       <div class="picker-bar">
-        <label>خط العرض<input type="number" step="0.00001" dir="ltr" [value]="latitude() ?? ''" (change)="manual('lat', $any($event.target).value)"></label>
-        <label>خط الطول<input type="number" step="0.00001" dir="ltr" [value]="longitude() ?? ''" (change)="manual('lng', $any($event.target).value)"></label>
+        <label>خط العرض<input #t1 type="number" step="0.00001" dir="ltr" [value]="latitude() ?? ''" (change)="manual('lat', t1.value)"></label>
+        <label>خط الطول<input #t2 type="number" step="0.00001" dir="ltr" [value]="longitude() ?? ''" (change)="manual('lng', t2.value)"></label>
         <span class="gov">{{ governorate() ? '📍 ' + governorate() : (latitude() != null ? 'خارج حدود المحافظات' : 'لم تُحدَّد النقطة بعد') }}</span>
       </div>
     </div>`,

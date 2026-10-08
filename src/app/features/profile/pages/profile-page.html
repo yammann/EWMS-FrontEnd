@@ -42,7 +42,7 @@
         <span>المرفقات <small class="muted">(اختياري — PDF أو صورة JPG/PNG، حتى {{ attachRules.maxFiles }} ملفات، 5MB لكل ملف)</small></span>
         <div class="actions">
           <label class="btn btn-ghost btn-sm" [class.disabled]="files().length >= attachRules.maxFiles">إرفاق ملف
-            <input type="file" multiple hidden [accept]="attachRules.accept" (change)="addFiles($any($event.target))" [disabled]="files().length >= attachRules.maxFiles || saving()">
+            <input #t1 type="file" multiple hidden [accept]="attachRules.accept" (change)="addFiles(t1)" [disabled]="files().length >= attachRules.maxFiles || saving()">
           </label>
           @for (f of files(); track $index) {
             <span class="status-badge">{{ f.name }} · {{ size(f.size) }}

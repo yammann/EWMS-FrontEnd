@@ -14,10 +14,10 @@ import { governorateName } from '@core/constants/governorates';
     <div class="place-search">
       <label class="form-label" [attr.for]="inputId">ابحث عن مكان <small class="hint">(مدينة، بلدة، قرية، حي)</small></label>
       <div class="box">
-        <input [id]="inputId" type="search" role="combobox" autocomplete="off" placeholder="مثال: المزة، حلب، جرمانا…"
+        <input #t1 [id]="inputId" type="search" role="combobox" autocomplete="off" placeholder="مثال: المزة، حلب، جرمانا…"
                [value]="query()" aria-autocomplete="list" [attr.aria-expanded]="open()" [attr.aria-controls]="inputId + '-list'"
                [attr.aria-activedescendant]="active() >= 0 ? inputId + '-opt-' + active() : null"
-               (input)="onInput($any($event.target).value)" (focus)="onFocus()" (keydown)="onKey($event)" (blur)="close()">
+               (input)="onInput(t1.value)" (focus)="onFocus()" (keydown)="onKey($event)" (blur)="close()">
         @if (open()) {
           <ul class="results" role="listbox" [id]="inputId + '-list'">
             @if (loading()) { <li class="note" role="status">جارٍ تحميل أسماء الأماكن…</li> }

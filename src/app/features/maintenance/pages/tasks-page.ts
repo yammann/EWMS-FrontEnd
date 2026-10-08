@@ -39,7 +39,7 @@ const PAGE_SIZE = 20;
 
       @if (employees().length > 1) {
         <div class="filters-row">
-          <select (change)="userId.set(+$any($event.target).value); page.set(1); load()" aria-label="الموظف">
+          <select #t1 (change)="userId.set(+t1.value); page.set(1); load()" aria-label="الموظف">
             <option [value]="0" [selected]="!userId()">كل الموظفين</option>
             @for (u of employees(); track u.id) { <option [value]="u.id" [selected]="u.id === userId()">{{ u.fullName }}</option> }
           </select>

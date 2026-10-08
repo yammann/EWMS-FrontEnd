@@ -3,6 +3,7 @@ import { MaintenanceService } from '../data-access/maintenance.service';
 import { TechnicianOption } from '../data-access/maintenance.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** شارة حالة الطلب بلونها المعرَّف في جدول الحالات (يعمل في الوضعين الفاتح والداكن) */
 @Component({
@@ -26,24 +27,21 @@ export class StatusChip {
  * النافذة تختار الموظف فقط — الحفظ عند الصفحة المستدعية عبر (assign).
  */
 @Component({
-  selector: 'app-assign-dialog', standalone: true, imports: [Alert, Modal],
+  selector: 'app-assign-dialog', standalone: true, imports: [FormActions, Alert, Modal],
   template: `
     <app-modal heading="تغيير الموظف المسؤول" [subheading]="subject()" [busy]="busy()" (closed)="closed.emit()">
       <form (submit)="$event.preventDefault(); submit()">
         <div class="modal-body">
           <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">الموظف المسؤول الجديد</span>
-            <select (change)="selected.set(+$any($event.target).value)" [disabled]="loading()">
+            <select #t1 (change)="selected.set(+t1.value)" [disabled]="loading()">
               <option [value]="0" [selected]="!selected()">{{ loading() ? 'جارٍ التحميل…' : 'اختر الموظف' }}</option>
               @for (u of options(); track u.id) { <option [value]="u.id" [disabled]="u.id === currentUserId()">{{ u.fullName }}{{ u.id === currentUserId() ? ' (الحالي)' : '' }}</option> }
             </select>
           </label>
           <p class="note">سيصل إشعار للموظف الجديد وللموظف السابق.</p>
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">إلغاء</button>
-          <button type="submit" [disabled]="!selected() || selected() === currentUserId() || busy()">{{ busy() ? 'جارٍ النقل…' : 'نقل' }}</button>
-        </footer>
+        <app-form-actions [busy]="busy()" [disabled]="!selected() || selected() === currentUserId()" label="نقل" busyLabel="جارٍ النقل…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`.note { margin: 12px 0 0; font-size: 12px; color: var(--ink-500); }`]

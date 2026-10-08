@@ -38,19 +38,19 @@ const PAGE_SIZE = 20;
       <div class="filters">
         <div class="filters-row">
           <div class="search-group">
-            <select [value]="searchField()" (change)="searchField.set($any($event.target).value); searchText() && changed()" aria-label="البحث في">
+            <select #t1 [value]="searchField()" (change)="setSearchField(t1.value); searchText() && changed()" aria-label="البحث في">
               <option value="serialNumber">الرقم التسلسلي</option>
               <option value="model">الموديل</option>
               <option value="name">اسم الجهاز</option>
             </select>
-            <input class="search" type="search" [placeholder]="searchField() === 'name' ? 'بحث بالاسم…' : 'يبدأ بـ…'" dir="auto"
-                   [value]="searchText()" (input)="searchText.set($any($event.target).value); changed()" aria-label="بحث">
+            <input #t2 class="search" type="search" [placeholder]="searchField() === 'name' ? 'بحث بالاسم…' : 'يبدأ بـ…'" dir="auto"
+                   [value]="searchText()" (input)="searchText.set(t2.value); changed()" aria-label="بحث">
           </div>
-          <select (change)="deviceTypeId.set(+$any($event.target).value); changed()" aria-label="نوع الجهاز">
+          <select #t3 (change)="deviceTypeId.set(+t3.value); changed()" aria-label="نوع الجهاز">
             <option [value]="0" [selected]="!deviceTypeId()">كل الأنواع</option>
             @for (x of lookups()?.deviceTypes; track x.id) { <option [value]="x.id" [selected]="x.id === deviceTypeId()">{{ x.name }}</option> }
           </select>
-          <select (change)="companyId.set(+$any($event.target).value); changed()" aria-label="الشركة">
+          <select #t4 (change)="companyId.set(+t4.value); changed()" aria-label="الشركة">
             <option [value]="0" [selected]="!companyId()">كل الشركات</option>
             @for (x of lookups()?.companies; track x.id) { <option [value]="x.id" [selected]="x.id === companyId()">{{ x.name }}</option> }
           </select>
@@ -117,6 +117,7 @@ export class MaintenanceDevicesPage {
   error = signal('');
 
   searchField = signal<SearchField>('serialNumber');
+  setSearchField(value: string) { this.searchField.set(value as SearchField); }
   searchText = signal('');
   deviceTypeId = signal(0);
   companyId = signal(0);

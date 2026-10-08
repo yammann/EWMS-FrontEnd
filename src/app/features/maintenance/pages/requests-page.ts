@@ -51,13 +51,13 @@ const BOARD_LIMIT = 5;
       <div class="filters">
         <div class="filters-row">
           <div class="search-group">
-            <select [value]="searchField()" (change)="searchField.set($any($event.target).value); searchText() && changed()" aria-label="البحث في">
+            <select #t1 [value]="searchField()" (change)="setSearchField(t1.value); searchText() && changed()" aria-label="البحث في">
               <option value="clientName">اسم العميل</option>
               <option value="serialNumber">الرقم التسلسلي</option>
               <option value="model">الموديل</option>
             </select>
-            <input class="search" type="search" [placeholder]="searchField() === 'clientName' ? 'بحث باسم العميل…' : 'يبدأ بـ…'"
-                   [value]="searchText()" (input)="searchText.set($any($event.target).value); changed()" aria-label="بحث">
+            <input #t2 class="search" type="search" [placeholder]="searchField() === 'clientName' ? 'بحث باسم العميل…' : 'يبدأ بـ…'"
+                   [value]="searchText()" (input)="searchText.set(t2.value); changed()" aria-label="بحث">
           </div>
           <div class="segmented" role="tablist" aria-label="طريقة العرض">
             <button type="button" role="tab" [class.on]="view() === 'table'" [attr.aria-selected]="view() === 'table'" (click)="setView('table')">جدول</button>
@@ -66,20 +66,20 @@ const BOARD_LIMIT = 5;
         </div>
         <div class="filters-row">
           @if (technicians().length > 1) {
-            <select (change)="technicianId.set(+$any($event.target).value); changed()" aria-label="الفني">
+            <select #t3 (change)="technicianId.set(+t3.value); changed()" aria-label="الفني">
               <option [value]="0" [selected]="!technicianId()">كل الفنيين</option>
               @for (t of technicians(); track t.id) { <option [value]="t.id" [selected]="t.id === technicianId()">{{ t.fullName }}</option> }
             </select>
           }
-          <select (change)="deviceTypeId.set(+$any($event.target).value); changed()" aria-label="نوع الجهاز">
+          <select #t4 (change)="deviceTypeId.set(+t4.value); changed()" aria-label="نوع الجهاز">
             <option [value]="0" [selected]="!deviceTypeId()">كل أنواع الأجهزة</option>
             @for (x of lookups()?.deviceTypes; track x.id) { <option [value]="x.id" [selected]="x.id === deviceTypeId()">{{ x.name }}</option> }
           </select>
-          <select (change)="companyId.set(+$any($event.target).value); changed()" aria-label="الشركة">
+          <select #t5 (change)="companyId.set(+t5.value); changed()" aria-label="الشركة">
             <option [value]="0" [selected]="!companyId()">كل الشركات</option>
             @for (x of lookups()?.companies; track x.id) { <option [value]="x.id" [selected]="x.id === companyId()">{{ x.name }}</option> }
           </select>
-          <select (change)="damageTypeId.set(+$any($event.target).value); changed()" aria-label="نوع العطل">
+          <select #t6 (change)="damageTypeId.set(+t6.value); changed()" aria-label="نوع العطل">
             <option [value]="0" [selected]="!damageTypeId()">كل الأعطال</option>
             @for (x of lookups()?.damageTypes; track x.id) { <option [value]="x.id" [selected]="x.id === damageTypeId()">{{ x.name }}</option> }
           </select>
@@ -185,6 +185,7 @@ export class MaintenanceRequestsPage {
 
   view = signal<View>('table');
   searchField = signal<SearchField>('clientName');
+  setSearchField(value: string) { this.searchField.set(value as SearchField); }
   searchText = signal('');
   statusId = signal(0);
   technicianId = signal(0);

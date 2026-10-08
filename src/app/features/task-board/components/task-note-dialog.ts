@@ -6,14 +6,14 @@ import { Modal } from '@shared/ui/modal';
 @Component({
   selector: 'app-task-note-dialog', standalone: true, imports: [FormsModule, Modal],
   template: `
-    <app-modal [heading]="heading()" [subheading]="subheading()" [busy]="busy()" (closed)="cancel.emit()">
+    <app-modal [heading]="heading()" [subheading]="subheading()" [busy]="busy()" (closed)="closed.emit()">
       <div class="modal-body form-stack">
         <label class="form-field"><span class="form-label">{{ label() }}</span>
           <textarea rows="4" maxlength="500" autofocus [(ngModel)]="text" [placeholder]="placeholder()"></textarea>
           <small class="hint">{{ text.length }}/500 — يصل إلى الجهة المنفِّذة ويُسجَّل في المهمة</small></label>
       </div>
       <footer class="modal-actions">
-        <button type="button" class="ghost" (click)="cancel.emit()" [disabled]="busy()">إلغاء</button>
+        <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">إلغاء</button>
         <button type="button" (click)="submit()" [disabled]="!text.trim() || busy()">{{ confirmLabel() }}</button>
       </footer>
     </app-modal>`
@@ -28,7 +28,7 @@ export class TaskNoteDialog {
 
   /** النص بعد القص */
   confirm = output<string>();
-  cancel = output<void>();
+  closed = output<void>();
   text = '';
   protected sent = signal(false);
 

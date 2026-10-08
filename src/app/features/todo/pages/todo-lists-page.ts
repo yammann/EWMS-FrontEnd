@@ -57,7 +57,7 @@ type View = 'lists' | 'today';
       @if (lists().length && view() === 'lists') {
         <div class="t-tools">
           <label class="sr-only" for="todo-lists-search">بحث في القوائم</label>
-          <input id="todo-lists-search" type="search" placeholder="بحث بالاسم أو الوصف…" [value]="search()" (input)="search.set($any($event.target).value)">
+          <input #t1 id="todo-lists-search" type="search" placeholder="بحث بالاسم أو الوصف…" [value]="search()" (input)="search.set(t1.value)">
         </div>
       }
 
@@ -157,7 +157,7 @@ type View = 'lists' | 'today';
       }
     </div>
 
-    @if (formOpen()) { <app-todo-list-dialog [list]="editing()" (saved)="saved($event)" (close)="formOpen.set(false)" /> }`,
+    @if (formOpen()) { <app-todo-list-dialog [list]="editing()" (saved)="saved($event)" (closed)="formOpen.set(false)" /> }`,
   styles: [`
     .page { gap: 20px; }
     .t-add { align-items: center; text-align: center; gap: 4px; cursor: pointer; }

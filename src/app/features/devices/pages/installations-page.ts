@@ -19,6 +19,7 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 const PAGE_SIZE = 50;
 
@@ -35,7 +36,7 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-installations-page', standalone: true,
-  imports: [PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
+  imports: [FormActions, PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
   styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
   template: `
     <div class="page">
@@ -52,21 +53,21 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
       <app-alert [message]="error()" />
 
       <div class="toolbar">
-        <input class="search" type="search" placeholder="بحث بالـ IP أو الجهاز أو الرقم التسلسلي أو MAC أو مكان التركيب…" [value]="search()"
-               (input)="search.set($any($event.target).value); search$.next()" aria-label="بحث">
-        <select [value]="governorate()" (change)="setFilter({ governorate: $any($event.target).value || null, siteId: null })" aria-label="المحافظة">
+        <input #t1 class="search" type="search" placeholder="بحث بالـ IP أو الجهاز أو الرقم التسلسلي أو MAC أو مكان التركيب…" [value]="search()"
+               (input)="search.set(t1.value); search$.next()" aria-label="بحث">
+        <select #t2 [value]="governorate()" (change)="setFilter({ governorate: t2.value || null, siteId: null })" aria-label="المحافظة">
           <option value="">كل المحافظات</option>
           @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
         </select>
-        <select [value]="siteId()" (change)="setFilter({ siteId: +$any($event.target).value || null })" aria-label="الموقع">
+        <select #t3 [value]="siteId()" (change)="setFilter({ siteId: +t3.value || null })" aria-label="الموقع">
           <option [value]="0">كل المواقع</option>
           @for (s of sitesInGovernorate(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
         </select>
-        <select [value]="deviceId()" (change)="setFilter({ deviceId: +$any($event.target).value || null })" aria-label="الجهاز">
+        <select #t4 [value]="deviceId()" (change)="setFilter({ deviceId: +t4.value || null })" aria-label="الجهاز">
           <option [value]="0">كل الأجهزة</option>
           @for (d of devices(); track d.id) { <option [value]="d.id">{{ d.name }}@if (d.model) { — {{ d.model }} }</option> }
         </select>
-        <select [value]="status()" (change)="setFilter({ status: +$any($event.target).value || null })" aria-label="الحالة">
+        <select #t5 [value]="status()" (change)="setFilter({ status: +t5.value || null })" aria-label="الحالة">
           <option [value]="0">كل الحالات</option>
           @for (s of statuses; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
         </select>
@@ -160,10 +161,7 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
               <small class="hint">«أُزيل» للأجهزة المفكوكة مع بقاء سجلها؛ الحذف لأخطاء الإدخال فقط</small></label>
             <label class="form-field full"><span class="form-label">ملاحظات <small class="hint">(اختياري)</small></span><textarea formControlName="note" rows="3" maxlength="1000"></textarea></label>
           </div>
-          <footer class="modal-actions">
-            <button type="button" class="ghost" (click)="closeForm()" [disabled]="saving()">إلغاء</button>
-            <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-          </footer>
+          <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closeForm()" />
         </form>
       </app-modal>
     }

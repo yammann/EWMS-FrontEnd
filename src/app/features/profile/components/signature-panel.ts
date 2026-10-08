@@ -33,7 +33,7 @@ import { trackRequest } from '@shared/ui/loader';
         <div class="card-actions">
           @if (removing()) {
             <label class="form-field remove-pass"><span class="form-label">كلمة المرور لتأكيد الحذف</span>
-              <input type="password" autocomplete="current-password" [value]="password()" (input)="password.set($any($event.target).value)"
+              <input #t1 type="password" autocomplete="current-password" [value]="password()" (input)="password.set(t1.value)"
                      (keydown.enter)="remove()"></label>
             <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="!password() || saving()">{{ saving() ? 'جارٍ الحذف…' : 'حذف التوقيع' }}</button>
             <button type="button" class="btn btn-ghost" (click)="removing.set(false); password.set('')" [disabled]="saving()">إلغاء</button>
@@ -46,7 +46,7 @@ import { trackRequest } from '@shared/ui/loader';
     </section>
 
     @if (padOpen()) {
-      <app-signature-pad [busy]="saving()" [error]="padError()" (accepted)="save($event)" (cancel)="padOpen.set(false)" />
+      <app-signature-pad [busy]="saving()" [error]="padError()" (accepted)="save($event)" (closed)="padOpen.set(false)" />
     }`,
   styles: [`
     .card { max-width: 560px; padding: 18px; border-radius: 18px; border: 1px solid var(--border); background: var(--surface-raised, var(--surface)); }

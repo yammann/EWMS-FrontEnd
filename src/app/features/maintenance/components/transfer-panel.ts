@@ -11,6 +11,7 @@ import { Modal } from '@shared/ui/modal';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 /**
  * طلب تحويل طلب صيانة (قرار المستخدم 2026-10-05) — في صفحة الطلب:
@@ -18,7 +19,7 @@ import { trackRequest } from '@shared/ui/loader';
  * - إن وُجد طلب معلّق: شريط بتفاصيله؛ ومن يملك نقل طلبات القسم (canAssign) يقبل (يختار الموظف، المقترح مختار مسبقاً) أو يرفض بملاحظة.
  */
 @Component({
-  selector: 'app-transfer-panel', standalone: true, imports: [Alert, UtcPipe, DatePipe, Modal],
+  selector: 'app-transfer-panel', standalone: true, imports: [FormActions, Alert, UtcPipe, DatePipe, Modal],
   template: `
     @if (pending(); as t) {
       <section class="panel transfer" role="status">
@@ -35,7 +36,7 @@ import { trackRequest } from '@shared/ui/loader';
           <app-alert [message]="error()" />
           <div class="decide">
             <label class="form-field"><span class="form-label">يُحوَّل إلى</span>
-              <select [value]="target()" (change)="target.set(+$any($event.target).value)" [disabled]="busy()">
+              <select #t1 [value]="target()" (change)="target.set(+t1.value)" [disabled]="busy()">
                 <option [value]="0">اختر الموظف</option>
                 @for (u of assignees(); track u.id) {
                   <option [value]="u.id" [selected]="u.id === target()" [disabled]="u.id === request().userId">{{ u.fullName }}{{ u.id === request().userId ? ' (الحالي)' : '' }}{{ u.id === t.suggestedUserId ? ' — المقترح' : '' }}</option>
@@ -43,7 +44,7 @@ import { trackRequest } from '@shared/ui/loader';
               </select>
             </label>
             <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span>
-              <input [value]="note()" (input)="note.set($any($event.target).value)" maxlength="500" [disabled]="busy()">
+              <input #t2 [value]="note()" (input)="note.set(t2.value)" maxlength="500" [disabled]="busy()">
             </label>
           </div>
           <div class="actions">
@@ -66,19 +67,16 @@ import { trackRequest } from '@shared/ui/loader';
           <div class="modal-body form-stack">
             <app-alert [message]="error()" />
             <label class="form-field"><span class="form-label">سبب التحويل</span>
-              <textarea rows="3" maxlength="500" [value]="reason()" (input)="reason.set($any($event.target).value)" placeholder="مثلاً: العطل خارج اختصاصي، أو لدي إجازة"></textarea>
+              <textarea #t3 rows="3" maxlength="500" [value]="reason()" (input)="reason.set(t3.value)" placeholder="مثلاً: العطل خارج اختصاصي، أو لدي إجازة"></textarea>
             </label>
             <label class="form-field"><span class="form-label">زميل مقترح <small class="hint">(اختياري)</small></span>
-              <select (change)="suggested.set(+$any($event.target).value)">
+              <select #t4 (change)="suggested.set(+t4.value)">
                 <option [value]="0">بلا اقتراح — يختار رئيس القسم</option>
                 @for (u of colleagues(); track u.id) { <option [value]="u.id">{{ u.fullName }}</option> }
               </select>
             </label>
           </div>
-          <footer class="modal-actions">
-            <button type="button" class="ghost" (click)="askOpen.set(false)" [disabled]="busy()">إلغاء</button>
-            <button type="submit" [disabled]="busy() || !reason().trim()">{{ busy() ? 'جارٍ الإرسال…' : 'إرسال الطلب' }}</button>
-          </footer>
+          <app-form-actions [busy]="busy()" [disabled]="!reason().trim()" label="إرسال الطلب" busyLabel="جارٍ الإرسال…" (dismissed)="askOpen.set(false)" />
         </form>
       </app-modal>
     }`,

@@ -13,12 +13,13 @@ import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };
 
 /** إضافة قطعة أو تعديل بياناتها — الكمية والسعر لا يُدخلان هنا (إدخال/تسوية فقط) */
 @Component({
-  selector: 'app-spare-part-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal],
+  selector: 'app-spare-part-form-dialog', standalone: true, imports: [FormActions, Alert, ReactiveFormsModule, Modal],
   styleUrl: '../../../shared/styles/devices.scss',
   template: `
     <app-modal [heading]="part() ? 'تعديل قطعة غيار' : 'قطعة غيار جديدة'" [subheading]="part()?.departmentName ?? 'تُضاف برصيد صفر — ثم «إدخال» لاستلام الكميات'"
@@ -55,10 +56,7 @@ const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDe
             </div>
           </fieldset>
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="form.invalid || needsDepartment() || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="form.invalid || needsDepartment()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`

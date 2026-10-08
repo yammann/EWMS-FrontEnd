@@ -14,15 +14,16 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { Alert } from '@shared/ui/alert';
 import { PageHeader } from '@shared/ui/page-header';
+import { FormActions } from '@shared/ui/form-actions';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };
 
 /** نافذة قالب: الاسم والعنوان والوصف والأولوية والمدة وبنود التحقق (بند في كل سطر) */
 @Component({
-  selector: 'app-template-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
+  selector: 'app-template-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
   template: `
-    <app-modal [heading]="template() ? 'تعديل القالب' : 'قالب جديد'" size="lg" [busy]="saving()" (closed)="close.emit()">
+    <app-modal [heading]="template() ? 'تعديل القالب' : 'قالب جديد'" size="lg" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
           <app-alert [message]="error()" />
@@ -43,10 +44,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
           <label class="form-field"><span class="form-label">بنود التحقق <small class="muted">(بند في كل سطر، حتى 30)</small></span>
             <textarea name="items" rows="5" [(ngModel)]="items" placeholder="جرد الأصناف&#10;مطابقة السجلات&#10;رفع التقرير"></textarea></label>
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="saving() || !name.trim() || !title.trim()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="!name.trim() || !title.trim()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } @media (max-width: 560px) { .two { grid-template-columns: 1fr; } }`]
@@ -55,7 +53,7 @@ export class TemplateDialog implements OnInit {
   private service = inject(AssignedTaskService);
   template = input<TaskTemplate | null>(null);
   saved = output<TaskTemplate>();
-  close = output<void>();
+  closed = output<void>();
 
   priorities: TaskPriority[] = ['Low', 'Normal', 'High', 'Urgent'];
   priorityLabel = TASK_PRIORITY_LABEL;
@@ -86,9 +84,9 @@ export class TemplateDialog implements OnInit {
 
 /** نافذة مهمة دورية: قالب + جهة + جدول */
 @Component({
-  selector: 'app-recurrence-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
+  selector: 'app-recurrence-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
   template: `
-    <app-modal [heading]="recurrence() ? 'تعديل المهمة الدورية' : 'مهمة دورية جديدة'" size="lg" [busy]="saving()" (closed)="close.emit()">
+    <app-modal [heading]="recurrence() ? 'تعديل المهمة الدورية' : 'مهمة دورية جديدة'" size="lg" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
           <app-alert [message]="error()" />
@@ -132,10 +130,7 @@ export class TemplateDialog implements OnInit {
             <input name="due" type="number" min="0" max="365" [(ngModel)]="dueAfterDays"></label>
           <p class="note">تُنشأ المهمة تلقائياً بصلاحياتك وقت التنفيذ؛ إن فقدتَ الصلاحية أو حُذفت الجهة تتوقف المهمة الدورية ويصلك إشعار.</p>
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="saving() || !templateId || !targetId">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="!templateId || !targetId" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`
@@ -151,7 +146,7 @@ export class RecurrenceDialog implements OnInit {
   recurrence = input<TaskRecurrence | null>(null);
   templates = input<TaskTemplate[]>([]);
   saved = output<TaskRecurrence>();
-  close = output<void>();
+  closed = output<void>();
 
   freq = FREQUENCY_LABEL;
   weekDays = WEEK_DAYS;
@@ -271,8 +266,8 @@ export class RecurrenceDialog implements OnInit {
       </section>
     </div>
 
-    @if (templateOpen()) { <app-template-dialog [template]="editTemplate()" (saved)="templateSaved()" (close)="templateOpen.set(false)" /> }
-    @if (recurrenceOpen()) { <app-recurrence-dialog [recurrence]="editRecurrence()" [templates]="templates()" (saved)="recurrenceSaved()" (close)="recurrenceOpen.set(false)" /> }`,
+    @if (templateOpen()) { <app-template-dialog [template]="editTemplate()" (saved)="templateSaved()" (closed)="templateOpen.set(false)" /> }
+    @if (recurrenceOpen()) { <app-recurrence-dialog [recurrence]="editRecurrence()" [templates]="templates()" (saved)="recurrenceSaved()" (closed)="recurrenceOpen.set(false)" /> }`,
   styles: [`
     .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }

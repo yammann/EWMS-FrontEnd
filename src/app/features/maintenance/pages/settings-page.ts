@@ -17,6 +17,7 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
 
@@ -25,7 +26,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
  * أنواع الأجهزة، الشركات المصنّعة، أنواع الأعطال، وحالات الطلب (بألوانها، وهي أعمدة لوحة الحالات).
  */
 @Component({
-  selector: 'app-maintenance-settings-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager],
+  selector: 'app-maintenance-settings-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager],
   styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss', '../../../shared/styles/maintenance.scss'],
   template: `
     <div class="page">
@@ -88,10 +89,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
                 <small class="hint">{{ stageHint() }}</small></label>
             }
           </div>
-          <footer class="modal-actions">
-            <button type="button" class="ghost" (click)="closeForm()" [disabled]="saving()">إلغاء</button>
-            <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-          </footer>
+          <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closeForm()" />
         </form>
       </app-modal>
     }`,

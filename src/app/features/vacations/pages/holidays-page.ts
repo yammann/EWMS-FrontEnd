@@ -23,7 +23,7 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
       <header class="page-header">
         <div><span class="eyebrow">إعدادات الإجازات</span><h1>العطل الرسمية</h1><p class="muted">لا تُحسب من مدة الإجازة، مثل يوم الجمعة.</p></div>
         <div class="actions">
-          <select [value]="year()" (change)="setYear(+$any($event.target).value)" aria-label="السنة">
+          <select #t1 [value]="year()" (change)="setYear(+t1.value)" aria-label="السنة">
             @for (y of years; track y) { <option [value]="y">{{ y }}</option> }
           </select>
           <button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button>

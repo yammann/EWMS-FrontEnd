@@ -17,10 +17,11 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */
 @Component({
-  selector: 'app-sites-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
+  selector: 'app-sites-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
   styleUrls: ['../../../shared/styles/organization.scss', '../../../shared/styles/devices.scss'],
   template: `
     <div class="page">
@@ -33,8 +34,8 @@ import { trackRequest } from '@shared/ui/loader';
       <app-alert [message]="error()" />
 
       <div class="toolbar">
-        <input class="search" type="search" placeholder="بحث باسم الموقع أو الوصف أو المسؤول…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="بحث">
-        <select [value]="governorate()" (change)="setGovernorate($any($event.target).value)" aria-label="تصفية حسب المحافظة">
+        <input #t1 class="search" type="search" placeholder="بحث باسم الموقع أو الوصف أو المسؤول…" [value]="search()" (input)="search.set(t1.value)" aria-label="بحث">
+        <select #t2 [value]="governorate()" (change)="setGovernorate(t2.value)" aria-label="تصفية حسب المحافظة">
           <option value="">كل المحافظات</option>
           @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
         </select>
@@ -89,10 +90,7 @@ import { trackRequest } from '@shared/ui/loader';
                 <app-coordinate-picker [latitude]="form.value.latitude ?? null" [longitude]="form.value.longitude ?? null" (picked)="setCoords($event)" />
               </div>
             </div>
-            <footer class="modal-actions">
-              <button type="button" class="ghost" (click)="closeForm()" [disabled]="saving()">إلغاء</button>
-              <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-            </footer>
+            <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closeForm()" />
           </form>
       </app-modal>
     }

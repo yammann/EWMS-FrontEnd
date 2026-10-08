@@ -115,9 +115,9 @@
     @if (!loading() && roles().length) {
       <div class="roles-search">
         <div class="search-box">
-          <input type="search" placeholder="بحث باسم الدور أو بصلاحية يملكها…" [value]="search()" autocomplete="off"
+          <input #t1 type="search" placeholder="بحث باسم الدور أو بصلاحية يملكها…" [value]="search()" autocomplete="off"
                  role="combobox" aria-autocomplete="list" [attr.aria-expanded]="suggestOpen() && suggestions().length > 0" aria-controls="roles-suggest"
-                 (input)="onSearchInput($any($event.target).value)" (keydown)="onSearchKey($event)" (focus)="suggestOpen.set(true)"
+                 (input)="onSearchInput(t1.value)" (keydown)="onSearchKey($event)" (focus)="suggestOpen.set(true)"
                  (blur)="suggestOpen.set(false)" aria-label="بحث في الأدوار">
           @if (suggestOpen() && suggestions().length) {
             <ul class="suggest" id="roles-suggest" role="listbox" aria-label="الأدوار المطابقة">

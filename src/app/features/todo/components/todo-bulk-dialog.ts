@@ -10,7 +10,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-todo-bulk-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
   template: `
-    <app-modal heading="إضافة عدة بنود" subheading="كل سطر بند جديد" [busy]="saving()" (closed)="close.emit()">
+    <app-modal heading="إضافة عدة بنود" subheading="كل سطر بند جديد" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
           <app-alert [message]="error()" />
@@ -22,7 +22,7 @@ import { trackRequest } from '@shared/ui/loader';
           @if (long().length) { <p class="alert alert-error" role="alert">{{ long().length }} سطر أطول من {{ limits.titleLength }} حرفاً — قصّرها.</p> }
         </div>
         <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
+          <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
           <button type="submit" [disabled]="saving() || !titles().length || tooMany() || long().length > 0 || titles().length > room()">
             {{ saving() ? 'جارٍ الإضافة…' : 'إضافة ' + titles().length + ' بنداً' }}</button>
         </footer>
@@ -37,7 +37,7 @@ export class TodoBulkDialog implements OnInit {
   /** نص جاهز (من لصق في خانة الإضافة) */
   initialText = input('');
   saved = output<ToDoList>();
-  close = output<void>();
+  closed = output<void>();
 
   limits = TODO_LIMITS;
   text = signal('');

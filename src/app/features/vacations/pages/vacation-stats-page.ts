@@ -31,7 +31,7 @@ import { trackRequest } from '@shared/ui/loader';
         </div>
         <div class="header-actions">
           @if (isAdmin()) {
-            <select [value]="branchId()" (change)="selectBranch(+$any($event.target).value)" aria-label="اختيار الفرع">
+            <select #t1 [value]="branchId()" (change)="selectBranch(+t1.value)" aria-label="اختيار الفرع">
               <option [value]="0">كل المؤسسة</option>
               @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
             </select>

@@ -27,10 +27,10 @@ import { trackRequest } from '@shared/ui/loader';
 
       <div class="filters">
         <div class="filters-row">
-          <label class="period">من <input type="date" [value]="from()" [max]="to()" (change)="from.set($any($event.target).value); load()"></label>
-          <label class="period">إلى <input type="date" [value]="to()" [min]="from()" [max]="today" (change)="to.set($any($event.target).value); load()"></label>
+          <label class="period">من <input #t1 type="date" [value]="from()" [max]="to()" (change)="from.set(t1.value); load()"></label>
+          <label class="period">إلى <input #t2 type="date" [value]="to()" [min]="from()" [max]="today" (change)="to.set(t2.value); load()"></label>
           @if (departments().length > 1) {
-            <select (change)="departmentId.set(+$any($event.target).value); load()" aria-label="القسم">
+            <select #t3 (change)="departmentId.set(+t3.value); load()" aria-label="القسم">
               <option [value]="0">كل الأقسام</option>
               @for (d of departments(); track d.id) { <option [value]="d.id">{{ d.name }}</option> }
             </select>

@@ -45,7 +45,7 @@ export interface RequestLookups {
             } @else if (!external()) {
               <label class="form-field"><span class="form-label">اسم العميل الكامل أو رقمه الذاتي</span>
                 <span class="with-btn">
-                  <input [value]="clientQuery()" (input)="clientQuery.set($any($event.target).value); matches.set([])" (keydown.enter)="$event.preventDefault(); findClient()"
+                  <input #t1 [value]="clientQuery()" (input)="clientQuery.set(t1.value); matches.set([])" (keydown.enter)="$event.preventDefault(); findClient()"
                          maxlength="200" autocomplete="off" placeholder="مطابقة تامة — ثم «بحث»">
                   <button type="button" class="btn btn-sm" (click)="findClient()" [disabled]="!clientQuery().trim() || clientSearching()">{{ clientSearching() ? 'جارٍ البحث…' : 'بحث' }}</button>
                 </span>
@@ -87,7 +87,7 @@ export interface RequestLookups {
               <label class="form-field"><span class="form-label">الرقم التسلسلي للجهاز</span>
                 <span class="with-btn">
                   <span class="suggest-wrap">
-                    <input [value]="serialQuery()" (input)="typed($any($event.target).value)" (keydown.enter)="$event.preventDefault(); findDevice()"
+                    <input #t2 [value]="serialQuery()" (input)="typed(t2.value)" (keydown.enter)="$event.preventDefault(); findDevice()"
                            (keydown.escape)="suggestions.set([])" (blur)="closeSuggestions()"
                            dir="ltr" maxlength="100" autocomplete="off" role="combobox" [attr.aria-expanded]="suggestions().length > 0"
                            placeholder="ابدأ بكتابة الرقم التسلسلي — تظهر الأجهزة المطابقة">

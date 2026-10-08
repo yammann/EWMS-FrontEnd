@@ -31,7 +31,7 @@ import { trackRequest } from '@shared/ui/loader';
       @if (tab() === 'team') {
         <section class="panel">
           <div class="panel-heading"><div><h2>سجل إجازات فريقي</h2><p>حسب دورك: رئيس القسم يرى قسمه، ورئيس الفرع يرى فرعه — بكل الحالات.</p></div>
-            <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" aria-label="تصفية حسب الحالة">
+            <select #t1 [value]="statusFilter()" (change)="statusFilter.set(t1.value)" aria-label="تصفية حسب الحالة">
               <option value="">كل الحالات</option><option value="Pending">قيد الانتظار</option><option value="Approved">معتمدة</option><option value="Rejected">مرفوضة</option><option value="Cancelled">ملغاة</option>
             </select></div>
           <app-alert [message]="teamError()" />

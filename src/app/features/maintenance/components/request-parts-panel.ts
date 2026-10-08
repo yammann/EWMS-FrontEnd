@@ -54,7 +54,7 @@ import { trackRequest } from '@shared/ui/loader';
         <div class="modal-body form-stack">
           <app-alert [message]="issueError()" />
           <label class="form-field"><span class="form-label">بحث في القطع المتوفرة</span>
-            <input type="search" [value]="search()" (input)="search.set($any($event.target).value); findParts()" placeholder="الاسم أو رقم القطعة…" autocomplete="off"></label>
+            <input #t1 type="search" [value]="search()" (input)="search.set(t1.value); findParts()" placeholder="الاسم أو رقم القطعة…" autocomplete="off"></label>
           <div class="pick" role="listbox" aria-label="القطع المتوفرة">
             @for (p of available(); track p.id) {
               <button type="button" role="option" [class.on]="selected()?.id === p.id" [attr.aria-selected]="selected()?.id === p.id" (click)="select(p)">
@@ -65,7 +65,7 @@ import { trackRequest } from '@shared/ui/loader';
           </div>
           @if (selected(); as s) {
             <label class="form-field"><span class="form-label">الكمية ({{ s.unit }}) — المتوفر {{ s.quantity | qty }}</span>
-              <input type="number" [value]="quantity()" (input)="quantity.set(+$any($event.target).value)" min="0.01" [max]="s.quantity" step="0.01" dir="ltr">
+              <input #t2 type="number" [value]="quantity()" (input)="quantity.set(+t2.value)" min="0.01" [max]="s.quantity" step="0.01" dir="ltr">
               @if (quantityError()) { <small class="form-error">{{ quantityError() }}</small> }
               @else { <small class="hint">التكلفة {{ quantity() * s.averageCost | money }} — بسعر المتوسط الحالي، ويُثبَّت على الطلب</small> }</label>
           }

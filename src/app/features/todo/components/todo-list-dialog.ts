@@ -5,12 +5,13 @@ import { TODO_COLORS, TODO_ICONS, TODO_LIMITS, ToDoList } from '../data-access/t
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** نافذة إنشاء قائمة أو تعديلها: الاسم والوصف واللون والرمز */
 @Component({
-  selector: 'app-todo-list-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
+  selector: 'app-todo-list-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
   template: `
-    <app-modal [heading]="list() ? 'تعديل القائمة' : 'قائمة جديدة'" [busy]="saving()" (closed)="close.emit()">
+    <app-modal [heading]="list() ? 'تعديل القائمة' : 'قائمة جديدة'" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
           <app-alert [message]="error()" />
@@ -39,10 +40,7 @@ import { trackRequest } from '@shared/ui/loader';
             </div>
           </fieldset>
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="saving() || !name.trim()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="!name.trim()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`
@@ -62,7 +60,7 @@ export class TodoListDialog implements OnInit {
 
   list = input<ToDoList | null>(null);
   saved = output<ToDoList>();
-  close = output<void>();
+  closed = output<void>();
 
   limits = TODO_LIMITS;
   colors = TODO_COLORS;

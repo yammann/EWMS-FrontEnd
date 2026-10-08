@@ -5,12 +5,13 @@ import { TODO_LIMITS, TODO_REPEAT_LABEL, TODO_REPEAT_VALUE, ToDoItem, ToDoList }
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** تعديل بند: العنوان والملاحظة والموعد والتكرار والأهمية (المهمة المرتبطة تُعرض للاطلاع) */
 @Component({
-  selector: 'app-todo-item-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
+  selector: 'app-todo-item-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
   template: `
-    <app-modal heading="تعديل البند" [busy]="saving()" (closed)="close.emit()">
+    <app-modal heading="تعديل البند" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
           <app-alert [message]="error()" />
@@ -33,10 +34,7 @@ import { trackRequest } from '@shared/ui/loader';
             <p class="linked">مرتبط بمهمة في لوحة المهام: <strong>{{ t.available ? t.title : 'مهمة غير متاحة لك' }}</strong>@if (t.available) { — {{ t.statusAr }} }</p>
           }
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="saving() || !title.trim()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="!title.trim()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`
@@ -52,7 +50,7 @@ export class TodoItemDialog implements OnInit {
 
   item = input.required<ToDoItem>();
   saved = output<ToDoList>();
-  close = output<void>();
+  closed = output<void>();
 
   limits = TODO_LIMITS;
   repeats = (Object.keys(TODO_REPEAT_LABEL) as (keyof typeof TODO_REPEAT_LABEL)[]).map(key => ({ key, label: TODO_REPEAT_LABEL[key] }));

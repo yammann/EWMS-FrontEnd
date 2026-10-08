@@ -5,12 +5,13 @@ import { ToDoList } from '../data-access/todo.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/loader';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** إضافة مهمة من لوحة المهام إلى إحدى قوائم مفكرتي كبند مرتبط بها (تُظهر حالتها وتفتحها) */
 @Component({
-  selector: 'app-add-to-todo-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
+  selector: 'app-add-to-todo-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
   template: `
-    <app-modal heading="أضف إلى مفكرتي" [subheading]="taskTitle()" [busy]="saving()" (closed)="close.emit()">
+    <app-modal heading="أضف إلى مفكرتي" [subheading]="taskTitle()" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
           <app-alert [message]="error()" />
@@ -24,10 +25,7 @@ import { trackRequest } from '@shared/ui/loader';
             <p class="note">يُنشأ بند بعنوان المهمة وموعدها، ويبقى مرتبطاً بها: ترى حالتها من مفكرتك وتفتحها بنقرة.</p>
           }
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="saving() || !listId">{{ saving() ? 'جارٍ الإضافة…' : 'إضافة' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="!listId" label="إضافة" busyLabel="جارٍ الإضافة…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`.note { margin: 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--ink-50); font-size: 12px; color: var(--ink-600); } .muted { margin: 0; color: var(--ink-500); }`]
@@ -38,7 +36,7 @@ export class AddToTodoDialog implements OnInit {
   taskId = input.required<number>();
   taskTitle = input('');
   done = output<ToDoList>();
-  close = output<void>();
+  closed = output<void>();
 
   all = signal<ToDoList[]>([]);
   lists = computed(() => this.all().filter(l => !l.isArchived));

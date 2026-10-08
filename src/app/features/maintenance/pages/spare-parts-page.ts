@@ -42,21 +42,21 @@ const PAGE_SIZE = 25;
 
       <div class="filters">
         <div class="filters-row">
-          <input class="search" type="search" placeholder="بحث بالاسم أو رقم القطعة…" dir="auto"
-                 [value]="searchText()" (input)="searchText.set($any($event.target).value); changed()" aria-label="بحث">
+          <input #t1 class="search" type="search" placeholder="بحث بالاسم أو رقم القطعة…" dir="auto"
+                 [value]="searchText()" (input)="searchText.set(t1.value); changed()" aria-label="بحث">
           @if (departments().length > 1) {
-            <select (change)="departmentId.set(+$any($event.target).value); reload()" aria-label="القسم">
+            <select #t2 (change)="departmentId.set(+t2.value); reload()" aria-label="القسم">
               <option [value]="0" [selected]="!departmentId()">كل الأقسام</option>
               @for (d of departments(); track d.id) { <option [value]="d.id" [selected]="d.id === departmentId()">{{ d.name }}</option> }
             </select>
           }
           @if (deviceTypes().length) {
-            <select (change)="deviceTypeId.set(+$any($event.target).value); reload()" aria-label="نوع الجهاز">
+            <select #t3 (change)="deviceTypeId.set(+t3.value); reload()" aria-label="نوع الجهاز">
               <option [value]="0" [selected]="!deviceTypeId()">كل الأجهزة</option>
               @for (t of deviceTypes(); track t.id) { <option [value]="t.id" [selected]="t.id === deviceTypeId()">تناسب {{ t.name }}</option> }
             </select>
           }
-          <label class="low-toggle"><input type="checkbox" [checked]="lowOnly()" (change)="lowOnly.set($any($event.target).checked); reload()"> تحت الحد الأدنى فقط</label>
+          <label class="low-toggle"><input #t4 type="checkbox" [checked]="lowOnly()" (change)="lowOnly.set(t4.checked); reload()"> تحت الحد الأدنى فقط</label>
           @if (hasFilter()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }
         </div>
       </div>

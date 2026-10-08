@@ -20,7 +20,7 @@ import { trackRequest } from '@shared/ui/loader';
 @Component({
   selector: 'app-task-detail-drawer', standalone: true, imports: [Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
   template: `
-    <div class="drawer-backdrop" (click)="close.emit()"></div>
+    <div class="drawer-backdrop" (click)="closed.emit()"></div>
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="task-drawer-title">
       @if (task(); as t) {
         <header class="drawer-head">
@@ -29,7 +29,7 @@ import { trackRequest } from '@shared/ui/loader';
             <span class="chip st s-{{ t.status }}">{{ t.statusAr }}</span>
             @if (t.isOverdue) { <span class="chip overdue">متأخرة</span> }
           </div>
-          <button type="button" class="icon-close" aria-label="إغلاق" (click)="close.emit()">×</button>
+          <button type="button" class="icon-close" aria-label="إغلاق" (click)="closed.emit()">×</button>
         </header>
 
         <div class="drawer-body">
@@ -80,7 +80,7 @@ import { trackRequest } from '@shared/ui/loader';
               <ul class="checklist">
                 @for (i of t.checklist; track i.id) {
                   <li [class.done]="i.isDone">
-                    <label><input type="checkbox" [checked]="i.isDone" [disabled]="busy() || !t.canManageChecklist" (change)="toggleItem(i.id, $any($event.target).checked)">
+                    <label><input #t1 type="checkbox" [checked]="i.isDone" [disabled]="busy() || !t.canManageChecklist" (change)="toggleItem(i.id, t1.checked)">
                       <span>{{ i.text }}</span></label>
                     @if (t.canManageChecklist) {
                       <button type="button" class="x" [disabled]="busy()" (click)="removeItem(i.id)" [attr.aria-label]="'حذف ' + i.text" title="حذف">×</button>
@@ -172,17 +172,17 @@ import { trackRequest } from '@shared/ui/loader';
           </footer>
         }
       } @else if (error()) {
-        <div class="drawer-body"><p class="alert alert-error" role="alert">{{ error() }}</p><button class="btn btn-ghost" (click)="close.emit()">إغلاق</button></div>
+        <div class="drawer-body"><p class="alert alert-error" role="alert">{{ error() }}</p><button class="btn btn-ghost" (click)="closed.emit()">إغلاق</button></div>
       } @else {
         <div class="drawer-body"><p class="muted" role="status">جارٍ التحميل…</p></div>
       }
     </aside>
     @if (todoOpen() && task(); as t) {
-      <app-add-to-todo-dialog [taskId]="t.id" [taskTitle]="t.title" (done)="todoAdded()" (close)="todoOpen.set(false)" />
+      <app-add-to-todo-dialog [taskId]="t.id" [taskTitle]="t.title" (done)="todoAdded()" (closed)="todoOpen.set(false)" />
     }
     @if (returning()) {
       <app-task-note-dialog heading="إعادة المهمة للتنفيذ" [subheading]="task()?.title ?? ''" [busy]="busy()"
-        (confirm)="applyStatus('InProgress', $event)" (cancel)="returning.set(false)" />
+        (confirm)="applyStatus('InProgress', $event)" (closed)="returning.set(false)" />
     }`,
   styleUrl: './task-detail-drawer.scss'
 })
@@ -193,7 +193,7 @@ export class TaskDetailDrawer {
   private toast = inject(ToastService);
 
   taskId = input.required<number>();
-  close = output<void>();
+  closed = output<void>();
   changed = output<void>();
   edit = output<AssignedTaskDetail>();
   delegate = output<AssignedTaskDetail>();
@@ -220,7 +220,7 @@ export class TaskDetailDrawer {
   }
 
   @HostListener('document:keydown.escape')
-  onEscape() { if (!hasOpenModal()) this.close.emit(); }   // نافذة فوق اللوحة تُغلق وحدها أولاً
+  onEscape() { if (!hasOpenModal()) this.closed.emit(); }   // نافذة فوق اللوحة تُغلق وحدها أولاً
 
   load(id = this.taskId()) {
     this.error.set(''); this.confirmDelete.set(false);
@@ -288,7 +288,7 @@ export class TaskDetailDrawer {
     if (!t || this.busy()) return;
     this.busy.set(true);
     this.service.delete(t.id).subscribe({
-      next: () => { this.busy.set(false); this.changed.emit(); this.close.emit(); },
+      next: () => { this.busy.set(false); this.changed.emit(); this.closed.emit(); },
       error: e => { this.busy.set(false); this.error.set(e.message); this.confirmDelete.set(false); }
     });
   }

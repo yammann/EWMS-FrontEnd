@@ -25,7 +25,7 @@ import { Component, computed, input, output } from '@angular/core';
         }
         @if (sizes().length > 1) {
           <label class="size"><span>في الصفحة</span>
-            <select [value]="pageSize()" (change)="sizeChange.emit(+$any($event.target).value)" aria-label="عدد العناصر في الصفحة">
+            <select #t1 [value]="pageSize()" (change)="sizeChange.emit(+t1.value)" aria-label="عدد العناصر في الصفحة">
               @for (s of sizes(); track s) { <option [value]="s">{{ s }}</option> }
             </select></label>
         }

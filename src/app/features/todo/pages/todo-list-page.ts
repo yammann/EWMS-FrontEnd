@@ -65,9 +65,9 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
         @if (l.itemsTotal) {
           <div class="t-tools">
             <label class="sr-only" for="todo-search">بحث في البنود</label>
-            <input id="todo-search" type="search" placeholder="بحث بالعنوان أو الملاحظة…" [value]="search()" (input)="search.set($any($event.target).value)">
+            <input #t1 id="todo-search" type="search" placeholder="بحث بالعنوان أو الملاحظة…" [value]="search()" (input)="search.set(t1.value)">
             <label class="sr-only" for="todo-sort">الترتيب</label>
-            <select id="todo-sort" [value]="sort()" (change)="sort.set($any($event.target).value)">
+            <select #t2 id="todo-sort" [value]="sort()" (change)="setSort(t2.value)">
               <option value="manual">ترتيبي اليدوي</option>
               <option value="due">حسب الموعد</option>
               <option value="important">المهم أولاً</option>
@@ -172,9 +172,9 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
       } @else { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
     </div>
 
-    @if (formOpen() && list(); as l) { <app-todo-list-dialog [list]="l" (saved)="renamed($event)" (close)="formOpen.set(false)" /> }
-    @if (editingItem(); as it) { <app-todo-item-dialog [item]="it" (saved)="replaced($event)" (close)="editingItem.set(null)" /> }
-    @if (bulkOpen() && list(); as l) { <app-todo-bulk-dialog [list]="l" [initialText]="bulkText()" (saved)="bulkSaved($event)" (close)="bulkOpen.set(false)" /> }`,
+    @if (formOpen() && list(); as l) { <app-todo-list-dialog [list]="l" (saved)="renamed($event)" (closed)="formOpen.set(false)" /> }
+    @if (editingItem(); as it) { <app-todo-item-dialog [item]="it" (saved)="replaced($event)" (closed)="editingItem.set(null)" /> }
+    @if (bulkOpen() && list(); as l) { <app-todo-bulk-dialog [list]="l" [initialText]="bulkText()" (saved)="bulkSaved($event)" (closed)="bulkOpen.set(false)" /> }`,
   styles: [`
     .page { gap: 20px; }
     .empty-state { text-align: center; }
@@ -199,6 +199,7 @@ export class TodoListPage {
   bulkText = signal('');
   filter = signal<Filter>('all');
   sort = signal<Sort>('manual');
+  setSort(value: string) { this.sort.set(value as Sort); }
   search = signal('');
   adding = signal(false);
   newTitle = '';

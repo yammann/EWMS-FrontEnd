@@ -21,7 +21,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
 @Component({
   selector: 'app-task-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, FormsModule, Modal],
   template: `
-    <app-modal [heading]="heading()" [subheading]="subheading()" size="lg" [busy]="saving()" (closed)="close.emit()">
+    <app-modal [heading]="heading()" [subheading]="subheading()" size="lg" [busy]="saving()" (closed)="closed.emit()">
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="modal-body form-stack">
@@ -127,7 +127,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
             @if (canTemplate() && !templateNaming()) {
               <button type="button" class="ghost tpl-btn" (click)="templateNaming.set(true)" [disabled]="saving() || !form.value.title?.trim()">حفظ كقالب</button>
             }
-            <button type="button" class="ghost" (click)="close.emit()" [disabled]="saving()">إلغاء</button>
+            <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
             <button type="submit" [disabled]="form.invalid || saving() || (mode() !== 'edit' && !form.value.targetId)">
               {{ saving() ? (uploadText() || 'جارٍ الحفظ…') : (mode() === 'edit' ? 'حفظ التعديلات' : 'إسناد المهمة') }}
             </button>
@@ -172,7 +172,7 @@ export class TaskFormDialog implements OnInit {
   saved = output<AssignedTaskDetail>();
   /** حُفظت المهمة لكن فشل رفع المرفقات (تبقى المهمة، وتُضاف الملفات من تفاصيلها) */
   uploadFailed = output<string>();
-  close = output<void>();
+  closed = output<void>();
 
   maxItems = 30;
   templates = signal<TaskTemplate[]>([]);
