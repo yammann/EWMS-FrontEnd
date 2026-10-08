@@ -1,4 +1,7 @@
 import { Pagination } from '@core/utils/pagination';
+import { RowActions } from '@shared/ui/row-actions';
+import { StatTile } from '@shared/ui/stat-tile';
+import { AdminHeader } from '@shared/ui/admin-header';
 import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
@@ -15,7 +18,7 @@ import { ModalCrud } from '@shared/ui/modal-crud';
 @Component({
   selector: 'app-branches-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './branches-page.html',
   styleUrl: './branches-page.scss'
 })

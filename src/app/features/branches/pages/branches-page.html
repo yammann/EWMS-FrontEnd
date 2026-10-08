@@ -1,104 +1,39 @@
 <section class="branches-page" dir="rtl">
 
   <!-- Header -->
-  <header class="page-header">
-    <div class="page-title">
-      <span class="eyebrow">
-        <span class="eyebrow-dot"></span>
-        إدارة الفروع
-      </span>
-      <h1>الفروع</h1>
-      <p>إدارة فروع النظام التي تتبعها الأقسام والمستخدمون.</p>
-    </div>
-
-    <div class="header-actions">
-      <button type="button" class="refresh-btn" (click)="load(true)" [disabled]="loading()">
-        <svg class="icon" [class.spin]="loading()" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"></path>
-          <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"></path>
-        </svg>
-        <span>{{ loading() ? 'جاري التحديث...' : 'تحديث' }}</span>
-      </button>
-
-      @if (canCreate()) {
-        <button type="button" class="new-btn" (click)="crud.openCreate()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
-          <span>فرع جديد</span>
-        </button>
-      }
-    </div>
-  </header>
+  <app-admin-header eyebrow="إدارة الفروع" heading="الفروع" subtitle="إدارة فروع النظام التي تتبعها الأقسام والمستخدمون." [loading]="loading()"
+    [createLabel]="canCreate() ? 'فرع جديد' : ''" (refresh)="load(true)" (create)="crud.openCreate()" />
 
   <!-- Stats -->
   <section class="stats-grid">
 
-    <article class="stat-card">
-      <div class="stat-top">
-        <div class="stat-icon green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 21h18"></path>
-            <path d="M5 21V5l7-3 7 3v16"></path>
-            <path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"></path>
-          </svg>
-        </div>
-        <span class="stat-label">إجمالي الفروع</span>
-      </div>
-      <div class="stat-value">{{ stats().total }}</div>
-      <div class="stat-footer">
-        <span class="stat-description">جميع الفروع المسجلة</span>
-      </div>
-    </article>
+    <app-stat-tile tone="green" icon="" label="إجمالي الفروع" [value]="stats().total" hint="جميع الفروع المسجلة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5l7-3 7 3v16"></path>
+                  <path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"></path>
+                </svg>
+    </app-stat-tile>
 
-    <article class="stat-card">
-      <div class="stat-top">
-        <div class="stat-icon blue">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 7h16M4 12h16M4 17h10"></path>
-          </svg>
-        </div>
-        <span class="stat-label">فروع بوصف</span>
-      </div>
-      <div class="stat-value">{{ stats().withDescription }}</div>
-      <div class="stat-footer">
-        <span class="stat-description">لها وصف موثق</span>
-      </div>
-    </article>
+    <app-stat-tile tone="blue" icon="" label="فروع بوصف" [value]="stats().withDescription" hint="لها وصف موثق">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 7h16M4 12h16M4 17h10"></path>
+                </svg>
+    </app-stat-tile>
 
-    <article class="stat-card">
-      <div class="stat-top">
-        <div class="stat-icon orange">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 8v4M12 16h.01"></path>
-          </svg>
-        </div>
-        <span class="stat-label">بدون وصف</span>
-      </div>
-      <div class="stat-value">{{ stats().withoutDescription }}</div>
-      <div class="stat-footer">
-        <span class="stat-description">تحتاج إلى استكمال البيانات</span>
-      </div>
-    </article>
+    <app-stat-tile tone="orange" icon="" label="بدون وصف" [value]="stats().withoutDescription" hint="تحتاج إلى استكمال البيانات">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path d="M12 8v4M12 16h.01"></path>
+                </svg>
+    </app-stat-tile>
 
-    <article class="stat-card">
-      <div class="stat-top">
-        <div class="stat-icon purple">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 21h18"></path>
-            <path d="M5 21V5l7-3 7 3v16"></path>
-          </svg>
-        </div>
-        <span class="stat-label">الحالة</span>
-      </div>
-      <div class="stat-value">{{ stats().total === 0 ? '—' : 'نشط' }}</div>
-      <div class="stat-footer">
-        <span class="live-dot" [style.display]="stats().total === 0 ? 'none' : 'inline-block'"></span>
-        <span class="stat-description">الفرع متاح للاستخدام</span>
-      </div>
-    </article>
+    <app-stat-tile tone="purple" icon="" label="الحالة" [value]="stats().total === 0 ? '—' : 'نشط'" hint="الفرع متاح للاستخدام" [live]="!(stats().total === 0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5l7-3 7 3v16"></path>
+                </svg>
+    </app-stat-tile>
   </section>
 
   <!-- Branches List -->
@@ -150,33 +85,7 @@
                   }
                 </td>
                 <td>
-                  <div class="row-actions">
-                    @if (canEdit()) {
-                      <button type="button" class="icon-btn edit" title="تعديل"
-                              (click)="crud.openEdit(branch)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M12 20h9"></path>
-                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-                        </svg>
-                      </button>
-                    }
-
-                    @if (canDelete()) {
-                      <button type="button" class="icon-btn danger" title="حذف"
-                              (click)="crud.remove(branch)"
-                              [disabled]="saving() === 'delete-' + branch.id">
-                        @if (saving() === 'delete-' + branch.id) {
-                          <span class="button-spinner dark"></span>
-                        } @else {
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                          </svg>
-                        }
-                      </button>
-                    }
-                  </div>
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="saving() === 'delete-' + branch.id" (edit)="crud.openEdit(branch)" (remove)="crud.remove(branch)" />
                 </td>
               </tr>
             }

@@ -1,4 +1,7 @@
 import { Pagination } from '@core/utils/pagination';
+import { RowActions } from '@shared/ui/row-actions';
+import { StatTile } from '@shared/ui/stat-tile';
+import { AdminHeader } from '@shared/ui/admin-header';
 import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
@@ -25,7 +28,7 @@ type UserPlacement = { needsBranch: boolean; needsDepartment: boolean; needsOffi
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss'
 })

@@ -1,18 +1,26 @@
-import { Component, input } from '@angular/core';
+import { Component, booleanAttribute, input } from '@angular/core';
 
 export type StatTone = 'green' | 'blue' | 'purple' | 'orange' | 'red';
 
-/** بطاقة رقم واحد (إحصائية) */
+/**
+ * بطاقة رقم واحد (إحصائية). الأيقونة: نص قصير عبر `icon`، أو عنصر svg يُمرَّر كمحتوى (مع icon="").
+ * `hint` سطر وصف أسفل الرقم، و`live` نقطة خضراء قبله.
+ */
 @Component({
   selector: 'app-stat-tile', standalone: true,
   template: `
     <article class="stat-card" [class.stat-alert]="alert()">
       <div class="stat-top">
-        <span class="stat-icon {{ tone() }}" aria-hidden="true">{{ icon() }}</span>
+        <span class="stat-icon {{ tone() }}" aria-hidden="true">{{ icon() }}<ng-content select="svg" /></span>
         <span class="stat-label">{{ label() }}</span>
       </div>
       <strong class="stat-value">{{ value() }}</strong>
-      @if (hint()) { <div class="stat-footer"><span class="stat-description">{{ hint() }}</span></div> }
+      @if (hint() || live()) {
+        <div class="stat-footer">
+          @if (live()) { <span class="live-dot"></span> }
+          <span class="stat-description">{{ hint() }}</span>
+        </div>
+      }
     </article>`,
   styles: [`
     :host { display: block; min-width: 0; }
@@ -31,4 +39,6 @@ export class StatTile {
   tone = input<StatTone>('green');
   /** إبراز البطاقة (مثل وجود طلبات بانتظار القرار) */
   alert = input(false);
+  /** نقطة «متاح» قبل الوصف */
+  live = input(false, { transform: booleanAttribute });
 }

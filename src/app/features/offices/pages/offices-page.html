@@ -1,36 +1,8 @@
 <section class="offices-page" dir="rtl">
 
   <!-- Header -->
-  <header class="page-header">
-    <div class="page-title">
-      <span class="eyebrow">
-        <span class="eyebrow-dot"></span>
-        الهيكل التنظيمي
-      </span>
-      <h1>المكاتب</h1>
-      <p>إدارة مكاتب الأقسام وربطها بالموظفين.</p>
-    </div>
-
-    <div class="header-actions">
-      <button type="button" class="refresh-btn" (click)="load(true)" [disabled]="loading()">
-        <svg class="icon" [class.spin]="loading()" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"></path>
-          <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"></path>
-        </svg>
-        <span>{{ loading() ? 'جاري التحديث...' : 'تحديث' }}</span>
-      </button>
-
-      @if (can().create) {
-        <button type="button" class="new-btn" (click)="crud.openCreate()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
-          <span>مكتب جديد</span>
-        </button>
-      }
-    </div>
-  </header>
+  <app-admin-header eyebrow="الهيكل التنظيمي" heading="المكاتب" subtitle="إدارة مكاتب الأقسام وربطها بالموظفين." [loading]="loading()"
+    [createLabel]="can().create ? 'مكتب جديد' : ''" (refresh)="load(true)" (create)="crud.openCreate()" />
 
   <!-- Offices List -->
   <section class="panel">
@@ -85,32 +57,7 @@
                   }
                 </td>
                 <td>
-                  <div class="row-actions">
-                    @if (can().edit) {
-                      <button type="button" class="icon-btn edit" title="تعديل" (click)="crud.openEdit(office)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M12 20h9"></path>
-                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-                        </svg>
-                      </button>
-                    }
-
-                    @if (can().delete) {
-                      <button type="button" class="icon-btn danger" title="حذف"
-                              (click)="crud.remove(office)"
-                              [disabled]="saving() === 'delete-' + office.id">
-                        @if (saving() === 'delete-' + office.id) {
-                          <span class="button-spinner dark"></span>
-                        } @else {
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                          </svg>
-                        }
-                      </button>
-                    }
-                  </div>
+                  <app-row-actions [canEdit]="can().edit" [canDelete]="can().delete" [deleting]="saving() === 'delete-' + office.id" (edit)="crud.openEdit(office)" (remove)="crud.remove(office)" />
                 </td>
               </tr>
             }

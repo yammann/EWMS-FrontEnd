@@ -1,4 +1,6 @@
 import { Pagination } from '@core/utils/pagination';
+import { StatTile } from '@shared/ui/stat-tile';
+import { AdminHeader } from '@shared/ui/admin-header';
 import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
@@ -68,7 +70,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
 @Component({
   selector: 'app-roles-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss'
 })
