@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { GovernorateCollection, GovernorateFeature, governorateOf, pointInFeature, projectSyria } from './geo';
+import { GovernorateCollection, GovernorateFeature, governorateOf, pointInFeature, projectSyria } from '@core/utils/geo';
 
 describe('SVG projection', () => {
   const file = resolve(process.cwd(), 'public/maps/syria-governorates.geojson');

@@ -1,9 +1,9 @@
 import { Injectable, NgZone, inject, signal } from '@angular/core';
 import { Subject, Subscription, interval, tap, catchError, EMPTY } from 'rxjs';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
-import { ApiService } from './api.service';
+import { ApiService } from '@core/services/api.service';
 import { AppNotification } from '@core/models/notification.models';
-import { PagedResult } from '@core/models/maintenance.models';
+import { PagedResult } from '@core/models/paged-result.model';
 
 // الاتصال اللحظي عبر SignalR هو الأساس؛ الاستعلام الدوري البطيء احتياط فقط (لو انقطع الاتصال)
 const HUB_URL = '/hubs/notifications';

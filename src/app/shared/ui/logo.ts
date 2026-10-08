@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { LOGO_PATHS, LOGO_VIEWBOX } from './logo-paths';
+import { LOGO_PATHS, LOGO_VIEWBOX } from '@shared/ui/logo-paths';
 
 /**
  * شعار الهوية البصرية السورية — لونه من CSS (currentColor)، افتراضياً الذهبي --accent.

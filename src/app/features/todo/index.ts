@@ -1,1 +1,1 @@
-export { AddToTodoDialog } from './add-to-todo-dialog';
+export { AddToTodoDialog } from './components/add-to-todo-dialog';

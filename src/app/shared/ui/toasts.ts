@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { ToastService } from './toast.service';
+import { ToastService } from '@shared/ui/toast.service';
 
 /** حاوية التنبيهات — مرة واحدة في MainLayout */
 @Component({

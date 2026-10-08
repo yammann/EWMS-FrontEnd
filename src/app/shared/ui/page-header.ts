@@ -15,7 +15,12 @@ import { Component, input } from '@angular/core';
       </div>
       <div class="header-actions"><ng-content /></div>
     </header>`,
-  styles: [`:host { display: contents; } .header-actions:empty { display: none; }`]
+  styles: [`
+    :host { display: contents; }
+    .header-actions:empty { display: none; }
+    /* نفس قاعدة .muted التي كانت تأتي من organization.scss لعنصر الوصف داخل رأس الصفحة */
+    .muted { color: var(--ink-500); line-height: 1.8; }
+  `]
 })
 export class PageHeader {
   eyebrow = input('');

@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { ToastService } from './toast.service';
+import { ToastService } from '@shared/ui/toast.service';
 
 /** قيمة تقنية (IP، اسم مستخدم، إحداثيات) بخط ثابت مع زر نسخ — المحتوى الإضافي (مثل شارة "مكرر") يُمرَّر بعدها */
 @Component({

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
-import { Pagination } from './pagination';
+import { Pagination } from '@core/utils/pagination';
 import { Pager } from '@shared/ui/pager';
 
 describe('Pagination (client-side lists)', () => {

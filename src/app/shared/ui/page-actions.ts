@@ -1,6 +1,6 @@
 import { inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ToastService } from './toast.service';
+import { ToastService } from '@shared/ui/toast.service';
 
 /** رسالة الخطأ من رد الـ API (ApiService يوحّدها في message) أو نص بديل */
 export function errorMessage(error: unknown, fallback: string): string {

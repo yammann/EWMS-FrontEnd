@@ -1,6 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { NavHistory } from '@core/services/nav-history.service';
-import { Icon } from './icon';
+import { Icon } from '@shared/ui/icon';
 
 /**
  * زر «رجوع» الموحّد — مكان واحد ثابت: أول عنصر في الشريط العلوي للتخطيط، وأول زر في شريط صفحات الطباعة.

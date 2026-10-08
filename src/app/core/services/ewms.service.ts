@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
-import { ApiService } from './api.service';
-import { AuthService } from './auth.service';
+import { ApiService } from '@core/services/api.service';
+import { AuthService } from '@core/services/auth.service';
 import { Branch, Department, Office, Role, User } from '@core/models/ewms.models';
 import { AppPermission } from '@core/constants/access';
 

@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { ConfirmService } from './confirm.service';
-import { ToastService } from './toast.service';
-import { PageActions, errorMessage } from './page-actions';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { ToastService } from '@shared/ui/toast.service';
+import { PageActions, errorMessage } from '@shared/ui/page-actions';
 import { roleLabel } from '@core/utils/roles';
 
 describe('ConfirmService', () => {

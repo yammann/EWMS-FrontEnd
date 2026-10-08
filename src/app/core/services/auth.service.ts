@@ -1,8 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
-import { ApiService } from './api.service';
-import { NotificationService } from './notification.service';
+import { ApiService } from '@core/services/api.service';
+import { NotificationService } from '@core/services/notification.service';
 import { LoginRequest } from '@core/models/login-request.model';
 import { AuthResponse, AuthUser } from '@core/models/auth-response.model';
 import { APPROVE_VACATIONS, AppPermissionName, TASK_OVERSIGHT } from '@core/constants/access';

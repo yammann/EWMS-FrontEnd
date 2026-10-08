@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { ThemeService } from './theme.service';
+import { ThemeService } from '@core/services/theme.service';
 
 describe('ThemeService', () => {
   let store: Map<string, string>;

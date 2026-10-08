@@ -1,1 +1,1 @@
-export { LinkedTasks, linkRoute } from './task-links';
+export { LinkedTasks, linkRoute } from './components/task-links';
