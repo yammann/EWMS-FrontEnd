@@ -72,3 +72,27 @@ test.describe('زر الرجوع الموحّد', () => {
     }
   });
 });
+
+test('الفروع: إنشاء فرع يظهر فوراً (إبطال التخزين المؤقت) ثم حذفه', async ({ page }) => {
+  const name = 'فرع اختبار آلي ' + Date.now();
+  await page.goto('/branches');
+  await page.getByRole('button', { name: /فرع جديد|إنشاء فرع/ }).first().click();
+  await page.locator('#create-name').fill(name);
+  await page.locator('#create-desc').fill('فرع يُنشئه الاختبار الآلي ثم يحذفه');
+  await page.locator('app-modal button[type=submit]').click();
+  await expect(page.getByText(name).first()).toBeVisible();
+
+  // الصفحة الأخرى (الأقسام) تقرأ من نفس التخزين: الفرع الجديد يظهر في قائمة الفروع بلا تحديث
+  await page.goto('/departments');
+  await page.locator('button.new-btn').click();
+  await expect(page.locator('#create-branch option', { hasText: name })).toHaveCount(1);
+  await page.keyboard.press('Escape');
+
+  await page.goto('/branches');
+  await expect(page.getByText(name).first()).toBeVisible();
+  // أقرب حاوية للاسم تحوي زر الحذف (الجدول قد يكون بطاقات أو صفوفاً)
+  const row = page.getByText(name).first().locator('xpath=ancestor::*[.//button[@title="حذف"]][1]');
+  await row.locator('button[title="حذف"]').click();
+  await page.getByRole('button', { name: /^(حذف|تأكيد|نعم)/ }).last().click();
+  await expect(page.getByText(name)).toHaveCount(0);
+});

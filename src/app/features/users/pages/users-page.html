@@ -12,7 +12,7 @@
     </div>
 
     <div class="header-actions">
-      <button type="button" class="refresh-btn" (click)="load()" [disabled]="loading()">
+      <button type="button" class="refresh-btn" (click)="load(true)" [disabled]="loading()">
         <svg class="icon" [class.spin]="loading()" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"></path>

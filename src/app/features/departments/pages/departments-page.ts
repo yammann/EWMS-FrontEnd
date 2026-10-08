@@ -1,11 +1,13 @@
 import { Pagination } from '@core/utils/pagination';
+import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Branch, Department } from '@core/models/ewms.models';
-import { EwmsService } from '@core/services/ewms.service';
+import { DepartmentService } from '../data-access/department.service';
+import { LookupsService } from '@core/services/lookups.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
@@ -23,7 +25,8 @@ type ModalType = 'create' | 'edit';
   styleUrl: './departments-page.scss'
 })
 export class DepartmentsPage {
-  private ewms = inject(EwmsService);
+  private departmentService = inject(DepartmentService);
+  private lookups = inject(LookupsService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private toast = inject(ToastService);
@@ -34,8 +37,7 @@ export class DepartmentsPage {
   branches = signal<Branch[]>([]);
   selectedDepartment = signal<Department | null>(null);
   activeModal = signal<ModalType | null>(null);
-  loading = signal(true);
-  private actions = new PageActions(() => this.load());
+  private actions = new PageActions(() => this.load(true));
   saving = this.actions.saving;
 
   createForm = this.fb.group({
@@ -66,27 +68,22 @@ export class DepartmentsPage {
     };
   });
 
-  constructor() {
-    this.load();
-  }
 
   /* =====================================================
    * Data loading
    * ===================================================== */
-  load() {
-    this.loading.set(true);
-    forkJoin({
-      departments: this.ewms.getDepartments(),
-      branches: this.ewms.getBranchLookup()
-    }).subscribe({
-      next: result => {
-        this.departments.set(result.departments);
-        this.branches.set(result.branches);
-        this.loading.set(false);
-      },
-      error: error => { this.loading.set(false); this.actions.loadFailed(error); }
-    });
-  }
+  private force = false;
+  private data = loader(() => forkJoin({
+    departments: this.departmentService.getAll(this.force),
+    branches: this.lookups.branchOptions(this.force)
+  }), null, {
+    onLoaded: result => { if (result) { this.departments.set(result.departments); this.branches.set(result.branches); } },
+    onError: error => this.actions.loadFailed(error)
+  });
+  loading = this.data.loading;
+
+  /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
+  load(force = false) { this.force = force; this.data.reload(); }
 
   /* =====================================================
    * Modal control
@@ -138,7 +135,7 @@ export class DepartmentsPage {
 
     this.actions.run(
       'create',
-      this.ewms.createDepartment(form),
+      this.departmentService.create(form),
       'تم إنشاء القسم بنجاح',
       () => {
         this.createForm.reset();
@@ -158,7 +155,7 @@ export class DepartmentsPage {
 
     this.actions.run(
       'edit',
-      this.ewms.updateDepartment(department.id, form),
+      this.departmentService.update(department.id, form),
       'تم تعديل القسم بنجاح',
       () => this.closeModal()
     );
@@ -179,7 +176,7 @@ export class DepartmentsPage {
   private performDelete(department: Department) {
     this.actions.run(
       `delete-${department.id}`,
-      this.ewms.deleteDepartment(department.id),
+      this.departmentService.delete(department.id),
       'تم حذف القسم بنجاح',
       () => {
         if (this.selectedDepartment()?.id === department.id) {

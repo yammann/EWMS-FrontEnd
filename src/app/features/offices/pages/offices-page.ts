@@ -1,11 +1,13 @@
 import { Pagination } from '@core/utils/pagination';
+import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Department, Office } from '@core/models/ewms.models';
-import { EwmsService } from '@core/services/ewms.service';
+import { OfficeService } from '../data-access/office.service';
+import { LookupsService } from '@core/services/lookups.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
@@ -25,7 +27,8 @@ type ModalType = 'create' | 'edit';
 })
 export class OfficesPage {
   private auth = inject(AuthService);
-  private service = inject(EwmsService);
+  private service = inject(OfficeService);
+  private lookups = inject(LookupsService);
   private fb = inject(FormBuilder);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
@@ -42,8 +45,7 @@ export class OfficesPage {
   departments = signal<Department[]>([]);
   selected = signal<Office | null>(null);
   activeModal = signal<ModalType | null>(null);
-  loading = signal(true);
-  private actions = new PageActions(() => this.load());
+  private actions = new PageActions(() => this.load(true));
   saving = this.actions.saving;
 
   createForm = this.fb.group({
@@ -58,18 +60,18 @@ export class OfficesPage {
     departmentId: ['', Validators.required]
   });
 
-  constructor() { this.load(); }
-
   /* =====================================================
    * Data loading
    * ===================================================== */
-  load() {
-    this.loading.set(true);
-    forkJoin({ offices: this.service.getOffices(), departments: this.service.getDepartments() }).subscribe({
-      next: r => { this.items.set(r.offices); this.departments.set(r.departments); this.loading.set(false); },
-      error: error => { this.loading.set(false); this.actions.loadFailed(error); }
-    });
-  }
+  private force = false;
+  private data = loader(() => forkJoin({ offices: this.service.getAll(this.force), departments: this.lookups.departments(this.force) }), null, {
+    onLoaded: r => { if (r) { this.items.set(r.offices); this.departments.set(r.departments); } },
+    onError: error => this.actions.loadFailed(error)
+  });
+  loading = this.data.loading;
+
+  /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
+  load(force = false) { this.force = force; this.data.reload(); }
 
   /* =====================================================
    * Modal control
@@ -112,7 +114,7 @@ export class OfficesPage {
     const v = this.createForm.getRawValue();
     if ((v.name ?? '').trim().length < 2) { this.toast.show('أدخل اسماً صحيحاً للمكتب', 'error'); return; }
 
-    this.actions.run('create', this.service.createOffice(this.body(v)), 'تم إنشاء المكتب بنجاح', () => {
+    this.actions.run('create', this.service.create(this.body(v)), 'تم إنشاء المكتب بنجاح', () => {
       this.createForm.reset();
       this.closeModal();
     });
@@ -124,7 +126,7 @@ export class OfficesPage {
     const v = this.editForm.getRawValue();
     if ((v.name ?? '').trim().length < 2) { this.toast.show('أدخل اسماً صحيحاً للمكتب', 'error'); return; }
 
-    this.actions.run('edit', this.service.updateOffice(office.id, this.body(v)), 'تم تعديل المكتب بنجاح', () => this.closeModal());
+    this.actions.run('edit', this.service.update(office.id, this.body(v)), 'تم تعديل المكتب بنجاح', () => this.closeModal());
   }
 
   deleteOffice(office: Office) {
@@ -139,7 +141,7 @@ export class OfficesPage {
   }
 
   private performDelete(office: Office) {
-    this.actions.run(`delete-${office.id}`, this.service.deleteOffice(office.id), 'تم حذف المكتب بنجاح', () => {
+    this.actions.run(`delete-${office.id}`, this.service.delete(office.id), 'تم حذف المكتب بنجاح', () => {
       if (this.selected()?.id === office.id) this.selected.set(null);
     });
   }

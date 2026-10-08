@@ -1,4 +1,5 @@
 import { Pagination } from '@core/utils/pagination';
+import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -8,7 +9,8 @@ import { utcDate } from '@core/utils/format';
 import { forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Branch, Department, Office, Role, User } from '@core/models/ewms.models';
-import { EwmsService } from '@core/services/ewms.service';
+import { UserService } from '../data-access/user.service';
+import { LookupsService } from '@core/services/lookups.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
@@ -28,7 +30,8 @@ type UserPlacement = { needsBranch: boolean; needsDepartment: boolean; needsOffi
   styleUrl: './users-page.scss'
 })
 export class UsersPage {
-  private ewms = inject(EwmsService);
+  private userService = inject(UserService);
+  private lookups = inject(LookupsService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private toast = inject(ToastService);
@@ -42,8 +45,7 @@ export class UsersPage {
   roles = signal<Role[]>([]);
   selectedUser = signal<User | null>(null);
   activeModal = signal<ModalType | null>(null);
-  loading = signal(true);
-  private actions = new PageActions(() => this.load());
+  private actions = new PageActions(() => this.load(true));
   saving = this.actions.saving;
   phone = formatPhone;
   utc = utcDate;
@@ -89,7 +91,6 @@ export class UsersPage {
   });
 
   constructor() {
-    this.load();
     // تغيير الدور يحدد أي الحقول (فرع/قسم/مكتب) مطلوبة
     this.createForm.controls.roleId.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.applyPlacement(this.createForm));
     this.editForm.controls.roleId.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.applyPlacement(this.editForm));
@@ -98,26 +99,28 @@ export class UsersPage {
   /* =====================================================
    * Data loading
    * ===================================================== */
-  load() {
-    this.loading.set(true);
-    forkJoin({
-      users: this.ewms.getUsers(),
-      branches: this.ewms.getBranchLookup(),
-      departments: this.ewms.getDepartments(),
-      offices: this.ewms.getOffices(),
-      roles: this.ewms.getRoles()
-    }).subscribe({
-      next: result => {
-        this.users.set(result.users);
-        this.branches.set(result.branches);
-        this.departments.set(result.departments);
-        this.offices.set(result.offices);
-        this.roles.set(result.roles);
-        this.loading.set(false);
-      },
-      error: error => { this.loading.set(false); this.actions.loadFailed(error); }
-    });
-  }
+  private force = false;
+  private data = loader(() => forkJoin({
+    users: this.userService.getAll(),
+    branches: this.lookups.branchOptions(this.force),
+    departments: this.lookups.departments(this.force),
+    offices: this.lookups.offices(this.force),
+    roles: this.lookups.roles(this.force)
+  }), null, {
+    onLoaded: result => {
+      if (!result) return;
+      this.users.set(result.users);
+      this.branches.set(result.branches);
+      this.departments.set(result.departments);
+      this.offices.set(result.offices);
+      this.roles.set(result.roles);
+    },
+    onError: error => this.actions.loadFailed(error)
+  });
+  loading = this.data.loading;
+
+  /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
+  load(force = false) { this.force = force; this.data.reload(); }
 
   /* =====================================================
    * Modal control
@@ -185,7 +188,7 @@ export class UsersPage {
 
     this.actions.run(
       'create',
-      this.ewms.createUser(form),
+      this.userService.create(form),
       'تم إنشاء المستخدم بنجاح',
       () => {
         this.createForm.reset();
@@ -214,7 +217,7 @@ export class UsersPage {
 
     this.actions.run(
       'edit',
-      this.ewms.updateUser(user.id, form),
+      this.userService.update(user.id, form),
       'تم تعديل المستخدم بنجاح',
       () => this.closeModal()
     );
@@ -235,7 +238,7 @@ export class UsersPage {
   private performDelete(user: User) {
     this.actions.run(
       `delete-${user.id}`,
-      this.ewms.deleteUser(user.id),
+      this.userService.delete(user.id),
       'تم حذف المستخدم بنجاح',
       () => {
         if (this.selectedUser()?.id === user.id) {

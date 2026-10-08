@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { DashboardService } from '@features/dashboard';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
-import { EwmsService } from '@core/services/ewms.service';
+import { LookupsService } from '@core/services/lookups.service';
 import { VacationStats } from '@features/dashboard';
 import { Branch } from '@core/models/ewms.models';
 import { ActionsTable, CountBars, VacationRows } from '@features/dashboard';
@@ -79,7 +79,7 @@ import { Alert } from '@shared/ui/alert';
 export class VacationStatsPage {
   private service = inject(DashboardService);
   private auth = inject(AuthService);
-  private ewms = inject(EwmsService);
+  private lookups = inject(LookupsService);
 
   data = signal<VacationStats | null>(null);
   branches = signal<Branch[]>([]);
@@ -91,7 +91,7 @@ export class VacationStatsPage {
 
   constructor() {
     this.load();
-    if (this.isAdmin()) this.ewms.getBranchLookup().subscribe({ next: b => this.branches.set(b), error: () => {} });
+    if (this.isAdmin()) this.lookups.branchOptions().subscribe({ next: b => this.branches.set(b), error: () => {} });
     inject(NotificationService).incoming$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
   }
 

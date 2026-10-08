@@ -1,10 +1,11 @@
 import { Pagination } from '@core/utils/pagination';
+import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Branch } from '@core/models/ewms.models';
-import { EwmsService } from '@core/services/ewms.service';
+import { BranchService } from '../data-access/branch.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
@@ -22,7 +23,7 @@ type ModalType = 'create' | 'edit';
   styleUrl: './branches-page.scss'
 })
 export class BranchesPage {
-  private ewms = inject(EwmsService);
+  private branchService = inject(BranchService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private toast = inject(ToastService);
@@ -32,8 +33,7 @@ export class BranchesPage {
   pager = new Pagination(() => this.branches());
   selectedBranch = signal<Branch | null>(null);
   activeModal = signal<ModalType | null>(null);
-  loading = signal(true);
-  private actions = new PageActions(() => this.load());
+  private actions = new PageActions(() => this.load(true));
   saving = this.actions.saving;
 
   createForm = this.fb.group({
@@ -60,23 +60,18 @@ export class BranchesPage {
     };
   });
 
-  constructor() {
-    this.load();
-  }
-
   /* =====================================================
    * Data loading
    * ===================================================== */
-  load() {
-    this.loading.set(true);
-    this.ewms.getBranches().subscribe({
-      next: branches => {
-        this.branches.set(branches);
-        this.loading.set(false);
-      },
-      error: error => { this.loading.set(false); this.actions.loadFailed(error); }
-    });
-  }
+  private force = false;
+  private data = loader(() => this.branchService.getAll(this.force), [] as Branch[], {
+    onLoaded: branches => this.branches.set(branches),
+    onError: error => this.actions.loadFailed(error)
+  });
+  loading = this.data.loading;
+
+  /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
+  load(force = false) { this.force = force; this.data.reload(); }
 
   /* =====================================================
    * Modal control
@@ -126,7 +121,7 @@ export class BranchesPage {
 
     this.actions.run(
       'create',
-      this.ewms.createBranch(form),
+      this.branchService.create(form),
       'تم إنشاء الفرع بنجاح',
       () => {
         this.createForm.reset();
@@ -145,7 +140,7 @@ export class BranchesPage {
 
     this.actions.run(
       'edit',
-      this.ewms.updateBranch(branch.id, form),
+      this.branchService.update(branch.id, form),
       'تم تعديل الفرع بنجاح',
       () => this.closeModal()
     );
@@ -166,7 +161,7 @@ export class BranchesPage {
   private performDelete(branch: Branch) {
     this.actions.run(
       `delete-${branch.id}`,
-      this.ewms.deleteBranch(branch.id),
+      this.branchService.delete(branch.id),
       'تم حذف الفرع بنجاح',
       () => {
         if (this.selectedBranch()?.id === branch.id) {

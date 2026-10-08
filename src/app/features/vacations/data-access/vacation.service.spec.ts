@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { apiErrorInterceptor } from '@core/interceptors/api-error.interceptor';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { VacationService } from './vacation.service';
 import { ApiService } from '@core/services/api.service';
@@ -8,7 +9,7 @@ describe('Vacation API contract', () => {
   let service: VacationService;
   let http: HttpTestingController;
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({ providers: [provideHttpClient(withInterceptors([apiErrorInterceptor])), provideHttpClientTesting()] });
     service = TestBed.inject(VacationService); http = TestBed.inject(HttpTestingController);
   });
   afterEach(() => http.verify());

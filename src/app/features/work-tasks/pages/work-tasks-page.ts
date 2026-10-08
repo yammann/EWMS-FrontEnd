@@ -5,7 +5,8 @@ import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { WorkTaskService } from '../data-access/work-task.service';
-import { EwmsService } from '@core/services/ewms.service';
+import { LookupsService } from '@core/services/lookups.service';
+import { UserService } from '@features/users';
 import { Branch, User } from '@core/models/ewms.models';
 import { WorkTask } from '../data-access/work-task.models';
 import { roleLabel } from '@core/utils/roles';
@@ -137,7 +138,8 @@ export class WorkTasksPage {
     delete: this.auth.hasPermission(AppPermission.DeleteWorkTask)
   }));
   private service = inject(WorkTaskService);
-  private ewms = inject(EwmsService);
+  private lookups = inject(LookupsService);
+  private userService = inject(UserService);
   private fb = inject(FormBuilder);
 
   icons = ICONS;
@@ -169,7 +171,7 @@ export class WorkTasksPage {
 
   constructor() {
     this.load();
-    this.ewms.getBranchLookup().subscribe({ next: b => this.branches.set(b), error: e => this.error.set(e.message) });
+    this.lookups.branchOptions().subscribe({ next: b => this.branches.set(b), error: e => this.error.set(e.message) });
   }
 
   load() {
@@ -197,7 +199,7 @@ export class WorkTasksPage {
     this.branchUsers.set([]);
     if (!branchId) return;
     this.usersLoading.set(true);
-    this.ewms.getUsersByBranch(branchId).subscribe({
+    this.userService.getByBranch(branchId).subscribe({
       next: users => { this.branchUsers.set(users.filter(u => u.isActive)); this.usersLoading.set(false); },
       error: e => { this.error.set(e.message); this.usersLoading.set(false); }
     });

@@ -1,11 +1,12 @@
 import { Pagination } from '@core/utils/pagination';
+import { loader } from '@shared/ui/loader';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Permission, Role } from '@core/models/ewms.models';
-import { EwmsService } from '@core/services/ewms.service';
+import { RoleService } from '../data-access/role.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
@@ -73,7 +74,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
 })
 export class RolesPage {
   pager = new Pagination(() => this.filteredRoles());
-  private ewms = inject(EwmsService);
+  private roleService = inject(RoleService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private toast = inject(ToastService);
@@ -134,8 +135,7 @@ export class RolesPage {
   permissions = signal<Permission[]>([]);
   selectedRole = signal<Role | null>(null);
   activeModal = signal<ModalType | null>(null);
-  loading = signal(true);
-  private actions = new PageActions(() => this.load());
+  private actions = new PageActions(() => this.load(true));
   saving = this.actions.saving;
 
 
@@ -179,26 +179,18 @@ export class RolesPage {
     };
   });
 
-  constructor() {
-    this.load();
-  }
-
   /* =====================================================
    * Data loading
    * ===================================================== */
-  load() {
-    this.loading.set(true);
-    forkJoin({
-      roles: this.ewms.getRoles(), permissions: this.ewms.getPermissions(),
-    }).subscribe({
-      next: result => {
-        this.roles.set(result.roles);
-        this.permissions.set(result.permissions);
-        this.loading.set(false);
-      },
-      error: error => { this.loading.set(false); this.actions.loadFailed(error); }
-    });
-  }
+  private force = false;
+  private data = loader(() => forkJoin({ roles: this.roleService.getAll(this.force), permissions: this.roleService.getPermissions() }), null, {
+    onLoaded: result => { if (result) { this.roles.set(result.roles); this.permissions.set(result.permissions); } },
+    onError: error => this.actions.loadFailed(error)
+  });
+  loading = this.data.loading;
+
+  /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
+  load(force = false) { this.force = force; this.data.reload(); }
 
   /* =====================================================
    * Modal control
@@ -381,7 +373,7 @@ export class RolesPage {
 
     this.actions.run(
       'create',
-      this.ewms.createRole(form),
+      this.roleService.create(form),
       'تم إنشاء الدور بنجاح',
       () => {
         this.createForm.reset({ permissionIds: [] });
@@ -400,7 +392,7 @@ export class RolesPage {
 
     this.actions.run(
       'edit',
-      this.ewms.updateRole(role.id, form),
+      this.roleService.update(role.id, form),
       'تم تعديل الدور بنجاح',
       () => this.closeModal()
     );
@@ -421,7 +413,7 @@ export class RolesPage {
   private performDelete(role: Role) {
     this.actions.run(
       `delete-${role.id}`,
-      this.ewms.deleteRole(role.id),
+      this.roleService.delete(role.id),
       'تم حذف الدور بنجاح',
       () => {
         if (this.selectedRole()?.id === role.id) {
