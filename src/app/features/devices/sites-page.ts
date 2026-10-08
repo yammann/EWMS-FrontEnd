@@ -13,10 +13,12 @@ import { ToastService } from '@shared/ui/toast.service';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { formatPhone, isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceHistory } from './device-ui';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /** المواقع — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة (المنطقة) تُحدَّد تلقائياً من النقطة المختارة */
 @Component({
-  selector: 'app-sites-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
+  selector: 'app-sites-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -28,7 +30,7 @@ import { DeviceHistory } from './device-ui';
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <div class="toolbar">
         <input class="search" type="search" placeholder="بحث باسم الموقع أو الوصف أو المسؤول…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="بحث">
@@ -40,8 +42,8 @@ import { DeviceHistory } from './device-ui';
 
       <section class="panel">
         <div class="panel-heading"><h2>المواقع <span class="count">({{ filtered().length }})</span></h2></div>
-        @if (loading()) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-        @else if (!filtered().length) { <p class="empty-state">{{ search() || governorate() ? 'لا توجد نتائج' : 'لا توجد مواقع بعد' }}</p> }
+        @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!filtered().length) { <app-empty-state>{{ search() || governorate() ? 'لا توجد نتائج' : 'لا توجد مواقع بعد' }}</app-empty-state> }
         @else {
           <div class="table-wrap"><table>
             <thead><tr><th>الموقع</th><th>المحافظة</th><th>الإحداثيات</th><th>المسؤول</th><th>الأجهزة المركّبة</th><th class="actions-th"></th></tr></thead>
@@ -74,7 +76,7 @@ import { DeviceHistory } from './device-ui';
       <app-modal [heading]="editing() ? 'تعديل الموقع' : 'موقع جديد'" size="lg" [busy]="saving()" (closed)="closeForm()">
           <form [formGroup]="form" (ngSubmit)="save()">
             <div class="modal-body form-stack">
-              @if (formError()) { <p class="alert alert-error" role="alert">{{ formError() }}</p> }
+              <app-alert [message]="formError()" />
               <label class="form-field"><span class="form-label">اسم الموقع</span><input formControlName="name" maxlength="100"></label>
               <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="2" maxlength="500"></textarea></label>
               <div class="form-grid-2">

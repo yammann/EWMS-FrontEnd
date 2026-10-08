@@ -12,6 +12,8 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { Pager } from '@shared/ui/pager';
 import { SparePartFormDialog, SparePartMovements, SparePartStockDialog } from './spare-part-dialogs';
 import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const PAGE_SIZE = 25;
 
@@ -21,7 +23,7 @@ const PAGE_SIZE = 25;
  */
 @Component({
   selector: 'app-spare-parts-page', standalone: true,
-  imports: [QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
+  imports: [EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
@@ -34,7 +36,7 @@ const PAGE_SIZE = 25;
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
       @if (departmentsLoaded() && !departments().length) {
         <p class="alert alert-warning" role="status">حسابك لا يتبع لقسم له مخزون قطع غيار.</p>
       }
@@ -61,7 +63,7 @@ const PAGE_SIZE = 25;
       </div>
 
       <section class="panel">
-        @if (loading() && !rows().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
+        @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
         @else if (!rows().length) {
           <div class="empty-state"><h3>{{ hasFilter() ? 'لا توجد نتائج مطابقة' : 'لا توجد قطع بعد' }}</h3>
             <p>{{ hasFilter() ? 'جرّب تعديل البحث أو الفلاتر.' : 'أضف القطعة ثم «إدخال» لاستلام كمياتها.' }}</p></div>

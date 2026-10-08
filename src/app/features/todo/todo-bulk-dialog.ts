@@ -3,15 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { ToDoService } from '@core/services/todo.service';
 import { TODO_LIMITS, ToDoList } from '@core/models/todo.models';
 import { Modal } from '@shared/ui/modal';
+import { Alert } from '@shared/ui/alert';
 
 /** إضافة عدة بنود دفعة واحدة: كل سطر بند (يناسب لصق نص منسوخ من رسالة أو محضر) */
 @Component({
-  selector: 'app-todo-bulk-dialog', standalone: true, imports: [FormsModule, Modal],
+  selector: 'app-todo-bulk-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
   template: `
     <app-modal heading="إضافة عدة بنود" subheading="كل سطر بند جديد" [busy]="saving()" (closed)="close.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">البنود</span>
             <textarea name="text" rows="9" [ngModel]="text()" (ngModelChange)="text.set($event)" autofocus
                       placeholder="اشتر الورق&#10;اتصل بالمورّد&#10;راجع التقرير"></textarea>

@@ -10,6 +10,7 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
 import { isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceFormDialog } from './device-form-dialog';
+import { Alert } from '@shared/ui/alert';
 
 export interface RequestLookups {
   deviceTypes: MaintenanceLookup[];
@@ -24,14 +25,14 @@ export interface RequestLookups {
  * (نافذة الجهاز: الرقم يُكتب مرتين بلا لصق) ثم يُقدَّم الطلب بمعرّفه — الطلب لا يحمل بيانات الجهاز بنفسه.
  */
 @Component({
-  selector: 'app-request-form-dialog', standalone: true, imports: [ReactiveFormsModule, Modal, DeviceFormDialog],
+  selector: 'app-request-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal, DeviceFormDialog],
   styleUrl: '../devices/devices.scss',
   template: `
     <app-modal [heading]="request() ? 'تعديل طلب الصيانة' : 'طلب صيانة جديد'" [subheading]="request()?.number ?? 'استلام جهاز من عميل'"
                size="lg" [busy]="saving()" (closed)="closed.emit()">
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="modal-body">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           @if (missingLookups()) { <p class="alert alert-warning" role="status">{{ missingLookups() }} — أضفها من «إعدادات الصيانة» أولاً.</p> }
 
           <fieldset class="group"><legend>العميل</legend>

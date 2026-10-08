@@ -12,11 +12,13 @@ import { DepartmentDashboard } from '@core/models/dashboard.models';
 import { WorkTaskCard } from '@core/models/work-task.models';
 import { ActivityList, TaskCards, TaskDistributionTable } from './dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
   selector: 'app-department-dashboard', standalone: true,
-  imports: [RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
+  imports: [EmptyState, Alert, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -50,7 +52,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 
     <ng-template #bodyTpl>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (data(); as d) {
         <section class="dash-stats" aria-label="إحصائيات القسم">
@@ -83,7 +85,7 @@ import { StatTile } from '@shared/ui/stat-tile';
                 }
               </tbody>
             </table></div>
-          } @else { <p class="empty-state">لا توجد مكاتب في هذا القسم</p> }
+          } @else { <app-empty-state>لا توجد مكاتب في هذا القسم</app-empty-state> }
         </section>
 
         <section class="panel">

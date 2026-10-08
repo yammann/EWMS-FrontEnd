@@ -6,14 +6,16 @@ import { AppPermission } from '@core/constants/access';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { VacationService } from '@core/services/vacation.service';
 import { VacationType } from '@core/models/vacation.models';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 @Component({
-  selector: 'app-vacation-types', standalone: true, imports: [ReactiveFormsModule, Pager],
+  selector: 'app-vacation-types', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
       <header class="page-header"><div><span class="eyebrow">إعدادات الإجازات</span><h1>أنواع الإجازات</h1></div><button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button></header>
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
       @if (editing() ? can().edit : can().create) {
       <section class="panel"><div class="panel-heading"><h2>{{ editing() ? 'تعديل النوع' : 'إضافة نوع إجازة' }}</h2></div>
@@ -27,8 +29,8 @@ import { VacationType } from '@core/models/vacation.models';
       </section>
       }
       <section class="panel">
-        @if (loading()) { <p class="empty-state">جارٍ التحميل…</p> }
-        @else if (!items().length && !error()) { <p class="empty-state">لا توجد أنواع إجازات بعد.</p> }
+        @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!items().length && !error()) { <app-empty-state>لا توجد أنواع إجازات بعد.</app-empty-state> }
         @else { <div class="table-wrap"><table><thead><tr><th>النوع</th><th>الوصف</th><th>الدفع</th><th>الإجراءات</th></tr></thead><tbody>@for (v of pager.items(); track v.id) { <tr><td>{{ v.name }}</td><td class="wrap">{{ v.description || '—' }}</td><td>{{ v.paymentTypeAr }}</td><td><div class="actions">@if (can().edit) { <button class="btn btn-ghost btn-sm" (click)="edit(v)" [disabled]="saving()">تعديل</button> }@if (can().delete) { <button class="btn btn-danger btn-sm" (click)="deleting.set(v)" [disabled]="saving()">حذف</button> }</div></td></tr> }</tbody></table></div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" /> }
         @if (deleting(); as v) { <div class="alert alert-warning">حذف «{{ v.name }}»؟ <button class="btn btn-danger" (click)="remove(v)" [disabled]="saving()">تأكيد الحذف</button><button class="btn btn-ghost" (click)="deleting.set(null)" [disabled]="saving()">تراجع</button></div> }

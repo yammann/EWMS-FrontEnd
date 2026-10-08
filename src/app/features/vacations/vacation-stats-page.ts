@@ -10,6 +10,7 @@ import { VacationStats } from '@core/models/dashboard.models';
 import { Branch } from '@core/models/ewms.models';
 import { ActionsTable, CountBars, VacationRows } from '@features/dashboard';
 import { StatTile } from '@shared/ui/stat-tile';
+import { Alert } from '@shared/ui/alert';
 
 /**
  * إحصائيات الإجازات للرؤساء — صفحة مستقلة عن لوحة المتابعة (الإجازات ميزة واحدة من التطبيق).
@@ -17,7 +18,7 @@ import { StatTile } from '@shared/ui/stat-tile';
  */
 @Component({
   selector: 'app-vacation-stats', standalone: true,
-  imports: [RouterLink, StatTile, VacationRows, ActionsTable, CountBars],
+  imports: [Alert, RouterLink, StatTile, VacationRows, ActionsTable, CountBars],
   styleUrl: '../dashboard/dashboard.scss',
   template: `
     <div class="page">
@@ -38,7 +39,7 @@ import { StatTile } from '@shared/ui/stat-tile';
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (data(); as d) {
         <section class="dash-stats" aria-label="ملخص الإجازات">

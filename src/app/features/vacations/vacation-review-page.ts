@@ -11,9 +11,11 @@ import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { VacationService } from '@core/services/vacation.service';
 import { Vacation } from '@core/models/vacation.models';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 @Component({
-  selector: 'app-vacation-review', standalone: true, imports: [CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
+  selector: 'app-vacation-review', standalone: true, imports: [EmptyState, Alert, CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
@@ -28,18 +30,18 @@ import { Vacation } from '@core/models/vacation.models';
             <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" aria-label="تصفية حسب الحالة">
               <option value="">كل الحالات</option><option value="Pending">قيد الانتظار</option><option value="Approved">معتمدة</option><option value="Rejected">مرفوضة</option><option value="Cancelled">ملغاة</option>
             </select></div>
-          @if (teamError()) { <p class="alert alert-error" role="alert">{{ teamError() }}</p> }
-          @if (teamLoading()) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-          @else if (!filteredTeam().length && !teamError()) { <p class="empty-state">لا توجد إجازات مطابقة.</p> }
+          <app-alert [message]="teamError()" />
+          @if (teamLoading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+          @else if (!filteredTeam().length && !teamError()) { <app-empty-state>لا توجد إجازات مطابقة.</app-empty-state> }
           @else { <div class="table-wrap"><table><thead><tr><th>الموظف</th><th>القسم</th><th>النوع</th><th>الفترة</th><th>أيام العمل</th><th>الحالة</th><th>الدفع</th>@if (canPrint()) { <th></th> }</tr></thead><tbody>
             @for (v of pager.items(); track v.id) { <tr><td>{{ v.userName }}</td><td>{{ v.departmentName }}</td><td>{{ v.vacationTypeName }}<app-vacation-attachments [attachments]="v.attachments" /></td><td>{{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }}</td><td>{{ v.vacDayCount }}</td><td><span class="status-badge" [class.status-active]="v.status === 'Approved'" [class.status-pending]="v.status.startsWith('Pending')">{{ v.statusAr }}</span>@if (v.rejectionReason) { <small class="form-error block">{{ v.rejectionReason }}</small> }</td><td>{{ v.paymentStatusAr }}</td>@if (canPrint()) { <td><a class="btn btn-ghost btn-sm" [routerLink]="['/vacations/print', v.id]">طباعة</a></td> }</tr> }
           </tbody></table></div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" /> }
         </section>
       } @else {
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
-      @if (loading()) { <div class="panel empty-state" role="status">جارٍ تحميل الطلبات…</div> }
+      @if (loading()) { <app-empty-state panel>جارٍ تحميل الطلبات…</app-empty-state> }
       @else if (!error() && !items().length) { <div class="panel empty-state"><h2>لا توجد طلبات بانتظارك</h2><p>ستظهر طلبات الموظفين هنا عندما تصل إلى مرحلة موافقتك.</p></div> }
       @else { <section class="review-list">
         @for (v of cards.items(); track v.id) {

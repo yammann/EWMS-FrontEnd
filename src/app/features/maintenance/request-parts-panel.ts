@@ -8,13 +8,14 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
 import { UtcPipe, MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
 
 /**
  * قطع الغيار المصروفة على طلب الصيانة: الصرف من مخزون قسم الطلب (المتوافقة مع الجهاز أولاً)، والإرجاع للمخزون،
  * وتكلفة الجهاز على مدى عمره مع تنبيه حد الاستبدال. بعد إغلاق الطلب تُقفل القطع.
  */
 @Component({
-  selector: 'app-request-parts-panel', standalone: true, imports: [QtyPipe, MoneyPipe, UtcPipe, DatePipe, Modal],
+  selector: 'app-request-parts-panel', standalone: true, imports: [Alert, QtyPipe, MoneyPipe, UtcPipe, DatePipe, Modal],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
     @if (data(); as d) {
@@ -50,7 +51,7 @@ import { UtcPipe, MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
     @if (issueOpen()) {
       <app-modal heading="صرف قطعة على الطلب" [subheading]="request().number + ' — من مخزون ' + request().departmentName" [busy]="busy()" (closed)="issueOpen.set(false)">
         <div class="modal-body form-stack">
-          @if (issueError()) { <p class="alert alert-error" role="alert">{{ issueError() }}</p> }
+          <app-alert [message]="issueError()" />
           <label class="form-field"><span class="form-label">بحث في القطع المتوفرة</span>
             <input type="search" [value]="search()" (input)="search.set($any($event.target).value); findParts()" placeholder="الاسم أو رقم القطعة…" autocomplete="off"></label>
           <div class="pick" role="listbox" aria-label="القطع المتوفرة">

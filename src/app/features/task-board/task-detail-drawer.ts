@@ -13,10 +13,11 @@ import { AppPermission } from '@core/constants/access';
 import { ToastService } from '@shared/ui/toast.service';
 import { AddToTodoDialog } from '@features/todo';
 import { TaskNoteDialog } from './task-note-dialog';
+import { Alert } from '@shared/ui/alert';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
-  selector: 'app-task-detail-drawer', standalone: true, imports: [CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
+  selector: 'app-task-detail-drawer', standalone: true, imports: [Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
   template: `
     <div class="drawer-backdrop" (click)="close.emit()"></div>
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="task-drawer-title">
@@ -36,7 +37,7 @@ import { TaskNoteDialog } from './task-note-dialog';
             <button type="button" class="link-btn" (click)="openTask.emit(t.parentTaskId)">↰ جزء من: {{ t.parentTitle }}</button>
           }
 
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
 
           @if (t.canChangeStatus || t.allowedStatuses.length) {
             <div class="status-switch" role="radiogroup" aria-label="حالة المهمة">

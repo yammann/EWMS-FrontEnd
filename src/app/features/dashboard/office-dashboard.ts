@@ -14,11 +14,13 @@ import { WorkTaskCard } from '@core/models/work-task.models';
 import { roleLabel } from '@core/utils/roles';
 import { ActivityList, TaskCards, TaskDistributionTable } from './dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /** لوحة رئيس المكتب */
 @Component({
   selector: 'app-office-dashboard', standalone: true,
-  imports: [CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
+  imports: [EmptyState, Alert, CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -54,7 +56,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 
     <ng-template #bodyTpl>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (data(); as d) {
         <section class="dash-stats" aria-label="إحصائيات المكتب">
@@ -91,7 +93,7 @@ import { StatTile } from '@shared/ui/stat-tile';
                 }
               </tbody>
             </table></div>
-          } @else { <p class="empty-state">لا يوجد موظفون في هذا المكتب</p> }
+          } @else { <app-empty-state>لا يوجد موظفون في هذا المكتب</app-empty-state> }
         </section>
 
         <section class="panel">

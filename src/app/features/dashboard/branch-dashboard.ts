@@ -10,11 +10,13 @@ import { ActivityList, TaskCards, TaskDistributionTable } from './dashboard-widg
 import { StatTile } from '@shared/ui/stat-tile';
 import { BranchMapComponent } from '@features/map';
 import { AppPermission } from '@core/constants/access';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({
   selector: 'app-branch-dashboard', standalone: true,
-  imports: [RouterLink, NgTemplateOutlet, StatTile, TaskCards, TaskDistributionTable, ActivityList, BranchMapComponent],
+  imports: [EmptyState, Alert, RouterLink, NgTemplateOutlet, StatTile, TaskCards, TaskDistributionTable, ActivityList, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -41,7 +43,7 @@ import { AppPermission } from '@core/constants/access';
     </ng-template>
 
     <ng-template #bodyTpl>
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (data(); as d) {
         <section class="dash-stats" aria-label="إحصائيات الفرع">
@@ -73,7 +75,7 @@ import { AppPermission } from '@core/constants/access';
                 }
               </tbody>
             </table></div>
-          } @else { <p class="empty-state">لا توجد أقسام في هذا الفرع</p> }
+          } @else { <app-empty-state>لا توجد أقسام في هذا الفرع</app-empty-state> }
         </section>
 
         <section class="panel">

@@ -15,6 +15,8 @@ import { CopyText } from '@shared/ui/secret-text';
 import { Pager } from '@shared/ui/pager';
 import { DeviceHistory, DevicePassword, InstallStatus, InstallationsImport } from './device-ui';
 import { localDateInput } from '@core/utils/format';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const PAGE_SIZE = 50;
 
@@ -31,7 +33,7 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-installations-page', standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
+  imports: [EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -47,7 +49,7 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <div class="toolbar">
         <input class="search" type="search" placeholder="بحث بالـ IP أو الجهاز أو الرقم التسلسلي أو MAC أو مكان التركيب…" [value]="search()"
@@ -72,8 +74,8 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
 
       <section class="panel">
         <div class="panel-heading"><h2>التركيبات <span class="count">({{ total() }})</span></h2></div>
-        @if (loading() && !rows().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-        @else if (!rows().length) { <p class="empty-state">{{ hasFilter() ? 'لا توجد نتائج' : 'لا توجد تركيبات بعد' }}</p> }
+        @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!rows().length) { <app-empty-state>{{ hasFilter() ? 'لا توجد نتائج' : 'لا توجد تركيبات بعد' }}</app-empty-state> }
         @else {
           <div class="table-wrap" [class.dim]="loading()"><table>
             <thead><tr><th>الجهاز</th><th>الموقع</th><th>الشبكة</th><th>المستخدم</th><th>كلمة السر</th><th>الحالة</th><th class="actions-th"></th></tr></thead>

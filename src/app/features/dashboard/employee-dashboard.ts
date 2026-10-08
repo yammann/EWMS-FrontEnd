@@ -14,11 +14,13 @@ import { WorkTaskCard } from '@core/models/work-task.models';
 import { roleLabel } from '@core/utils/roles';
 import { TaskCards } from './dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({
   selector: 'app-employee-dashboard', standalone: true,
-  imports: [CommonModule, RouterLink, StatTile, TaskCards, NgTemplateOutlet, BranchMapComponent],
+  imports: [EmptyState, Alert, CommonModule, RouterLink, StatTile, TaskCards, NgTemplateOutlet, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -50,7 +52,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 
     <ng-template #bodyTpl>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (data(); as d) {
         <section class="dash-stats" aria-label="ملخصي">
@@ -79,7 +81,7 @@ import { StatTile } from '@shared/ui/stat-tile';
                 }
               </tbody>
             </table></div>
-          } @else { <p class="empty-state">لا يوجد زملاء في فريقك بعد</p> }
+          } @else { <app-empty-state>لا يوجد زملاء في فريقك بعد</app-empty-state> }
         </section>
 
       } @else if (loading()) {

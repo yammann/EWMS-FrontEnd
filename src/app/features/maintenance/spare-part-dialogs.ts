@@ -10,19 +10,21 @@ import { Modal } from '@shared/ui/modal';
 import { Pager } from '@shared/ui/pager';
 import { MoneyPipe, QtyPipe, UtcPipe } from '@shared/pipes/format.pipes';
 import { localDateInput } from '@core/utils/format';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };
 
 /** إضافة قطعة أو تعديل بياناتها — الكمية والسعر لا يُدخلان هنا (إدخال/تسوية فقط) */
 @Component({
-  selector: 'app-spare-part-form-dialog', standalone: true, imports: [ReactiveFormsModule, Modal],
+  selector: 'app-spare-part-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal],
   styleUrl: '../devices/devices.scss',
   template: `
     <app-modal [heading]="part() ? 'تعديل قطعة غيار' : 'قطعة غيار جديدة'" [subheading]="part()?.departmentName ?? 'تُضاف برصيد صفر — ثم «إدخال» لاستلام الكميات'"
                size="lg" [busy]="saving()" (closed)="closed.emit()">
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="modal-body">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <div class="form-grid-2">
             @if (!part() && departments().length > 1) {
               <label class="form-field full"><span class="form-label">مخزون القسم</span>
@@ -127,14 +129,14 @@ export class SparePartFormDialog implements OnInit {
 
 /** إدخال (استلام كمية بسعرها وتاريخها ومصدرها) أو تسوية (جرد / تالف) */
 @Component({
-  selector: 'app-spare-part-stock-dialog', standalone: true, imports: [QtyPipe, MoneyPipe, ReactiveFormsModule, Modal],
+  selector: 'app-spare-part-stock-dialog', standalone: true, imports: [Alert, QtyPipe, MoneyPipe, ReactiveFormsModule, Modal],
   template: `
     <app-modal [heading]="(mode() === 'receive' ? 'إدخال: ' : 'تسوية: ') + part().name"
                [subheading]="'الرصيد الحالي ' + (part().quantity | qty) + ' ' + part().unit + ' · متوسط السعر ' + (part().averageCost | money)"
                [busy]="saving()" (closed)="closed.emit()">
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           @if (mode() === 'receive') {
             <label class="form-field"><span class="form-label">الكمية المستلمة ({{ part().unit }})</span><input type="number" formControlName="quantity" min="0.01" step="0.01" dir="ltr"></label>
             <label class="form-field"><span class="form-label">سعر الوحدة (ل.س)</span><input type="number" formControlName="unitCost" min="0" step="0.01" dir="ltr">
@@ -227,15 +229,15 @@ export class SparePartStockDialog implements OnInit {
 
 /** سجل حركات القطعة (لا يُحذف ولا يُعدَّل) */
 @Component({
-  selector: 'app-spare-part-movements', standalone: true, imports: [UtcPipe, QtyPipe, MoneyPipe, DatePipe, RouterLink, Modal, Pager],
+  selector: 'app-spare-part-movements', standalone: true, imports: [EmptyState, Alert, UtcPipe, QtyPipe, MoneyPipe, DatePipe, RouterLink, Modal, Pager],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
     <app-modal [heading]="'حركات: ' + part().name" [subheading]="'الرصيد ' + (part().quantity | qty) + ' ' + part().unit + ' · ' + part().departmentName"
                size="lg" (closed)="closed.emit()">
       <div class="modal-body">
-        @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
-        @if (loading() && !rows().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-        @else if (!rows().length) { <p class="empty-state">لا توجد حركات بعد — ابدأ بـ«إدخال»</p> }
+        <app-alert [message]="error()" />
+        @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!rows().length) { <app-empty-state>لا توجد حركات بعد — ابدأ بـ«إدخال»</app-empty-state> }
         @else {
           <div class="table-wrap"><table>
             <thead><tr><th>التاريخ</th><th>الحركة</th><th>الكمية</th><th>سعر الوحدة</th><th>الرصيد بعدها</th><th>التفاصيل</th><th>بواسطة</th></tr></thead>

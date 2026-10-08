@@ -12,18 +12,19 @@ import {
 import { Modal } from '@shared/ui/modal';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
+import { Alert } from '@shared/ui/alert';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };
 
 /** نافذة قالب: الاسم والعنوان والوصف والأولوية والمدة وبنود التحقق (بند في كل سطر) */
 @Component({
-  selector: 'app-template-dialog', standalone: true, imports: [FormsModule, Modal],
+  selector: 'app-template-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
   template: `
     <app-modal [heading]="template() ? 'تعديل القالب' : 'قالب جديد'" size="lg" [busy]="saving()" (closed)="close.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">اسم القالب <small class="muted">(لك وحدك)</small></span>
             <input name="name" maxlength="100" [(ngModel)]="name" placeholder="مثال: جرد المستودع الشهري" autofocus></label>
           <label class="form-field"><span class="form-label">عنوان المهمة</span>
@@ -84,12 +85,12 @@ export class TemplateDialog implements OnInit {
 
 /** نافذة مهمة دورية: قالب + جهة + جدول */
 @Component({
-  selector: 'app-recurrence-dialog', standalone: true, imports: [FormsModule, Modal],
+  selector: 'app-recurrence-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
   template: `
     <app-modal [heading]="recurrence() ? 'تعديل المهمة الدورية' : 'مهمة دورية جديدة'" size="lg" [busy]="saving()" (closed)="close.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">القالب</span>
             <select name="template" [(ngModel)]="templateId">
               <option [ngValue]="0">اختر قالباً</option>
@@ -209,7 +210,7 @@ export class RecurrenceDialog implements OnInit {
 
 /** القوالب والمهام الدورية لمن يملك صلاحية إسناد: قوالب خاصة به، وجدولة إنشاء مهام تلقائياً */
 @Component({
-  selector: 'app-recurring-tasks-page', standalone: true, imports: [DatePipe, TemplateDialog, RecurrenceDialog],
+  selector: 'app-recurring-tasks-page', standalone: true, imports: [Alert, DatePipe, TemplateDialog, RecurrenceDialog],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss'],
   template: `
     <div class="page">
@@ -217,7 +218,7 @@ export class RecurrenceDialog implements OnInit {
         <div><span class="eyebrow">إدارة المهام</span><h1>المهام الدورية والقوالب</h1>
           <p class="muted">القوالب خاصة بك. المهمة الدورية تُنشئ مهمة جديدة من قالب في كل موعد دون تدخل منك.</p></div>
       </header>
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <section class="panel">
         <div class="panel-heading row"><div><h2>المهام الدورية</h2></div>

@@ -8,6 +8,7 @@ import { AppNotification } from '@core/models/notification.models';
 import { storePageSize, storedPageSize } from '@core/utils/pagination';
 import { Pager } from '@shared/ui/pager';
 import { Icon } from '@shared/ui/icon';
+import { Alert } from '@shared/ui/alert';
 
 type Tone = 'green' | 'blue' | 'orange' | 'purple' | 'red';
 interface Kind { icon: string; tone: Tone; }
@@ -45,7 +46,7 @@ function ago(iso: string): string {
  * التقسيم من الخادم (Notifications/Page)، والإشعار اللحظي يُضاف أعلى الصفحة الأولى.
  */
 @Component({
-  selector: 'app-notifications-page', standalone: true, imports: [DatePipe, Pager, Icon],
+  selector: 'app-notifications-page', standalone: true, imports: [Alert, DatePipe, Pager, Icon],
   styleUrls: ['../shared/organization.scss'],
   template: `
     <div class="page">
@@ -64,7 +65,7 @@ function ago(iso: string): string {
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
       @if (desktopPermission() === 'default') {
         <p class="alert alert-success">فعّل إشعارات سطح المكتب لتصلك التنبيهات حتى عندما تكون في تبويب أو برنامج آخر.
           <button class="btn btn-sm" (click)="enableDesktop()">تفعيل إشعارات سطح المكتب</button></p>

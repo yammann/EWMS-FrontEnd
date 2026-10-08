@@ -9,6 +9,7 @@ import { MaintenanceRequest, MaintenanceTransfer, TechnicianOption } from '@core
 import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
 
 /**
  * طلب تحويل طلب صيانة (قرار المستخدم 2026-10-05) — في صفحة الطلب:
@@ -16,7 +17,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
  * - إن وُجد طلب معلّق: شريط بتفاصيله؛ ومن يملك نقل طلبات القسم (canAssign) يقبل (يختار الموظف، المقترح مختار مسبقاً) أو يرفض بملاحظة.
  */
 @Component({
-  selector: 'app-transfer-panel', standalone: true, imports: [UtcPipe, DatePipe, Modal],
+  selector: 'app-transfer-panel', standalone: true, imports: [Alert, UtcPipe, DatePipe, Modal],
   template: `
     @if (pending(); as t) {
       <section class="panel transfer" role="status">
@@ -30,7 +31,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
         <p class="reason"><b>السبب:</b> {{ t.reason }}</p>
 
         @if (canDecide()) {
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <div class="decide">
             <label class="form-field"><span class="form-label">يُحوَّل إلى</span>
               <select [value]="target()" (change)="target.set(+$any($event.target).value)" [disabled]="busy()">
@@ -62,7 +63,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
       <app-modal heading="طلب تحويل الطلب" [subheading]="request().number + ' — يقرّره رئيس القسم'" [busy]="busy()" (closed)="askOpen.set(false)">
         <form (submit)="$event.preventDefault(); ask()">
           <div class="modal-body form-stack">
-            @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+            <app-alert [message]="error()" />
             <label class="form-field"><span class="form-label">سبب التحويل</span>
               <textarea rows="3" maxlength="500" [value]="reason()" (input)="reason.set($any($event.target).value)" placeholder="مثلاً: العطل خارج اختصاصي، أو لدي إجازة"></textarea>
             </label>

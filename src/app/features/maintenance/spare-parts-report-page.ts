@@ -5,13 +5,15 @@ import { NamedRef, SparePartReport } from '@core/models/spare-part.models';
 import { StatTile } from '@shared/ui/stat-tile';
 import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { localDateInput } from '@core/utils/format';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /**
  * تقارير قطع الغيار (قرار المستخدم 2026-10-05 — بلا نسب التكلفة للأقسام): قيمة المخزون، أكثر القطع صرفاً في الفترة،
  * وأعلى الأجهزة تكلفة على مدى عمرها مع تنبيه «إصلاحه أغلى من استبداله» حسب حد نوع الجهاز.
  */
 @Component({
-  selector: 'app-spare-parts-report-page', standalone: true, imports: [QtyPipe, MoneyPipe, RouterLink, StatTile],
+  selector: 'app-spare-parts-report-page', standalone: true, imports: [EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
@@ -36,7 +38,7 @@ import { localDateInput } from '@core/utils/format';
         </div>
       </div>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (report(); as r) {
         <section class="stats-4" aria-label="ملخص">
@@ -48,7 +50,7 @@ import { localDateInput } from '@core/utils/format';
 
         <section class="panel">
           <div class="panel-heading"><div><h2>أكثر القطع صرفاً</h2><p>من {{ r.from.slice(0, 10) }} إلى {{ r.to.slice(0, 10) }} — صافي بعد الإرجاع</p></div></div>
-          @if (!r.mostUsed.length) { <p class="empty-state">لم تُصرف قطع في هذه الفترة</p> }
+          @if (!r.mostUsed.length) { <app-empty-state>لم تُصرف قطع في هذه الفترة</app-empty-state> }
           @else {
             <div class="table-wrap"><table>
               <thead><tr><th>القطعة</th><th>الكمية</th><th>التكلفة</th></tr></thead>
@@ -61,7 +63,7 @@ import { localDateInput } from '@core/utils/format';
 
         <section class="panel">
           <div class="panel-heading"><div><h2>تكلفة الأجهزة على مدى عمرها</h2><p>أعلى 20 جهازاً تكلفة في قطع الغيار</p></div></div>
-          @if (!r.deviceCosts.length) { <p class="empty-state">لا توجد قطع مصروفة على أجهزة بعد</p> }
+          @if (!r.deviceCosts.length) { <app-empty-state>لا توجد قطع مصروفة على أجهزة بعد</app-empty-state> }
           @else {
             <div class="table-wrap"><table>
               <thead><tr><th>الجهاز</th><th>النوع</th><th>طلبات بقطع</th><th>التكلفة</th></tr></thead>
@@ -76,7 +78,7 @@ import { localDateInput } from '@core/utils/format';
             </table></div>
           }
         </section>
-      } @else if (loading()) { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
+      } @else if (loading()) { <app-empty-state panel>جارٍ التحميل…</app-empty-state> }
     </div>`,
   styles: [`
     .period { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }

@@ -4,6 +4,8 @@ import { MaintenanceService } from '@core/services/maintenance.service';
 import { NotificationService } from '@core/services/notification.service';
 import { MaintenanceCount, MaintenanceStats, formatHours } from '@core/models/maintenance.models';
 import { StatTile } from '@shared/ui/stat-tile';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 
@@ -51,7 +53,7 @@ export class MaintBars {
  * الطلبات حسب الحالة والفني ونوع العطل والجهاز والشركة، حركة آخر 6 أشهر، ومهام الصيانة حسب الموظف.
  */
 @Component({
-  selector: 'app-maintenance-stats-page', standalone: true, imports: [StatTile, MaintBars],
+  selector: 'app-maintenance-stats-page', standalone: true, imports: [EmptyState, Alert, StatTile, MaintBars],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -60,7 +62,7 @@ export class MaintBars {
         <div class="header-actions"><button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button></div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (stats(); as s) {
         <section class="stats-4" aria-label="ملخص">
@@ -112,7 +114,7 @@ export class MaintBars {
           <div class="panel-heading"><div><h2>مهام الصيانة حسب الموظف</h2></div></div>
           <app-maint-bars [items]="s.tasksByUser" [limit]="12" />
         </section>
-      } @else if (loading()) { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
+      } @else if (loading()) { <app-empty-state panel>جارٍ التحميل…</app-empty-state> }
     </div>`,
   styles: [`
     .months { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 14px; align-items: end; height: 220px; }

@@ -13,6 +13,8 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { StatusChip } from './maintenance-ui';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
 
@@ -21,7 +23,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
  * أنواع الأجهزة، الشركات المصنّعة، أنواع الأعطال، وحالات الطلب (بألوانها، وهي أعمدة لوحة الحالات).
  */
 @Component({
-  selector: 'app-maintenance-settings-page', standalone: true, imports: [ReactiveFormsModule, Modal, StatusChip, Pager],
+  selector: 'app-maintenance-settings-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -38,13 +40,13 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
         }
       </nav>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <section class="panel">
         <div class="panel-heading"><div><h2>{{ meta().label }} <span class="count">({{ items().length }})</span></h2>
           @if (meta().color) { <p>كل حالة تظهر عموداً في «لوحة الحالات» بلونها وبترتيب مراحلها. المرحلة تحدد السلوك: «قيد العمل» تسجّل وقت البدء، «جاهز للتسليم» وقت الإنجاز وتبلّغ العميل، و«مُسلَّم» / «غير قابل للصيانة» نهائيتان تُقفلان الطلب (ويُثبَّت في «مُسلَّم» توقيع ورقة التسليم).</p> }</div></div>
-        @if (loading()) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-        @else if (!items().length) { <p class="empty-state">لا توجد عناصر بعد</p> }
+        @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!items().length) { <app-empty-state>لا توجد عناصر بعد</app-empty-state> }
         @else {
           <div class="table-wrap"><table>
             <thead><tr><th>الاسم</th>@if (meta().description) { <th>الوصف</th> }@if (meta().color) { <th>اللون</th><th>المرحلة</th> }<th class="actions-th"></th></tr></thead>
@@ -71,7 +73,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
       <app-modal [heading]="(editing() ? 'تعديل ' : 'إضافة ') + meta().single" [busy]="saving()" (closed)="closeForm()">
         <form [formGroup]="form" (ngSubmit)="save()">
           <div class="modal-body form-stack">
-            @if (formError()) { <p class="alert alert-error" role="alert">{{ formError() }}</p> }
+            <app-alert [message]="formError()" />
             <label class="form-field"><span class="form-label">الاسم</span><input formControlName="name" maxlength="100"></label>
             @if (meta().description) {
               <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="3" maxlength="500"></textarea></label>

@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { AssignedTaskService } from '@core/services/assigned-task.service';
 import { TaskStats } from '@core/models/assigned-task.models';
 import { StatTile } from '@shared/ui/stat-tile';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -12,7 +14,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
  * وجدول لكل جهة (قسم/مكتب/موظف) وحركة الأشهر. الفترة تُحسب على تاريخ إنشاء المهمة.
  */
 @Component({
-  selector: 'app-task-stats-page', standalone: true, imports: [FormsModule, StatTile],
+  selector: 'app-task-stats-page', standalone: true, imports: [EmptyState, Alert, FormsModule, StatTile],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', '../maintenance/maintenance.scss'],
   template: `
     <div class="page">
@@ -30,7 +32,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
         <button type="button" class="btn btn-ghost btn-sm" (click)="preset(365)">سنة</button>
       </div>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (stats(); as s) {
         <section class="stats-4" aria-label="ملخص">
@@ -78,7 +80,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
           </div>
           <p class="legend"><span class="sw created"></span> أُنشئت <span class="sw done"></span> أُنجزت</p>
         </section>
-      } @else if (loading()) { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
+      } @else if (loading()) { <app-empty-state panel>جارٍ التحميل…</app-empty-state> }
     </div>`,
   styles: [`
     .range { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }

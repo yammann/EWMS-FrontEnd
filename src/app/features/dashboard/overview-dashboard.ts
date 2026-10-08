@@ -10,11 +10,13 @@ import { NotificationService } from '@core/services/notification.service';
 import { OverviewDashboard } from '@core/models/dashboard.models';
 import { ActivityList } from './dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */
 @Component({
   selector: 'app-overview-dashboard', standalone: true,
-  imports: [RouterLink, NgTemplateOutlet, StatTile, ActivityList, BranchMapComponent],
+  imports: [EmptyState, Alert, RouterLink, NgTemplateOutlet, StatTile, ActivityList, BranchMapComponent],
   styleUrl: './dashboard.scss',
   template: `
     <div class="page">
@@ -37,7 +39,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 
     <ng-template #bodyTpl>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (data(); as d) {
         <section class="dash-stats" aria-label="إحصائيات المؤسسة">
@@ -65,7 +67,7 @@ import { StatTile } from '@shared/ui/stat-tile';
                 }
               </tbody>
             </table></div>
-          } @else { <p class="empty-state">لا توجد فروع بعد</p> }
+          } @else { <app-empty-state>لا توجد فروع بعد</app-empty-state> }
         </section>
 
 

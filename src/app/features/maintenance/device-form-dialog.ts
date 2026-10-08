@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Va
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { MaintenanceDevice, MaintenanceLookup } from '@core/models/maintenance.models';
 import { Modal } from '@shared/ui/modal';
+import { Alert } from '@shared/ui/alert';
 
 /** مقارنة الرقمين بعد حذف الفراغات وبلا تمييز لحالة الأحرف (الباكاند يعامل الرقم كذلك) */
 const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim().toUpperCase();
@@ -13,14 +14,14 @@ const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim()
  * عند التعديل يُطلب التأكيد فقط إن تغيّر الرقم.
  */
 @Component({
-  selector: 'app-device-form-dialog', standalone: true, imports: [ReactiveFormsModule, Modal],
+  selector: 'app-device-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal],
   styleUrl: '../devices/devices.scss',
   template: `
     <app-modal [heading]="device() ? 'تعديل جهاز الصيانة' : 'إضافة جهاز صيانة'" [subheading]="device()?.serialNumber ?? 'جهاز يُحضَر للصيانة برقمه التسلسلي'"
                [busy]="saving()" (closed)="closed.emit()">
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           @if (!lookups().deviceTypes.length || !lookups().companies.length) {
             <p class="alert alert-warning" role="status">أضف أنواع الأجهزة والشركات المصنّعة من «إعدادات الصيانة» أولاً.</p>
           }

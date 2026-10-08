@@ -8,12 +8,14 @@ import { AppPermission } from '@core/constants/access';
 import { VacationService } from '@core/services/vacation.service';
 import { PublicHoliday } from '@core/models/vacation.models';
 import { vacationDateRange } from './vacation-validators';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
 /** العطل الرسمية: أيام لا تُحسب من مدة الإجازة، إضافة إلى الجمعة (العطلة الأسبوعية) */
 @Component({
-  selector: 'app-holidays-page', standalone: true, imports: [ReactiveFormsModule, DatePipe, Pager],
+  selector: 'app-holidays-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, DatePipe, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
@@ -26,7 +28,7 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
           <button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button>
         </div>
       </header>
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
       @if (editing() ? can().edit : can().create) {
       <section class="panel"><div class="panel-heading"><h2>{{ editing() ? 'تعديل العطلة' : 'إضافة عطلة' }}</h2></div>
@@ -41,8 +43,8 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
       </section>
       }
       <section class="panel">
-        @if (loading()) { <p class="empty-state">جارٍ التحميل…</p> }
-        @else if (!items().length && !error()) { <p class="empty-state">لا توجد عطل رسمية مسجّلة لسنة {{ year() }}.</p> }
+        @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!items().length && !error()) { <app-empty-state>لا توجد عطل رسمية مسجّلة لسنة {{ year() }}.</app-empty-state> }
         @else {
           <div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>العطلة</th><th>الإجراءات</th></tr></thead><tbody>
             @for (h of pager.items(); track h.id) {

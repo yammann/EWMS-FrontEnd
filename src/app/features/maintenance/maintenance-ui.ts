@@ -2,6 +2,7 @@ import { Component, OnInit, inject, input, output, signal } from '@angular/core'
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { TechnicianOption } from '@core/models/maintenance.models';
 import { Modal } from '@shared/ui/modal';
+import { Alert } from '@shared/ui/alert';
 
 /** شارة حالة الطلب بلونها المعرَّف في جدول الحالات (يعمل في الوضعين الفاتح والداكن) */
 @Component({
@@ -25,12 +26,12 @@ export class StatusChip {
  * النافذة تختار الموظف فقط — الحفظ عند الصفحة المستدعية عبر (assign).
  */
 @Component({
-  selector: 'app-assign-dialog', standalone: true, imports: [Modal],
+  selector: 'app-assign-dialog', standalone: true, imports: [Alert, Modal],
   template: `
     <app-modal heading="تغيير الموظف المسؤول" [subheading]="subject()" [busy]="busy()" (closed)="closed.emit()">
       <form (submit)="$event.preventDefault(); submit()">
         <div class="modal-body">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">الموظف المسؤول الجديد</span>
             <select (change)="selected.set(+$any($event.target).value)" [disabled]="loading()">
               <option [value]="0" [selected]="!selected()">{{ loading() ? 'جارٍ التحميل…' : 'اختر الموظف' }}</option>

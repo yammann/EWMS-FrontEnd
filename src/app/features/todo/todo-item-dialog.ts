@@ -3,15 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { ToDoService } from '@core/services/todo.service';
 import { TODO_LIMITS, TODO_REPEAT_LABEL, TODO_REPEAT_VALUE, ToDoItem, ToDoList } from '@core/models/todo.models';
 import { Modal } from '@shared/ui/modal';
+import { Alert } from '@shared/ui/alert';
 
 /** تعديل بند: العنوان والملاحظة والموعد والتكرار والأهمية (المهمة المرتبطة تُعرض للاطلاع) */
 @Component({
-  selector: 'app-todo-item-dialog', standalone: true, imports: [FormsModule, Modal],
+  selector: 'app-todo-item-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
   template: `
     <app-modal heading="تعديل البند" [busy]="saving()" (closed)="close.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">العنوان</span>
             <input name="title" [maxlength]="limits.titleLength" [(ngModel)]="title" autofocus autocomplete="off"></label>
           <label class="form-field"><span class="form-label">ملاحظة <small class="muted">(اختياري)</small></span>

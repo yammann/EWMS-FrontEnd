@@ -16,6 +16,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from './todo-list-dialog';
 import { TodoItemDialog } from './todo-item-dialog';
 import { TodoBulkDialog } from './todo-bulk-dialog';
+import { Alert } from '@shared/ui/alert';
 
 type Filter = 'all' | 'today' | 'tomorrow' | 'late' | 'done' | 'important';
 type Sort = 'manual' | 'due' | 'important';
@@ -32,7 +33,7 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
  */
 @Component({
   selector: 'app-todo-list-page', standalone: true,
-  imports: [FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, TodoListDialog, TodoItemDialog, TodoBulkDialog],
+  imports: [Alert, FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, TodoListDialog, TodoItemDialog, TodoBulkDialog],
   styleUrls: ['../shared/organization.scss', './todo.scss', './todo-cards.scss'],
   template: `
     <div class="page">
@@ -74,7 +75,7 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
           </div>
         }
 
-        @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+        <app-alert [message]="error()" />
 
         @if (l.itemsTotal) {
           <div class="t-pills" role="group" aria-label="تصفية البنود">

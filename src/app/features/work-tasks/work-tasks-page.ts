@@ -9,12 +9,14 @@ import { EwmsService } from '@core/services/ewms.service';
 import { Branch, User } from '@core/models/ewms.models';
 import { WorkTask } from '@core/models/work-task.models';
 import { roleLabel } from '@core/utils/roles';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧', '📁', '🧮', '🗂️', '📞'];
 
 /** إدارة مهام العمل لكل فرع وإسنادها لموظفيه (ManageWorkTasks — السوبر ادمن) */
 @Component({
-  selector: 'app-work-tasks-page', standalone: true, imports: [ReactiveFormsModule, Pager],
+  selector: 'app-work-tasks-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, Pager],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
@@ -23,7 +25,7 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
         <button class="btn btn-ghost" (click)="load()" [disabled]="loading() || saving()">تحديث</button>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
       @if (success()) { <p class="alert alert-success" role="status">{{ success() }}</p> }
 
       @if (editing() ? can().edit : can().create) {
@@ -82,8 +84,8 @@ const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧'
             @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
           </select>
         </div>
-        @if (loading()) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-        @else if (!filtered().length) { <p class="empty-state">لا توجد مهام بعد. أضف مهمة واختر فرعها والموظفين المسؤولين.</p> }
+        @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!filtered().length) { <app-empty-state>لا توجد مهام بعد. أضف مهمة واختر فرعها والموظفين المسؤولين.</app-empty-state> }
         @else {
           <div class="table-wrap"><table>
             <thead><tr><th>المهمة</th><th>الفرع</th><th>الحالة</th><th>المسؤولون</th><th>الإجراءات</th></tr></thead>

@@ -3,15 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { ToDoService } from '@core/services/todo.service';
 import { ToDoList } from '@core/models/todo.models';
 import { Modal } from '@shared/ui/modal';
+import { Alert } from '@shared/ui/alert';
 
 /** إضافة مهمة من لوحة المهام إلى إحدى قوائم مفكرتي كبند مرتبط بها (تُظهر حالتها وتفتحها) */
 @Component({
-  selector: 'app-add-to-todo-dialog', standalone: true, imports: [FormsModule, Modal],
+  selector: 'app-add-to-todo-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
   template: `
     <app-modal heading="أضف إلى مفكرتي" [subheading]="taskTitle()" [busy]="saving()" (closed)="close.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           @if (loading()) { <p class="muted" role="status">جارٍ تحميل قوائمك…</p> }
           @else if (!lists().length) { <p class="muted">لا توجد قوائم نشطة — أنشئ قائمة من صفحة مفكرتي أولاً.</p> }
           @else {

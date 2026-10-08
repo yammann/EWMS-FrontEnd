@@ -11,6 +11,7 @@ import {
 } from '@core/models/assigned-task.models';
 import { fileSize } from '@core/utils/file-size';
 import { fileIcon } from './task-attachments';
+import { Alert } from '@shared/ui/alert';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';
 
@@ -18,13 +19,13 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
 
 /** نافذة إنشاء مهمة / تعديلها / تفويض جزء من مهمة واردة لجهة أدنى */
 @Component({
-  selector: 'app-task-form-dialog', standalone: true, imports: [ReactiveFormsModule, FormsModule, Modal],
+  selector: 'app-task-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, FormsModule, Modal],
   template: `
     <app-modal [heading]="heading()" [subheading]="subheading()" size="lg" [busy]="saving()" (closed)="close.emit()">
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="modal-body form-stack">
-            @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+            <app-alert [message]="error()" />
 
             @if (mode() === 'create' && templates().length) {
               <label class="form-field">

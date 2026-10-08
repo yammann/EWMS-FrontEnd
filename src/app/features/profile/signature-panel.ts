@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { MaintenanceService } from '@core/services/maintenance.service';
 import { ToastService } from '@shared/ui/toast.service';
 import { SignaturePad } from './signature-pad';
+import { Alert } from '@shared/ui/alert';
 
 /**
  * توقيعي الإلكتروني (ManageMySignature): بطاقة بالتوقيع الحالي، و«تغيير التوقيع» يفتح لوحة الرسم/الرفع في نافذة.
@@ -9,14 +10,14 @@ import { SignaturePad } from './signature-pad';
  * الحفظ والحذف يطلبان كلمة المرور (قرار المستخدم 2026-10-04).
  */
 @Component({
-  selector: 'app-signature-panel', standalone: true, imports: [SignaturePad],
+  selector: 'app-signature-panel', standalone: true, imports: [Alert, SignaturePad],
   template: `
     <section class="panel">
       <div class="panel-heading"><div><span class="panel-kicker">الهوية</span><h2>توقيعي الإلكتروني</h2>
         <p>يُحفظ مع قراراتك الموقَّعة (الاعتماد النهائي للإجازات والرفض) ويُطبع على الأوراق.
           تغيير التوقيع لاحقاً لا يغيّر الأوراق التي وقّعتها سابقاً.</p></div></div>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <div class="card">
         <div class="card-head">

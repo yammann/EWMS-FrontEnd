@@ -24,3 +24,36 @@ export function retarget(names, fromTest, toSpec, exceptFile) {
   }
   return n;
 }
+
+/**
+ * يطبّق تحويلاً نصياً على قوالب المكوّنات، ثم يضيف `cls` إلى imports كل مكوّن صار يستعمل `tag`، مع سطر الاستيراد.
+ * transform(chunk) → chunk جديد (النص كله من @Component حتى التالي).
+ */
+export function migrateTemplates({ transform, tag, cls, importLine, skip = [] }) {
+  let files = 0, replaced = 0;
+  for (const file of walk(root)) {
+    if (/\.spec\.ts$/.test(file) || skip.some(s => file.replaceAll(path.sep, '/').endsWith(s))) continue;
+    const src = fs.readFileSync(file, 'utf8');
+    if (!/@Component\(/.test(src)) continue;
+    const parts = src.split(/(?=@Component\()/);
+    let touched = false;
+    const out = parts.map((c, i) => {
+      if (i === 0) return c;
+      const n = transform(c);
+      if (n === c) return c;
+      touched = true; replaced++;
+      c = n;
+      if (new RegExp(`imports:\s*\[[^\]]*\b${cls}\b`).test(c)) return c;
+      if (/imports:\s*\[/.test(c)) return c.replace(/imports:\s*\[/, `imports: [${cls}, `);
+      return c.replace(/standalone: true,?/, m => `${m} imports: [${cls}],`);
+    });
+    if (!touched) continue;
+    let res = out.join('');
+    if (!res.includes(importLine)) {
+      const idx = res.indexOf('\n', res.lastIndexOf('\nimport ') + 1);
+      res = res.slice(0, idx + 1) + importLine + '\n' + res.slice(idx + 1);
+    }
+    fs.writeFileSync(file, res); files++;
+  }
+  return { files, replaced };
+}

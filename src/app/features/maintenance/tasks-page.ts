@@ -13,6 +13,8 @@ import { ToastService } from '@shared/ui/toast.service';
 import { AssignDialog } from './maintenance-ui';
 import { Pager } from '@shared/ui/pager';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const PAGE_SIZE = 20;
 
@@ -21,7 +23,7 @@ const PAGE_SIZE = 20;
  * كل موظف يرى مهامه، ورئيس القسم مهام قسمه وله نقلها لموظف آخر، ورئيس الفرع يطّلع فقط.
  */
 @Component({
-  selector: 'app-maintenance-tasks-page', standalone: true, imports: [UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
+  selector: 'app-maintenance-tasks-page', standalone: true, imports: [EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -33,7 +35,7 @@ const PAGE_SIZE = 20;
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (employees().length > 1) {
         <div class="filters-row">
@@ -45,7 +47,7 @@ const PAGE_SIZE = 20;
       }
 
       <section class="panel">
-        @if (loading() && !tasks().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
+        @if (loading() && !tasks().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
         @else if (!tasks().length) {
           <div class="empty-state"><h3>لا توجد مهام صيانة بعد</h3><p>سجّل المهمة عند تكليفك بعمل ميداني لتوثيق ما طُلب وما أُنجز.</p></div>
         } @else {

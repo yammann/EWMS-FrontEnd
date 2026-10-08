@@ -3,15 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { ToDoService } from '@core/services/todo.service';
 import { TODO_COLORS, TODO_ICONS, TODO_LIMITS, ToDoList } from '@core/models/todo.models';
 import { Modal } from '@shared/ui/modal';
+import { Alert } from '@shared/ui/alert';
 
 /** نافذة إنشاء قائمة أو تعديلها: الاسم والوصف واللون والرمز */
 @Component({
-  selector: 'app-todo-list-dialog', standalone: true, imports: [FormsModule, Modal],
+  selector: 'app-todo-list-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
   template: `
     <app-modal [heading]="list() ? 'تعديل القائمة' : 'قائمة جديدة'" [busy]="saving()" (closed)="close.emit()">
       <form (ngSubmit)="save()">
         <div class="modal-body form-stack">
-          @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+          <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">اسم القائمة</span>
             <input name="name" [maxlength]="limits.nameLength" [(ngModel)]="name" placeholder="مثال: مهام الأسبوع" autofocus autocomplete="off"></label>
           <label class="form-field"><span class="form-label">الوصف <small class="muted">(اختياري)</small></span>

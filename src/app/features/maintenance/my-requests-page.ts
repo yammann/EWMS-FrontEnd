@@ -9,13 +9,15 @@ import { NotificationService } from '@core/services/notification.service';
 import { MyMaintenanceRequest } from '@core/models/maintenance.models';
 import { StatusChip } from './maintenance-ui';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /**
  * «أجهزتي في الصيانة» (ViewMyMaintenanceRequests): طلبات الصيانة التي أنا عميلها — للمتابعة فقط.
  * إشعار تغيّر الحالة يفتح الصفحة على الطلب (?request=ID) ويُبرزه.
  */
 @Component({
-  selector: 'app-my-maintenance-requests', standalone: true, imports: [UtcPipe, DatePipe, StatusChip, Pager],
+  selector: 'app-my-maintenance-requests', standalone: true, imports: [EmptyState, Alert, UtcPipe, DatePipe, StatusChip, Pager],
   styleUrls: ['../shared/organization.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -24,10 +26,10 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
         <div class="header-actions"><button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button></div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <section class="panel">
-        @if (loading() && !items().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
+        @if (loading() && !items().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
         @else if (!items().length) { <div class="empty-state"><h3>لا توجد أجهزة لك في الصيانة</h3><p>عند تسليم جهاز لقسم الصيانة باسمك يظهر هنا.</p></div> }
         @else {
           <div class="table-wrap"><table>

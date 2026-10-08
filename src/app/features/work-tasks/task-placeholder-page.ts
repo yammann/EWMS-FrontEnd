@@ -3,13 +3,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WorkTaskService } from '@core/services/work-task.service';
 import { WorkTaskCard } from '@core/models/work-task.models';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /**
  * صفحة مهمة العمل. صفحات المهام الفعلية (مثل المخزن: إدخال/إخراج/تقارير) ستُبنى لاحقاً
  * كل مهمة على حدة — عندها تُضاف لها route خاص بها بدلاً من هذه الصفحة.
  */
 @Component({
-  selector: 'app-task-placeholder', standalone: true, imports: [RouterLink],
+  selector: 'app-task-placeholder', standalone: true, imports: [EmptyState, RouterLink],
   styleUrl: '../shared/organization.scss',
   template: `
     <div class="page">
@@ -28,7 +29,7 @@ import { WorkTaskCard } from '@core/models/work-task.models';
           <p class="muted">صفحة هذه المهمة قيد التطوير وستكون متاحة قريباً.</p>
         </section>
       } @else {
-        <div class="panel empty-state" role="status">جارٍ التحميل…</div>
+        <app-empty-state panel>جارٍ التحميل…</app-empty-state>
       }
     </div>`,
   styles: [`

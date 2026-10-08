@@ -6,6 +6,8 @@ import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { Pager } from '@shared/ui/pager';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)
@@ -73,13 +75,13 @@ export class InstallStatus {
 
 /** سجل التغييرات لموقع أو جهاز أو تركيب (من غيّر ماذا ومتى، ومن أظهر كلمة السر) */
 @Component({
-  selector: 'app-device-history', standalone: true, imports: [UtcPipe, DatePipe, Modal, Pager],
+  selector: 'app-device-history', standalone: true, imports: [EmptyState, Alert, UtcPipe, DatePipe, Modal, Pager],
   template: `
     <app-modal [heading]="'سجل: ' + title()" subheading="من غيّر ماذا ومتى — الأحدث أولاً" size="lg" (closed)="closed.emit()">
       <div class="modal-body">
-        @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
-        @if (loading() && !items().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-        @else if (!items().length) { <p class="empty-state">لا يوجد سجل بعد</p> }
+        <app-alert [message]="error()" />
+        @if (loading() && !items().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!items().length) { <app-empty-state>لا يوجد سجل بعد</app-empty-state> }
         @else {
           <ol class="log">
             @for (l of items(); track l.id) {
@@ -135,11 +137,11 @@ export class DeviceHistory implements OnInit {
  * الموقع يجب أن يكون موجوداً، والجهاز الجديد يُضاف إلى الكتالوج (قرار المستخدم 2026-10-05).
  */
 @Component({
-  selector: 'app-installations-import', standalone: true, imports: [Modal],
+  selector: 'app-installations-import', standalone: true, imports: [Alert, Modal],
   template: `
     <app-modal heading="استيراد التركيبات من Excel" subheading="معاينة أولاً — لا يُحفظ شيء قبل تأكيدك" size="lg" [busy]="busy()" (closed)="closed.emit()">
       <div class="modal-body form-stack">
-        @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+        <app-alert [message]="error()" />
         <ol class="steps">
           <li>نزّل <button type="button" class="link-btn" (click)="template()">قالب الاستيراد</button> واملأه (الأعمدة الحمراء مطلوبة، وتعليمات في الورقة الثانية).</li>
           <li>المواقع يجب أن تكون مضافة مسبقاً بنفس الاسم؛ الأجهزة الجديدة تُضاف إلى الكتالوج تلقائياً.</li>

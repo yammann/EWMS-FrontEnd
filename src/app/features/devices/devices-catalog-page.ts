@@ -9,10 +9,12 @@ import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { DeviceHistory } from './device-ui';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات */
 @Component({
-  selector: 'app-devices-catalog-page', standalone: true, imports: [ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
+  selector: 'app-devices-catalog-page', standalone: true, imports: [EmptyState, Alert, ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -24,14 +26,14 @@ import { DeviceHistory } from './device-ui';
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <section class="panel">
         <div class="panel-heading"><h2>الأجهزة <span class="count">({{ filtered().length }})</span></h2>
           <input class="search" type="search" placeholder="بحث بالاسم أو الموديل أو الفئة أو الشركة…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="بحث">
         </div>
-        @if (loading()) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
-        @else if (!filtered().length) { <p class="empty-state">{{ search() ? 'لا توجد نتائج' : 'لا توجد أجهزة بعد' }}</p> }
+        @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+        @else if (!filtered().length) { <app-empty-state>{{ search() ? 'لا توجد نتائج' : 'لا توجد أجهزة بعد' }}</app-empty-state> }
         @else {
           <div class="table-wrap"><table>
             <thead><tr><th>الجهاز</th><th>الموديل</th><th>الفئة</th><th>الشركة المصنّعة</th><th>التركيبات</th><th class="actions-th"></th></tr></thead>

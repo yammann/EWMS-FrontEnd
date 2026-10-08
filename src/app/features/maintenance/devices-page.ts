@@ -9,6 +9,8 @@ import { Modal } from '@shared/ui/modal';
 import { Pager } from '@shared/ui/pager';
 import { DeviceFormDialog } from './device-form-dialog';
 import { DeviceRepairHistory } from './device-repair-history';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 type SearchField = 'serialNumber' | 'model' | 'name';
 const PAGE_SIZE = 20;
@@ -19,7 +21,7 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-maintenance-devices-page', standalone: true,
-  imports: [Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
+  imports: [EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
@@ -31,7 +33,7 @@ const PAGE_SIZE = 20;
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <div class="filters">
         <div class="filters-row">
@@ -57,7 +59,7 @@ const PAGE_SIZE = 20;
       </div>
 
       <section class="panel">
-        @if (loading() && !rows().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
+        @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
         @else if (!rows().length) {
           <div class="empty-state"><h3>{{ hasFilter() ? 'لا توجد نتائج مطابقة' : 'لا توجد أجهزة بعد' }}</h3>
             <p>{{ hasFilter() ? 'جرّب تعديل البحث أو الفلاتر.' : 'يُضاف الجهاز برقمه التسلسلي عند أول طلب صيانة له، أو من هنا.' }}</p></div>

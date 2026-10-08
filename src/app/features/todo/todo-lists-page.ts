@@ -14,6 +14,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { Icon } from '@shared/ui/icon';
 import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from './todo-list-dialog';
+import { Alert } from '@shared/ui/alert';
 
 type View = 'lists' | 'today';
 
@@ -23,7 +24,7 @@ type View = 'lists' | 'today';
  * السوبر ادمن يرى قوائم الجميع بأسماء أصحابها.
  */
 @Component({
-  selector: 'app-todo-lists-page', standalone: true, imports: [TodoListDialog, DatePipe, Icon, StatTile, Pager],
+  selector: 'app-todo-lists-page', standalone: true, imports: [Alert, TodoListDialog, DatePipe, Icon, StatTile, Pager],
   styleUrls: ['../shared/organization.scss', './todo.scss', './todo-cards.scss'],
   template: `
     <div class="page">
@@ -67,7 +68,7 @@ type View = 'lists' | 'today';
         }
       </div>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (view() === 'today') {
         @if (today(); as t) {

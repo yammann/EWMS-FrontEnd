@@ -13,13 +13,15 @@ import { formatPhone } from '@core/utils/phone';
 import { deviceUrl } from '@core/utils/network';
 import { DeviceHistory, DevicePassword, InstallStatus } from './device-ui';
 import { LinkedTasks } from '@features/task-board';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 /**
  * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):
  * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, Pager],
+  selector: 'app-site-details-page', standalone: true, imports: [EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, Pager],
   styleUrls: ['../shared/organization.scss', './devices.scss'],
   template: `
     <div class="page">
@@ -37,7 +39,7 @@ import { LinkedTasks } from '@features/task-board';
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (site(); as s) {
         <section class="site-stats" aria-label="ملخص الموقع">
@@ -73,7 +75,7 @@ import { LinkedTasks } from '@features/task-board';
 
         <section class="panel">
           <div class="panel-heading"><div><h2>الأجهزة المركّبة <span class="count">({{ total() }})</span></h2><p>{{ access().canRevealPasswords ? 'كلمات السر مخفية — 👁 للإظهار أو ⧉ للنسخ (يُسجَّل كل إظهار)' : 'كلمات السر تحتاج صلاحية الإظهار' }}{{ total() > installations().length ? ' — يُعرض أول ' + installations().length + '، والباقي في صفحة التركيبات' : '' }}</p></div></div>
-          @if (!installations().length) { <p class="empty-state">لا توجد أجهزة مركّبة في هذا الموقع بعد</p> }
+          @if (!installations().length) { <app-empty-state>لا توجد أجهزة مركّبة في هذا الموقع بعد</app-empty-state> }
           @else {
             <div class="table-wrap"><table>
               <thead><tr><th>الجهاز</th><th>الرقم التسلسلي</th><th>مكان التركيب</th><th>IP</th><th>Subnet</th><th>المستخدم</th><th>كلمة السر</th><th>الحالة</th><th>ملاحظات</th></tr></thead>
@@ -111,7 +113,7 @@ import { LinkedTasks } from '@features/task-board';
         }
         @if (historyOpen()) { <app-device-history kind="site" [entityId]="s.id" [title]="s.name" (closed)="historyOpen.set(false)" /> }
       } @else if (loading()) {
-        <div class="panel empty-state" role="status">جارٍ تحميل تفاصيل الموقع…</div>
+        <app-empty-state panel>جارٍ تحميل تفاصيل الموقع…</app-empty-state>
       }
 
     </div>`,

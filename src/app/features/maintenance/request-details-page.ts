@@ -16,6 +16,8 @@ import { TransferPanel } from './transfer-panel';
 import { LinkedTasks } from '@features/task-board';
 import { RequestPartsPanel } from './request-parts-panel';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4: '✎', 5: '⇢', 6: '✕', 7: '⚙', 8: '↩' };
 
@@ -25,7 +27,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
  */
 @Component({
   selector: 'app-maintenance-request-details', standalone: true,
-  imports: [UtcPipe, DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
+  imports: [EmptyState, Alert, UtcPipe, DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss'],
   template: `
     <div class="page">
@@ -44,7 +46,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       @if (request(); as r) {
         @if (r.isClosed) {
@@ -108,7 +110,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
 
         <section class="panel">
           <div class="panel-heading"><div><h2>سجل الطلب</h2><p>كل ما جرى على الطلب، الأحدث أولاً</p></div></div>
-          @if (!activities().length) { <p class="empty-state">لا يوجد سجل لهذا الطلب</p> }
+          @if (!activities().length) { <app-empty-state>لا يوجد سجل لهذا الطلب</app-empty-state> }
           @else {
             <ol class="timeline">
               @for (a of activities(); track a.id) {
@@ -127,7 +129,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
             <button class="btn btn-danger" type="button" (click)="askDelete(r)" [disabled]="busy()">حذف الطلب</button>
           </section>
         }
-      } @else if (loading()) { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
+      } @else if (loading()) { <app-empty-state panel>جارٍ التحميل…</app-empty-state> }
     </div>
 
     @if (editOpen() && lookups(); as l) {

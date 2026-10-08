@@ -15,6 +15,8 @@ import { Pager } from '@shared/ui/pager';
 import { RequestFormDialog, RequestLookups } from './request-form-dialog';
 import { PendingTransfersButton } from './transfer-panel';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { Alert } from '@shared/ui/alert';
+import { EmptyState } from '@shared/ui/empty-state';
 
 type View = 'table' | 'board';
 type SearchField = 'clientName' | 'serialNumber' | 'model';
@@ -32,7 +34,7 @@ const BOARD_LIMIT = 5;
  */
 @Component({
   selector: 'app-maintenance-requests-page', standalone: true,
-  imports: [UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
+  imports: [EmptyState, Alert, UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
   styleUrls: ['../shared/organization.scss', '../devices/devices.scss', './maintenance.scss', './requests-page.scss'],
   template: `
     <div class="page">
@@ -45,7 +47,7 @@ const BOARD_LIMIT = 5;
         </div>
       </header>
 
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      <app-alert [message]="error()" />
 
       <div class="filters">
         <div class="filters-row">
@@ -98,7 +100,7 @@ const BOARD_LIMIT = 5;
         </div>
 
         <section class="panel">
-          @if (loading() && !rows().length) { <p class="empty-state" role="status">جارٍ التحميل…</p> }
+          @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
           @else if (!rows().length) {
             <div class="empty-state"><h3>{{ hasFilter() || statusId() ? 'لا توجد نتائج مطابقة' : 'لا توجد طلبات صيانة بعد' }}</h3>
               <p>{{ hasFilter() || statusId() ? 'جرّب تعديل البحث أو الفلاتر.' : 'سجّل أول طلب عند استلام جهاز من عميل.' }}</p></div>
@@ -125,7 +127,7 @@ const BOARD_LIMIT = 5;
         </section>
       } @else {
         @if (!canDrag()) { <p class="readonly-note">وضع المشاهدة — تغيير الحالة لمن يملك صلاحية تغيير حالة الطلب</p> }
-        @if (loading() && !columns().length) { <div class="panel empty-state" role="status">جارٍ تحميل اللوحة…</div> }
+        @if (loading() && !columns().length) { <app-empty-state panel>جارٍ تحميل اللوحة…</app-empty-state> }
         @else if (!columns().length) { <div class="panel empty-state"><h3>لا توجد حالات معرّفة</h3><p>أضف حالات الطلب من «إعدادات الصيانة».</p></div> }
         @else {
           <div class="board" cdkDropListGroup [style.--cols]="columns().length">
