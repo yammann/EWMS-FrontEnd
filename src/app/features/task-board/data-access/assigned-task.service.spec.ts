@@ -19,16 +19,17 @@ describe('Task board API contract', () => {
     service.changeStatus(7, 'InProgress').subscribe();
     const req = http.expectOne('/api/AssignedTasks/Status/7');
     expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual({ status: 2, note: null });
+    expect(req.request.body).toEqual({ status: 2, note: null, expectedStatus: null });
     req.flush({});
   });
 
   it('sends the review status value and the return note', () => {
     service.changeStatus(7, 'InReview').subscribe();
     http.expectOne('/api/AssignedTasks/Status/7').flush({});
-    service.changeStatus(7, 'InProgress', 'ينقصها تقرير').subscribe();
+    service.changeStatus(7, 'InProgress', 'ينقصها تقرير', 'InReview').subscribe();
     const req = http.expectOne('/api/AssignedTasks/Status/7');
-    expect(req.request.body).toEqual({ status: 2, note: 'ينقصها تقرير' });
+    // الحالة التي رآها المستخدم تُرسل كي يرفض الخادم قراراً بُني على حالة قديمة
+    expect(req.request.body).toEqual({ status: 2, note: 'ينقصها تقرير', expectedStatus: 4 });
     req.flush({});
   });
 

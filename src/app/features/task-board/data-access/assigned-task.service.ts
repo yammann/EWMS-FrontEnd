@@ -25,8 +25,11 @@ export class AssignedTaskService {
   create(body: CreateTaskRequest) { return this.api.post<AssignedTaskDetail>('/AssignedTasks/Create', body); }
   update(id: number, body: UpdateTaskRequest) { return this.api.put<AssignedTaskDetail>(`/AssignedTasks/Update/${id}`, body); }
   /** note: سبب إعادة المهمة من المراجعة إلى التنفيذ (من المُسنِد) */
-  changeStatus(id: number, status: TaskStatus, note?: string | null) {
-    return this.api.put<AssignedTaskCard>(`/AssignedTasks/Status/${id}`, { status: TASK_STATUS_VALUE[status], note: note ?? null });
+  /** expected = الحالة التي رآها المستخدم حين قرّر: إن تغيّرت على الخادم منذها يُرفض القرار (لا يكتب فوق قرار غيره) */
+  changeStatus(id: number, status: TaskStatus, note?: string | null, expected?: TaskStatus) {
+    return this.api.put<AssignedTaskCard>(`/AssignedTasks/Status/${id}`, {
+      status: TASK_STATUS_VALUE[status], note: note ?? null, expectedStatus: expected ? TASK_STATUS_VALUE[expected] : null
+    });
   }
   comment(id: number, text: string) { return this.api.post<AssignedTaskDetail>(`/AssignedTasks/Comment/${id}`, { text }); }
   delete(id: number) { return this.api.delete<{ message: string }>(`/AssignedTasks/Delete/${id}`); }

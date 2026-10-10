@@ -205,9 +205,10 @@ export class TaskBoardPage {
     const from = task.status;
     // تحديث متفائل ثم التراجع إن رفض الخادم
     this.patch(task.id, { status: to, statusAr: TASK_STATUS_LABEL[to] });
-    this.service.changeStatus(task.id, to, note).subscribe({
+    this.service.changeStatus(task.id, to, note, from).subscribe({
       next: updated => { this.patch(task.id, updated); this.toast.success(`«${task.title}» ← ${TASK_STATUS_LABEL[to]}`); done?.(); },
-      error: e => { this.patch(task.id, { status: from, statusAr: TASK_STATUS_LABEL[from] }); this.toast.error(e.message); done?.(); }
+      // رفض الخادم (ومنه: غيّرها مستخدم آخر للتو) ← التراجع ثم إعادة قراءة اللوحة لتظهر الحالة الفعلية
+      error: e => { this.patch(task.id, { status: from, statusAr: TASK_STATUS_LABEL[from] }); this.toast.error(e.message); done?.(); this.load(false); }
     });
   }
 

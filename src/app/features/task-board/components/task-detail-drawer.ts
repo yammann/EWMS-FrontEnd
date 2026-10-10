@@ -79,9 +79,10 @@ export class TaskDetailDrawer {
     const t = this.task();
     if (!t || this.busy()) return;
     this.busy.set(true); this.error.set('');
-    this.service.changeStatus(t.id, status, note).subscribe({
+    this.service.changeStatus(t.id, status, note, t.status).subscribe({
       next: () => { this.busy.set(false); this.returning.set(false); this.load(); this.changed.emit(); },
-      error: e => { this.busy.set(false); this.returning.set(false); this.error.set(e.message); }
+      // رفض الخادم (ومنه: غيّرها مستخدم آخر للتو) ← إعادة قراءة المهمة لتظهر حالتها الفعلية مع الرسالة
+      error: e => { this.busy.set(false); this.returning.set(false); this.load(); this.error.set(e.message); }
     });
   }
 
