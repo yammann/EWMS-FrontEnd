@@ -87,6 +87,8 @@ export interface AssignedTaskDetail extends AssignedTaskCard {
   checklist: ChecklistItem[];
   canAttach: boolean;
   canManageChecklist: boolean;
+  /** بانتظار المراجعة ولستُ مراجِعها: لا أعدّل فيها حتى يعتمدها المُسنِد أو يعيدها */
+  reviewLocked: boolean;
   canClaim: boolean;
   canRelease: boolean;
 }

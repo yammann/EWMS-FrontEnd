@@ -18,6 +18,10 @@
 
       <app-alert [message]="error()" />
 
+      @if (t.reviewLocked) {
+        <p class="review-lock" role="status">🔒 أُرسلت للمراجعة — لا تُعدَّل حتى يعتمدها المُسنِد أو يعيدها للتنفيذ. يمكنك التعليق.</p>
+      }
+
       @if (t.canChangeStatus || t.allowedStatuses.length) {
         <div class="status-switch" role="radiogroup" aria-label="حالة المهمة">
           @for (s of statuses; track s) {
@@ -25,7 +29,7 @@
                     [disabled]="busy() || (t.status !== s && !t.allowedStatuses.includes(s))" (click)="setStatus(s)">{{ statusLabel[s] }}</button>
           }
         </div>
-        @if (t.status === 'InReview') {
+        @if (t.status === 'InReview' && !t.reviewLocked) {
           <p class="hint-line">{{ t.needsReturnNote ? 'بانتظار اعتمادك: اعتمدها «تم التنفيذ» أو أعدها للتنفيذ مع ذكر السبب.' : 'أُرسلت للمراجعة، بانتظار اعتماد المُسنِد.' }}</p>
         }
       }
