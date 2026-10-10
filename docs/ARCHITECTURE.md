@@ -1,7 +1,8 @@
 # معمارية الواجهة (Angular 22)
 
 > أُعيدت هيكلة الواجهة على الفرع `refactor/frontend` (2026-10-08) دون أي تغيير في الشكل أو السلوك أو عقد الـ API.
-> التحقق: بناء + 100 اختبار وحدة + 59 اختبار Playwright (منها 21 صفحة تُقارَن لقطاتها بالكود الأصلي بعتبة 0.4%).
+> المرحلة 8 (2026-10-10): توحيد نمط صفحات الإدارة (`CrudPage`) — تغيّر الشكل قليلاً بقصد (النماذج في نافذة)، والوظيفة محميّة باختبارات `crud.spec.ts`.
+> التحقق: بناء + 100 اختبار وحدة + 80 اختبار Playwright (منها 21 صفحة ونوافذ الهيكل تُقارَن لقطاتها بعتبة 0.4%).
 
 ## الطبقات والاعتماد
 
@@ -38,11 +39,30 @@ src/app/
 | أزرار نافذة النموذج | `<app-form-actions [busy] [disabled] label busyLabel (dismissed)>` |
 | نافذة / تأكيد / تنبيه | `app-modal` / `ConfirmService` / `ToastService` |
 | تقسيم الصفحات | `Pagination<T>` + `<app-pager>` |
-| تحميل صفحة (loading/error/data) | `loader(() => obs, initial, {onLoaded, onError})` أو `trackRequest(obs, loading, error, next)` |
-| صفحة إدارة بنافذة إنشاء/تعديل/حذف | `ModalCrud` (مثال: `features/branches/pages/branches-page.ts`) |
-| إجراءات حفظ/حذف بمفتاح انشغال وتنبيه | `PageActions` |
+| **صفحة إدارة (قائمة + إضافة/تعديل/حذف)** | **`CrudPage`** (`shared/ui/crud-page.ts`) — انظر «النمط الموحّد» أدناه |
+| أزرار الصف (تعديل/حذف + أزرار إضافية) | `<app-row-actions [canEdit] [canDelete] [deleting] (edit) (remove)>` والأزرار الإضافية كمحتوى |
+| طلب واحد خارج CrudPage | `trackRequest(obs, busy, error, next)`؛ ورسالة الخطأ `errorMessage(e, بديل)` |
+| قيمة `<select>` مربوطة بإشارة | `[appSelectValue]` (لا `[value]` على select: يُطبَّق قبل وصول الخيارات فيظهر خيار خاطئ) |
 | قوائم الهيكل (فروع/أقسام/مكاتب/أدوار) | `LookupsService` (تخزين 60 ث، يُبطَل بعد أي تعديل؛ `branchOptions()` لمن لا يملك ViewBranches) |
 | تنسيق تاريخ UTC / مبلغ / كمية | أنابيب `utc` `money` `qty` (`shared/pipes/format.pipes.ts`) أو `core/utils/format.ts` |
+
+### النمط الموحّد لصفحات الإدارة (CrudPage)
+```ts
+crud = new CrudPage<Item, Body>({
+  load: () => this.service.getAll(),            // أو forkJoin(...).pipe(map(...)) مع قوائم النموذج
+  create: body => this.service.create(body), update: (id, body) => this.service.update(id, body),
+  remove: item => this.service.delete(item.id),
+  can: { create: this.canCreate, edit: this.canEdit, delete: this.canDelete },
+  onOpen: item => /* تعبئة النموذج أو تصفيره */, onRefresh: () => this.lookups.invalidate(),
+  messages: { saved: 'تم الحفظ', deleted: 'تم الحذف', plural: 'الأنواع', confirmDelete: i => `حذف "${i.name}"؟` }
+});
+```
+- **الإضافة والتعديل في نافذة** (`crud.dialog()` = `{mode, item}`)، و**خطأ الخادم داخل النافذة** (`crud.formError()` عبر `app-alert` أو `app-entity-form [error]`) فلا يضيع ما كتبه المستخدم؛ لا تُغلق النافذة أثناء الحفظ.
+- النجاح: تُغلق النافذة + تنبيه + **إعادة قراءة صامتة** للقائمة وحدها (الجدول لا يختفي؛ القوائم المساعدة من `LookupsService` لا تُعاد).
+- الحذف: `ConfirmService` ثم إزالة الصف محلياً **بلا إعادة قراءة**، ومؤشر على الصف (`crud.deletingId()`).
+- فشل التحميل: `app-alert` مع «إعادة المحاولة» (`(retry)="crud.refresh()"`) والقائمة السابقة تبقى ظاهرة.
+- الصفحات ذات الترقيم من الخادم (أجهزة الصيانة، قطع الغيار، مهام الصيانة، التركيبات) تبقى بمنطقها، وتستعمل `app-row-actions` و`deletingId` فقط.
+- أُزيلت: `ModalCrud`، `PageActions`، `loader()`.
 
 ### أخطاء الـ API
 `apiErrorInterceptor` يحوّل كل خطأ لـ `/api/*` إلى `{ status, message }` (الرسالة عربية جاهزة للعرض). لا تفكّ `HttpErrorResponse` في الصفحات.
@@ -53,6 +73,9 @@ src/app/
 - `@defer` للمكوّنات الثقيلة التي تُفتح عند الطلب (الدرج، نوافذ المهام، التقويم، لوحة التوقيع).
 - SignalR يُحمَّل بـ `import()` عند بدء الاتصال (خارج الحزمة الأولى).
 - ميزانية الحزمة الأولى: تحذير 430 kB / خطأ 480 kB.
+- الخطوط WOFF2 (`npm run fonts:woff2` يولّدها من OTF، تحقق جدولاً بجدول؛ OTF يبقى احتياطاً في `@font-face`): 168 → 85 kB.
+- **OnPush**: هو الافتراضي في Angular 22 لكل المكوّنات (لا يوجد `Eager` في المشروع). أي حالة تُعرض في القالب وتتغيّر بعد طلب/مؤقّت يجب أن تكون إشارة.
+- أنماط `shared/styles/*.scss` تبقى في المكوّنات (تُضمَّن في كل قطعة كسولة ~2 kB) عمداً: نقلها عاماً لا يسرّع أي صفحة ويجعل محدّدات مثل `dl` و`.panel` و`.actions` تسري على التطبيق كله.
 
 ## كيف أضيف…
 
@@ -63,10 +86,11 @@ src/app/
 **استعمال شيء من ميزة أخرى:** صدّره من `index.ts` تلك الميزة ثم `import { X } from '@features/<ميزة>'`.
 
 ## الاختبارات
-- `npm test` — vitest (وحدة): خدمات، pagination، ModalCrud، loader، LookupsService، interceptor، المكوّنات المشتركة، **حارس ربط المخرجات** (`template-outputs.spec.ts`: ربط `(event)` على مكوّن لا يملك هذا المخرج يصير مستمع DOM صامتاً بلا خطأ بناء).
+- `npm test` — vitest (وحدة): خدمات، pagination، CrudPage، SelectValue، trackRequest، LookupsService، interceptor، المكوّنات المشتركة، **حارس ربط المخرجات** (`template-outputs.spec.ts`: ربط `(event)` على مكوّن لا يملك هذا المخرج يصير مستمع DOM صامتاً بلا خطأ بناء).
 - `npm run lint` — ESLint (typescript-eslint + angular-eslint + حدود الطبقات).
 - `npm run e2e` — Playwright بـ Chrome المثبّت: يحتاج API على 7181 وخادم الواجهة و`E2E_ADMIN_PASSWORD` (لا تُحفظ في الشيفرة)؛ `E2E_BASE_URL` لتغيير العنوان (الافتراضي 4200).
   - `smoke.spec.ts`: 27 صفحة بلا أخطاء كونسول/5xx. `flows.spec.ts`: تدفقات (مفكرتي، الفروع، الأدوار، الرجوع، النوافذ).
+  - `crud.spec.ts`: إضافة/تعديل/حذف وأخطاء الخادم لكل صفحات الإدارة (أنواع الإجازات، العطل، مهام العمل، الكتالوج، المواقع، إعدادات الصيانة، الهيكل، المستخدمون، الأدوار، أجهزة الصيانة، قطع الغيار). كل سجل باسم «e2e …»، و`cleanup.teardown.ts` يحذف ما تبقّى بعد كل تشغيل.
   - `visual-parity.spec.ts`: تطابق الشكل مع لقطات مرجعية (راجع تعليق الملف لتوليد المرجع من الكود الأصلي).
 - الاختبارات التي تحتاج الباكاند الحي تُشغَّل يدوياً؛ الباقي بلا خادم.
 
