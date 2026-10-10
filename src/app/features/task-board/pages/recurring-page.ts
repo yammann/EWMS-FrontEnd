@@ -42,7 +42,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
             <label class="form-field"><span class="form-label">مدة التسليم <small class="muted">(أيام من الإنشاء، فارغ = بلا موعد)</small></span>
               <input name="days" type="number" min="0" max="365" [(ngModel)]="days"></label>
           </div>
-          <div class="form-field"><span class="form-label">بنود التحقق <small class="muted">(▼ أو Enter لبند جديد، ▲ للحذف)</small></span>
+          <div class="form-field"><span class="form-label">بنود التحقق <small class="muted">(+ أو Enter لبند جديد، − للحذف)</small></span>
             <app-line-list [(values)]="items" [max]="30" [disabled]="saving()" label="بند التحقق" placeholder="مثال: جرد الأصناف" /></div>
         </div>
         <app-form-actions [busy]="saving()" [disabled]="!name.trim() || !title.trim()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />

@@ -71,7 +71,7 @@
 
         @if (mode() !== 'edit') {
           <div class="form-field">
-            <span class="form-label">بنود التحقق <small class="muted">(اختياري — ▼ أو Enter لبند جديد، ▲ للحذف)</small></span>
+            <span class="form-label">بنود التحقق <small class="muted">(اختياري — + أو Enter لبند جديد، − للحذف)</small></span>
             <app-line-list [(values)]="items" [max]="maxItems" [disabled]="saving()" label="بند التحقق"
                            placeholder="خطوة صغيرة تُنشأ مع المهمة ويعلّمها المنفِّذ" />
           </div>

@@ -7,7 +7,7 @@ export function cleanLines(values: readonly string[]): string[] {
 
 /**
  * قائمة قيم متعددة بنمط وينبوكس (مثل منافذ البريدج): كل قيمة في سطر مستقل،
- * ▼ يضيف سطراً فارغاً تحته ويضع المؤشر فيه، و▲ يحذف السطر.
+ * + يضيف سطراً فارغاً تحته ويضع المؤشر فيه، و− يحذف السطر.
  * لوحة المفاتيح: Enter = سطر جديد تحته، Backspace في سطر فارغ = حذفه، ↑↓ للتنقل بين الأسطر،
  * ولصق نص متعدد الأسطر يوزّعه على أسطر. الأسطر الفارغة تبقى في القيمة؛ cleanLines() يزيلها عند الحفظ.
  */
@@ -22,9 +22,9 @@ export function cleanLines(values: readonly string[]): string[] {
                  [disabled]="disabled()" [attr.aria-label]="label() + ' ' + (i + 1)"
                  (input)="set(i, field.value)" (keydown)="key($event, i, field)" (paste)="paste($event, i, field)">
           <button type="button" class="step" title="حذف البند" [attr.aria-label]="'حذف ' + label() + ' ' + (i + 1)"
-                  [disabled]="disabled()" (click)="remove(i)">▲</button>
+                  [disabled]="disabled()" (click)="remove(i)">−</button>
           <button type="button" class="step" title="إضافة بند بعده" [attr.aria-label]="'إضافة ' + label() + ' بعد ' + (i + 1)"
-                  [disabled]="disabled() || full()" (click)="addAfter(i)">▼</button>
+                  [disabled]="disabled() || full()" (click)="addAfter(i)">+</button>
         </div>
       }
     </div>
@@ -38,7 +38,7 @@ export function cleanLines(values: readonly string[]): string[] {
     .step {
       flex-shrink: 0; width: 34px; height: 34px; display: grid; place-items: center; padding: 0;
       border: 1px solid var(--border); border-radius: 8px; background: var(--fill); color: var(--ink-700);
-      font-size: 11px; line-height: 1; cursor: pointer;
+      font-size: 18px; font-weight: 600; line-height: 1; cursor: pointer;
     }
     .step:hover:not(:disabled) { background: var(--fill-strong); color: var(--brand-700); }
     .step:disabled { opacity: .4; cursor: default; }

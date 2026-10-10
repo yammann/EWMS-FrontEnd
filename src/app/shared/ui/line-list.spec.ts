@@ -16,7 +16,7 @@ describe('LineList (بنود بنمط وينبوكس)', () => {
     expect(inputs(f).length).toBe(1);
   });
 
-  it('▼ adds an empty row after the current one, ▲ removes it', () => {
+  it('+ adds an empty row after the current one, − removes it', () => {
     const f = create(['أ', 'ج']);
     f.componentInstance.addAfter(0);
     expect(f.componentInstance.values()).toEqual(['أ', '', 'ج']);
