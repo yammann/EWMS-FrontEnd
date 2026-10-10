@@ -7,7 +7,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 
@@ -56,6 +56,8 @@ export class MaintBars {
   `]
 })
 export class MaintenanceStatsPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(MaintenanceService);
 
   stats = signal<MaintenanceStats | null>(null);
@@ -76,6 +78,6 @@ export class MaintenanceStatsPage {
   monthName(month: number) { return MONTHS[month - 1] ?? ''; }
 
   load() {
-    trackRequest(this.service.stats(), this.loading, this.error, s => { this.stats.set(s); });
+    this.latest(this.service.stats(), this.loading, this.error, s => { this.stats.set(s); });
   }
 }

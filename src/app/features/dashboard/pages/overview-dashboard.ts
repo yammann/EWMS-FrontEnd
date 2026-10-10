@@ -11,7 +11,7 @@ import { ActivityList } from '../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */
 @Component({
@@ -21,6 +21,8 @@ import { trackRequest } from '@shared/ui/track-request';
   templateUrl: './overview-dashboard.html'
 })
 export class OverviewDashboardPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(DashboardService);
   private auth = inject(AuthService);
   showMap = computed(() => this.auth.hasPermission(AppPermission.ViewBranchMap));
@@ -36,6 +38,6 @@ export class OverviewDashboardPage {
   }
 
   load() {
-    trackRequest(this.service.overview(), this.loading, this.error, d => { this.data.set(d); });
+    this.latest(this.service.overview(), this.loading, this.error, d => { this.data.set(d); });
   }
 }

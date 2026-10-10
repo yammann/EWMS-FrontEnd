@@ -16,7 +16,7 @@ import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 const PAGE_SIZE = 25;
 
@@ -41,6 +41,8 @@ const PAGE_SIZE = 25;
   `]
 })
 export class MaintenanceSparePartsPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   /** السجل الجاري حذفه (مؤشر على صفه) */
   deletingId = signal<number | null>(null);
   private service = inject(MaintenanceService);
@@ -106,7 +108,7 @@ export class MaintenanceSparePartsPage {
   }
 
   load() {
-    trackRequest(this.service.parts({ search: this.searchText().trim() || undefined, departmentId: this.departmentId() || null, deviceTypeId: this.deviceTypeId() || null, lowStock: this.lowOnly() || undefined, page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
+    this.latest(this.service.parts({ search: this.searchText().trim() || undefined, departmentId: this.departmentId() || null, deviceTypeId: this.deviceTypeId() || null, lowStock: this.lowOnly() || undefined, page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
   }
 
   compat(p: SparePart) {

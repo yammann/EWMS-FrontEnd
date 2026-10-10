@@ -6,7 +6,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -22,6 +22,8 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
   
 })
 export class TaskStatsPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(AssignedTaskService);
 
   from = signal(iso(new Date(Date.now() - 90 * 86_400_000)));
@@ -45,6 +47,6 @@ export class TaskStatsPage {
   }
 
   load() {
-    trackRequest(this.service.stats(this.from(), this.to()), this.loading, this.error, s => { this.stats.set(s); });
+    this.latest(this.service.stats(this.from(), this.to()), this.loading, this.error, s => { this.stats.set(s); });
   }
 }

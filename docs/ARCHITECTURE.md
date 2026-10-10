@@ -41,7 +41,9 @@ src/app/
 | تقسيم الصفحات | `Pagination<T>` + `<app-pager>` |
 | **صفحة إدارة (قائمة + إضافة/تعديل/حذف)** | **`CrudPage`** (`shared/ui/crud-page.ts`) — انظر «النمط الموحّد» أدناه |
 | أزرار الصف (تعديل/حذف + أزرار إضافية) | `<app-row-actions [canEdit] [canDelete] [deleting] (edit) (remove)>` والأزرار الإضافية كمحتوى |
-| طلب واحد خارج CrudPage | `trackRequest(obs, busy, error, next)`؛ ورسالة الخطأ `errorMessage(e, بديل)` |
+| تحميل قائمة/صفحة (بحث، فلاتر، ترقيم، إعادة تحميل عند إشعار) | `private latest = latestRequest();` ثم `this.latest(obs, busy, error, next)` — كل تحميل يلغي السابق، فلا يستبدل ردٌّ متأخر على شبكة بطيئة النتيجةَ الأحدث |
+| عملية مفردة (حفظ، حذف، إرسال) | `trackRequest(obs, busy, error, next)` — لا تُلغى؛ ورسالة الخطأ `errorMessage(e, بديل)` |
+| فحص حيّ أثناء الكتابة (`switchMap`) | `catchError` **داخل** الطلب الداخلي: خطأ يصل للتدفق الخارجي يُنهيه ويتوقف الفحص حتى إعادة فتح الصفحة |
 | قيمة `<select>` مربوطة بإشارة | `[appSelectValue]` (لا `[value]` على select: يُطبَّق قبل وصول الخيارات فيظهر خيار خاطئ) |
 | قوائم الهيكل (فروع/أقسام/مكاتب/أدوار) | `LookupsService` (تخزين 60 ث، يُبطَل بعد أي تعديل؛ `branchOptions()` لمن لا يملك ViewBranches) |
 | تنسيق تاريخ UTC / مبلغ / كمية | أنابيب `utc` `money` `qty` (`shared/pipes/format.pipes.ts`) أو `core/utils/format.ts` |

@@ -13,7 +13,7 @@ import { DeviceRepairHistory } from '../components/device-repair-history';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 
 type SearchField = 'serialNumber' | 'model' | 'name';
@@ -30,6 +30,8 @@ const PAGE_SIZE = 20;
   templateUrl: './devices-page.html'
 })
 export class MaintenanceDevicesPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   /** السجل الجاري حذفه (مؤشر على صفه) */
   deletingId = signal<number | null>(null);
   private service = inject(MaintenanceService);
@@ -79,7 +81,7 @@ export class MaintenanceDevicesPage {
 
   load() {
     const text = this.searchText().trim();
-    trackRequest(this.service.devices({ [this.searchField()]: text || undefined, deviceTypeId: this.deviceTypeId() || null, deviceCompanyId: this.companyId() || null, page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
+    this.latest(this.service.devices({ [this.searchField()]: text || undefined, deviceTypeId: this.deviceTypeId() || null, deviceCompanyId: this.companyId() || null, page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
   }
 
   openForm(device: MaintenanceDevice | null) { this.editing.set(device); this.formOpen.set(true); }

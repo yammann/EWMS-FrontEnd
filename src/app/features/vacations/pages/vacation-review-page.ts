@@ -14,7 +14,7 @@ import { Vacation } from '../data-access/vacation.models';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 
 @Component({
@@ -23,6 +23,8 @@ import { SelectValue } from '@shared/ui/select-value';
   templateUrl: './vacation-review-page.html'
 })
 export class VacationReviewPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   cards = new Pagination(() => this.items());
   pager = new Pagination(() => this.filteredTeam());
   private service = inject(VacationService);
@@ -53,7 +55,7 @@ export class VacationReviewPage {
     });
   }
   load() {
-    trackRequest(this.service.pending(), this.loading, this.error, v => { this.items.set(v); });
+    this.latest(this.service.pending(), this.loading, this.error, v => { this.items.set(v); });
   }
   choose(v: Vacation, approve: boolean) { this.selected.set(v); this.approving.set(approve); this.form.reset(); this.error.set(''); this.success.set(''); }
   submit() {

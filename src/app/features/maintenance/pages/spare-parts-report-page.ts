@@ -8,7 +8,7 @@ import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 /**
  * تقارير قطع الغيار (قرار المستخدم 2026-10-05 — بلا نسب التكلفة للأقسام): قيمة المخزون، أكثر القطع صرفاً في الفترة،
@@ -26,6 +26,8 @@ import { trackRequest } from '@shared/ui/track-request';
   `]
 })
 export class MaintenanceSparePartsReportPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(MaintenanceService);
   can = this.service.can;
 
@@ -45,6 +47,6 @@ export class MaintenanceSparePartsReportPage {
   }
 
   load() {
-    trackRequest(this.service.partReport({ departmentId: this.departmentId() || null, from: this.from(), to: this.to() }), this.loading, this.error, r => { this.report.set(r); });
+    this.latest(this.service.partReport({ departmentId: this.departmentId() || null, from: this.from(), to: this.to() }), this.loading, this.error, r => { this.report.set(r); });
   }
 }

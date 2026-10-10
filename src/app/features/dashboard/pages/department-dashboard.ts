@@ -13,7 +13,7 @@ import { ActivityList, TaskCards, TaskDistributionTable } from '../components/da
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
@@ -23,6 +23,8 @@ import { trackRequest } from '@shared/ui/track-request';
   templateUrl: './department-dashboard.html'
 })
 export class DepartmentDashboardPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(DashboardService);
   private tasks = inject(WorkTaskService);
   private auth = inject(AuthService);
@@ -54,7 +56,7 @@ export class DepartmentDashboardPage {
   }
 
   load() {
-    trackRequest(this.service.department(this.id), this.loading, this.error, d => { this.data.set(d); });
+    this.latest(this.service.department(this.id), this.loading, this.error, d => { this.data.set(d); });
     if (this.isOwn()) this.tasks.my().subscribe({ next: t => this.myTasks.set(t), error: () => this.myTasks.set([]) });
   }
 }

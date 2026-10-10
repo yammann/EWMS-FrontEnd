@@ -15,7 +15,7 @@ import { TaskCards } from '../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({
@@ -25,6 +25,8 @@ import { trackRequest } from '@shared/ui/track-request';
   templateUrl: './employee-dashboard.html'
 })
 export class EmployeeDashboardPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(DashboardService);
   private workTasks = inject(WorkTaskService);
   private notificationService = inject(NotificationService);
@@ -49,7 +51,7 @@ export class EmployeeDashboardPage {
   }
 
   load() {
-    trackRequest(this.service.me(), this.loading, this.error, d => { this.data.set(d); });
+    this.latest(this.service.me(), this.loading, this.error, d => { this.data.set(d); });
     if (this.canMyTasks()) this.workTasks.my().subscribe({ next: t => this.tasks.set(t), error: () => this.tasks.set([]) });
   }
 }

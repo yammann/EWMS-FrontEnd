@@ -4,7 +4,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, debounceTime, forkJoin, merge, of, switchMap } from 'rxjs';
+import { Subject, catchError, debounceTime, forkJoin, merge, of, switchMap } from 'rxjs';
 import { DeviceService, saveBlob } from '../data-access/device.service';
 import { Device, DeviceSite, INSTALLATION_STATUSES, InstallationStatus, IpInUse, Site } from '../data-access/device.models';
 import { GOVERNORATES } from '@core/constants/governorates';
@@ -19,7 +19,7 @@ import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
 import { SelectValue } from '@shared/ui/select-value';
 
@@ -51,6 +51,8 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
   `]
 })
 export class InstallationsPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   /** السجل الجاري حذفه (مؤشر على صفه) */
   deletingId = signal<number | null>(null);
   private service = inject(DeviceService);
@@ -123,10 +125,13 @@ export class InstallationsPage {
       debounceTime(350),
       switchMap(() => {
         const { ip, siteId } = this.form.getRawValue();
-        return siteId && isIpv4(ip) ? this.service.ipInUse(siteId, ip.trim(), this.editing()?.id ?? null) : of([]);
+        // فشل طلب واحد (شبكة متقطعة) لا يوقف الفحص: لا تحذير الآن، ويعود الفحص مع الكتابة التالية
+        return siteId && isIpv4(ip)
+          ? this.service.ipInUse(siteId, ip.trim(), this.editing()?.id ?? null).pipe(catchError(() => of([])))
+          : of([]);
       }),
       takeUntilDestroyed()
-    ).subscribe({ next: list => this.duplicates.set(list), error: () => this.duplicates.set([]) });
+    ).subscribe(list => this.duplicates.set(list));
 
     forkJoin({ sites: this.service.sites(), devices: this.service.devices() }).subscribe({
       next: r => { this.sites.set(r.sites); this.devices.set(r.devices); },
@@ -150,7 +155,7 @@ export class InstallationsPage {
   goTo(page: number) { this.page.set(page); this.load(); }
 
   load() {
-    trackRequest(this.service.installations({ ...this.filter(), page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
+    this.latest(this.service.installations({ ...this.filter(), page: this.page(), pageSize: PAGE_SIZE }), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
   }
 
   export() {

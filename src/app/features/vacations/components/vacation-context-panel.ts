@@ -3,7 +3,7 @@ import { Component, inject, input, signal } from '@angular/core';
 import { VacationService } from '../data-access/vacation.service';
 import { VacationApprovalContext } from '../data-access/vacation.models';
 import { daysAr, vacationsAr } from '@core/utils/arabic-count';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 /**
  * «سجل الموظف» داخل بطاقة طلب الإجازة قبل القرار (قرار المستخدم 2026-10-04): مطوي، ويُحمَّل عند أول فتح.
@@ -15,6 +15,8 @@ import { trackRequest } from '@shared/ui/track-request';
   styleUrl: './vacation-context-panel.scss'
 })
 export class VacationContextPanel {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(VacationService);
   vacationId = input.required<number>();
 
@@ -31,6 +33,6 @@ export class VacationContextPanel {
   }
 
   load() {
-    trackRequest(this.service.approvalContext(this.vacationId()), this.loading, this.error, d => { this.data.set(d); });
+    this.latest(this.service.approvalContext(this.vacationId()), this.loading, this.error, d => { this.data.set(d); });
   }
 }

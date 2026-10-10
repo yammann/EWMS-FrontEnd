@@ -11,7 +11,7 @@ import { Branch } from '@core/models/ewms.models';
 import { ActionsTable, CountBars, VacationRows } from '@features/dashboard';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 
 /**
@@ -25,6 +25,8 @@ import { SelectValue } from '@shared/ui/select-value';
   templateUrl: './vacation-stats-page.html'
 })
 export class VacationStatsPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(DashboardService);
   private auth = inject(AuthService);
   private lookups = inject(LookupsService);
@@ -46,6 +48,6 @@ export class VacationStatsPage {
   selectBranch(id: number) { this.branchId.set(id); this.load(); }
 
   load() {
-    trackRequest(this.service.vacations(this.branchId() || null), this.loading, this.error, d => { this.data.set(d); });
+    this.latest(this.service.vacations(this.branchId() || null), this.loading, this.error, d => { this.data.set(d); });
   }
 }

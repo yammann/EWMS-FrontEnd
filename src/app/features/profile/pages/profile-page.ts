@@ -20,7 +20,7 @@ import { AppPermission } from '@core/constants/access';
 import { SignaturePanel } from '../components/signature-panel';
 import { formatPhone } from '@core/utils/phone';
 import { utcDate } from '@core/utils/format';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest, trackRequest } from '@shared/ui/track-request';
 
 
 /** لا تقديم بأثر رجعي، واليوم الحالي مسموح (قرار المستخدم 2026-10-04) */
@@ -34,6 +34,8 @@ export function notInPast(control: AbstractControl) {
   templateUrl: './profile-page.html', styleUrl: '../../../shared/styles/page-base.scss'
 })
 export class ProfilePage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   pager = new Pagination(() => this.vacations());
   private service = inject(VacationService);
   private api = inject(ApiService);
@@ -129,7 +131,7 @@ export class ProfilePage {
     });
   }
   load() {
-    trackRequest(this.service.mine(), this.loading, this.error, value => { this.vacations.set(value); });
+    this.latest(this.service.mine(), this.loading, this.error, value => { this.vacations.set(value); });
   }
   canCancel(v: Vacation) { return v.status === 'PendingManager' || v.status === 'PendingBranchManager'; }
   cancel(v: Vacation) {

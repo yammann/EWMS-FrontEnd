@@ -12,7 +12,7 @@ import { MoneyPipe, QtyPipe, UtcPipe } from '@shared/pipes/format.pipes';
 import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };
@@ -174,6 +174,8 @@ export class SparePartStockDialog implements OnInit {
   `]
 })
 export class SparePartMovements implements OnInit {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(MaintenanceService);
   pageSize = 15;
 
@@ -189,6 +191,6 @@ export class SparePartMovements implements OnInit {
   ngOnInit() { this.load(1); }
 
   load(page: number) {
-    this.page.set(page); trackRequest(this.service.partMovements(this.part().id, page, this.pageSize), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
+    this.page.set(page); this.latest(this.service.partMovements(this.part().id, page, this.pageSize), this.loading, this.error, r => { this.rows.set(r.items); this.total.set(r.totalCount); });
   }
 }

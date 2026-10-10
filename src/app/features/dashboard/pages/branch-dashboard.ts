@@ -11,7 +11,7 @@ import { StatTile } from '@shared/ui/stat-tile';
 import { AppPermission } from '@core/constants/access';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({
@@ -21,6 +21,8 @@ import { trackRequest } from '@shared/ui/track-request';
   templateUrl: './branch-dashboard.html'
 })
 export class BranchDashboardPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(DashboardService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
@@ -46,6 +48,6 @@ export class BranchDashboardPage {
   }
 
   load() {
-    trackRequest(this.service.branch(this.id), this.loading, this.error, d => { this.data.set(d); });
+    this.latest(this.service.branch(this.id), this.loading, this.error, d => { this.data.set(d); });
   }
 }

@@ -9,7 +9,7 @@ import { storePageSize, storedPageSize } from '@core/utils/pagination';
 import { Pager } from '@shared/ui/pager';
 import { Icon } from '@shared/ui/icon';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest, trackRequest } from '@shared/ui/track-request';
 
 type Tone = 'green' | 'blue' | 'orange' | 'purple' | 'red';
 interface Kind { icon: string; tone: Tone; }
@@ -53,6 +53,8 @@ function ago(iso: string): string {
   
 })
 export class NotificationsPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(NotificationService);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -98,15 +100,11 @@ export class NotificationsPage {
   setSize(size: number) { this.size.set(size); storePageSize(size); this.page.set(1); this.load(); }
 
   load() {
-    this.loading.set(true); this.error.set('');
     this.service.refreshCount().subscribe({ error: () => {} });
-    this.service.page(this.unreadOnly(), this.page(), this.size()).subscribe({
-      next: r => {
-        // صفحة تجاوزت الأخيرة (بعد تعليم/حذف) ← نعود لآخر صفحة موجودة
-        if (!r.items.length && r.totalCount > 0 && this.page() > 1) { this.page.set(Math.max(1, r.totalPages)); this.load(); return; }
-        this.items.set(r.items); this.total.set(r.totalCount); this.loading.set(false);
-      },
-      error: e => { this.error.set(e.message); this.loading.set(false); }
+    this.latest(this.service.page(this.unreadOnly(), this.page(), this.size()), this.loading, this.error, r => {
+      // صفحة تجاوزت الأخيرة (بعد تعليم/حذف) ← نعود لآخر صفحة موجودة
+      if (!r.items.length && r.totalCount > 0 && this.page() > 1) { this.page.set(Math.max(1, r.totalPages)); this.load(); return; }
+      this.items.set(r.items); this.total.set(r.totalCount);
     });
   }
 

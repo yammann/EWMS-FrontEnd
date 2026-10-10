@@ -15,7 +15,7 @@ import { Icon } from '@shared/ui/icon';
 import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from '../components/todo-list-dialog';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest } from '@shared/ui/track-request';
 
 type View = 'lists' | 'today';
 
@@ -31,6 +31,8 @@ type View = 'lists' | 'today';
   
 })
 export class TodoListsPage {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   pager = new Pagination(() => this.filtered(), { size: 12, sizes: [12, 24, 48] });
   private service = inject(ToDoService);
   private auth = inject(AuthService);
@@ -93,7 +95,7 @@ export class TodoListsPage {
   reload() { this.loadLists(); this.loadToday(); }
 
   private loadLists() {
-    trackRequest(this.service.lists(), this.loading, this.error, l => { this.lists.set(l); });
+    this.latest(this.service.lists(), this.loading, this.error, l => { this.lists.set(l); });
   }
 
   private loadToday() { this.service.today().subscribe({ next: t => this.today.set(t), error: e => this.error.set(e.message) }); }

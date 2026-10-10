@@ -8,7 +8,7 @@ import { Pager } from '@shared/ui/pager';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/track-request';
+import { latestRequest, trackRequest } from '@shared/ui/track-request';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)
@@ -109,6 +109,8 @@ export class InstallStatus {
   `]
 })
 export class DeviceHistory implements OnInit {
+  /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
+  private latest = latestRequest();
   private service = inject(DeviceService);
 
   kind = input.required<'site' | 'device' | 'installation'>();
@@ -125,7 +127,7 @@ export class DeviceHistory implements OnInit {
   ngOnInit() { this.load(1); }
 
   load(page: number) {
-    this.page.set(page); trackRequest(this.service.history(this.kind(), this.entityId(), page), this.loading, this.error, r => { this.items.set(r.items); this.total.set(r.totalCount); });
+    this.page.set(page); this.latest(this.service.history(this.kind(), this.entityId(), page), this.loading, this.error, r => { this.items.set(r.items); this.total.set(r.totalCount); });
   }
 }
 
