@@ -1,0 +1,82 @@
+<div class="page">
+  <app-page-header eyebrow="الصيانة" heading="مهام الصيانة" subtitle="الأعمال الميدانية: أين نُفّذت، لمن، وما المطلوب وما أُنجز">
+
+        @if (can().createTask) { <button class="btn" type="button" (click)="openForm(null)">+ مهمة جديدة</button> }
+        <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="error()" />
+
+  @if (employees().length > 1) {
+    <div class="filters-row">
+      <select #t1 (change)="userId.set(+t1.value); page.set(1); load()" aria-label="الموظف">
+        <option [value]="0" [selected]="!userId()">كل الموظفين</option>
+        @for (u of employees(); track u.id) { <option [value]="u.id" [selected]="u.id === userId()">{{ u.fullName }}</option> }
+      </select>
+    </div>
+  }
+
+  <section class="panel">
+    @if (loading() && !tasks().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!tasks().length) {
+      <div class="empty-state"><h3>لا توجد مهام صيانة بعد</h3><p>سجّل المهمة عند تكليفك بعمل ميداني لتوثيق ما طُلب وما أُنجز.</p></div>
+    } @else {
+      <div class="table-wrap"><table>
+        <thead><tr><th>المكان</th><th>الجهة الطالبة</th><th>الأعمال المطلوبة</th><th>الحالة</th><th>الموظف المكلَّف</th><th>تاريخ التسجيل</th><th class="actions-th"></th></tr></thead>
+        <tbody>
+          @for (t of tasks(); track t.id) {
+            <tr class="clickable" (click)="openForm(t)">
+              <td><span class="cell-strong">{{ t.taskLocation }}</span></td>
+              <td>{{ t.requestingParty }}</td>
+              <td class="wrap"><span class="clamp">{{ t.requiredWork }}</span></td>
+              <td><span class="status-badge" [class.status-active]="state(t) === 'done'" [class.status-pending]="state(t) === 'running'" [class.status-draft]="state(t) === 'new'">{{ stateLabel[state(t)] }}</span></td>
+              <td>{{ t.userName }}</td>
+              <td class="nowrap">{{ t.createdAt | utc | date:'yyyy/MM/dd' }}</td>
+              <td (click)="$event.stopPropagation()"><app-row-actions [canDelete]="can().deleteTask && t.canDelete" [deleting]="deletingId() === t.id" (remove)="askDelete(t)">
+                @if (can().assignTask && t.canAssign) { <button class="btn btn-ghost btn-sm" type="button" (click)="assigning.set(t)">نقل</button> }
+              </app-row-actions></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="page.set($event); load()" />
+    }
+  </section>
+</div>
+
+@if (formOpen()) {
+  <app-modal [heading]="!editing() ? 'مهمة صيانة جديدة' : readOnly() ? 'تفاصيل المهمة' : 'تعديل المهمة'"
+             [subheading]="editing() ? 'الموظف: ' + editing()!.userName : ''" size="lg" [busy]="saving()" (closed)="closeForm()">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body form-grid-2">
+        @if (formError()) { <p class="alert alert-error full" role="alert">{{ formError() }}</p> }
+        @if (canPickEmployee()) {
+          <label class="form-field full"><span class="form-label">الموظف المكلَّف بالمهمة</span>
+            <select formControlName="assigneeId">
+              @if (!editing()) { <option [ngValue]="0">أنا (المهمة لي)</option> }
+              @for (u of employees(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
+            </select>
+            <small class="hint">يصل إشعار للموظف عند توجيه المهمة إليه</small></label>
+        }
+        <label class="form-field"><span class="form-label">مكان المهمة</span><input formControlName="taskLocation" maxlength="200"></label>
+        <label class="form-field"><span class="form-label">الجهة الطالبة</span><input formControlName="requestingParty" maxlength="200"></label>
+        <label class="form-field full"><span class="form-label">الأعمال المطلوبة</span><textarea formControlName="requiredWork" rows="3" maxlength="2000"></textarea></label>
+        <label class="form-field full"><span class="form-label">الأعمال المنجزة <small class="hint">(تُملأ بعد التنفيذ)</small></span><textarea formControlName="completedWorks" rows="3" maxlength="2000"></textarea></label>
+        <label class="form-field"><span class="form-label">تاريخ البدء <small class="hint">(اختياري)</small></span>
+          <span class="with-btn"><input type="datetime-local" formControlName="startedAt">@if (!readOnly()) { <button type="button" class="btn btn-ghost btn-sm" (click)="setNow('startedAt')">الآن</button> }</span></label>
+        <label class="form-field"><span class="form-label">تاريخ الإنجاز <small class="hint">(اختياري)</small></span>
+          <span class="with-btn"><input type="datetime-local" formControlName="completedAt" [min]="form.controls.startedAt.value">@if (!readOnly()) { <button type="button" class="btn btn-ghost btn-sm" (click)="setNow('completedAt')">الآن</button> }</span>
+          @if (dateError()) { <small class="form-error">تاريخ الإنجاز لا يسبق تاريخ البدء</small> }</label>
+      </div>
+      <footer class="modal-actions">
+        <button type="button" class="ghost" (click)="closeForm()" [disabled]="saving()">{{ readOnly() ? 'إغلاق' : 'إلغاء' }}</button>
+        @if (!readOnly()) { <button type="submit" [disabled]="form.invalid || dateError() || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button> }
+      </footer>
+    </form>
+  </app-modal>
+}
+
+@if (assigning(); as t) {
+  <app-assign-dialog [subject]="t.taskLocation + ' — ' + t.requestingParty" [currentUserId]="t.userId" [departmentId]="t.departmentId"
+                     [busy]="saving()" (assign)="assign(t, $event)" (closed)="assigning.set(null)" />
+}

@@ -1,0 +1,59 @@
+<div class="page">
+  <app-page-header eyebrow="إدارة المهام" heading="المهام الدورية والقوالب" subtitle="القوالب خاصة بك. المهمة الدورية تُنشئ مهمة جديدة من قالب في كل موعد دون تدخل منك." />
+  <app-alert [message]="error()" />
+
+  <section class="panel">
+    <div class="panel-heading row"><div><h2>المهام الدورية</h2></div>
+      <button class="btn" type="button" (click)="editRecurrence.set(null); recurrenceOpen.set(true)" [disabled]="!templates().length">+ مهمة دورية</button></div>
+    @if (!templates().length) { <p class="muted">أنشئ قالباً أولاً ثم جدولته كمهمة دورية.</p> }
+    @else if (!recurrences().length) { <p class="muted">لا توجد مهام دورية بعد.</p> }
+    @else {
+      <ul class="cards">
+        @for (r of recurrences(); track r.id) {
+          <li class="card" [class.off]="!r.isActive">
+            <div class="head">
+              <strong>{{ r.templateName }}</strong>
+              <span class="chip" [class.on]="r.isActive">{{ r.isActive ? 'نشطة' : 'متوقفة' }}</span>
+            </div>
+            <p class="line">{{ r.taskTitle }} ← {{ r.targetTypeAr }}: <strong>{{ r.targetName }}</strong></p>
+            <p class="line">{{ r.scheduleAr }}@if (r.isActive && r.nextRunDate) { — القادمة: {{ r.nextRunDate | date:'yyyy/MM/dd' }} }
+              @if (r.endDate) { — حتى {{ r.endDate | date:'yyyy/MM/dd' }} }</p>
+            @if (r.lastRunAt) { <p class="line muted">آخر إنشاء: {{ r.lastRunAt | date:'yyyy/MM/dd HH:mm' }}
+              @if (r.lastTaskId) { — <a href="javascript:void 0" (click)="openTask(r.lastTaskId)">فتح المهمة</a> }</p> }
+            @if (r.lastError) { <p class="alert alert-error err" role="alert">توقفت: {{ r.lastError }}</p> }
+            <div class="actions">
+              <button type="button" class="btn btn-ghost btn-sm" (click)="toggle(r)">{{ r.isActive ? 'إيقاف' : 'استئناف' }}</button>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="runNow(r)">إنشاء الآن</button>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="editRecurrence.set(r); recurrenceOpen.set(true)">تعديل</button>
+              <button type="button" class="btn btn-danger btn-sm" (click)="removeRecurrence(r)">حذف</button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading row"><div><h2>قوالبي</h2><p class="muted">تُستعمل عند إنشاء مهمة جديدة من نافذة «مهمة جديدة»، وفي المهام الدورية.</p></div>
+      <button class="btn" type="button" (click)="editTemplate.set(null); templateOpen.set(true)">+ قالب</button></div>
+    @if (!templates().length) { <p class="muted">لا توجد قوالب بعد.</p> }
+    @else {
+      <ul class="cards">
+        @for (t of templates(); track t.id) {
+          <li class="card">
+            <div class="head"><strong>{{ t.name }}</strong><span class="chip">{{ t.priorityAr }}</span></div>
+            <p class="line">{{ t.title }}</p>
+            <p class="line muted">@if (t.defaultDueDays !== null) { تسليم بعد {{ t.defaultDueDays }} يوم · } {{ t.items.length }} بند تحقق</p>
+            <div class="actions">
+              <button type="button" class="btn btn-ghost btn-sm" (click)="editTemplate.set(t); templateOpen.set(true)">تعديل</button>
+              <button type="button" class="btn btn-danger btn-sm" (click)="removeTemplate(t)">حذف</button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
+
+@if (templateOpen()) { <app-template-dialog [template]="editTemplate()" (saved)="templateSaved()" (closed)="templateOpen.set(false)" /> }
+@if (recurrenceOpen()) { <app-recurrence-dialog [recurrence]="editRecurrence()" [templates]="templates()" (saved)="recurrenceSaved()" (closed)="recurrenceOpen.set(false)" /> }

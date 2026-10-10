@@ -1,0 +1,153 @@
+<section class="departments-page" dir="rtl">
+
+  <!-- Header -->
+  <app-admin-header eyebrow="إدارة الأقسام" heading="الأقسام" subtitle="إدارة أقسام النظام وتوزيعها على الفروع." [loading]="crud.busy()"
+    [createLabel]="canCreate() ? 'قسم جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
+
+  <!-- Stats -->
+  <section class="stats-grid">
+
+    <app-stat-tile tone="green" icon="" label="إجمالي الأقسام" [value]="stats().total" hint="جميع الأقسام المسجلة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5l7-3 7 3v16"></path>
+                  <path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="blue" icon="" label="أقسام بوصف" [value]="stats().withDescription" hint="لها وصف موثق">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 7h16M4 12h16M4 17h10"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="purple" icon="" label="فروع مغطاة" [value]="stats().branchesCovered" hint="من أصل {{ stats().totalBranches }} فرع">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5l7-3 7 3v16"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="orange" icon="" label="إجمالي الفروع" [value]="stats().totalBranches" hint="الفروع المتاحة في النظام">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5l7-3 7 3v16"></path>
+                </svg>
+    </app-stat-tile>
+  </section>
+
+  <!-- Departments List -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-kicker">السجل</span>
+        <h2>قائمة الأقسام</h2>
+        <p>اضغط أيقونة التعديل لتحديث بيانات قسم، أو الحذف لإزالته.</p>
+      </div>
+      <span class="pill">{{ departments().length }} قسم</span>
+    </div>
+
+    @if (crud.loading()) {
+      <div class="skeleton-list">
+        @for (item of [1,2,3,4,5]; track item) {
+          <div class="skeleton-row departments-skeleton">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        }
+      </div>
+    } @else if (departments().length) {
+      <div class="table-wrap">
+        <table class="departments-table">
+          <thead>
+            <tr>
+              <th>القسم</th>
+              <th>الفرع</th>
+              <th>الوصف</th>
+              <th class="actions-th">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (department of pager.items(); track department.id) {
+              <tr [class.selected]="crud.dialog()?.item?.id === department.id">
+                <td>
+                  <div class="department-cell-name">
+                    <div class="department-avatar">{{ (department.name || 'ق').charAt(0) }}</div>
+                    <div class="department-details">
+                      <strong>{{ department.name || 'قسم بدون اسم' }}</strong>
+                      <small>#{{ department.id }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="branch-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                      <path d="M3 21h18"></path>
+                      <path d="M5 21V5l7-3 7 3v16"></path>
+                    </svg>
+                    {{ department.branchName || branchName(department.branchId) }}
+                  </span>
+                </td>
+                <td>
+                  @if (department.description) {
+                    <span class="description-text">{{ department.description }}</span>
+                  } @else {
+                    <span class="muted-text">لا يوجد وصف</span>
+                  }
+                </td>
+                <td>
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === department.id" (edit)="crud.openEdit(department)" (remove)="crud.remove(department)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V5l7-3 7 3v16"></path>
+          </svg>
+        </div>
+        <h3>لا توجد أقسام</h3>
+        <p>ابدأ بالضغط على زر "قسم جديد" في الأعلى.</p>
+      </div>
+    }
+  </section>
+
+  <!-- ============================================================
+       Modals
+       ============================================================ -->
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title(dlg.mode)" [busy]="crud.saving()" (closed)="crud.close()">
+
+        <div class="modal-body">
+          <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم القسم"
+                           namePlaceholder="مثال: قسم الأرشيف" descPlaceholder="وصف مختصر عن القسم..." createLabel="إنشاء القسم"
+                           [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
+            <svg nameIcon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V5l7-3 7 3v16"></path>
+            </svg>
+          <ng-container [formGroup]="form">
+            <div class="form-field">
+              <label class="form-label" [attr.for]="dlg.mode + '-branch'">الفرع</label>
+              <select [id]="dlg.mode + '-branch'" formControlName="branchId">
+                <option value="">اختر الفرع</option>
+                @for (branch of branches(); track branch.id) {
+                  <option [value]="branch.id">{{ branch.name }}</option>
+                }
+              </select>
+              @if (dlg.mode === 'create' && form.controls.branchId.touched && form.controls.branchId.invalid) {
+                <small class="form-error">اختر الفرع المرتبط بالقسم.</small>
+              }
+            </div>
+          </ng-container>
+          </app-entity-form>
+        </div>
+    </app-modal>
+  }
+
+</section>

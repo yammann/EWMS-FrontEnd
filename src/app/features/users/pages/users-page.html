@@ -1,0 +1,427 @@
+<section class="users-page" dir="rtl">
+
+  <!-- Header -->
+  <app-admin-header eyebrow="إدارة المستخدمين" heading="المستخدمون" subtitle="إدارة حسابات المستخدمين وتوزيعهم على الأقسام والفروع." [loading]="crud.busy()"
+    [createLabel]="canCreate() ? 'مستخدم جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
+
+  <!-- Stats -->
+  <section class="stats-grid">
+
+    <app-stat-tile tone="green" icon="" label="إجمالي المستخدمين" [value]="stats().total" hint="جميع الحسابات المسجلة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="blue" icon="" label="الحسابات النشطة" [value]="stats().active" hint="قادرة على تسجيل الدخول" live>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <path d="m9 11 3 3L22 4"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="orange" icon="" label="الحسابات المعطّلة" [value]="stats().inactive" hint="موقوفة مؤقتاً">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 8v4M12 16h.01"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="purple" icon="" label="الأدوار" [value]="stats().roles" hint="متاحة للتعيين">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
+                  <path d="m9 12 2 2 4-4"></path>
+                </svg>
+    </app-stat-tile>
+  </section>
+
+  <!-- Users List -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-kicker">السجل</span>
+        <h2>قائمة المستخدمين</h2>
+        <p>اضغط أيقونة التعديل لتحديث بيانات مستخدم، أو الحذف لإزالته.</p>
+      </div>
+      <span class="pill">{{ users().length }} مستخدم</span>
+    </div>
+
+    @if (crud.loading()) {
+      <div class="skeleton-list">
+        @for (item of [1,2,3,4,5]; track item) {
+          <div class="skeleton-row users-skeleton">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        }
+      </div>
+    } @else if (users().length) {
+      <div class="table-wrap">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>المستخدم</th>
+              <th>الدور</th>
+              <th>المكتب</th><th>القسم</th>
+              <th>الفرع</th>
+              <th>الحالة</th>
+              <th>تاريخ الإضافة</th>
+              <th class="actions-th">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of pager.items(); track user.id) {
+              <tr [class.selected]="crud.dialog()?.item?.id === user.id">
+                <td>
+                  <div class="user-cell-name">
+                    <div class="user-avatar">{{ (user.fullName || 'م').charAt(0) }}</div>
+                    <div class="user-details">
+                      <strong>{{ user.fullName || 'مستخدم بدون اسم' }}</strong>
+                      <small dir="ltr" class="user-email">{{ user.email }}</small>
+                      @if (user.personalIdNumber || user.phoneNumber) {
+                        <small class="user-extra">
+                          @if (user.personalIdNumber) { <span title="الرقم الذاتي">الرقم الذاتي: <bdi>{{ user.personalIdNumber }}</bdi></span> }
+                          @if (user.phoneNumber) { <span title="رقم التواصل">الهاتف: <bdi>{{ phone(user.phoneNumber) }}</bdi></span> }
+                        </small>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="role-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                      <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
+                    </svg>
+                    {{ user.roleName || '—' }}
+                  </span>
+                </td>
+                <td>{{ user.officeName || '—' }}</td>
+<td>
+                  <span class="department-cell-text">{{ user.departmentName || '—' }}</span>
+                </td>
+                <td>
+                  <span class="branch-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                      <path d="M3 21h18"></path>
+                      <path d="M5 21V5l7-3 7 3v16"></path>
+                    </svg>
+                    {{ user.branchName || '—' }}
+                  </span>
+                </td>
+                <td>
+                  @if (user.isActive) {
+                    <span class="status-badge status-active">
+                      <span class="status-badge-dot"></span>
+                      نشط
+                    </span>
+                  } @else {
+                    <span class="status-badge status-archived">
+                      <span class="status-badge-dot"></span>
+                      معطّل
+                    </span>
+                  }
+                </td>
+                <td class="nowrap">{{ utc(user.createdAt) | date:'yyyy/MM/dd' }}</td>
+                <td>
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === user.id" (edit)="crud.openEdit(user)" (remove)="crud.remove(user)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h3>لا يوجد مستخدمون</h3>
+        <p>ابدأ بالضغط على زر "مستخدم جديد" في الأعلى.</p>
+      </div>
+    }
+  </section>
+
+  <!-- ============================================================
+       Modals
+       ============================================================ -->
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title()" size="lg" [busy]="crud.saving()" (closed)="crud.close()">
+
+        <div class="modal-body">
+
+          @switch (dlg.mode) {
+
+            <!-- CREATE -->
+            @case ('create') {
+              <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
+                <app-alert [message]="crud.formError()" />
+                <div class="form-grid">
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-fullname">الاسم الكامل</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      <input id="create-fullname" type="text" formControlName="fullName"
+                             placeholder="مثال: محمد الأحمد" autocomplete="off" />
+                    </div>
+                    @if (createForm.controls.fullName.touched && createForm.controls.fullName.invalid) {
+                      <small class="form-error">أدخل اسماً لا يقل عن 3 أحرف.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-email">البريد الإلكتروني</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                        <path d="m22 6-10 7L2 6"></path>
+                      </svg>
+                      <input id="create-email" type="email" formControlName="email"
+                             placeholder="user@example.com" autocomplete="off" dir="ltr" />
+                    </div>
+                    @if (createForm.controls.email.touched && createForm.controls.email.invalid) {
+                      <small class="form-error">أدخل بريداً إلكترونياً صحيحاً.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-personal-id">الرقم الذاتي</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                        <path d="M7 9h4M7 13h6M15 9h2"></path>
+                      </svg>
+                      <input id="create-personal-id" type="text" formControlName="personalIdNumber"
+                             placeholder="مثال: M201160" autocomplete="off" dir="ltr" maxlength="20" />
+                    </div>
+                    @if (createForm.controls.personalIdNumber.invalid) {
+                      <small class="form-error">حروف لاتينية وأرقام فقط، حتى 20 خانة.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-phone">رقم التواصل</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="2" width="12" height="20" rx="2.5"></rect>
+                        <path d="M11 18h2"></path>
+                      </svg>
+                      <input id="create-phone" type="tel" formControlName="phoneNumber"
+                             placeholder="09XXXXXXXX" autocomplete="off" dir="ltr" maxlength="20" />
+                    </div>
+                    @if (createForm.controls.phoneNumber.invalid) {
+                      <small class="form-error">رقم غير صحيح: جوال 09XXXXXXXX أو أرضي يبدأ بـ 0 ورمز المحافظة.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-password">كلمة المرور</label>
+                    <div class="input-wrapper">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                      <input id="create-password" type="password" formControlName="password"
+                             placeholder="6 أحرف على الأقل" autocomplete="new-password" />
+                    </div>
+                    @if (createForm.controls.password.touched && createForm.controls.password.invalid) {
+                      <small class="form-error">كلمة المرور مطلوبة (6 أحرف على الأقل).</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="create-role">الدور</label>
+                    <select id="create-role" formControlName="roleId">
+                      <option value="">اختر الدور</option>
+                      @for (role of roles(); track role.id) {
+                        <option [value]="role.id">{{ role.name }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  @if (placement().needsBranch) {
+                  <div class="form-field">
+                    <label class="form-label" for="create-branch">الفرع <small class="muted">(اختياري)</small></label>
+                    <select id="create-branch" formControlName="branchId" (change)="branchChanged()">
+                      <option value="">بدون فرع</option>
+                      @for (branch of branches(); track branch.id) {
+                        <option [value]="branch.id">{{ branch.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+
+                  @if (placement().needsDepartment) {
+                  <div class="form-field">
+                    <label class="form-label" for="create-dept">القسم <small class="muted">(اختياري)</small></label>
+                    <select id="create-dept" formControlName="departmentId" (change)="departmentChanged()">
+                      <option value="">بدون قسم</option>
+                      @for (department of filteredDepartments(); track department.id) {
+                        <option [value]="department.id">{{ department.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+                  @if (placement().needsOffice) {
+                  <div class="form-field">
+                    <label class="form-label" for="create-office">المكتب <small class="muted">(اختياري)</small></label>
+                    <select id="create-office" formControlName="officeId">
+                      <option value="">بدون مكتب</option>
+                      @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
+                    </select>
+                    <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
+                  </div>
+                  }
+
+
+                </div>
+
+                <div class="modal-actions">
+                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
+                  <button type="submit" [disabled]="createForm.invalid || crud.saving()">
+                    @if (crud.saving()) {
+                      <span class="button-spinner"></span>
+                      <span>جاري الإنشاء...</span>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M12 5v14M5 12h14"></path>
+                      </svg>
+                      <span>إنشاء المستخدم</span>
+                    }
+                  </button>
+                </div>
+              </form>
+            }
+
+            <!-- EDIT -->
+            @case ('edit') {
+              <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
+                <app-alert [message]="crud.formError()" />
+                <div class="form-grid">
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-fullname">الاسم الكامل</label>
+                    <input id="edit-fullname" type="text" formControlName="fullName" />
+                    @if (editForm.controls.fullName.touched && editForm.controls.fullName.invalid) {
+                      <small class="form-error">أدخل اسماً لا يقل عن 3 أحرف.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-email">البريد الإلكتروني</label>
+                    <input id="edit-email" type="email" formControlName="email" dir="ltr" />
+                    @if (editForm.controls.email.touched && editForm.controls.email.invalid) {
+                      <small class="form-error">أدخل بريداً إلكترونياً صحيحاً.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-personal-id">الرقم الذاتي</label>
+                    <input id="edit-personal-id" type="text" formControlName="personalIdNumber" dir="ltr" maxlength="20" placeholder="مثال: M201160" />
+                    @if (editForm.controls.personalIdNumber.invalid) {
+                      <small class="form-error">حروف لاتينية وأرقام فقط، حتى 20 خانة.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-phone">رقم التواصل</label>
+                    <input id="edit-phone" type="tel" formControlName="phoneNumber" dir="ltr" maxlength="20" placeholder="09XXXXXXXX" />
+                    @if (editForm.controls.phoneNumber.invalid) {
+                      <small class="form-error">رقم غير صحيح: جوال 09XXXXXXXX أو أرضي يبدأ بـ 0 ورمز المحافظة.</small>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-password">كلمة المرور الجديدة</label>
+                    <input id="edit-password" type="password" formControlName="password"
+                           placeholder="اتركها فارغة لعدم التغيير" autocomplete="new-password" />
+                    <small class="form-hint">اترك الحقل فارغاً إن لم ترغب بتغيير كلمة المرور.</small>
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="edit-role">الدور</label>
+                    <select id="edit-role" formControlName="roleId">
+                      <option value="">اختر الدور</option>
+                      @for (role of roles(); track role.id) {
+                        <option [value]="role.id">{{ role.name }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  @if (placement().needsBranch) {
+                  <div class="form-field">
+                    <label class="form-label" for="edit-branch">الفرع <small class="muted">(اختياري)</small></label>
+                    <select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
+                      <option value="">بدون فرع</option>
+                      @for (branch of branches(); track branch.id) {
+                        <option [value]="branch.id">{{ branch.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+
+                  @if (placement().needsDepartment) {
+                  <div class="form-field">
+                    <label class="form-label" for="edit-dept">القسم <small class="muted">(اختياري)</small></label>
+                    <select id="edit-dept" formControlName="departmentId" (change)="departmentChanged()">
+                      <option value="">بدون قسم</option>
+                      @for (department of filteredDepartments(); track department.id) {
+                        <option [value]="department.id">{{ department.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  }
+                  @if (placement().needsOffice) {
+                  <div class="form-field">
+                    <label class="form-label" for="edit-office">المكتب <small class="muted">(اختياري)</small></label>
+                    <select id="edit-office" formControlName="officeId">
+                      <option value="">بدون مكتب</option>
+                      @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
+                    </select>
+                    <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
+                  </div>
+                  }
+
+
+                </div>
+
+                <label class="toggle-row">
+                  <input type="checkbox" formControlName="isActive" />
+                  <span class="toggle-text">
+                    <strong>حساب نشط</strong>
+                    <small>الحساب المعطّل لا يستطيع تسجيل الدخول</small>
+                  </span>
+                </label>
+
+                <div class="modal-actions">
+                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
+                  <button type="submit" [disabled]="editForm.invalid || crud.saving()">
+                    @if (crud.saving()) {
+                      <span class="button-spinner"></span>
+                      <span>جاري الحفظ...</span>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M20 6 9 17l-5-5"></path>
+                      </svg>
+                      <span>حفظ التعديل</span>
+                    }
+                  </button>
+                </div>
+              </form>
+            }
+          }
+
+        </div>
+    </app-modal>
+  }
+
+</section>

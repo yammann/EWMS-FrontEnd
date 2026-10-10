@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { AppPermissionName } from '../constants/access';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermissionName } from '@core/constants/access';
 
 /**
  * حماية الصفحات بصلاحيات الدور فقط (Role-Permission، 2026-10-03) — لا أسماء أدوار ولا مناصب.

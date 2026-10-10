@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { ConfirmService } from './confirm.service';
-import { Modal } from './modal';
+import { ConfirmService } from '@shared/ui/confirm.service';
+import { Modal } from '@shared/ui/modal';
 
 /** نافذة التأكيد الموحّدة — مرة واحدة في MainLayout (تفتحها ConfirmService.ask) */
 @Component({

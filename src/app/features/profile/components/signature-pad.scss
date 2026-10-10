@@ -1,0 +1,52 @@
+.sig { display: grid; gap: 12px; }
+svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* التبويبان: مؤشر ينزلق بينهما */
+.tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--fill); }
+.pill { position: absolute; top: 4px; bottom: 4px; inset-inline-start: 4px; width: calc(50% - 6px); border-radius: 9px;
+  background: var(--surface-raised, var(--surface)); box-shadow: 0 1px 2px rgb(0 0 0 / .14), 0 0 0 1px rgb(0 0 0 / .06);
+  transition: inset-inline-start .28s cubic-bezier(.3, 1.3, .5, 1); }
+.tabs.second .pill { inset-inline-start: calc(50% + 2px); }
+.tabs button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 8px;
+  border: 0; border-radius: 9px; background: transparent; color: var(--ink-500); font-weight: 500; font-size: 13px; box-shadow: none; }
+.tabs button[aria-selected="true"] { color: var(--ink-900); font-weight: 700; }
+.tabs button:hover { transform: none; box-shadow: none; color: var(--ink-900); }
+
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; }
+.tools { display: flex; align-items: center; gap: 2px; }
+.ghost-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border: 0; border-radius: 9px;
+  background: transparent; color: var(--ink-600); font-size: 13px; font-weight: 500; box-shadow: none; }
+.ghost-btn:hover:not(:disabled) { background: var(--fill); color: var(--ink-900); transform: none; box-shadow: none; }
+.ghost-btn:disabled { opacity: .4; }
+.hint { font-size: 13px; color: var(--ink-400); }
+
+.inks { display: flex; gap: 6px; }
+.inks button { display: grid; place-items: center; width: 28px; height: 28px; min-height: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; }
+.inks span { width: 18px; height: 18px; border-radius: 50%; transition: box-shadow .15s, transform .15s; }
+.inks button:hover span { transform: scale(1.1); }
+.inks button.on span { box-shadow: 0 0 0 2px var(--surface-raised, var(--surface)), 0 0 0 4px var(--border-strong); }
+
+/* سطح التوقيع */
+.surface { position: relative; height: 196px; border-radius: 14px; background: var(--fill); overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.rule { position: absolute; inset-inline: 32px; bottom: 52px; pointer-events: none; user-select: none; }
+.line { height: 1px; background: var(--border-strong); }
+.rule-hint { margin: 8px 0 0; text-align: center; font-size: 12.5px; color: var(--ink-400); transition: opacity .2s; }
+.rule-hint.hidden { opacity: 0; }
+
+.drop { position: absolute; inset: 20px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  border: 1px dashed var(--border-strong); border-radius: 14px; background: transparent; color: var(--ink-700); box-shadow: none; min-height: 0; }
+.drop:hover, .drop.over { background: color-mix(in srgb, var(--ink-900) 4%, transparent); transform: none; box-shadow: none; }
+.drop svg { width: 22px; height: 22px; color: var(--ink-400); transition: transform .2s; }
+.drop.over svg { transform: translateY(-2px); }
+.drop strong { font-size: 13px; font-weight: 600; }
+.drop small { font-size: 11.5px; color: var(--ink-400); }
+
+.preview { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 12px; }
+/* الصورة المرفوعة على ورقة بيضاء دائماً (كما ستُطبع) */
+.preview img { max-height: 118px; max-width: 100%; object-fit: contain; padding: 6px 12px; border-radius: 10px; background: #fff; }
+
+.consent { margin: 0; font-size: 11.5px; line-height: 1.7; color: var(--ink-500); }
+.password { max-width: 320px; }
+
+@media (prefers-reduced-motion: reduce) { .pill, .rule-hint, .inks span, .drop svg { transition: none; } }

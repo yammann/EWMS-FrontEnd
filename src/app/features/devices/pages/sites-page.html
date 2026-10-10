@@ -1,0 +1,70 @@
+<div class="page">
+  <app-page-header eyebrow="توثيق الأجهزة" heading="المواقع" subtitle="مواقع التركيب — تُحدَّد محافظة كل موقع تلقائياً من مكانه على الخريطة">
+
+        @if (access().canCreate) { <button class="btn" type="button" (click)="crud.openCreate()">+ موقع جديد</button> }
+        <button class="btn btn-ghost" type="button" (click)="crud.refresh()" [disabled]="crud.busy()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
+  <div class="toolbar">
+    <input #t1 class="search" type="search" placeholder="بحث باسم الموقع أو الوصف أو المسؤول…" [value]="search()" (input)="search.set(t1.value)" aria-label="بحث">
+    <select #t2 [appSelectValue]="governorate()" (change)="setGovernorate(t2.value)" aria-label="تصفية حسب المحافظة">
+      <option value="">كل المحافظات</option>
+      @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
+    </select>
+  </div>
+
+  <section class="panel">
+    <div class="panel-heading"><h2>المواقع <span class="count">({{ filtered().length }})</span></h2></div>
+    @if (crud.loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!filtered().length) { <app-empty-state>{{ search() || governorate() ? 'لا توجد نتائج' : 'لا توجد مواقع بعد' }}</app-empty-state> }
+    @else {
+      <div class="table-wrap"><table>
+        <thead><tr><th>الموقع</th><th>المحافظة</th><th>الإحداثيات</th><th>المسؤول</th><th>الأجهزة المركّبة</th><th class="actions-th"></th></tr></thead>
+        <tbody>
+          @for (s of pager.items(); track s.id) {
+            <tr>
+              <td><a class="cell-link cell-strong" [routerLink]="['/devices/sites', s.id]" title="تفاصيل الموقع">{{ s.name }}</a>@if (s.description) { <small>{{ s.description }}</small> }</td>
+              <td>{{ s.governorateName || "—" }}</td>
+              <td>@if (coords(s.latitude, s.longitude); as c) { <span class="mono">{{ c }}</span> } @else { <span class="missing">⚠ بلا إحداثيات</span> }</td>
+              <td>@if (s.contactName || s.contactPhone || s.responsibleParty) {
+                  {{ s.contactName || '—' }}@if (s.contactPhone) { <small class="mono" dir="ltr">{{ phone(s.contactPhone) }}</small> }@if (s.responsibleParty) { <small>{{ s.responsibleParty }}</small> }
+                } @else { <span class="muted-cell">—</span> }</td>
+              <td><a class="cell-link" [routerLink]="['/devices/installations']" [queryParams]="{ siteId: s.id }">{{ s.installationsCount }} تركيب ←</a>
+                @if (s.installationsCount !== s.activeInstallationsCount) { <small>{{ s.activeInstallationsCount }} يعمل</small> }</td>
+              <td><app-row-actions [canEdit]="access().canEdit" [canDelete]="access().canDelete" [deleting]="crud.deletingId() === s.id" (edit)="crud.openEdit(s)" (remove)="crud.remove(s)">
+                <button class="btn btn-ghost btn-sm" type="button" (click)="history.set(s)">السجل</button>
+              </app-row-actions></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+  <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    }
+  </section>
+</div>
+
+@if (crud.dialog(); as dlg) {
+  <app-modal [heading]="dlg.mode === 'edit' ? 'تعديل الموقع' : 'موقع جديد'" size="lg" [busy]="crud.saving()" (closed)="crud.close()">
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal-body form-stack">
+          <app-alert [message]="crud.formError()" />
+          <label class="form-field"><span class="form-label">اسم الموقع</span><input formControlName="name" maxlength="100"></label>
+          <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="2" maxlength="500"></textarea></label>
+          <div class="form-grid-2">
+            <label class="form-field"><span class="form-label">مسؤول الموقع <small class="hint">(اختياري)</small></span><input formControlName="contactName" maxlength="100"></label>
+            <label class="form-field"><span class="form-label">هاتف المسؤول <small class="hint">(اختياري)</small></span><input formControlName="contactPhone" dir="ltr" maxlength="20" inputmode="tel" placeholder="0933 123 456">
+              @if (form.controls.contactPhone.invalid) { <small class="form-error">رقم غير صحيح — جوال 09 ثم 8 أرقام، أو أرضي مع رمز المحافظة</small> }</label>
+            <label class="form-field full"><span class="form-label">الجهة المسؤولة <small class="hint">(اختياري — فرع أو قسم أو جهة خارجية)</small></span><input formControlName="responsibleParty" maxlength="150"></label>
+          </div>
+          <div class="form-field"><span class="form-label">مكان الموقع على الخريطة <small class="hint">(تُحدَّد المحافظة تلقائياً من النقطة)</small></span>
+            <app-coordinate-picker [latitude]="form.value.latitude ?? null" [longitude]="form.value.longitude ?? null" (picked)="setCoords($event)" />
+          </div>
+        </div>
+        <app-form-actions [busy]="crud.saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="crud.close()" />
+      </form>
+  </app-modal>
+}
+
+@if (history(); as h) { <app-device-history kind="site" [entityId]="h.id" [title]="h.name" (closed)="history.set(null)" /> }

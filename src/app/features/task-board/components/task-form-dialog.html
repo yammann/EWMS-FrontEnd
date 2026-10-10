@@ -1,0 +1,113 @@
+<app-modal [heading]="heading()" [subheading]="subheading()" size="lg" [busy]="saving()" (closed)="closed.emit()">
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="modal-body form-stack">
+        <app-alert [message]="error()" />
+
+        @if (mode() === 'create' && templates().length) {
+          <label class="form-field">
+            <span class="form-label">البدء من قالب <small class="muted">(اختياري — يملأ الحقول وتبقى قابلة للتعديل)</small></span>
+            <select [ngModel]="''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="applyTemplate($event)">
+              <option value="">بدون قالب</option>
+              @for (t of templates(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
+            </select>
+          </label>
+        }
+
+        <label class="form-field">
+          <span class="form-label">عنوان المهمة</span>
+          <input formControlName="title" maxlength="200" placeholder="مثال: إعداد تقرير الجرد الشهري" autofocus>
+          @if (form.controls.title.touched && form.controls.title.invalid) { <small class="form-error">العنوان مطلوب</small> }
+        </label>
+
+        @if (mode() !== 'edit') {
+          @if (mode() === 'create' && targetTypes().length > 1) {
+            <fieldset class="form-field">
+              <legend class="form-label">نوع الجهة</legend>
+              <div class="segmented types" role="radiogroup">
+                @for (type of targetTypes(); track type.value) {
+                  <button type="button" class="seg" role="radio" [attr.aria-checked]="kind() === type.value"
+                          [class.on]="kind() === type.value" (click)="chooseKind(type.value)">{{ type.label }}</button>
+                }
+              </div>
+            </fieldset>
+          }
+          <label class="form-field">
+            <span class="form-label">إسناد إلى {{ targetLabel() }}</span>
+            <select formControlName="targetId">
+              <option [ngValue]="0">{{ targetsLoading() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel() }}</option>
+              @for (t of targets(); track t.id) {
+                <option [ngValue]="t.id">{{ t.name }}@if (targetLabel() !== 'موظف') { — {{ t.headNames || 'لا أحد يتولاها حالياً' }} }</option>
+              }
+            </select>
+            @if (!targetsLoading() && !targets().length) { <small class="form-hint">لا توجد جهات متاحة للإسناد ضمن صلاحياتك.</small> }
+            @else if (selectedTarget() && targetLabel() !== 'موظف' && !selectedTarget()!.headNames) {
+              <small class="form-hint warn">لا يوجد من يملك صلاحية تولّي مهام هذه الجهة حالياً — ستبقى المهمة بانتظاره.</small>
+            }
+          </label>
+        } @else {
+          <p class="readonly-target">مُسندة إلى: <strong>{{ task()?.targetName }}</strong></p>
+        }
+
+        <fieldset class="form-field">
+          <legend class="form-label">الأولوية</legend>
+          <div class="segmented" role="radiogroup">
+            @for (p of priorities; track p) {
+              <button type="button" class="seg p-{{ p }}" role="radio" [attr.aria-checked]="form.value.priority === p"
+                      [class.on]="form.value.priority === p" (click)="form.patchValue({ priority: p })">{{ priorityLabel[p] }}</button>
+            }
+          </div>
+        </fieldset>
+
+        <label class="form-field">
+          <span class="form-label">تاريخ التسليم <small class="muted">(اختياري)</small></span>
+          <input type="date" formControlName="dueDate" [min]="mode() === 'edit' ? '' : today">
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">الوصف والتعليمات <small class="muted">(اختياري)</small></span>
+          <textarea formControlName="description" rows="5" maxlength="4000" placeholder="ما المطلوب بالتحديد؟ أي ملاحظات أو معايير للإنجاز"></textarea>
+        </label>
+
+        @if (mode() !== 'edit') {
+          <div class="form-field">
+            <span class="form-label">بنود التحقق <small class="muted">(اختياري — + أو Enter لبند جديد، − للحذف)</small></span>
+            <app-line-list [(values)]="items" [max]="maxItems" [disabled]="saving()" label="بند التحقق"
+                           placeholder="خطوة صغيرة تُنشأ مع المهمة ويعلّمها المنفِّذ" />
+          </div>
+          <div class="form-field">
+            <span class="form-label">مرفقات <small class="muted">(اختياري — حتى {{ maxFiles }} ملفات، 10MB للملف: PDF وصور وWord وExcel وPowerPoint)</small></span>
+            <input #picker type="file" multiple hidden [accept]="accept" (change)="pick($event)">
+            @if (files().length) {
+              <ul class="picked">
+                @for (f of files(); track f) {
+                  <li><span aria-hidden="true">{{ icon(f.type) }}</span><span class="n">{{ f.name }}</span><small>{{ size(f.size) }}</small>
+                    <button type="button" class="x" (click)="dropFile(f)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name">×</button></li>
+                }
+              </ul>
+            }
+            <button type="button" class="btn btn-ghost btn-sm add-file" (click)="picker.click()" [disabled]="saving() || files().length >= maxFiles">+ إرفاق ملف</button>
+            @if (fileProblem()) { <small class="form-error">{{ fileProblem() }}</small> }
+          </div>
+        }
+      </div>
+
+      @if (templateNaming()) {
+        <div class="tpl-save">
+          <input [ngModel]="templateName()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="templateName.set($event)" (keydown.enter)="$event.preventDefault(); saveAsTemplate()"
+                 maxlength="100" placeholder="اسم القالب" aria-label="اسم القالب">
+          <button type="button" class="btn btn-sm" (click)="saveAsTemplate()" [disabled]="!templateName().trim() || templateBusy()">حفظ القالب</button>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="templateNaming.set(false)">إلغاء</button>
+        </div>
+      }
+      <footer class="modal-actions">
+        @if (canTemplate() && !templateNaming()) {
+          <button type="button" class="ghost tpl-btn" (click)="templateNaming.set(true)" [disabled]="saving() || !form.value.title?.trim()">حفظ كقالب</button>
+        }
+        <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
+        <button type="submit" [disabled]="form.invalid || saving() || (mode() !== 'edit' && !form.value.targetId)">
+          {{ saving() ? (uploadText() || 'جارٍ الحفظ…') : (mode() === 'edit' ? 'حفظ التعديلات' : 'إسناد المهمة') }}
+        </button>
+      </footer>
+    </form>
+</app-modal>

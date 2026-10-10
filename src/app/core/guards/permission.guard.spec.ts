@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, provideRouter, Router, RouterStateSnapshot } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { permissionGuard } from './permission.guard';
+import { AuthService } from '@core/services/auth.service';
+import { permissionGuard } from '@core/guards/permission.guard';
 import { provideHttpClient } from '@angular/common/http';
 import { vi } from 'vitest';
 

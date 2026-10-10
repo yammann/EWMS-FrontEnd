@@ -1,0 +1,14 @@
+.card { max-width: 560px; padding: 18px; border-radius: 18px; border: 1px solid var(--border); background: var(--surface-raised, var(--surface)); }
+.card-head { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+.badge { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 700;
+  background: var(--brand-100); color: var(--brand-700); }
+.state { font-size: 13px; color: var(--ink-500); }
+.state.on { color: var(--ink-900); font-weight: 600; }
+/* ورقة بيضاء دائماً: هكذا يُطبع التوقيع */
+.paper { margin-top: 14px; height: 132px; display: flex; align-items: center; justify-content: center; padding: 12px 24px;
+  border-radius: 14px; background: #fff; border: 1px solid var(--border); }
+.paper img { max-height: 100px; max-width: 100%; object-fit: contain; }
+.paper.empty { background: var(--fill); border-style: dashed; }
+.paper.empty span { font-size: 13px; color: var(--ink-400); text-align: center; }
+.card-actions { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-top: 14px; }
+.remove-pass { flex: 1 1 220px; max-width: 300px; margin: 0; }

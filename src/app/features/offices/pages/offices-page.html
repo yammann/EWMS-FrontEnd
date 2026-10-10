@@ -1,0 +1,112 @@
+<section class="offices-page" dir="rtl">
+
+  <!-- Header -->
+  <app-admin-header eyebrow="الهيكل التنظيمي" heading="المكاتب" subtitle="إدارة مكاتب الأقسام وربطها بالموظفين." [loading]="crud.busy()"
+    [createLabel]="can().create ? 'مكتب جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
+
+  <!-- Offices List -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-kicker">السجل</span>
+        <h2>دليل المكاتب</h2>
+        <p>اضغط أيقونة التعديل لتحديث بيانات مكتب، أو الحذف لإزالته. لا يمكن حذف مكتب مرتبط بموظفين.</p>
+      </div>
+      <span class="pill">{{ items().length }} مكتب</span>
+    </div>
+
+    @if (crud.loading()) {
+      <div class="skeleton-list">
+        @for (item of [1,2,3,4,5]; track item) {
+          <div class="skeleton-row offices-skeleton">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        }
+      </div>
+    } @else if (items().length) {
+      <div class="table-wrap">
+        <table class="offices-table">
+          <thead>
+            <tr>
+              <th>المكتب</th>
+              <th>القسم</th>
+              <th>الفرع</th>
+              <th>الوصف</th>
+              <th class="actions-th">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (office of pager.items(); track office.id) {
+              <tr [class.selected]="crud.dialog()?.item?.id === office.id">
+                <td>
+                  <div class="office-cell-name">
+                    <div class="office-avatar">{{ (office.name || 'م').charAt(0) }}</div>
+                    <div class="office-details">
+                      <strong>{{ office.name || 'مكتب بدون اسم' }}</strong>
+                      <small>#{{ office.id }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ office.departmentName }}</td>
+                <td><span class="branch-chip">{{ office.branchName }}</span></td>
+                <td>
+                  @if (office.description) {
+                    <span class="description-text">{{ office.description }}</span>
+                  } @else {
+                    <span class="muted-text">لا يوجد وصف</span>
+                  }
+                </td>
+                <td>
+                  <app-row-actions [canEdit]="can().edit" [canDelete]="can().delete" [deleting]="crud.deletingId() === office.id" (edit)="crud.openEdit(office)" (remove)="crud.remove(office)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17M3 21h18"></path>
+            <circle cx="15" cy="12" r="1"></circle>
+          </svg>
+        </div>
+        <h3>لا توجد مكاتب</h3>
+        <p>ابدأ بالضغط على زر "مكتب جديد" في الأعلى واختر القسم التابع له.</p>
+      </div>
+    }
+  </section>
+
+  <!-- ============================================================
+       Modals
+       ============================================================ -->
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title(dlg.mode)" [busy]="crud.saving()" (closed)="crud.close()">
+
+        <div class="modal-body">
+          <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم المكتب"
+                           namePlaceholder="مثال: مكتب المتابعة" descPlaceholder="وصف مختصر عن المكتب..." createLabel="إنشاء المكتب" [iconed]="false" [nameMaxLength]="100" [descMaxLength]="500"
+                           [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
+            
+          <ng-container ngProjectAs="[before]" [formGroup]="form">
+            <div class="form-field">
+              <label class="form-label" [attr.for]="dlg.mode + '-dept'">القسم</label>
+              <select [id]="dlg.mode + '-dept'" formControlName="departmentId">
+                <option value="">اختر القسم</option>
+                @for (department of departments(); track department.id) {
+                  <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
+                }
+              </select>
+              @if (dlg.mode === 'create' && form.controls.departmentId.touched && form.controls.departmentId.invalid) {
+                <small class="form-error">اختر القسم التابع له المكتب.</small>
+              }
+            </div>
+          </ng-container>
+          </app-entity-form>
+        </div>
+    </app-modal>
+  }
+
+</section>

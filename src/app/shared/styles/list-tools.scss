@@ -1,0 +1,35 @@
+/* أدوات القوائم: شريط فلاتر، مبدّل عرض، شبكة الحقائق، إحصاءات 4 أعمدة — مع page-base.scss و data-tools.scss */
+:host { display: block; }
+
+.stats-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1100px) { .stats-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .stats-4 { grid-template-columns: minmax(0, 1fr); } }
+
+/* شريط الفلاتر */
+.filters { display: grid; gap: 10px; }
+.filters-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filters-row .search { flex: 1; min-width: 220px; }
+.filters-row select { width: auto; min-width: 150px; flex: 0 1 auto; }
+.search-group { display: flex; flex: 1; min-width: 280px; gap: 8px; }
+.search-group select { min-width: 140px; }
+
+/* مبدّل العرض: جدول / لوحة */
+.segmented { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-lg); background: var(--fill); }
+.segmented button { min-height: 32px; padding: 0 14px; background: transparent; color: var(--ink-600); font-size: 13px; font-weight: 700; border-radius: var(--radius-md); }
+.segmented button:hover:not(:disabled) { background: var(--surface); box-shadow: none; transform: none; }
+.segmented button.on { background: var(--surface); color: var(--ink-900); box-shadow: var(--shadow-sm); }
+
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; direction: ltr; unicode-bidi: isolate; }
+.number { font-weight: 700; color: var(--brand-700); text-decoration: none; white-space: nowrap; }
+a.number:hover { text-decoration: underline; }
+td small, .sub { display: block; font-size: 11px; color: var(--ink-400); }
+tr.clickable { cursor: pointer; }
+.nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 24px; margin: 0; }
+.facts dt { font-size: 12px; color: var(--ink-500); margin-bottom: 4px; }
+.facts dd { margin: 0; font-weight: 700; color: var(--ink-900); overflow-wrap: anywhere; }
+.facts .wide { grid-column: 1 / -1; }
+.facts .wide dd { font-weight: 400; line-height: 1.9; white-space: pre-line; }
+@media (max-width: 900px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .facts { grid-template-columns: minmax(0, 1fr); } }

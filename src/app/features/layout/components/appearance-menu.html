@@ -1,0 +1,27 @@
+<button type="button" class="top-btn" [class.active]="open()" (click)="open.set(!open())"
+        aria-haspopup="dialog" [attr.aria-expanded]="open()" aria-label="المظهر" title="المظهر">
+  <app-icon name="palette" />
+</button>
+@if (open()) {
+  <div class="menu" role="dialog" aria-label="المظهر">
+    <p class="menu-title">لوحة الألوان</p>
+    <div class="swatches" role="radiogroup" aria-label="لوحة الألوان">
+      @for (p of palettes; track p.id) {
+        <button type="button" class="swatch" role="radio" [attr.aria-checked]="theme.palette() === p.id"
+                [class.selected]="theme.palette() === p.id" (click)="theme.setPalette(p.id)" [title]="p.name">
+          <span class="dot" [style.background]="p.swatch"></span>
+          <span class="swatch-label">{{ p.label }}</span>
+        </button>
+      }
+    </div>
+    <p class="menu-title">المظهر</p>
+    <div class="segmented" role="radiogroup" aria-label="الوضع">
+      @for (m of modes; track m.id) {
+        <button type="button" role="radio" [attr.aria-checked]="theme.mode() === m.id" [class.selected]="theme.mode() === m.id"
+                (click)="theme.setMode(m.id)">
+          <app-icon [name]="m.id === 'system' ? 'auto' : m.id === 'light' ? 'sun' : 'moon'" />{{ m.label }}
+        </button>
+      }
+    </div>
+  </div>
+}

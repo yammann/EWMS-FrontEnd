@@ -1,0 +1,42 @@
+@if (attachments().length) {
+  <ul class="files">
+    @for (a of attachments(); track a.id) {
+      <li>
+        <button type="button" class="file" (click)="open(a)" [title]="canPreview(a) ? 'معاينة ' + a.fileName : 'تنزيل ' + a.fileName">
+          <span class="ico" aria-hidden="true">{{ icon(a.contentType) }}</span>
+          <span class="meta"><span class="name">{{ a.fileName }}</span><small>{{ size(a.size) }} · {{ a.uploadedByName }}</small></span>
+        </button>
+        @if (a.canDelete && !readonly()) {
+          <button type="button" class="del" (click)="remove(a)" [disabled]="busy()" [attr.aria-label]="'حذف ' + a.fileName" title="حذف">🗑</button>
+        }
+      </li>
+    }
+  </ul>
+} @else if (readonly() || !canAttach()) {
+  <p class="muted">لا توجد مرفقات.</p>
+}
+
+@if (canAttach() && !readonly()) {
+  <div class="drop" [class.over]="over()" (dragover)="$event.preventDefault(); over.set(true)" (dragleave)="over.set(false)" (drop)="dropped($event)">
+    <input #picker type="file" multiple hidden [accept]="accept" (change)="picked($event)">
+    <button type="button" class="btn btn-ghost btn-sm" (click)="picker.click()" [disabled]="busy() || remaining() <= 0">
+      {{ busy() ? progressText() || 'جارٍ الرفع…' : '+ إرفاق ملف' }}</button>
+    <small>{{ remaining() > 0 ? 'أو اسحب الملفات إلى هنا — PDF وصور وWord وExcel وPowerPoint حتى 10MB (متبقٍّ ' + remaining() + ' من ' + max + ')' : 'بلغت الحد الأقصى ' + max + ' ملفات' }}</small>
+  </div>
+}
+@if (problem()) { <p class="alert alert-error problem" role="alert">{{ problem() }}</p> }
+
+@if (current(); as a) {
+  <app-modal [heading]="a.fileName" size="lg" (closed)="close()">
+    <div class="modal-body viewer">
+      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+      @else if (!url()) { <p class="muted" role="status">جارٍ التحميل…</p> }
+      @else if (a.contentType === 'application/pdf') { <iframe [src]="safeUrl()" title="معاينة الملف"></iframe> }
+      @else { <img [src]="safeUrl()" [alt]="a.fileName"> }
+    </div>
+    <footer class="modal-actions">
+      <button type="button" class="ghost" (click)="close()">إغلاق</button>
+      <button type="button" (click)="download(a)" [disabled]="!url()">تنزيل</button>
+    </footer>
+  </app-modal>
+}

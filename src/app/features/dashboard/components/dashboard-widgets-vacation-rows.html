@@ -1,0 +1,30 @@
+@if (rows().length) {
+  <div class="table-wrap"><table class="compact">
+    <thead><tr>
+      @if (showEmployee()) { <th>الموظف</th> }
+      @if (showDepartment()) { <th>القسم</th> }
+      @if (showOffice()) { <th>المكتب</th> }
+      <th>النوع</th><th>الفترة</th><th>الأيام</th>
+      @if (showStatus()) { <th>الحالة</th> }
+    </tr></thead>
+    <tbody>
+      @for (v of rows(); track v.id) {
+        <tr>
+          @if (showEmployee()) { <td><strong class="cell-strong">{{ v.employeeName }}</strong></td> }
+          @if (showDepartment()) { <td>{{ v.departmentName }}</td> }
+          @if (showOffice()) { <td>{{ v.officeName || '—' }}</td> }
+          <td>{{ v.vacationTypeName }}<small>{{ v.paymentStatusAr }}</small></td>
+          <td class="nowrap">{{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }}
+            @if (isNow(v)) { <small class="now">في إجازة الآن</small> }
+          </td>
+          <td>{{ v.vacDayCount }}</td>
+          @if (showStatus()) {
+            <td><span class="status-badge" [class.status-active]="v.status === 'Approved'" [class.status-pending]="v.status.startsWith('Pending')" [class.status-rejected]="v.status === 'Rejected'" [class.status-draft]="v.status === 'Cancelled'"><span class="status-badge-dot"></span>{{ v.statusAr }}</span></td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table></div>
+} @else {
+  <p class="empty-inline">{{ emptyText() }}</p>
+}

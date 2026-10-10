@@ -1,0 +1,83 @@
+<div class="page">
+  <app-page-header eyebrow="الإدارة" heading="مهام العمل" subtitle="المهام الدورية لكل فرع (مثل إدارة المخزن) ومن المسؤول عنها. تظهر كبطاقات في لوحات المتابعة.">
+    @if (can().create) { <button class="btn" type="button" (click)="crud.openCreate()">+ مهمة جديدة</button> }
+    <button class="btn btn-ghost" type="button" (click)="crud.refresh()" [disabled]="crud.busy()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>المهام ({{ filtered().length }})</h2>
+      <select #branchFilter [appSelectValue]="filterBranch()" (change)="filterBranch.set(+branchFilter.value)" aria-label="تصفية حسب الفرع">
+        <option [value]="0">كل الفروع</option>
+        @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
+      </select>
+    </div>
+    @if (crud.loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!filtered().length) { <app-empty-state>لا توجد مهام بعد. أضف مهمة واختر فرعها والموظفين المسؤولين.</app-empty-state> }
+    @else {
+      <div class="table-wrap"><table>
+        <thead><tr><th>المهمة</th><th>الفرع</th><th>الحالة</th><th>المسؤولون</th><th class="actions-th">الإجراءات</th></tr></thead>
+        <tbody>
+          @for (t of pager.items(); track t.id) {
+            <tr>
+              <td><strong><span aria-hidden="true">{{ t.icon }}</span> {{ t.name }}</strong>@if (t.description) { <small>{{ t.description }}</small> }</td>
+              <td>{{ t.branchName }}</td>
+              <td><span class="status-badge" [class.status-active]="t.isActive" [class.status-draft]="!t.isActive"><span class="status-badge-dot"></span>{{ t.isActive ? 'فعّالة' : 'معطّلة' }}</span></td>
+              <td class="wrap">{{ assigneeNames(t) || '—' }}</td>
+              <td><app-row-actions [canEdit]="can().edit" [canDelete]="can().delete" [deleting]="crud.deletingId() === t.id" (edit)="crud.openEdit(t)" (remove)="crud.remove(t)" /></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    }
+  </section>
+</div>
+
+@if (crud.dialog(); as d) {
+  <app-modal [heading]="d.mode === 'create' ? 'مهمة عمل جديدة' : 'تعديل المهمة'" size="lg" [busy]="crud.saving()" (closed)="crud.close()">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body form-grid">
+        <div class="full-width"><app-alert [message]="crud.formError()" /></div>
+        <label class="form-field"><span class="form-label">اسم المهمة</span><input formControlName="name" maxlength="100" placeholder="مثال: إدارة المخزن"></label>
+        <label class="form-field"><span class="form-label">الفرع</span>
+          <select formControlName="branchId" (change)="branchChanged()">
+            <option [ngValue]="0">اختر الفرع</option>
+            @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
+          </select>
+        </label>
+        <label class="form-field"><span class="form-label">الحالة</span>
+          <select formControlName="isActive"><option [ngValue]="true">فعّالة</option><option [ngValue]="false">معطّلة (لا تظهر كبطاقة)</option></select>
+        </label>
+        <label class="form-field full-width"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><input formControlName="description" maxlength="500" placeholder="مثال: الإدخال والإخراج والتقارير"></label>
+
+        <fieldset class="full-width icon-picker">
+          <legend class="form-label">الأيقونة</legend>
+          @for (icon of icons; track icon) {
+            <button type="button" class="icon-option" [class.selected]="form.value.icon === icon" (click)="form.patchValue({ icon })" [attr.aria-label]="'اختيار الأيقونة ' + icon" [attr.aria-pressed]="form.value.icon === icon">{{ icon }}</button>
+          }
+        </fieldset>
+
+        <fieldset class="full-width assignees">
+          <legend class="form-label">الموظفون المسؤولون ({{ selected().size }})</legend>
+          @if (!Number(form.value.branchId)) { <p class="muted">اختر الفرع أولاً لعرض موظفيه.</p> }
+          @else if (usersLoading()) { <p class="muted">جارٍ تحميل موظفي الفرع…</p> }
+          @else if (!branchUsers().length) { <p class="muted">لا يوجد موظفون في هذا الفرع.</p> }
+          @else {
+            <div class="user-grid">
+              @for (u of branchUsers(); track u.id) {
+                <label class="user-option" [class.checked]="selected().has(u.id)">
+                  <input type="checkbox" [checked]="selected().has(u.id)" (change)="toggle(u.id)">
+                  <span><strong>{{ u.fullName }}</strong><small>{{ label(u.roleName) }}@if (u.departmentName) { · {{ u.departmentName }} }@if (u.officeName) { / {{ u.officeName }} }</small></span>
+                </label>
+              }
+            </div>
+          }
+        </fieldset>
+      </div>
+      <app-form-actions [busy]="crud.saving()" [disabled]="form.invalid || !Number(form.value.branchId)" label="حفظ المهمة" busyLabel="جارٍ الحفظ…" (dismissed)="crud.close()" />
+    </form>
+  </app-modal>
+}

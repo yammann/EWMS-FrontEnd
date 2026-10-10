@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { PlaceIndex, PlacesFile, normalizePlaceText } from './places';
+import { PlaceIndex, PlacesFile, normalizePlaceText } from '@core/utils/places';
 
 describe('Place search', () => {
   const file = resolve(process.cwd(), 'public/maps/syria-places.json');

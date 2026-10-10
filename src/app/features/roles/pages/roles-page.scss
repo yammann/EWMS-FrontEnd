@@ -1,0 +1,305 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* =========================================================
+   Roles table (خاص بالصفحة)
+   ========================================================= */
+.roles-table { min-width: 820px; }
+
+.roles-skeleton { grid-template-columns: 2.2fr 3fr 1fr 1fr; }
+
+.role-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 180px;
+}
+
+.role-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--purple-50);
+  color: var(--purple-500);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.role-details { display: flex; flex-direction: column; min-width: 0; }
+.role-details strong {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-800);
+  font-size: 13px;
+  font-weight: 800;
+}
+.role-details small {
+  margin-top: 3px;
+  color: var(--ink-400);
+  font-size: 10px;
+}
+
+/* =========================================================
+   Permissions cell (بالجدول)
+   ========================================================= */
+.permissions-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 260px;
+}
+
+.permission-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-700);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.permission-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.permission-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface-alt);
+  color: var(--ink-600);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.permission-chip.more {
+  background: var(--info-50);
+  border-color: var(--info-300);
+  color: var(--info-700);
+}
+
+/* =========================================================
+   Permissions section (داخل النافذة)
+   ========================================================= */
+.permissions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-alt);
+}
+
+.permissions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.permissions-header > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.permissions-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* عناوين أقسام الصلاحيات: ثابتة أعلى القائمة أثناء التمرير داخل النافذة */
+.perm-tabs {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; flex-wrap: wrap; gap: 4px; padding: 4px;
+  border-radius: var(--radius-lg); background: var(--surface-alt); border: 1px solid var(--border);
+}
+.perm-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; padding: 0 12px; background: transparent; color: var(--ink-600); font-weight: 700; font-size: 13px;
+}
+.perm-tab:hover:not(:disabled) { background: var(--fill); box-shadow: none; transform: none; }
+.perm-tab.on { background: var(--surface); color: var(--ink-900); box-shadow: var(--shadow-sm); }
+.perm-tab-count {
+  padding: 1px 7px; border-radius: var(--radius-full); background: var(--surface);
+  color: var(--ink-500); font-size: 11px; font-variant-numeric: tabular-nums;
+}
+.perm-tab.on .perm-tab-count { background: var(--fill); }
+.perm-tab-count.has { background: var(--brand-100); color: var(--brand-700); }
+
+/* جذر القسم المعروض: اسمه وعدد المختار وتحديد الكل */
+.perm-section-root { display: flex; align-items: center; gap: 8px; padding: 2px 14px 0 4px; }
+.perm-section-title { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; color: var(--ink-900); }
+
+/* مجموعات الصلاحيات القابلة للطي */
+.perm-groups { display: grid; gap: 8px; }
+.perm-group { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; }
+.perm-group.open { border-color: var(--border-strong); }
+.perm-group-head { display: flex; align-items: center; gap: 8px; padding-inline-end: 14px; }
+.perm-group-toggle {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+  min-height: 46px; padding: 0 14px; border-radius: 0; background: transparent; color: var(--ink-900);
+  font-weight: 700; text-align: start;
+}
+.perm-group-toggle:hover:not(:disabled) { background: var(--fill); box-shadow: none; transform: none; }
+.perm-group-toggle .chevron { width: 16px; height: 16px; flex: none; color: var(--ink-500); transition: transform .2s ease; transform: rotate(90deg); }
+.perm-group.open .perm-group-toggle .chevron { transform: rotate(0); }
+.perm-group-title { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.perm-group-count {
+  padding: 2px 10px; border-radius: var(--radius-full); background: var(--fill);
+  color: var(--ink-500); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.perm-group-count.has { background: var(--brand-100); color: var(--brand-700); }
+.perm-group-all { display: grid; place-items: center; cursor: pointer; }
+.perm-group-all input { width: 18px; height: 18px; accent-color: var(--brand-600); cursor: pointer; margin: 0; }
+
+/* الطي المتحرك: grid-template-rows 0fr ↔ 1fr */
+.perm-group-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .22s ease; }
+.perm-group.open .perm-group-body { grid-template-rows: 1fr; }
+.perm-group-body > .permissions-grid { overflow: hidden; min-height: 0; }
+.perm-group.open .perm-group-body > .permissions-grid { padding: 4px 12px 12px; }
+@media (prefers-reduced-motion: reduce) { .perm-group-body, .perm-group-toggle .chevron { transition: none; } }
+
+/* Permissions grid */
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.permission-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+.permission-card:hover {
+  border-color: var(--brand-300);
+  background: var(--surface-alt);
+}
+
+.permission-card.checked {
+  border-color: var(--brand-400);
+  background: var(--brand-50);
+  box-shadow: 0 0 0 2px var(--brand-100);
+}
+
+.permission-card input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.permission-card-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.permission-card-body strong {
+  color: var(--ink-800);
+  font-size: 12px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.permission-card-body small {
+  margin-top: 2px;
+  color: var(--ink-500);
+  font-size: 10px;
+  direction: ltr;
+  text-align: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.permission-check {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+
+  border: 1.5px solid var(--border-strong);
+  border-radius: 6px;
+
+  background: var(--surface);
+  color: transparent;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.permission-check svg {
+  width: 12px;
+  height: 12px;
+}
+
+.permission-card.checked .permission-check {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--on-brand);
+}
+
+/* Scrollbar صغير للـ permissions-grid */
+.permissions-grid::-webkit-scrollbar { width: 8px; }
+.permissions-grid::-webkit-scrollbar-track { background: transparent; }
+.permissions-grid::-webkit-scrollbar-thumb {
+  background: var(--ink-200);
+  border-radius: 4px;
+}
+.permissions-grid::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
+
+/* =========================================================
+   Responsive (خاص بالصفحة)
+   ========================================================= */
+@media (max-width: 760px) {
+  .permissions-grid { grid-template-columns: 1fr; }
+  .permission-chips { display: none; }
+}
+/* بحث الأدوار */
+.roles-search { margin: 0 0 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.search-box { position: relative; flex: 1; max-width: 420px; min-width: 240px; }
+.roles-search input { width: 100%; }
+.suggest { position: absolute; z-index: 40; inset-inline: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none; max-height: 340px; overflow: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
+.suggest-head { padding: 4px 12px 6px; font-size: 11.5px; font-weight: 700; color: var(--ink-400); }
+.suggest button { width: 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; min-height: 40px; padding: 8px 12px; text-align: start;
+  background: transparent; color: var(--ink-800); font-weight: 400; box-shadow: none; border-radius: var(--radius-md); }
+.suggest button:hover:not(:disabled), .suggest button.active { background: var(--fill); transform: none; box-shadow: none; }
+.suggest .s-name { font-size: 14px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest small { flex: none; max-width: 55%; font-size: 11.5px; color: var(--ink-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -1,0 +1,45 @@
+<div class="page">
+  <app-page-header eyebrow="إعدادات الإجازات" heading="أنواع الإجازات" subtitle="يُحدَّد الدفع عند الاعتماد النهائي: يومان مدفوعان في الشهر لكل الأنواع المدفوعة معاً، والباقي غير مدفوع.">
+    @if (can().create) { <button class="btn" type="button" (click)="crud.openCreate()">+ نوع جديد</button> }
+    <button class="btn btn-ghost" type="button" (click)="crud.refresh()" [disabled]="crud.busy()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
+  <section class="panel">
+    @if (crud.loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!crud.items().length) { <app-empty-state>لا توجد أنواع إجازات بعد.</app-empty-state> }
+    @else {
+      <div class="table-wrap"><table>
+        <thead><tr><th>النوع</th><th>الوصف</th><th>الدفع</th><th class="actions-th">الإجراءات</th></tr></thead>
+        <tbody>
+          @for (v of pager.items(); track v.id) {
+            <tr>
+              <td>{{ v.name }}</td>
+              <td class="wrap">{{ v.description || '—' }}</td>
+              <td>{{ v.paymentTypeAr }}</td>
+              <td><app-row-actions [canEdit]="can().edit" [canDelete]="can().delete" [deleting]="crud.deletingId() === v.id" (edit)="crud.openEdit(v)" (remove)="crud.remove(v)" /></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    }
+  </section>
+</div>
+
+@if (crud.dialog(); as d) {
+  <app-modal [heading]="d.mode === 'create' ? 'نوع إجازة جديد' : 'تعديل نوع الإجازة'" [busy]="crud.saving()" (closed)="crud.close()">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body form-stack">
+        <app-alert [message]="crud.formError()" />
+        <label class="form-field"><span class="form-label">الاسم</span><input formControlName="name" maxlength="100"></label>
+        <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><input formControlName="description" maxlength="500"></label>
+        <label class="form-field"><span class="form-label">الدفع</span>
+          <select formControlName="isPaid"><option [ngValue]="true">نوع مدفوع</option><option [ngValue]="false">نوع غير مدفوع</option></select>
+        </label>
+      </div>
+      <app-form-actions [busy]="crud.saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="crud.close()" />
+    </form>
+  </app-modal>
+}

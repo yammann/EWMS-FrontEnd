@@ -119,6 +119,9 @@ button.btn-sm {
   flex-wrap: nowrap;
   gap: 6px;
 }
+/* أزرار الصف لا تنكمش ولا يلتف نصها في عمود ضيق — الجدول يتسع لها */
+.row-actions > * { flex-shrink: 0; }
+.row-actions .btn { white-space: nowrap; }
 
 .icon-btn {
   display: grid;

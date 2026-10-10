@@ -1,11 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
-import { ApiService } from './api.service';
-import { NotificationService } from './notification.service';
-import { LoginRequest } from '../models/login-request.model';
-import { AuthResponse, AuthUser } from '../models/auth-response.model';
-import { APPROVE_VACATIONS, AppPermissionName, TASK_OVERSIGHT } from '../constants/access';
+import { ApiService } from '@core/services/api.service';
+import { NotificationService } from '@core/services/notification.service';
+import { LoginRequest } from '@core/models/login-request.model';
+import { AuthResponse, AuthUser } from '@core/models/auth-response.model';
+import { APPROVE_VACATIONS, AppPermissionName, TASK_OVERSIGHT } from '@core/constants/access';
 
 const TOKEN_KEY = 'ewms_token';
 const USER_KEY = 'ewms_user';

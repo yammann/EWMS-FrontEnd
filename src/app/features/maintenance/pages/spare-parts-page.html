@@ -1,0 +1,73 @@
+<div class="page">
+  <app-page-header eyebrow="الصيانة" heading="قطع الغيار" subtitle="مخزون {{ departments().length === 1 ? departments()[0].name : 'الأقسام' }} — الرصيد يتغيّر بالإدخال والصرف على الطلبات والتسوية">
+    @if (can().viewPartReports) { <a class="btn btn-ghost" routerLink="/maintenance/parts/report">تقارير القطع</a> }
+              @if (can().createPart) { <button class="btn" type="button" (click)="openForm(null)" [disabled]="!departments().length">+ قطعة جديدة</button> }
+              <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="error()" />
+  @if (departmentsLoaded() && !departments().length) {
+    <p class="alert alert-warning" role="status">حسابك لا يتبع لقسم له مخزون قطع غيار.</p>
+  }
+
+  <div class="filters">
+    <div class="filters-row">
+      <input #t1 class="search" type="search" placeholder="بحث بالاسم أو رقم القطعة…" dir="auto"
+             [value]="searchText()" (input)="searchText.set(t1.value); changed()" aria-label="بحث">
+      @if (departments().length > 1) {
+        <select #t2 (change)="departmentId.set(+t2.value); reload()" aria-label="القسم">
+          <option [value]="0" [selected]="!departmentId()">كل الأقسام</option>
+          @for (d of departments(); track d.id) { <option [value]="d.id" [selected]="d.id === departmentId()">{{ d.name }}</option> }
+        </select>
+      }
+      @if (deviceTypes().length) {
+        <select #t3 (change)="deviceTypeId.set(+t3.value); reload()" aria-label="نوع الجهاز">
+          <option [value]="0" [selected]="!deviceTypeId()">كل الأجهزة</option>
+          @for (t of deviceTypes(); track t.id) { <option [value]="t.id" [selected]="t.id === deviceTypeId()">تناسب {{ t.name }}</option> }
+        </select>
+      }
+      <label class="low-toggle"><input #t4 type="checkbox" [checked]="lowOnly()" (change)="lowOnly.set(t4.checked); reload()"> تحت الحد الأدنى فقط</label>
+      @if (hasFilter()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }
+    </div>
+  </div>
+
+  <section class="panel">
+    @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!rows().length) {
+      <div class="empty-state"><h3>{{ hasFilter() ? 'لا توجد نتائج مطابقة' : 'لا توجد قطع بعد' }}</h3>
+        <p>{{ hasFilter() ? 'جرّب تعديل البحث أو الفلاتر.' : 'أضف القطعة ثم «إدخال» لاستلام كمياتها.' }}</p></div>
+    } @else {
+      <div class="table-wrap" [class.dim]="loading()"><table>
+        <thead><tr><th>القطعة</th>@if (departments().length > 1) { <th>القسم</th> }<th>الرصيد</th><th>الحد الأدنى</th><th>متوسط السعر</th><th>قيمة الرصيد</th><th>التوافق</th><th class="actions-th"></th></tr></thead>
+        <tbody>
+          @for (p of rows(); track p.id) {
+            <tr [class.low]="p.isLow">
+              <td><span class="cell-strong">{{ p.name }}</span>@if (p.partNumber) { <small class="mono">{{ p.partNumber }}</small> }</td>
+              @if (departments().length > 1) { <td>{{ p.departmentName }}</td> }
+              <td class="num"><span class="cell-strong">{{ p.quantity | qty }}</span> {{ p.unit }}@if (p.isLow) { <span class="low-badge">تحت الحد</span> }</td>
+              <td class="num">{{ p.minQuantity ? (p.minQuantity | qty) : '—' }}</td>
+              <td class="num">{{ p.averageCost | money }}</td>
+              <td class="num">{{ p.stockValue | money }}</td>
+              <td class="compat">{{ compat(p) }}</td>
+              <td><app-row-actions [canEdit]="can().editPart" [canDelete]="can().deletePart" [deleting]="deletingId() === p.id" (edit)="openForm(p)" (remove)="remove(p)">
+                @if (can().receiveParts) { <button class="btn btn-sm" type="button" (click)="stock.set({ part: p, mode: 'receive' })">إدخال</button> }
+                @if (can().adjustParts) { <button class="btn btn-ghost btn-sm" type="button" (click)="stock.set({ part: p, mode: 'adjust' })">تسوية</button> }
+                <button class="btn btn-ghost btn-sm" type="button" (click)="movements.set(p)">الحركات</button>
+              </app-row-actions></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+    }
+  </section>
+</div>
+
+@if (formOpen()) {
+  <app-spare-part-form-dialog [part]="editing()" [departments]="departments()" [deviceTypes]="deviceTypes()" [companies]="companies()"
+                              (saved)="saved($event)" (closed)="formOpen.set(false)" />
+}
+@if (stock(); as s) {
+  <app-spare-part-stock-dialog [part]="s.part" [mode]="s.mode" (saved)="stockSaved($event, s.mode)" (closed)="stock.set(null)" />
+}
+@if (movements(); as m) { <app-spare-part-movements [part]="m" (closed)="movements.set(null)" /> }

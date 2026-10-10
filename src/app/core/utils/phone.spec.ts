@@ -1,4 +1,4 @@
-import { formatPhone, isValidPhone, normalizePhone } from './phone';
+import { formatPhone, isValidPhone, normalizePhone } from '@core/utils/phone';
 
 describe('phone', () => {
   it('accepts Syrian mobile, landline and international forms', () => {

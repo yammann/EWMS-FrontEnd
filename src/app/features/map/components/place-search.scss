@@ -1,0 +1,15 @@
+.place-search { display: grid; gap: 6px; }
+.box { position: relative; }
+.box input { width: 100%; }
+.hint { color: var(--ink-400); font-weight: 400; }
+.results { position: absolute; inset-inline: 0; top: calc(100% + 4px); z-index: 20; margin: 0; padding: 4px; list-style: none;
+  max-height: 280px; overflow-y: auto; border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  background: var(--surface); box-shadow: var(--shadow-md, 0 8px 24px rgb(0 0 0 / .12)); }
+.results li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; }
+.results li.on { background: var(--fill); }
+.results .name { font-weight: 700; color: var(--ink-900); }
+.results .name small { margin-inline-start: 8px; font-weight: 400; color: var(--ink-400); }
+.results .meta { flex: none; font-size: 12px; color: var(--ink-500); }
+.results .note { cursor: default; color: var(--ink-500); font-size: 13px; }
+.results .note.error { color: var(--danger-600); }
+.credit { font-size: 11px; color: var(--ink-400); }

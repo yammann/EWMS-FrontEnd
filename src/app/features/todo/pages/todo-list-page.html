@@ -1,0 +1,139 @@
+<div class="page">
+  @if (list(); as l) {
+    <header class="t-head">
+      <div class="t-id">
+        <span class="t-badge" aria-hidden="true">@if (l.icon) { {{ l.icon }} } @else { <app-icon name="clipboard" /> }</span>
+        <div class="t-title">
+          <h1>{{ l.name }}@if (l.isArchived) { <span class="t-chip">مؤرشفة</span> }</h1>
+          <p class="t-sub">
+            <span>{{ dateText }}</span><span class="t-dot" aria-hidden="true"></span>
+            <span class="t-pill">تم إنجاز {{ percent() }}%</span>
+            @if (l.description) { <span class="t-dot" aria-hidden="true"></span><span>{{ l.description }}</span> }
+          </p>
+        </div>
+      </div>
+      <div class="t-actions">
+        @if (canEdit() && !l.isArchived) { <button type="button" class="btn btn-ghost" (click)="formOpen.set(true)">تعديل القائمة</button> }
+      </div>
+    </header>
+
+    <section class="t-tiles" aria-label="ملخص القائمة">
+      <app-stat-tile label="إجمالي البنود" [value]="l.itemsTotal" icon="🗂️" tone="blue" />
+      <app-stat-tile label="المنجزة" [value]="l.itemsDone" icon="✅" tone="green" />
+      <app-stat-tile label="المتبقية" [value]="l.itemsTotal - l.itemsDone" icon="⏳" tone="orange" [hint]="l.itemsOverdue ? l.itemsOverdue + ' متأخرة' : 'لا متأخرات'" [alert]="l.itemsOverdue > 0" />
+      <app-stat-tile label="الهامة" [value]="importantOpen()" icon="⭐" tone="red" hint="غير منجزة" />
+    </section>
+
+    @if (l.itemsTotal) {
+      <div class="t-tools">
+        <label class="sr-only" for="todo-search">بحث في البنود</label>
+        <input #t1 id="todo-search" type="search" placeholder="بحث بالعنوان أو الملاحظة…" [value]="search()" (input)="search.set(t1.value)">
+        <label class="sr-only" for="todo-sort">الترتيب</label>
+        <select #t2 id="todo-sort" [appSelectValue]="sort()" (change)="setSort(t2.value)">
+          <option value="manual">ترتيبي اليدوي</option>
+          <option value="due">حسب الموعد</option>
+          <option value="important">المهم أولاً</option>
+        </select>
+      </div>
+    }
+
+    <app-alert [message]="error()" />
+
+    @if (l.itemsTotal) {
+      <div class="t-pills" role="group" aria-label="تصفية البنود">
+        @for (f of filterList(); track f.key) {
+          @if (f.key === 'all' || f.count || filter() === f.key) {
+            <button type="button" class="p" [class.on]="filter() === f.key" [attr.aria-pressed]="filter() === f.key" (click)="filter.set(f.key)">
+              {{ f.label }}<span class="n">({{ f.count }})</span></button>
+          }
+        }
+        @if (editable() && l.itemsDone) {
+          <button type="button" class="btn btn-ghost btn-sm clear" (click)="clearDone()" [disabled]="busy()">مسح المنجزة ({{ l.itemsDone }})</button>
+        }
+      </div>
+    }
+
+    <ul class="t-grid" cdkDropList cdkDropListOrientation="mixed" [cdkDropListDisabled]="!canDrag()" (cdkDropListDropped)="drop($event)">
+      @for (item of visible(); track item.id) {
+        <li class="t-card" [class.imp]="item.isImportant && !item.isDone" [class.done]="item.isDone" [class.click]="editable()" cdkDrag [cdkDragData]="item" (click)="open(item)">
+          <div class="t-row">
+            <button type="button" class="t-tick" role="checkbox" [attr.aria-checked]="item.isDone" [disabled]="!editable() || busy()"
+                    (click)="toggle(item); $event.stopPropagation()" [attr.aria-label]="(item.isDone ? 'إلغاء إنجاز ' : 'إنجاز ') + item.title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+            </button>
+            <div class="t-body">
+              <h3 class="t-name">@if (item.isImportant && !item.isDone) { <span class="t-star" aria-label="مهم">★</span> }{{ item.title }}</h3>
+              @if (item.note) { <p class="t-note">{{ item.note }}</p> }
+              <div class="t-meta">
+                @if (item.isDone) {
+                  <span class="t-chip ok">✔ أُنجز {{ item.doneAt | date:'MM/dd' }}</span>
+                } @else if (dueLabel(item); as d) {
+                  <span class="t-chip" [class.late]="d.kind === 'late'" [class.today]="d.kind === 'today'">📅 {{ d.text }}</span>
+                }
+                @if (item.repeatAr) { <span class="t-chip">🔁 {{ item.repeatAr }}</span> }
+                @if (item.linkedTask; as t) {
+                  @if (t.available) {
+                    <a class="t-chip info" [routerLink]="['/task-board']" [queryParams]="{ task: t.id }" (click)="$event.stopPropagation()" title="فتح المهمة في لوحة المهام">🔗 {{ t.statusAr }}@if (t.isOverdue) { · متأخرة }</a>
+                  } @else { <span class="t-chip">🔗 مهمة غير متاحة</span> }
+                }
+              </div>
+            </div>
+            @if (editable()) {
+              <div class="t-acts" (click)="$event.stopPropagation()">
+                <button type="button" class="t-act t-tip" data-tip="تفاصيل وتعديل" [attr.aria-label]="'تفاصيل وتعديل ' + item.title" (click)="open(item)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>
+                </button>
+                <button type="button" class="t-act del t-tip" data-tip="حذف البند" [attr.aria-label]="'حذف ' + item.title" (click)="remove(item)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                </button>
+              </div>
+            }
+          </div>
+          @if (canDrag()) { <span class="t-grip" cdkDragHandle (click)="$event.stopPropagation()" aria-label="اسحب لإعادة الترتيب" title="اسحب لإعادة الترتيب">⋮⋮</span> }
+        </li>
+      } @empty {
+        @if (l.itemsTotal) { <li class="t-empty">لا بنود مطابقة.</li> }
+      }
+
+      @if (editable() && l.itemsTotal < limits.maxItems) {
+        @if (adding()) {
+          <li class="t-card t-add open">
+            <form (ngSubmit)="add()">
+              <label class="sr-only" for="todo-new">بند جديد</label>
+              <input id="todo-new" name="title" [maxlength]="limits.titleLength" [(ngModel)]="newTitle" placeholder="عنوان البند… (الصق عدة أسطر لإضافتها دفعة واحدة)"
+                     autocomplete="off" [disabled]="busy()" (paste)="onPaste($event)" (keydown.escape)="cancelAdd()">
+              <div class="f-row">
+                <input name="due" type="date" [(ngModel)]="newDue" aria-label="موعد البند" title="موعد (اختياري)">
+                <button type="button" class="t-star-toggle" [class.on]="newImportant" [attr.aria-pressed]="newImportant" (click)="newImportant = !newImportant" title="مهم" aria-label="مهم">★</button>
+              </div>
+              <div class="f-row">
+                <button type="submit" class="btn btn-sm" [disabled]="busy() || !newTitle.trim()">إضافة</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="cancelAdd()">إلغاء</button>
+              </div>
+            </form>
+          </li>
+        } @else {
+          <li class="t-card t-add">
+            <div class="t-add-row">
+              <button type="button" class="t-add-btn t-tip" data-tip="بند جديد — اكتب العنوان والموعد" aria-label="بند جديد" (click)="startAdd()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M12 11v6M9 14h6"/></svg>
+              </button>
+              <div class="t-add-text"><strong>أضف إلى القائمة</strong><small>بند واحد أو عدة بنود دفعة واحدة</small></div>
+              <button type="button" class="t-add-btn t-tip" data-tip="عدة بنود — كل سطر بند" aria-label="عدة بنود" (click)="openBulk('')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h6"/><path d="M18 14v6M15 17h6"/></svg>
+              </button>
+            </div>
+          </li>
+        }
+      }
+    </ul>
+    @if (l.itemsTotal >= limits.maxItems && editable()) { <p class="t-hint">بلغت الحد الأقصى ({{ limits.maxItems }} بنداً).</p> }
+    @if (l.isArchived) { <p class="t-hint">القائمة مؤرشفة: أعدها من صفحة مفكرتي لتعديل بنودها.</p> }
+  } @else if (error()) {
+    <p class="alert alert-error" role="alert">{{ error() }}</p>
+  } @else { <div class="panel empty-state" role="status">جارٍ التحميل…</div> }
+</div>
+
+@if (formOpen() && list(); as l) { <app-todo-list-dialog [list]="l" (saved)="renamed($event)" (closed)="formOpen.set(false)" /> }
+@if (editingItem(); as it) { <app-todo-item-dialog [item]="it" (saved)="replaced($event)" (closed)="editingItem.set(null)" /> }
+@if (bulkOpen() && list(); as l) { <app-todo-bulk-dialog [list]="l" [initialText]="bulkText()" (saved)="bulkSaved($event)" (closed)="bulkOpen.set(false)" /> }

@@ -1,0 +1,129 @@
+<section class="branches-page" dir="rtl">
+
+  <!-- Header -->
+  <app-admin-header eyebrow="إدارة الفروع" heading="الفروع" subtitle="إدارة فروع النظام التي تتبعها الأقسام والمستخدمون." [loading]="crud.busy()"
+    [createLabel]="canCreate() ? 'فرع جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
+
+  <!-- Stats -->
+  <section class="stats-grid">
+
+    <app-stat-tile tone="green" icon="" label="إجمالي الفروع" [value]="stats().total" hint="جميع الفروع المسجلة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5l7-3 7 3v16"></path>
+                  <path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="blue" icon="" label="فروع بوصف" [value]="stats().withDescription" hint="لها وصف موثق">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 7h16M4 12h16M4 17h10"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="orange" icon="" label="بدون وصف" [value]="stats().withoutDescription" hint="تحتاج إلى استكمال البيانات">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path d="M12 8v4M12 16h.01"></path>
+                </svg>
+    </app-stat-tile>
+
+    <app-stat-tile tone="purple" icon="" label="الحالة" [value]="stats().total === 0 ? '—' : 'نشط'" hint="الفرع متاح للاستخدام" [live]="!(stats().total === 0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5l7-3 7 3v16"></path>
+                </svg>
+    </app-stat-tile>
+  </section>
+
+  <!-- Branches List -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-kicker">السجل</span>
+        <h2>قائمة الفروع</h2>
+        <p>اضغط أيقونة التعديل لتحديث بيانات فرع، أو الحذف لإزالته.</p>
+      </div>
+      <span class="pill">{{ branches().length }} فرع</span>
+    </div>
+
+    @if (crud.loading()) {
+      <div class="skeleton-list">
+        @for (item of [1,2,3,4,5]; track item) {
+          <div class="skeleton-row branches-skeleton">
+            <span></span><span></span><span></span>
+          </div>
+        }
+      </div>
+    } @else if (branches().length) {
+      <div class="table-wrap">
+        <table class="branches-table">
+          <thead>
+            <tr>
+              <th>الفرع</th>
+              <th>الوصف</th>
+              <th class="actions-th">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (branch of pager.items(); track branch.id) {
+              <tr [class.selected]="crud.dialog()?.item?.id === branch.id">
+                <td>
+                  <div class="branch-cell-name">
+                    <div class="branch-avatar">{{ (branch.name || 'ف').charAt(0) }}</div>
+                    <div class="branch-details">
+                      <strong>{{ branch.name || 'فرع بدون اسم' }}</strong>
+                      <small>#{{ branch.id }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  @if (branch.description) {
+                    <span class="description-text">{{ branch.description }}</span>
+                  } @else {
+                    <span class="muted-text">لا يوجد وصف</span>
+                  }
+                </td>
+                <td>
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === branch.id" (edit)="crud.openEdit(branch)" (remove)="crud.remove(branch)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V5l7-3 7 3v16"></path>
+          </svg>
+        </div>
+        <h3>لا توجد فروع</h3>
+        <p>ابدأ بالضغط على زر "فرع جديد" في الأعلى.</p>
+      </div>
+    }
+  </section>
+
+  <!-- ============================================================
+       Modals
+       ============================================================ -->
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title(dlg.mode)" [busy]="crud.saving()" (closed)="crud.close()">
+
+        <div class="modal-body">
+          <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم الفرع"
+                           namePlaceholder="مثال: فرع دمشق" descPlaceholder="وصف مختصر عن الفرع..." createLabel="إنشاء الفرع"
+                           [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
+            <svg nameIcon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V5l7-3 7 3v16"></path>
+            </svg>
+          </app-entity-form>
+        </div>
+    </app-modal>
+  }
+
+</section>

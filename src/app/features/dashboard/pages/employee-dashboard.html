@@ -1,0 +1,56 @@
+<div class="page">
+  <app-dashboard-frame [showMap]="showMap()" [header]="headerTpl" [body]="bodyTpl" />
+</div>
+
+<ng-template #headerTpl>
+    <div>
+      <span class="eyebrow">لوحتي</span>
+      <h1>مرحباً، {{ data()?.fullName }}</h1>
+      @if (data(); as d) {
+        <p class="header-sub">{{ label(d.roleName) }}@if (d.branchName) { · {{ d.branchName }} }@if (d.departmentName) { / {{ d.departmentName }} }@if (d.officeName) { / {{ d.officeName }} }</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (canRequestVacation()) { <a class="btn" routerLink="/profile">طلب إجازة</a> }
+      <button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+</ng-template>
+
+<ng-template #bodyTpl>
+
+  <app-alert [message]="error()" />
+
+  @if (data(); as d) {
+    <section class="dash-stats" aria-label="ملخصي">
+      @if (canMyTasks()) { <app-stat-tile label="مهامي" [value]="tasks().length" icon="📋" tone="green" hint="المهام الموكلة إليك" /> }
+      <app-stat-tile label="فريقي" [value]="d.team.length" icon="👥" tone="blue" [hint]="d.teamName ? 'زملاء ' + d.teamName : ''" />
+      @if (canNotifications()) { <app-stat-tile label="إشعارات غير مقروءة" [value]="unread()" icon="🔔" tone="purple" /> }
+      <app-stat-tile label="أيام إجازة مدفوعة متبقية" [value]="d.paidDaysLeftThisMonth + ' من ' + d.paidDaysLimitPerMonth" icon="🌴" tone="orange" hint="هذا الشهر" />
+    </section>
+
+    @if (canMyTasks()) {
+    <section class="panel">
+      <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام الموكلة إليك</h2><p>اضغط على المهمة لفتح صفحتها</p></div></div>
+      <app-task-cards [tasks]="tasks()" emptyText="لا توجد مهام موكلة إليك بعد" />
+    </section>
+    }
+
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>فريقي</h2>@if (d.teamName) { <p>زملاؤك في {{ d.teamName }}</p> }</div></div>
+      @if (d.team.length) {
+        <div class="table-wrap"><table>
+          <thead><tr><th>الاسم</th><th>الدور</th><th>البريد الإلكتروني</th></tr></thead>
+          <tbody>
+            @for (m of d.team; track m.email) {
+              <tr><td><strong class="cell-link">{{ m.fullName }}</strong></td><td>{{ label(m.roleName) }}</td><td dir="ltr">{{ m.email }}</td></tr>
+            }
+          </tbody>
+        </table></div>
+      } @else { <app-empty-state>لا يوجد زملاء في فريقك بعد</app-empty-state> }
+    </section>
+
+  } @else if (loading()) {
+    <div class="panel skeleton" role="status">جارٍ تحميل لوحتك…</div>
+  }
+</ng-template>

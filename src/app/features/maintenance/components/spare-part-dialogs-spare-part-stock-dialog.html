@@ -1,0 +1,30 @@
+<app-modal [heading]="(mode() === 'receive' ? 'إدخال: ' : 'تسوية: ') + part().name"
+           [subheading]="'الرصيد الحالي ' + (part().quantity | qty) + ' ' + part().unit + ' · متوسط السعر ' + (part().averageCost | money)"
+           [busy]="saving()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body form-stack">
+      <app-alert [message]="error()" />
+      @if (mode() === 'receive') {
+        <label class="form-field"><span class="form-label">الكمية المستلمة ({{ part().unit }})</span><input type="number" formControlName="quantity" min="0.01" step="0.01" dir="ltr"></label>
+        <label class="form-field"><span class="form-label">سعر الوحدة (ل.س)</span><input type="number" formControlName="unitCost" min="0" step="0.01" dir="ltr">
+          <small class="hint">يدخل في متوسط السعر المرجّح — بعده {{ newAverage() | money }}</small></label>
+        <label class="form-field"><span class="form-label">تاريخ الاستلام</span><input type="date" formControlName="date" [max]="today"></label>
+        <label class="form-field"><span class="form-label">المصدر <small class="hint">(المورّد أو الجهة — اختياري)</small></span><input formControlName="note" maxlength="500"></label>
+      } @else {
+        <div class="segmented" role="radiogroup" aria-label="نوع التسوية">
+          <button type="button" role="radio" [class.on]="adjustKind() === 'count'" [attr.aria-checked]="adjustKind() === 'count'" (click)="setKind('count')">جرد (الكمية الفعلية)</button>
+          <button type="button" role="radio" [class.on]="adjustKind() === 'damaged'" [attr.aria-checked]="adjustKind() === 'damaged'" (click)="setKind('damaged')">تالف أو مفقود</button>
+        </div>
+        <label class="form-field"><span class="form-label">{{ adjustKind() === 'count' ? 'الكمية الموجودة فعلاً' : 'الكمية التالفة' }} ({{ part().unit }})</span>
+          <input type="number" formControlName="quantity" min="0" step="0.01" dir="ltr">
+          <small class="hint">الفرق: {{ deltaText() }} — الرصيد بعدها {{ part().quantity + delta() | qty }}</small></label>
+        <label class="form-field"><span class="form-label">السبب</span><input formControlName="note" maxlength="500" [placeholder]="adjustKind() === 'count' ? 'جرد شهري…' : 'كسر أثناء التركيب…'"></label>
+      }
+      @if (form.controls.quantity.invalid && form.controls.quantity.touched) { <small class="form-error">كمية موجبة بخانتين عشريتين على الأكثر</small> }
+    </div>
+    <footer class="modal-actions">
+      <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
+      <button type="submit" [disabled]="!valid() || saving()">{{ saving() ? 'جارٍ الحفظ…' : (mode() === 'receive' ? 'إدخال' : 'حفظ التسوية') }}</button>
+    </footer>
+  </form>
+</app-modal>

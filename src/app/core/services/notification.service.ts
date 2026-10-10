@@ -1,8 +1,9 @@
 import { Injectable, NgZone, inject, signal } from '@angular/core';
 import { Subject, Subscription, interval, tap, catchError, EMPTY } from 'rxjs';
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
-import { ApiService } from './api.service';
-import { AppNotification } from '../models/notification.models';
+import type { HubConnection } from '@microsoft/signalr';
+import { ApiService } from '@core/services/api.service';
+import { AppNotification } from '@core/models/notification.models';
+import { PagedResult } from '@core/models/paged-result.model';
 
 // الاتصال اللحظي عبر SignalR هو الأساس؛ الاستعلام الدوري البطيء احتياط فقط (لو انقطع الاتصال)
 const HUB_URL = '/hubs/notifications';
@@ -20,6 +21,8 @@ export class NotificationService {
   private api = inject(ApiService);
   private zone = inject(NgZone);
   private hub?: HubConnection;
+  /** SignalR (~70KB) يُحمَّل عند أول بدء اتصال فقط — خارج الحزمة الأولى (صفحة الدخول لا تحتاجه) */
+  private starting = false;
   private polling?: Subscription;
 
   unreadCount = signal(0);
@@ -32,6 +35,11 @@ export class NotificationService {
 
   my(unreadOnly = false) {
     return this.api.get<AppNotification[]>(`/Notifications/My?unreadOnly=${unreadOnly}`);
+  }
+
+  /** صفحة من إشعاراتي (الأحدث أولاً) مع العدد الكلي — لصفحة الإشعارات */
+  page(unreadOnly: boolean, page: number, pageSize: number) {
+    return this.api.get<PagedResult<AppNotification>>(`/Notifications/Page?unreadOnly=${unreadOnly}&page=${page}&pageSize=${pageSize}`);
   }
 
   refreshCount() {
@@ -50,8 +58,13 @@ export class NotificationService {
   /* =====================================================
    * الاتصال اللحظي
    * ===================================================== */
-  start(accessToken: () => string) {
-    if (this.hub) return;
+  async start(accessToken: () => string) {
+    if (this.hub || this.starting) return;
+    this.starting = true;
+    const { HubConnectionBuilder, HubConnectionState, LogLevel } = await import('@microsoft/signalr');
+    // أُوقفت الخدمة (تسجيل خروج) أثناء تحميل المكتبة
+    if (!this.starting) return;
+    this.starting = false;
 
     this.hub = new HubConnectionBuilder()
       .withUrl(HUB_URL, { accessTokenFactory: accessToken })
@@ -75,6 +88,7 @@ export class NotificationService {
   }
 
   stop() {
+    this.starting = false;
     this.polling?.unsubscribe();
     this.polling = undefined;
     this.hub?.stop();
@@ -153,6 +167,7 @@ export function notificationRoute(n: AppNotification, canReview: boolean): strin
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
+  if (n.relatedEntityType === 'ToDoList' && n.relatedEntityId) return `/todo-lists/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MaintenanceRequest' && n.relatedEntityId) return `/maintenance/requests/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MyMaintenanceRequest' && n.relatedEntityId) return `/maintenance/mine?request=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'SparePart' && n.relatedEntityId) return `/maintenance/parts?part=${n.relatedEntityId}`;

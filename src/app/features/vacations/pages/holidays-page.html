@@ -1,0 +1,50 @@
+<div class="page">
+  <app-page-header eyebrow="إعدادات الإجازات" heading="العطل الرسمية" subtitle="لا تُحسب من مدة الإجازة، مثل يوم الجمعة.">
+    <select #yearSelect class="year-select" (change)="setYear(+yearSelect.value)" aria-label="السنة">
+      @for (y of years; track y) { <option [value]="y" [selected]="y === year()">{{ y }}</option> }
+    </select>
+    @if (can().create) { <button class="btn" type="button" (click)="crud.openCreate()">+ عطلة جديدة</button> }
+    <button class="btn btn-ghost" type="button" (click)="crud.refresh()" [disabled]="crud.busy()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
+  <section class="panel">
+    @if (crud.loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!crud.items().length) { <app-empty-state>لا توجد عطل رسمية مسجّلة لسنة {{ year() }}.</app-empty-state> }
+    @else {
+      <div class="table-wrap"><table>
+        <thead><tr><th>التاريخ</th><th>اليوم</th><th>العطلة</th><th class="actions-th">الإجراءات</th></tr></thead>
+        <tbody>
+          @for (h of pager.items(); track h.id) {
+            <tr>
+              <td>{{ h.date | date:'yyyy/MM/dd' }}</td>
+              <td>{{ dayName(h.date) }}@if (h.isFriday) { <small class="muted"> (جمعة أصلاً)</small> }</td>
+              <td>{{ h.name }}</td>
+              <td><app-row-actions [canEdit]="can().edit" [canDelete]="can().delete" [deleting]="crud.deletingId() === h.id" (edit)="crud.openEdit(h)" (remove)="crud.remove(h)" /></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    }
+  </section>
+</div>
+
+@if (crud.dialog(); as d) {
+  <app-modal [heading]="d.mode === 'create' ? 'عطلة جديدة' : 'تعديل العطلة'" [busy]="crud.saving()" (closed)="crud.close()">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body form-stack">
+        <app-alert [message]="crud.formError()" />
+        <label class="form-field"><span class="form-label">الاسم</span><input formControlName="name" maxlength="100" placeholder="مثال: عيد الفطر"></label>
+        <label class="form-field"><span class="form-label">{{ d.mode === 'edit' ? 'التاريخ' : 'من تاريخ' }}</span><input type="date" formControlName="startVac"></label>
+        @if (d.mode === 'create') {
+          <label class="form-field"><span class="form-label">إلى تاريخ <small class="hint">(اختياري)</small></span><input type="date" formControlName="endVac" [min]="form.controls.startVac.value"></label>
+          <p class="hint">لعطلة من عدة أيام (كالعيد) حدّد المدة، فيُضاف يوم لكل تاريخ.</p>
+        }
+        @if (form.hasError('dateRange')) { <p class="form-error">تاريخ النهاية يجب أن يساوي تاريخ البداية أو يليه.</p> }
+      </div>
+      <app-form-actions [busy]="crud.saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="crud.close()" />
+    </form>
+  </app-modal>
+}

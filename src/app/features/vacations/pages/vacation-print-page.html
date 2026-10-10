@@ -1,0 +1,76 @@
+<div class="bar no-print">
+  <app-back-button />
+  <button type="button" class="btn" (click)="print()" [disabled]="!data()">🖨 طباعة</button>
+</div>
+
+@if (error()) { <p class="alert alert-error no-print" role="alert">{{ error() }}</p> }
+@if (data(); as d) {
+  @if (!d.personalIdNumber || !d.phone) {
+    <p class="alert alert-warning no-print" role="status">
+      {{ !d.personalIdNumber && !d.phone ? 'الرقم الذاتي ورقم التواصل غير مسجّلين' : !d.personalIdNumber ? 'الرقم الذاتي غير مسجّل' : 'رقم التواصل غير مسجّل' }}
+      في بيانات الموظف — ستبقى خانته فارغة. يُضاف من صفحة المستخدمين.
+    </p>
+  }
+  @if (d.vacation.status.startsWith('Pending')) {
+    <p class="alert alert-warning no-print" role="status">الطلب لم يُعتمد بعد — يُطبع «رأي رئيس الفرع» فارغاً.</p>
+  }
+
+  <article class="sheet" dir="rtl">
+    <header class="head">
+      <div class="side right">
+        <strong>{{ header.countryAr }}</strong>
+        <strong class="branch">{{ d.branchName }}</strong>
+      </div>
+      <div class="center">
+        <app-logo class="emblem" />
+      </div>
+      <div class="side left" dir="ltr"><strong>{{ header.countryEn }}</strong></div>
+    </header>
+
+    <div class="meta-row">
+      <table class="ref"><tbody>
+        <tr><th>الرقم:</th><td class="ltr">{{ d.vacation.requestNumber }}</td></tr>
+        <tr><th>التاريخ:</th><td class="ltr">{{ d.submittedHijri }}</td></tr>
+        <tr><th>الموافق لـ:</th><td class="ltr">{{ d.submittedAt | date:'yyyy/M/d' }}</td></tr>
+      </tbody></table>
+      <h1>( طلب إجازة )</h1>
+      <span></span>
+    </div>
+
+    <h2>❖ بيانات مقدم الطلب:</h2>
+    <table class="grid"><tbody>
+      <tr><th>الاسم الثلاثي</th><td>{{ d.employeeName }}</td><th>الرقم الذاتي</th><td class="ltr">{{ d.personalIdNumber || '' }}</td></tr>
+      <tr><th>رقم التواصل</th><td class="ltr">{{ d.phone || '' }}</td><th>القسم التابع له</th><td>{{ d.departmentName }}</td></tr>
+      <tr><th>تاريخ تقديم الإجازة</th><td class="ltr">{{ d.submittedAt | date:'yyyy/M/d' }}</td><th>عدد أيام الإجازة</th><td>{{ days(d.vacation.vacDayCount) }}</td></tr>
+      <tr><th>تاريخ بدء الإجازة</th><td class="ltr">{{ d.vacation.startVac | date:'yyyy/M/d' }}</td><th>تاريخ انتهاء الإجازة</th><td class="ltr">{{ d.vacation.endVac | date:'yyyy/M/d' }}</td></tr>
+    </tbody></table>
+
+    <table class="grid types"><tbody>
+      <tr><th>نوع الإجازة:</th>
+        <td>@for (t of d.types; track t.id) { <span class="type">{{ t.name }} <span class="box">({{ t.selected ? '✓' : '  ' }})</span></span> }</td>
+      </tr>
+    </tbody></table>
+
+    <div class="body">
+      <div class="fields">
+        <p class="label">• سبب طلب الإجازة:</p>
+        <p class="answer">{{ d.vacation.vacReason || '' }}</p>
+        <p class="label">• رأي رئيس الفرع:</p>
+        @if (d.branchOpinion) { <p class="answer">{{ d.branchOpinion }}</p> }
+        @else { <span class="dots"></span><span class="dots"></span> }
+      </div>
+      <div class="signer">
+        <strong>رئيس {{ d.branchName }}</strong>
+        @if (d.signerSignature) { <img [src]="d.signerSignature" alt="التوقيع"> } @else { <span class="sign-space"></span> }
+        <span class="name">{{ d.signerName || '' }}</span>
+        <span class="stamp">مكان الختم</span>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span class="employee-sign">توقيع مقدم الطلب:
+        <span class="sig-box">@if (d.requesterSignature) { <img [src]="d.requesterSignature" alt="توقيع مقدم الطلب"> }</span></span>
+      <p class="copy">نسخة إلى:<br>- أرشيف {{ d.branchName }}</p>
+    </footer>
+  </article>
+} @else if (!error()) { <p class="loading no-print" role="status">جارٍ التحميل…</p> }

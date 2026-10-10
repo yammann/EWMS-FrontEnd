@@ -1,0 +1,129 @@
+<div class="page">
+  <app-page-header eyebrow="الصيانة" heading="طلبات الصيانة" subtitle="الأجهزة المستلمة للإصلاح ومتابعة حالتها حتى التسليم">
+
+        @if (can().assignRequest) { <app-pending-transfers-button /> }
+        @if (can().createRequest) { <button class="btn" type="button" (click)="formOpen.set(true)" [disabled]="!lookups()">+ طلب جديد</button> }
+        <button class="btn btn-ghost" type="button" (click)="refresh()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="error()" />
+
+  <div class="filters">
+    <div class="filters-row">
+      <div class="search-group">
+        <select #t1 [appSelectValue]="searchField()" (change)="setSearchField(t1.value); searchText() && changed()" aria-label="البحث في">
+          <option value="clientName">اسم العميل</option>
+          <option value="serialNumber">الرقم التسلسلي</option>
+          <option value="model">الموديل</option>
+        </select>
+        <input #t2 class="search" type="search" [placeholder]="searchField() === 'clientName' ? 'بحث باسم العميل…' : 'يبدأ بـ…'"
+               [value]="searchText()" (input)="searchText.set(t2.value); changed()" aria-label="بحث">
+      </div>
+      <div class="segmented" role="tablist" aria-label="طريقة العرض">
+        <button type="button" role="tab" [class.on]="view() === 'table'" [attr.aria-selected]="view() === 'table'" (click)="setView('table')">جدول</button>
+        <button type="button" role="tab" [class.on]="view() === 'board'" [attr.aria-selected]="view() === 'board'" (click)="setView('board')">لوحة الحالات</button>
+      </div>
+    </div>
+    <div class="filters-row">
+      @if (technicians().length > 1) {
+        <select #t3 (change)="technicianId.set(+t3.value); changed()" aria-label="الفني">
+          <option [value]="0" [selected]="!technicianId()">كل الفنيين</option>
+          @for (t of technicians(); track t.id) { <option [value]="t.id" [selected]="t.id === technicianId()">{{ t.fullName }}</option> }
+        </select>
+      }
+      <select #t4 (change)="deviceTypeId.set(+t4.value); changed()" aria-label="نوع الجهاز">
+        <option [value]="0" [selected]="!deviceTypeId()">كل أنواع الأجهزة</option>
+        @for (x of lookups()?.deviceTypes; track x.id) { <option [value]="x.id" [selected]="x.id === deviceTypeId()">{{ x.name }}</option> }
+      </select>
+      <select #t5 (change)="companyId.set(+t5.value); changed()" aria-label="الشركة">
+        <option [value]="0" [selected]="!companyId()">كل الشركات</option>
+        @for (x of lookups()?.companies; track x.id) { <option [value]="x.id" [selected]="x.id === companyId()">{{ x.name }}</option> }
+      </select>
+      <select #t6 (change)="damageTypeId.set(+t6.value); changed()" aria-label="نوع العطل">
+        <option [value]="0" [selected]="!damageTypeId()">كل الأعطال</option>
+        @for (x of lookups()?.damageTypes; track x.id) { <option [value]="x.id" [selected]="x.id === damageTypeId()">{{ x.name }}</option> }
+      </select>
+      @if (hasFilter()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }
+    </div>
+  </div>
+
+  @if (view() === 'table') {
+    <!-- شارات الحالات: العدد ضمن نطاقي، والنقر يفلتر -->
+    <div class="status-tabs" role="tablist" aria-label="تصفية حسب الحالة">
+      <button type="button" role="tab" [class.on]="!statusId()" [attr.aria-selected]="!statusId()" (click)="setStatus(0)">الكل <b>{{ totalAll() }}</b></button>
+      @for (s of lookups()?.statuses; track s.id) {
+        <button type="button" role="tab" [class.on]="statusId() === s.id" [attr.aria-selected]="statusId() === s.id" [style.--c]="s.color" (click)="setStatus(s.id)">
+          <i aria-hidden="true"></i>{{ s.name }} <b>{{ countOf(s.id) }}</b>
+        </button>
+      }
+    </div>
+
+    <section class="panel">
+      @if (loading() && !rows().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+      @else if (!rows().length) {
+        <div class="empty-state"><h3>{{ hasFilter() || statusId() ? 'لا توجد نتائج مطابقة' : 'لا توجد طلبات صيانة بعد' }}</h3>
+          <p>{{ hasFilter() || statusId() ? 'جرّب تعديل البحث أو الفلاتر.' : 'سجّل أول طلب عند استلام جهاز من عميل.' }}</p></div>
+      } @else {
+        <div class="table-wrap" [class.dim]="loading()"><table>
+          <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الجهاز</th><th>الرقم التسلسلي</th><th>العطل</th><th>الحالة</th><th>الفني</th><th>تاريخ الاستلام</th></tr></thead>
+          <tbody>
+            @for (r of rows(); track r.id) {
+              <tr class="clickable" (click)="open(r)">
+                <td><a class="number mono" [routerLink]="['/maintenance/requests', r.id]" (click)="$event.stopPropagation()">{{ r.number }}</a></td>
+                <td><span class="cell-strong">{{ r.clientName }}</span>@if (r.clientPhone) { <small class="mono">{{ phone(r.clientPhone) }}</small> }</td>
+                <td><span class="cell-strong">{{ r.deviceTypeName }}</span><small>{{ r.deviceCompanyName }}{{ r.model ? ' · ' + r.model : '' }}</small></td>
+                <td>@if (r.serialNumber) { <span class="mono">{{ r.serialNumber }}</span> } @else { <span class="muted-cell">—</span> }</td>
+                <td>{{ r.damageTypeName }}</td>
+                <td><app-status-chip [name]="r.statusName" [color]="r.statusColor" /></td>
+                <td>{{ r.technicianName }}</td>
+                <td class="nowrap">{{ r.createdAt | utc | date:'yyyy/MM/dd' }}<small>{{ r.createdAt | utc | date:'HH:mm' }}</small></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+        <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+      }
+    </section>
+  } @else {
+    @if (!canDrag()) { <p class="readonly-note">وضع المشاهدة — تغيير الحالة لمن يملك صلاحية تغيير حالة الطلب</p> }
+    @if (loading() && !columns().length) { <app-empty-state panel>جارٍ تحميل اللوحة…</app-empty-state> }
+    @else if (!columns().length) { <div class="panel empty-state"><h3>لا توجد حالات معرّفة</h3><p>أضف حالات الطلب من «إعدادات الصيانة».</p></div> }
+    @else {
+      <div class="board" cdkDropListGroup [style.--cols]="columns().length">
+        @for (col of columns(); track col.status.id) {
+          <section class="column" [style.--c]="col.status.color" [attr.aria-label]="col.status.name">
+            <header class="col-head">
+              <span class="col-dot" aria-hidden="true"></span>
+              <h2>{{ col.status.name }}</h2>
+              <span class="col-count">{{ col.total }}</span>
+            </header>
+            <div class="col-body" cdkDropList [id]="'st-' + col.status.id" [cdkDropListData]="col.status.id"
+                 [cdkDropListEnterPredicate]="canDrop" (cdkDropListDropped)="drop($event)">
+              @for (r of col.items; track r.id) {
+                <article class="card" cdkDrag [cdkDragData]="r" [cdkDragDisabled]="!draggable(r)" [class.draggable]="draggable(r)"
+                         tabindex="0" role="button" (click)="open(r)" (keydown.enter)="open(r)" [attr.aria-label]="r.number + ' — ' + r.clientName">
+                  <div class="card-top"><span class="mono number">{{ r.number }}</span><small>{{ r.createdAt | utc | date:'MM/dd' }}</small></div>
+                  <h3>{{ r.deviceTypeName }} <span>{{ r.deviceCompanyName }}{{ r.model ? ' ' + r.model : '' }}</span></h3>
+                  <p class="damage">{{ r.damageTypeName }}</p>
+                  <footer class="card-foot"><small>{{ r.clientName }}</small><small class="tech">{{ r.technicianName }}</small></footer>
+                  <div class="drop-ghost" *cdkDragPlaceholder></div>
+                </article>
+              } @empty { <p class="col-empty">لا توجد طلبات</p> }
+            </div>
+            @if (col.total > boardLimit) {
+              <nav class="col-pager" [attr.aria-label]="'صفحات ' + col.status.name">
+                <button type="button" (click)="columnTo(col, col.page - 1)" [disabled]="col.page <= 1 || loading()" aria-label="الصفحة السابقة">‹</button>
+                <span>{{ col.page }} / {{ columnPages(col) }} <small>({{ col.total }})</small></span>
+                <button type="button" (click)="columnTo(col, col.page + 1)" [disabled]="col.page >= columnPages(col) || loading()" aria-label="الصفحة التالية">›</button>
+              </nav>
+            }
+          </section>
+        }
+      </div>
+    }
+  }
+</div>
+
+@if (formOpen() && lookups(); as l) {
+  <app-request-form-dialog [lookups]="l" (saved)="created($event)" (closed)="formOpen.set(false)" />
+}

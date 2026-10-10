@@ -1,0 +1,78 @@
+<div class="page">
+  @if (data(); as d) {
+    @if (seesOrganization()) {
+      <nav class="crumbs" aria-label="المسار"><a routerLink="/">المؤسسة</a><span>/</span><a [routerLink]="['/dashboard/branch', d.branchId]">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
+    } @else if (isBranchPosition()) {
+      <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.branchName }}</a><span>/</span><a [routerLink]="['/dashboard/department', d.departmentId]">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
+    } @else if (isDepartmentPosition()) {
+      <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.departmentName }}</a><span>/</span><span>{{ d.officeName }}</span></nav>
+    }
+  }
+  <app-dashboard-frame [showMap]="showMap()" [header]="headerTpl" [body]="bodyTpl" />
+</div>
+
+<ng-template #headerTpl>
+    <div>
+      <span class="eyebrow">لوحة رئيس المكتب</span>
+      <h1>{{ data()?.officeName || 'المكتب' }}</h1>
+      @if (data(); as d) { <p class="header-sub">{{ d.branchName }} / {{ d.departmentName }}@if (d.managerNames) { · رئيس المكتب: {{ d.managerNames }} }</p> }
+    </div>
+    <div class="header-actions"><button class="btn btn-ghost" (click)="load()" [disabled]="loading()">تحديث</button></div>
+</ng-template>
+
+<ng-template #bodyTpl>
+
+  <app-alert [message]="error()" />
+
+  @if (data(); as d) {
+    <section class="dash-stats" aria-label="إحصائيات المكتب">
+      <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="👥" tone="green" />
+      <app-stat-tile label="مهام العمل" [value]="d.tasksCount" icon="📋" tone="blue" hint="المسنَدة لموظفي المكتب" />
+      <app-stat-tile label="مسؤولون عن مهام" [value]="d.employeesWithTasks" icon="✅" tone="purple" />
+      <app-stat-tile label="موظفون بلا مهام" [value]="d.employeesWithoutTasks" icon="🧩" tone="orange" [alert]="d.employeesWithoutTasks > 0" />
+    </section>
+
+    @if (isOwn()) {
+      <section class="panel">
+        <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام المسنَدة إليك</h2></div></div>
+        <app-task-cards [tasks]="myTasks()" emptyText="لا توجد مهام مسنَدة إليك" />
+      </section>
+    }
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>موظفو المكتب</h2><p>الأدوار والمهام الموكلة لكل موظف</p></div></div>
+      @if (d.members.length) {
+        <div class="table-wrap"><table>
+          <thead><tr><th>الموظف</th><th>الدور</th><th>البريد الإلكتروني</th><th>مهام العمل</th><th>تاريخ الانضمام</th></tr></thead>
+          <tbody>
+            @for (m of d.members; track m.userId) {
+              <tr>
+                <td><strong class="cell-link">{{ m.fullName }}</strong></td>
+                <td>{{ label(m.roleName) }}</td>
+                <td dir="ltr">{{ m.email }}</td>
+                <td>
+                  @if (m.taskNames.length) { <div class="tag-list">@for (t of m.taskNames; track t) { <span class="tag">{{ t }}</span> }</div> }
+                  @else { <span class="muted-cell">لا توجد مهام</span> }
+                </td>
+                <td class="num">{{ m.joinedAt | date:'yyyy/MM/dd' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+      } @else { <app-empty-state>لا يوجد موظفون في هذا المكتب</app-empty-state> }
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>توزيع مهام العمل</h2><p>من المسؤول عن كل مهمة داخل المكتب</p></div></div>
+      <app-task-distribution [items]="d.taskDistribution" />
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>آخر الإجراءات</h2><p>انضمام الموظفين وإسناد المهام في المكتب</p></div></div>
+      <app-activity-list [items]="d.recentActivity" />
+    </section>
+
+  } @else if (loading()) {
+    <div class="panel skeleton" role="status">جارٍ تحميل لوحة المكتب…</div>
+  }
+</ng-template>

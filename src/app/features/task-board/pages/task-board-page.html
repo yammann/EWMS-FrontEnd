@@ -1,0 +1,158 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">إدارة المهام</span>
+      <h1>لوحة المهام</h1>
+      <p class="header-sub">
+        @if (mode() === 'incoming') { المهام المُسندة إليك — اسحب البطاقة بين الأعمدة لتحديث حالتها — وعند الانتهاء أرسلها «للمراجعة» ليعتمدها المُسنِد }
+        @else if (mode() === 'outgoing') { المهام التي أسندتَها — تابع تقدّم الجهات المنفِّذة }
+        @else { كل المهام ضمن نطاقك }
+      </p>
+    </div>
+    <div class="header-actions">
+      @if (canCreate()) { <button class="btn" type="button" (click)="newTask()">+ مهمة جديدة</button> }
+      @if (canRecurring()) { <a class="btn btn-ghost" routerLink="/task-board/recurring">المهام الدورية والقوالب</a> }
+      @if (canStats()) { <a class="btn btn-ghost" routerLink="/task-board/stats">الإحصائيات</a> }
+      <button class="btn btn-ghost" type="button" (click)="exportExcel()" [disabled]="exporting() || !tasks().length">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button>
+      <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="عرض المهام">
+    <button type="button" role="tab" [attr.aria-selected]="mode() === 'incoming'" [class.on]="mode() === 'incoming'" (click)="setMode('incoming')">الواردة إليّ</button>
+    @if (canCreate()) {
+      <button type="button" role="tab" [attr.aria-selected]="mode() === 'outgoing'" [class.on]="mode() === 'outgoing'" (click)="setMode('outgoing')">الصادرة مني</button>
+    }
+    @if (isLeader()) {
+      <button type="button" role="tab" [attr.aria-selected]="mode() === 'scope'" [class.on]="mode() === 'scope'" (click)="setMode('scope')">كل مهام نطاقي</button>
+    }
+  </nav>
+
+  <section class="dash-stats" aria-label="ملخص المهام">
+    <app-stat-tile label="لم تُنفَّذ" [value]="counts().todo" icon="🗂️" tone="blue" />
+    <app-stat-tile label="قيد التنفيذ" [value]="counts().inProgress" icon="⚙️" tone="purple" />
+    <app-stat-tile label="بانتظار المراجعة" [value]="counts().inReview" icon="🔎" tone="orange" hint="بانتظار اعتماد المُسنِد" />
+    <app-stat-tile label="متأخرة" [value]="counts().overdue" icon="⏰" tone="red" [alert]="counts().overdue > 0" hint="تجاوزت تاريخ التسليم" />
+  </section>
+
+  <div class="toolbar">
+    <label class="search">
+      <span class="sr-only">بحث</span>
+      <input #t1 type="search" placeholder="بحث بالعنوان أو الجهة أو المُسنِد…" [value]="search()" (input)="search.set(t1.value)">
+    </label>
+    <select #t2 [appSelectValue]="priorityFilter()" (change)="setPriorityFilter(t2.value)" aria-label="تصفية حسب الأولوية">
+      <option value="">كل الأولويات</option>
+      @for (p of priorities; track p) { <option [value]="p">{{ priorityLabel[p] }}</option> }
+    </select>
+    <label class="check"><input #t3 type="checkbox" [checked]="overdueOnly()" (change)="overdueOnly.set(t3.checked)"> المتأخرة فقط</label>
+    <div class="view-switch" role="group" aria-label="طريقة العرض">
+      <button type="button" [class.on]="view() === 'board'" [attr.aria-pressed]="view() === 'board'" (click)="setView('board')">اللوحة</button>
+      <button type="button" [class.on]="view() === 'calendar'" [attr.aria-pressed]="view() === 'calendar'" (click)="setView('calendar')">التقويم</button>
+    </div>
+  </div>
+
+  <details class="more-filters" [open]="filtersActive()">
+    <summary>فلاتر إضافية@if (filtersActive()) { <span class="dotmark" aria-label="فلاتر مفعّلة"></span> }</summary>
+    <div class="filters-grid">
+      <label>المُسنِد
+        <select #t4 [appSelectValue]="creatorFilter()" (change)="creatorFilter.set(t4.value)">
+          <option value="">الكل</option>@for (c of creators(); track c) { <option [value]="c">{{ c }}</option> }
+        </select></label>
+      <label>الجهة المنفِّذة
+        <select #t5 [appSelectValue]="targetFilter()" (change)="targetFilter.set(t5.value)">
+          <option value="">الكل</option>@for (t of targets(); track t) { <option [value]="t">{{ t }}</option> }
+        </select></label>
+      <label>التسليم من <input #t6 type="date" [value]="dueFrom()" (change)="dueFrom.set(t6.value)"></label>
+      <label>التسليم إلى <input #t7 type="date" [value]="dueTo()" (change)="dueTo.set(t7.value)"></label>
+      <label>المنجزة المعروضة
+        <select #t8 [appSelectValue]="doneDays()" (change)="setDoneDays(+t8.value)">
+          <option value="30">آخر 30 يوماً</option><option value="90">آخر 3 أشهر</option><option value="365">آخر سنة</option><option value="3650">الكل</option>
+        </select></label>
+      @if (filtersActive()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }
+    </div>
+  </details>
+
+  @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+
+  @if (loading() && !tasks().length) {
+    <div class="panel empty-state" role="status">جارٍ تحميل المهام…</div>
+  } @else if (view() === 'calendar') {
+    @defer { <app-task-calendar [tasks]="filtered()" (openTask)="open($event)" /> }
+  } @else {
+    <div class="board" cdkDropListGroup>
+      @for (col of columns; track col.status) {
+        <section class="column c-{{ col.status }}" [attr.aria-label]="col.label">
+          <header class="col-head">
+            <span class="col-dot" aria-hidden="true"></span>
+            <h2>{{ col.label }}</h2>
+            <span class="col-count">{{ byStatus()[col.status].length }}</span>
+            <small>{{ col.hint }}</small>
+          </header>
+
+          <div class="col-body" cdkDropList [id]="'col-' + col.status" [cdkDropListData]="col.status"
+               [cdkDropListEnterPredicate]="canDrop" (cdkDropListDropped)="drop($event)">
+            @for (t of byStatus()[col.status]; track t.id) {
+              <article class="card p-{{ t.priority }}" cdkDrag [cdkDragData]="t" [cdkDragDisabled]="!t.canChangeStatus"
+                       [class.draggable]="t.canChangeStatus" tabindex="0" role="button"
+                       (click)="open(t)" (keydown.enter)="open(t)" [attr.aria-label]="t.title + ' — ' + t.statusAr">
+                <div class="card-top">
+                  <span class="prio p-{{ t.priority }}">{{ t.priorityAr }}</span>
+                  @if (dueState(t); as due) {
+                    <span class="due {{ due }}">{{ due === 'late' ? 'متأخرة' : 'قريباً' }} · {{ t.dueDate | date:'MM/dd' }}</span>
+                  } @else if (t.dueDate) {
+                    <span class="due">{{ t.dueDate | date:'yyyy/MM/dd' }}</span>
+                  }
+                </div>
+                <h3>{{ t.title }}</h3>
+                @if (t.parentTitle) { <p class="parent">↰ {{ t.parentTitle }}</p> }
+                <p class="target">
+                  @if (mode() === 'incoming') { من: {{ t.createdByName }} }
+                  @else { إلى: {{ t.targetName }} }
+                </p>
+                @if (t.claimedByName) { <p class="claimed">✋ يعمل عليها: {{ t.claimedByName }}</p> }
+                @if (t.subTasksTotal) {
+                  <div class="sub" [attr.title]="t.subTasksDone + ' من ' + t.subTasksTotal + ' مهام فرعية منجزة'">
+                    <span class="bar"><span [style.width.%]="100 * t.subTasksDone / t.subTasksTotal"></span></span>
+                    <small>{{ t.subTasksDone }}/{{ t.subTasksTotal }}</small>
+                  </div>
+                }
+                <footer class="card-foot">
+                  <small>{{ t.targetPath }}</small>
+                  <span class="badges">
+                    @if (t.checklistTotal) { <small [attr.title]="'قائمة التحقق: ' + t.checklistDone + ' من ' + t.checklistTotal" [class.all]="t.checklistDone === t.checklistTotal">☑ {{ t.checklistDone }}/{{ t.checklistTotal }}</small> }
+                    @if (t.attachmentsCount) { <small title="مرفقات">📎 {{ t.attachmentsCount }}</small> }
+                    @if (t.commentsCount) { <small class="comments">💬 {{ t.commentsCount }}</small> }
+                  </span>
+                </footer>
+                <div class="drop-ghost" *cdkDragPlaceholder></div>
+              </article>
+            } @empty {
+              <p class="col-empty">لا توجد مهام</p>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
+
+@if (openTaskId(); as id) {
+  @defer {
+    <app-task-detail-drawer [taskId]="id" (closed)="closeDrawer()" (changed)="load(false)"
+                            (edit)="editTask($event)" (delegate)="delegateTask($event)" (openTask)="openTask($event)" />
+  }
+}
+
+@if (form(); as f) {
+  @defer {
+    <app-task-form-dialog [mode]="f.mode" [task]="f.task" [targetTypes]="targetTypes()"
+                          (saved)="formSaved($event)" (uploadFailed)="uploadFailed($event)" (closed)="form.set(null)" />
+  }
+}
+
+@if (returning(); as r) {
+  @defer {
+    <app-task-note-dialog heading="إعادة المهمة للتنفيذ" [subheading]="r.title" [busy]="returnBusy()"
+                          (confirm)="returnWithNote($event)" (closed)="returning.set(null)" />
+  }
+}
