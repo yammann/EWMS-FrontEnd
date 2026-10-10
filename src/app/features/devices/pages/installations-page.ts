@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { RowActions } from '@shared/ui/row-actions';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
@@ -37,7 +38,7 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-installations-page', standalone: true,
-  imports: [SelectValue, FormActions, PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
+  imports: [RowActions, SelectValue, FormActions, PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss'],
   templateUrl: './installations-page.html',
   styles: [`
@@ -50,6 +51,8 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
   `]
 })
 export class InstallationsPage {
+  /** السجل الجاري حذفه (مؤشر على صفه) */
+  deletingId = signal<number | null>(null);
   private service = inject(DeviceService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
@@ -185,9 +188,10 @@ export class InstallationsPage {
   async askDelete(i: DeviceSite) {
     const hint = i.status === 3 ? '' : ' إن كان الجهاز قد فُكّ فاستخدم الحالة «أُزيل» بدل الحذف ليبقى سجله.';
     if (!await this.confirm.ask(`حذف تركيب «${i.deviceName}» في «${i.siteName}» (${i.ip})؟${hint}`, 'حذف')) return;
+    this.deletingId.set(i.id);
     this.service.deleteInstallation(i.id).subscribe({
-      next: () => { this.toast.success('تم الحذف'); this.load(); },
-      error: e => this.toast.error(e.message)
+      next: () => { this.deletingId.set(null); this.toast.success('تم الحذف'); this.load(); },
+      error: e => { this.deletingId.set(null); this.toast.error(e.message); }
     });
   }
 

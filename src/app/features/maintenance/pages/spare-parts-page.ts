@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RowActions } from '@shared/ui/row-actions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject, debounceTime } from 'rxjs';
@@ -25,7 +26,7 @@ const PAGE_SIZE = 25;
  */
 @Component({
   selector: 'app-spare-parts-page', standalone: true,
-  imports: [PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
+  imports: [RowActions, PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './requests-page.scss'],
   templateUrl: './spare-parts-page.html',
   styles: [`
@@ -40,6 +41,8 @@ const PAGE_SIZE = 25;
   `]
 })
 export class MaintenanceSparePartsPage {
+  /** السجل الجاري حذفه (مؤشر على صفه) */
+  deletingId = signal<number | null>(null);
   private service = inject(MaintenanceService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
@@ -127,9 +130,10 @@ export class MaintenanceSparePartsPage {
 
   async remove(part: SparePart) {
     if (!await this.confirm.ask(`حذف «${part.name}»؟ لا تُحذف قطعة لها حركات مخزون.`, 'حذف')) return;
+    this.deletingId.set(part.id);
     this.service.deletePart(part.id).subscribe({
-      next: r => { this.toast.success(r.message); this.load(); },
-      error: e => this.toast.error(e.message)
+      next: r => { this.deletingId.set(null); this.toast.success(r.message); this.load(); },
+      error: e => { this.deletingId.set(null); this.toast.error(e.message); }
     });
   }
 }

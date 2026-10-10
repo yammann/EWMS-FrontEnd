@@ -166,7 +166,8 @@ test('مهام العمل: إضافة بفرع وموظف مسؤول، تعدي�
   await page.goto('/work-tasks');
   await startCreate(page, /مهمة جديدة/);
   const branch = await field(page, 'الفرع');
-  // أول فرع فيه موظفون
+  // أول فرع فيه موظفون (بعد وصول قائمة الفروع)
+  await waitOptions(branch);
   const options = await branch.locator('option').evaluateAll(os => os.map(o => (o as HTMLOptionElement).value).filter(v => v !== '0'));
   let picked = false;
   for (const v of options) {
@@ -385,4 +386,34 @@ test('المواقع: كتابة الإحداثيين يدوياً تحدد ال
 test('العطل: قائمة السنة تُظهر السنة المعروضة فعلاً', async ({ page }) => {
   await page.goto('/vacations/holidays');
   await expect(page.getByRole('combobox', { name: 'السنة' })).toHaveValue(String(new Date().getFullYear()));
+});
+
+// ───────────────────────── صفحات الترقيم من الخادم ─────────────────────────
+test('أجهزة الصيانة: إضافة جهاز برقم تسلسلي مؤكَّد، ثم البحث عنه وحذفه', async ({ page }) => {
+  const serial = 'E2E-' + uid();
+  await page.goto('/maintenance/devices');
+  await startCreate(page, /جهاز جديد/);
+  await (await field(page, /^الرقم التسلسلي/)).fill(serial);
+  await (await field(page, 'تأكيد الرقم التسلسلي')).fill(serial);
+  const type = await field(page, 'نوع الجهاز'); await waitOptions(type); await type.selectOption({ index: 1 });
+  const company = await field(page, 'الشركة المصنّعة'); await waitOptions(company); await company.selectOption({ index: 1 });
+  await (await field(page, 'اسم الجهاز')).fill('e2e جهاز صيانة');
+  await submit(page);
+  await page.locator('main input[type=search]').first().fill(serial);
+  await expectRow(page, serial);
+  await deleteRow(page, serial);
+});
+
+test('قطع الغيار: إضافة قطعة ثم حذفها (بلا حركات)', async ({ page }) => {
+  const name = 'e2e قطعة ' + uid();
+  await page.goto('/maintenance/parts');
+  await startCreate(page, /قطعة جديدة/);
+  const dept = await field(page, 'مخزون القسم');
+  if (await dept.count()) { await waitOptions(dept); await dept.selectOption({ index: 1 }); }
+  await (await field(page, 'اسم القطعة')).fill(name);
+  await (await field(page, 'الوحدة')).fill('قطعة');
+  await submit(page);
+  await page.locator('main input[type=search]').first().fill(name);
+  await expectRow(page, name);
+  await deleteRow(page, name);
 });

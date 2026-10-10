@@ -32,10 +32,9 @@
               <td><span class="status-badge" [class.status-active]="state(t) === 'done'" [class.status-pending]="state(t) === 'running'" [class.status-draft]="state(t) === 'new'">{{ stateLabel[state(t)] }}</span></td>
               <td>{{ t.userName }}</td>
               <td class="nowrap">{{ t.createdAt | utc | date:'yyyy/MM/dd' }}</td>
-              <td (click)="$event.stopPropagation()"><div class="row-actions">
+              <td (click)="$event.stopPropagation()"><app-row-actions [canDelete]="can().deleteTask && t.canDelete" [deleting]="deletingId() === t.id" (remove)="askDelete(t)">
                 @if (can().assignTask && t.canAssign) { <button class="btn btn-ghost btn-sm" type="button" (click)="assigning.set(t)">نقل</button> }
-                @if (can().deleteTask && t.canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(t)">حذف</button> }
-              </div></td>
+              </app-row-actions></td>
             </tr>
           }
         </tbody>

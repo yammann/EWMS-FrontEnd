@@ -49,13 +49,11 @@
               <td class="num">{{ p.averageCost | money }}</td>
               <td class="num">{{ p.stockValue | money }}</td>
               <td class="compat">{{ compat(p) }}</td>
-              <td><div class="row-actions">
+              <td><app-row-actions [canEdit]="can().editPart" [canDelete]="can().deletePart" [deleting]="deletingId() === p.id" (edit)="openForm(p)" (remove)="remove(p)">
                 @if (can().receiveParts) { <button class="btn btn-sm" type="button" (click)="stock.set({ part: p, mode: 'receive' })">إدخال</button> }
                 @if (can().adjustParts) { <button class="btn btn-ghost btn-sm" type="button" (click)="stock.set({ part: p, mode: 'adjust' })">تسوية</button> }
                 <button class="btn btn-ghost btn-sm" type="button" (click)="movements.set(p)">الحركات</button>
-                @if (can().editPart) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(p)">تعديل</button> }
-                @if (can().deletePart) { <button class="btn btn-danger btn-sm" type="button" (click)="remove(p)">حذف</button> }
-              </div></td>
+              </app-row-actions></td>
             </tr>
           }
         </tbody>

@@ -45,11 +45,9 @@
               <td>{{ d.name || '—' }}@if (d.description) { <small>{{ d.description }}</small> }</td>
               <td><span class="cell-strong">{{ d.deviceTypeName }}</span><small>{{ d.deviceCompanyName }}</small></td>
               <td>@if (d.model) { <span class="mono">{{ d.model }}</span> } @else { <span class="muted-cell">—</span> }</td>
-              <td><div class="row-actions">
+              <td><app-row-actions [canEdit]="can().editDevice && !!lookups()" [canDelete]="can().deleteDevice" [deleting]="deletingId() === d.id" (edit)="openForm(d)" (remove)="remove(d)">
                 @if (can().viewRequests) { <button class="btn btn-ghost btn-sm" type="button" (click)="openHistory(d)">سجل الإصلاحات</button> }
-                @if (can().editDevice) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(d)" [disabled]="!lookups()">تعديل</button> }
-                @if (can().deleteDevice) { <button class="btn btn-danger btn-sm" type="button" (click)="remove(d)">حذف</button> }
-              </div></td>
+              </app-row-actions></td>
             </tr>
           }
         </tbody>

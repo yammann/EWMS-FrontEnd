@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { RowActions } from '@shared/ui/row-actions';
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,7 +26,7 @@ const PAGE_SIZE = 20;
  * كل موظف يرى مهامه، ورئيس القسم مهام قسمه وله نقلها لموظف آخر، ورئيس الفرع يطّلع فقط.
  */
 @Component({
-  selector: 'app-maintenance-tasks-page', standalone: true, imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
+  selector: 'app-maintenance-tasks-page', standalone: true, imports: [RowActions, PageHeader, EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './tasks-page.html',
   styles: [`
@@ -35,6 +36,8 @@ const PAGE_SIZE = 20;
   `]
 })
 export class MaintenanceTasksPage {
+  /** السجل الجاري حذفه (مؤشر على صفه) */
+  deletingId = signal<number | null>(null);
   private service = inject(MaintenanceService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
@@ -168,9 +171,10 @@ export class MaintenanceTasksPage {
 
   async askDelete(t: MaintenanceTask) {
     if (!await this.confirm.ask(`حذف مهمة الصيانة في «${t.taskLocation}»؟`, 'حذف')) return;
+    this.deletingId.set(t.id);
     this.service.deleteTask(t.id).subscribe({
-      next: () => { this.toast.success('تم حذف المهمة'); this.load(); },
-      error: e => this.toast.error(e.message)
+      next: () => { this.deletingId.set(null); this.toast.success('تم حذف المهمة'); this.load(); },
+      error: e => { this.deletingId.set(null); this.toast.error(e.message); }
     });
   }
 }

@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RowActions } from '@shared/ui/row-actions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, debounceTime, forkJoin } from 'rxjs';
 import { MaintenanceService } from '../data-access/maintenance.service';
@@ -24,11 +25,13 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-maintenance-devices-page', standalone: true,
-  imports: [SelectValue, PageHeader, EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
+  imports: [RowActions, SelectValue, PageHeader, EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './requests-page.scss'],
   templateUrl: './devices-page.html'
 })
 export class MaintenanceDevicesPage {
+  /** السجل الجاري حذفه (مؤشر على صفه) */
+  deletingId = signal<number | null>(null);
   private service = inject(MaintenanceService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
@@ -89,9 +92,10 @@ export class MaintenanceDevicesPage {
 
   async remove(device: MaintenanceDevice) {
     if (!await this.confirm.ask('حذف الجهاز «' + device.serialNumber + '»؟ لا يُحذف جهاز له طلبات صيانة.', 'حذف')) return;
+    this.deletingId.set(device.id);
     this.service.deleteDevice(device.id).subscribe({
-      next: r => { this.toast.success(r.message); this.load(); },
-      error: e => this.toast.error(e.message)
+      next: r => { this.deletingId.set(null); this.toast.success(r.message); this.load(); },
+      error: e => { this.deletingId.set(null); this.toast.error(e.message); }
     });
   }
 

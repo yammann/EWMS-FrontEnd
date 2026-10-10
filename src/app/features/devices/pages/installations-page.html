@@ -56,12 +56,10 @@
               <td><app-device-password [installationId]="i.id" [hasPassword]="i.hasPassword" /></td>
               <td><app-install-status [status]="i.status" />
                 <small>{{ i.lastVerifiedAt ? 'تحقق ' + (i.lastVerifiedAt | date:'yyyy/MM/dd') : 'لم يُتحقق بعد' }}</small></td>
-              <td><div class="row-actions">
+              <td><app-row-actions [canEdit]="access().canEdit" [canDelete]="access().canDelete" [deleting]="deletingId() === i.id" (edit)="openForm(i)" (remove)="askDelete(i)">
                 @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="verify(i)" title="تأكيد أن بيانات التركيب صحيحة اليوم">✓ تحققت</button> }
                 <button class="btn btn-ghost btn-sm" type="button" (click)="history.set(i)">السجل</button>
-                @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(i)">تعديل</button> }
-                @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(i)">حذف</button> }
-              </div></td>
+              </app-row-actions></td>
             </tr>
           }
         </tbody>

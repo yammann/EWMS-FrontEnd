@@ -21,6 +21,9 @@ teardown('حذف بيانات الاختبار المتبقية', async ({ baseU
   for (const s of await list('Sites/GetAll')) if (E2E(s.name)) await del(`Sites/Delete/${s.id}`);
   for (const kind of ['DamageTypes', 'MaintenanceRequestStatuses', 'DeviceTypes', 'DeviceCompanies'])
     for (const x of await list(`${kind}/GetAll`)) if (E2E(x.name)) await del(`${kind}/Delete/${x.id}`);
+  const paged = async (path: string) => { const r = await api.get(path, { headers }); return r.ok() ? ((await r.json()).items ?? []) as { id: number; name?: string; serialNumber?: string }[] : []; };
+  for (const d of await paged('MaintenanceDevices/GetAll?serialNumber=E2E-&pageSize=100')) if (/^E2E-\d+$/.test(d.serialNumber ?? '')) await del(`MaintenanceDevices/Delete/${d.id}`);
+  for (const p of await paged('SpareParts/GetAll?search=e2e&pageSize=100')) if (E2E(p.name)) await del(`SpareParts/Delete/${p.id}`);
   for (const u of await list('Users/GetAll')) if (/^e2e\d+@test\.local$/.test(u.email ?? '')) await del(`Users/Delete/${u.id}`);
   for (const r of await list('Roles/GetAll')) if (E2E(r.name)) await del(`Roles/Delete/${r.id}`);
   for (const o of await list('Offices/GetAll')) if (E2E(o.name)) await del(`Offices/Delete/${o.id}`);
