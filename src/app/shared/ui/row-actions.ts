@@ -1,10 +1,14 @@
 import { Component, input, output } from '@angular/core';
 
-/** أزرار الصف في جداول الإدارة: تعديل + حذف (أيقونتان) بحسب الصلاحية، ومؤشر انشغال على الحذف. الشكل من .icon-btn العام. */
+/**
+ * أزرار الصف في جداول الإدارة: تعديل + حذف (أيقونتان) بحسب الصلاحية، ومؤشر انشغال على الحذف. الشكل من .icon-btn العام.
+ * أزرار إضافية خاصة بالصفحة (مثل «السجل» أو «نسخ») تُمرَّر كمحتوى وتظهر قبلهما.
+ */
 @Component({
   selector: 'app-row-actions', standalone: true,
   template: `
     <div class="row-actions">
+      <ng-content />
       @if (canEdit()) {
         <button type="button" class="icon-btn edit" title="تعديل" (click)="edit.emit()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

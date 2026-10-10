@@ -13,7 +13,7 @@
       <app-alert [message]="error()" />
       <div class="decide">
         <label class="form-field"><span class="form-label">يُحوَّل إلى</span>
-          <select #t1 [value]="target()" (change)="target.set(+t1.value)" [disabled]="busy()">
+          <select #t1 [appSelectValue]="target()" (change)="target.set(+t1.value)" [disabled]="busy()">
             <option [value]="0">اختر الموظف</option>
             @for (u of assignees(); track u.id) {
               <option [value]="u.id" [selected]="u.id === target()" [disabled]="u.id === request().userId">{{ u.fullName }}{{ u.id === request().userId ? ' (الحالي)' : '' }}{{ u.id === t.suggestedUserId ? ' — المقترح' : '' }}</option>

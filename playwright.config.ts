@@ -21,13 +21,15 @@ export default defineConfig({
     screenshot: 'only-on-failure'
   },
   projects: [
-    { name: 'setup', testMatch: /auth\.setup\.ts/, use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
+    // setup يسجّل الدخول؛ وبعد انتهاء كل الاختبارات يحذف cleanup بيانات «e2e …» المتبقية
+    { name: 'setup', testMatch: /auth\.setup\.ts/, use: { ...devices['Desktop Chrome'], channel: 'chrome' }, teardown: 'cleanup' },
+    { name: 'cleanup', testMatch: /cleanup\.teardown\.ts/ },
     {
       name: 'chrome',
       // Chrome المثبّت على الجهاز — بلا تنزيل متصفح إضافي
       use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: 'e2e/.auth/admin.json', viewport: { width: 1440, height: 900 } },
       dependencies: ['setup'],
-      testIgnore: /auth\.setup\.ts/
+      testIgnore: /auth\.setup\.ts|cleanup\.teardown\.ts/
     }
   ]
 });

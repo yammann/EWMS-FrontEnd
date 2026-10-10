@@ -40,7 +40,7 @@
       <span class="sr-only">بحث</span>
       <input #t1 type="search" placeholder="بحث بالعنوان أو الجهة أو المُسنِد…" [value]="search()" (input)="search.set(t1.value)">
     </label>
-    <select #t2 [value]="priorityFilter()" (change)="setPriorityFilter(t2.value)" aria-label="تصفية حسب الأولوية">
+    <select #t2 [appSelectValue]="priorityFilter()" (change)="setPriorityFilter(t2.value)" aria-label="تصفية حسب الأولوية">
       <option value="">كل الأولويات</option>
       @for (p of priorities; track p) { <option [value]="p">{{ priorityLabel[p] }}</option> }
     </select>
@@ -55,17 +55,17 @@
     <summary>فلاتر إضافية@if (filtersActive()) { <span class="dotmark" aria-label="فلاتر مفعّلة"></span> }</summary>
     <div class="filters-grid">
       <label>المُسنِد
-        <select #t4 [value]="creatorFilter()" (change)="creatorFilter.set(t4.value)">
+        <select #t4 [appSelectValue]="creatorFilter()" (change)="creatorFilter.set(t4.value)">
           <option value="">الكل</option>@for (c of creators(); track c) { <option [value]="c">{{ c }}</option> }
         </select></label>
       <label>الجهة المنفِّذة
-        <select #t5 [value]="targetFilter()" (change)="targetFilter.set(t5.value)">
+        <select #t5 [appSelectValue]="targetFilter()" (change)="targetFilter.set(t5.value)">
           <option value="">الكل</option>@for (t of targets(); track t) { <option [value]="t">{{ t }}</option> }
         </select></label>
       <label>التسليم من <input #t6 type="date" [value]="dueFrom()" (change)="dueFrom.set(t6.value)"></label>
       <label>التسليم إلى <input #t7 type="date" [value]="dueTo()" (change)="dueTo.set(t7.value)"></label>
       <label>المنجزة المعروضة
-        <select #t8 [value]="doneDays()" (change)="setDoneDays(+t8.value)">
+        <select #t8 [appSelectValue]="doneDays()" (change)="setDoneDays(+t8.value)">
           <option value="30">آخر 30 يوماً</option><option value="90">آخر 3 أشهر</option><option value="365">آخر سنة</option><option value="3650">الكل</option>
         </select></label>
       @if (filtersActive()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }

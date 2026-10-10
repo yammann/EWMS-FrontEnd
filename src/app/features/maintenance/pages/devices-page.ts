@@ -13,6 +13,7 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { trackRequest } from '@shared/ui/loader';
+import { SelectValue } from '@shared/ui/select-value';
 
 type SearchField = 'serialNumber' | 'model' | 'name';
 const PAGE_SIZE = 20;
@@ -23,7 +24,7 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-maintenance-devices-page', standalone: true,
-  imports: [PageHeader, EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
+  imports: [SelectValue, PageHeader, EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './requests-page.scss'],
   templateUrl: './devices-page.html'
 })

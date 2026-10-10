@@ -6,6 +6,7 @@ import { GovernorateFeature } from '@core/utils/geo';
 import { ToastService } from '@shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 import { trackRequest } from '@shared/ui/loader';
+import { SelectValue } from '@shared/ui/select-value';
 
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */
 const RAMP = ['var(--map-1)', 'var(--map-2)', 'var(--map-3)', 'var(--map-4)'];
@@ -23,7 +24,7 @@ let lastView: { branchId: number; focus: string | null } | null = null;
  * أثناء السكرول بينما تصغر وتخفت تدريجياً حتى تنغلق.
  */
 @Component({
-  selector: 'app-branch-map', standalone: true, imports: [RouterLink, SyriaSvgMap],
+  selector: 'app-branch-map', standalone: true, imports: [SelectValue, RouterLink, SyriaSvgMap],
   templateUrl: './branch-map.html',
   styleUrl: './branch-map.scss'
 })

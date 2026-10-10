@@ -21,7 +21,7 @@
     </div>
     <div class="head-actions">
       @if (branches().length > 1) {
-      <select #t1 [value]="branchId()" (change)="selectBranch(+t1.value)" aria-label="اختيار الفرع">
+      <select #t1 [appSelectValue]="branchId()" (change)="selectBranch(+t1.value)" aria-label="اختيار الفرع">
         @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}{{ b.hasMapData ? '' : ' (لا توجد بيانات بعد)' }}</option> }
       </select>
       }

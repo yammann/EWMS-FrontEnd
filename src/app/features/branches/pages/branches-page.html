@@ -1,8 +1,8 @@
 <section class="branches-page" dir="rtl">
 
   <!-- Header -->
-  <app-admin-header eyebrow="إدارة الفروع" heading="الفروع" subtitle="إدارة فروع النظام التي تتبعها الأقسام والمستخدمون." [loading]="loading()"
-    [createLabel]="canCreate() ? 'فرع جديد' : ''" (refresh)="load(true)" (create)="crud.openCreate()" />
+  <app-admin-header eyebrow="إدارة الفروع" heading="الفروع" subtitle="إدارة فروع النظام التي تتبعها الأقسام والمستخدمون." [loading]="crud.busy()"
+    [createLabel]="canCreate() ? 'فرع جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
   <!-- Stats -->
   <section class="stats-grid">
@@ -47,7 +47,7 @@
       <span class="pill">{{ branches().length }} فرع</span>
     </div>
 
-    @if (loading()) {
+    @if (crud.loading()) {
       <div class="skeleton-list">
         @for (item of [1,2,3,4,5]; track item) {
           <div class="skeleton-row branches-skeleton">
@@ -67,7 +67,7 @@
           </thead>
           <tbody>
             @for (branch of pager.items(); track branch.id) {
-              <tr [class.selected]="crud.selected()?.id === branch.id">
+              <tr [class.selected]="crud.dialog()?.item?.id === branch.id">
                 <td>
                   <div class="branch-cell-name">
                     <div class="branch-avatar">{{ (branch.name || 'ف').charAt(0) }}</div>
@@ -85,7 +85,7 @@
                   }
                 </td>
                 <td>
-                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="saving() === 'delete-' + branch.id" (edit)="crud.openEdit(branch)" (remove)="crud.remove(branch)" />
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === branch.id" (edit)="crud.openEdit(branch)" (remove)="crud.remove(branch)" />
                 </td>
               </tr>
             }
@@ -110,13 +110,13 @@
   <!-- ============================================================
        Modals
        ============================================================ -->
-  @if (crud.activeModal(); as modal) {
-    <app-modal kicker="إجراء" [heading]="crud.modalTitle(modal)" [busy]="!!saving()" (closed)="crud.closeModal()">
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title(dlg.mode)" [busy]="crud.saving()" (closed)="crud.close()">
 
         <div class="modal-body">
-          <app-entity-form [mode]="modal" [form]="modal === 'create' ? createForm : editForm" nameLabel="اسم الفرع"
+          <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم الفرع"
                            namePlaceholder="مثال: فرع دمشق" descPlaceholder="وصف مختصر عن الفرع..." createLabel="إنشاء الفرع"
-                           [saving]="saving()" (submitted)="modal === 'create' ? crud.create() : crud.update()" (dismissed)="crud.closeModal()">
+                           [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
             <svg nameIcon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 21h18"></path>
             <path d="M5 21V5l7-3 7 3v16"></path>

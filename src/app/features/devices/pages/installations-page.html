@@ -14,19 +14,19 @@
   <div class="toolbar">
     <input #t1 class="search" type="search" placeholder="بحث بالـ IP أو الجهاز أو الرقم التسلسلي أو MAC أو مكان التركيب…" [value]="search()"
            (input)="search.set(t1.value); search$.next()" aria-label="بحث">
-    <select #t2 [value]="governorate()" (change)="setFilter({ governorate: t2.value || null, siteId: null })" aria-label="المحافظة">
+    <select #t2 [appSelectValue]="governorate()" (change)="setFilter({ governorate: t2.value || null, siteId: null })" aria-label="المحافظة">
       <option value="">كل المحافظات</option>
       @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
     </select>
-    <select #t3 [value]="siteId()" (change)="setFilter({ siteId: +t3.value || null })" aria-label="الموقع">
+    <select #t3 [appSelectValue]="siteId()" (change)="setFilter({ siteId: +t3.value || null })" aria-label="الموقع">
       <option [value]="0">كل المواقع</option>
       @for (s of sitesInGovernorate(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
     </select>
-    <select #t4 [value]="deviceId()" (change)="setFilter({ deviceId: +t4.value || null })" aria-label="الجهاز">
+    <select #t4 [appSelectValue]="deviceId()" (change)="setFilter({ deviceId: +t4.value || null })" aria-label="الجهاز">
       <option [value]="0">كل الأجهزة</option>
       @for (d of devices(); track d.id) { <option [value]="d.id">{{ d.name }}@if (d.model) { — {{ d.model }} }</option> }
     </select>
-    <select #t5 [value]="status()" (change)="setFilter({ status: +t5.value || null })" aria-label="الحالة">
+    <select #t5 [appSelectValue]="status()" (change)="setFilter({ status: +t5.value || null })" aria-label="الحالة">
       <option [value]="0">كل الحالات</option>
       @for (s of statuses; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
     </select>

@@ -1,21 +1,21 @@
+import { CommonModule } from '@angular/common';
+import { Component, computed, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AppPermission } from '@core/constants/access';
+import { Branch } from '@core/models/ewms.models';
+import { AuthService } from '@core/services/auth.service';
+import { LookupsService } from '@core/services/lookups.service';
 import { Pagination } from '@core/utils/pagination';
+import { AdminHeader } from '@shared/ui/admin-header';
+import { CrudMode, CrudPage } from '@shared/ui/crud-page';
 import { EntityForm } from '@shared/ui/entity-form';
+import { Modal } from '@shared/ui/modal';
+import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { StatTile } from '@shared/ui/stat-tile';
-import { AdminHeader } from '@shared/ui/admin-header';
-import { loader } from '@shared/ui/loader';
-import { Pager } from '@shared/ui/pager';
-import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Branch } from '@core/models/ewms.models';
 import { BranchService } from '../data-access/branch.service';
-import { AuthService } from '@core/services/auth.service';
-import { AppPermission } from '@core/constants/access';
-import { Modal } from '@shared/ui/modal';
-import { PageActions } from '@shared/ui/page-actions';
-import { ModalCrud } from '@shared/ui/modal-crud';
 
+/** الفروع — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-branches-page',
   standalone: true,
@@ -25,41 +25,38 @@ import { ModalCrud } from '@shared/ui/modal-crud';
 })
 export class BranchesPage {
   private branchService = inject(BranchService);
-  private fb = inject(FormBuilder);
+  private lookups = inject(LookupsService);
   private auth = inject(AuthService);
-
-  branches = signal<Branch[]>([]);
-  pager = new Pagination(() => this.branches());
-  private actions = new PageActions(() => this.load(true));
-  saving = this.actions.saving;
-
-  createForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
-    description: ['']
-  });
-
-  editForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
-    description: ['']
-  });
 
   canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateBranch));
   canEdit = computed(() => this.auth.hasPermission(AppPermission.EditBranch));
   canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteBranch));
 
-  crud = new ModalCrud({
-    actions: this.actions, noun: 'الفرع', plural: 'الفروع',
-    titles: { create: 'إنشاء فرع جديد', edit: 'تعديل الفرع' },
-    can: { create: this.canCreate, edit: this.canEdit, delete: this.canDelete },
-    forms: { create: this.createForm, edit: this.editForm },
-    toEditValue: (b: Branch) => ({ name: b.name, description: b.description }),
-    toBody: v => { const f = new FormData(); f.append('Name', v.name ?? ''); f.append('Description', v.description ?? ''); return f; },
-    service: this.branchService
+  form = inject(FormBuilder).group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    description: ['']
   });
+
+  crud = new CrudPage<Branch, FormData>({
+    load: () => this.branchService.getAll(),
+    create: body => this.branchService.create(body),
+    update: (id, body) => this.branchService.update(id, body),
+    remove: b => this.branchService.delete(b.id),
+    can: { create: this.canCreate, edit: this.canEdit, delete: this.canDelete },
+    onOpen: b => this.form.reset({ name: b?.name ?? '', description: b?.description ?? '' }),
+    onRefresh: () => this.lookups.invalidate(),
+    messages: {
+      saved: (_, mode) => mode === 'create' ? 'تم إنشاء الفرع بنجاح' : 'تم تعديل الفرع بنجاح',
+      deleted: 'تم حذف الفرع بنجاح', plural: 'الفروع', confirmLabel: 'تأكيد الحذف',
+      confirmDelete: b => `هل أنت متأكد من حذف الفرع "${b.name}"؟ لا يمكن التراجع عن هذا الإجراء.`
+    }
+  });
+
+  branches = this.crud.items;
+  pager = new Pagination(() => this.branches());
 
   stats = computed(() => {
     const branches = this.branches();
-
     return {
       total: branches.length,
       withDescription: branches.filter(b => !!b.description).length,
@@ -67,17 +64,13 @@ export class BranchesPage {
     };
   });
 
-  /* =====================================================
-   * Data loading
-   * ===================================================== */
-  private force = false;
-  private data = loader(() => this.branchService.getAll(this.force), [] as Branch[], {
-    onLoaded: branches => this.branches.set(branches),
-    onError: error => this.actions.loadFailed(error)
-  });
-  loading = this.data.loading;
+  title(mode: CrudMode) { return mode === 'create' ? 'إنشاء فرع جديد' : 'تعديل الفرع'; }
 
-  /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
-  load(force = false) { this.force = force; this.data.reload(); }
-
+  save() {
+    if (this.form.invalid) return;
+    const v = this.form.getRawValue();
+    const f = new FormData();
+    f.append('Name', v.name ?? ''); f.append('Description', v.description ?? '');
+    this.crud.save(f);
+  }
 }

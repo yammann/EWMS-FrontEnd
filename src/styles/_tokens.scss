@@ -11,9 +11,9 @@
    ========================================================= */
 
 /* ---------- الخط ---------- */
-@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-light.otf") format("opentype"); font-weight: 300; font-display: swap; }
-@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-regular.otf") format("opentype"); font-weight: 400 500; font-display: swap; }
-@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-bold.otf") format("opentype"); font-weight: 600 900; font-display: swap; }
+@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-light.woff2") format("woff2"), url("/fonts/qomra-arabic-light.otf") format("opentype"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-regular.woff2") format("woff2"), url("/fonts/qomra-arabic-regular.otf") format("opentype"); font-weight: 400 500; font-display: swap; }
+@font-face { font-family: "Qomra Arabic"; src: url("/fonts/qomra-arabic-bold.woff2") format("woff2"), url("/fonts/qomra-arabic-bold.otf") format("opentype"); font-weight: 600 900; font-display: swap; }
 
 :root {
   --font-sans: "Qomra Arabic", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Tahoma, sans-serif;

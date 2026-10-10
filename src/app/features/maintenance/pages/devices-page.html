@@ -10,7 +10,7 @@
   <div class="filters">
     <div class="filters-row">
       <div class="search-group">
-        <select #t1 [value]="searchField()" (change)="setSearchField(t1.value); searchText() && changed()" aria-label="البحث في">
+        <select #t1 [appSelectValue]="searchField()" (change)="setSearchField(t1.value); searchText() && changed()" aria-label="البحث في">
           <option value="serialNumber">الرقم التسلسلي</option>
           <option value="model">الموديل</option>
           <option value="name">اسم الجهاز</option>

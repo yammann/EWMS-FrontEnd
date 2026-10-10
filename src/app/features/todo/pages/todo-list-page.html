@@ -29,7 +29,7 @@
         <label class="sr-only" for="todo-search">بحث في البنود</label>
         <input #t1 id="todo-search" type="search" placeholder="بحث بالعنوان أو الملاحظة…" [value]="search()" (input)="search.set(t1.value)">
         <label class="sr-only" for="todo-sort">الترتيب</label>
-        <select #t2 id="todo-sort" [value]="sort()" (change)="setSort(t2.value)">
+        <select #t2 id="todo-sort" [appSelectValue]="sort()" (change)="setSort(t2.value)">
           <option value="manual">ترتيبي اليدوي</option>
           <option value="due">حسب الموعد</option>
           <option value="important">المهم أولاً</option>

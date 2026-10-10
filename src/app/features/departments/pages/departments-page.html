@@ -1,8 +1,8 @@
 <section class="departments-page" dir="rtl">
 
   <!-- Header -->
-  <app-admin-header eyebrow="إدارة الأقسام" heading="الأقسام" subtitle="إدارة أقسام النظام وتوزيعها على الفروع." [loading]="loading()"
-    [createLabel]="canCreate() ? 'قسم جديد' : ''" (refresh)="load(true)" (create)="crud.openCreate()" />
+  <app-admin-header eyebrow="إدارة الأقسام" heading="الأقسام" subtitle="إدارة أقسام النظام وتوزيعها على الفروع." [loading]="crud.busy()"
+    [createLabel]="canCreate() ? 'قسم جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
   <!-- Stats -->
   <section class="stats-grid">
@@ -47,7 +47,7 @@
       <span class="pill">{{ departments().length }} قسم</span>
     </div>
 
-    @if (loading()) {
+    @if (crud.loading()) {
       <div class="skeleton-list">
         @for (item of [1,2,3,4,5]; track item) {
           <div class="skeleton-row departments-skeleton">
@@ -68,7 +68,7 @@
           </thead>
           <tbody>
             @for (department of pager.items(); track department.id) {
-              <tr [class.selected]="crud.selected()?.id === department.id">
+              <tr [class.selected]="crud.dialog()?.item?.id === department.id">
                 <td>
                   <div class="department-cell-name">
                     <div class="department-avatar">{{ (department.name || 'ق').charAt(0) }}</div>
@@ -95,7 +95,7 @@
                   }
                 </td>
                 <td>
-                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="saving() === 'delete-' + department.id" (edit)="crud.openEdit(department)" (remove)="crud.remove(department)" />
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === department.id" (edit)="crud.openEdit(department)" (remove)="crud.remove(department)" />
                 </td>
               </tr>
             }
@@ -120,27 +120,27 @@
   <!-- ============================================================
        Modals
        ============================================================ -->
-  @if (crud.activeModal(); as modal) {
-    <app-modal kicker="إجراء" [heading]="crud.modalTitle(modal)" [busy]="!!saving()" (closed)="crud.closeModal()">
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title(dlg.mode)" [busy]="crud.saving()" (closed)="crud.close()">
 
         <div class="modal-body">
-          <app-entity-form [mode]="modal" [form]="modal === 'create' ? createForm : editForm" nameLabel="اسم القسم"
+          <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم القسم"
                            namePlaceholder="مثال: قسم الأرشيف" descPlaceholder="وصف مختصر عن القسم..." createLabel="إنشاء القسم"
-                           [saving]="saving()" (submitted)="modal === 'create' ? crud.create() : crud.update()" (dismissed)="crud.closeModal()">
+                           [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
             <svg nameIcon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 21h18"></path>
             <path d="M5 21V5l7-3 7 3v16"></path>
             </svg>
-          <ng-container [formGroup]="modal === 'create' ? createForm : editForm">
+          <ng-container [formGroup]="form">
             <div class="form-field">
-              <label class="form-label" [attr.for]="modal + '-branch'">الفرع</label>
-              <select [id]="modal + '-branch'" formControlName="branchId">
+              <label class="form-label" [attr.for]="dlg.mode + '-branch'">الفرع</label>
+              <select [id]="dlg.mode + '-branch'" formControlName="branchId">
                 <option value="">اختر الفرع</option>
                 @for (branch of branches(); track branch.id) {
                   <option [value]="branch.id">{{ branch.name }}</option>
                 }
               </select>
-              @if (modal === 'create' && createForm.controls.branchId.touched && createForm.controls.branchId.invalid) {
+              @if (dlg.mode === 'create' && form.controls.branchId.touched && form.controls.branchId.invalid) {
                 <small class="form-error">اختر الفرع المرتبط بالقسم.</small>
               }
             </div>

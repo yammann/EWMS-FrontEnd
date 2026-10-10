@@ -9,14 +9,13 @@ import {
   MAINTENANCE_LOOKUPS, MAINTENANCE_STAGES, MaintenanceLookup, MaintenanceLookupKind, MaintenanceStage, isFinalStage, stageLabel
 } from '../data-access/maintenance.models';
 import { money } from '@core/utils/format';
-import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
-import { ToastService } from '@shared/ui/toast.service';
 import { StatusChip } from '../components/maintenance-ui';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/loader';
+import { CrudPage } from '@shared/ui/crud-page';
+import { RowActions } from '@shared/ui/row-actions';
 import { FormActions } from '@shared/ui/form-actions';
 
 const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
@@ -26,7 +25,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
  * أنواع الأجهزة، الشركات المصنّعة، أنواع الأعطال، وحالات الطلب (بألوانها، وهي أعمدة لوحة الحالات).
  */
 @Component({
-  selector: 'app-maintenance-settings-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager],
+  selector: 'app-maintenance-settings-page', standalone: true, imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager, RowActions],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './settings-page.html',
   styles: [`
@@ -36,10 +35,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
   `]
 })
 export class MaintenanceSettingsPage {
-  pager = new Pagination(() => this.items());
   private service = inject(MaintenanceService);
-  private toast = inject(ToastService);
-  private confirm = inject(ConfirmService);
   private router = inject(Router);
 
   can = this.service.can;
@@ -52,13 +48,6 @@ export class MaintenanceSettingsPage {
 
   kind = signal<MaintenanceLookupKind>('deviceTypes');
   meta = computed(() => MAINTENANCE_LOOKUPS[this.kind()]);
-  items = signal<MaintenanceLookup[]>([]);
-  loading = signal(false);
-  saving = signal(false);
-  error = signal('');
-  formError = signal('');
-  formOpen = signal(false);
-  editing = signal<MaintenanceLookup | null>(null);
 
   form = inject(FormBuilder).nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -69,11 +58,27 @@ export class MaintenanceSettingsPage {
   private stageValue = toSignal(this.form.controls.stage.valueChanges, { initialValue: this.form.controls.stage.value });
   stageHint = computed(() => MAINTENANCE_STAGES.find(s => s.value === this.stageValue())?.hint ?? '');
 
+  crud = new CrudPage<MaintenanceLookup, Partial<MaintenanceLookup>>({
+    // التبويب من الرابط: التحميل يبدأ عند قراءة ?tab=
+    immediate: false,
+    load: () => this.service.lookup(this.kind()),
+    create: body => this.service.createLookup(this.kind(), body),
+    update: (id, body) => this.service.updateLookup(this.kind(), id, body),
+    remove: item => this.service.deleteLookup(this.kind(), item.id),
+    can: { create: () => this.can().createLookup, edit: () => this.can().editLookup, delete: () => this.can().deleteLookup },
+    onOpen: item => this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6', stage: item?.stage ?? 2 }),
+    messages: {
+      saved: 'تم الحفظ', deleted: 'تم الحذف', plural: 'القوائم',
+      confirmDelete: item => `حذف «${item.name}» من ${this.meta().label}؟`
+    }
+  });
+  pager = new Pagination(() => this.crud.items());
+
   constructor() {
     inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe(p => {
       const tab = p.get('tab') as MaintenanceLookupKind | null;
       this.kind.set(tab && KINDS.includes(tab) ? tab : 'deviceTypes');
-      this.load();
+      this.crud.reload(true);
     });
   }
 
@@ -81,37 +86,15 @@ export class MaintenanceSettingsPage {
     this.router.navigate([], { queryParams: { tab: kind === 'deviceTypes' ? null : kind }, queryParamsHandling: 'merge' });
   }
 
-  load() {
-    const kind = this.kind();
-    this.items.set([]);
-    trackRequest(this.service.lookup(kind), this.loading, this.error, list => { if (kind === this.kind()) { this.items.set(list); } });
-  }
 
-  openForm(item: MaintenanceLookup | null) {
-    this.editing.set(item); this.formError.set('');
-    this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6', stage: item?.stage ?? 2 });
-    this.formOpen.set(true);
-  }
-
-  closeForm() { if (!this.saving()) this.formOpen.set(false); }
 
   save() {
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid) return;
     const v = this.form.getRawValue();
     const meta = this.meta();
     const body: Partial<MaintenanceLookup> = { name: v.name.trim() };
     if (meta.description) body.description = v.description.trim();
     if (meta.color) { body.color = v.color.toUpperCase(); body.stage = v.stage; }
-
-    const item = this.editing();
-    trackRequest((item ? this.service.updateLookup(this.kind(), item.id, body) : this.service.createLookup(this.kind(), body)), this.saving, this.formError, () => { this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); });
-  }
-
-  async askDelete(item: MaintenanceLookup) {
-    if (!await this.confirm.ask(`حذف «${item.name}» من ${this.meta().label}؟`, 'حذف')) return;
-    this.service.deleteLookup(this.kind(), item.id).subscribe({
-      next: () => { this.toast.success('تم الحذف'); this.load(); },
-      error: e => this.toast.error(e.message)
-    });
+    this.crud.save(body);
   }
 }

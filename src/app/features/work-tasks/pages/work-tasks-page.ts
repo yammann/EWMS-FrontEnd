@@ -1,61 +1,56 @@
-import { Pagination } from '@core/utils/pagination';
-import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { WorkTaskService } from '../data-access/work-task.service';
 import { LookupsService } from '@core/services/lookups.service';
-import { UserService } from '@features/users';
 import { Branch, User } from '@core/models/ewms.models';
-import { WorkTask } from '../data-access/work-task.models';
+import { Pagination } from '@core/utils/pagination';
 import { roleLabel } from '@core/utils/roles';
+import { UserService } from '@features/users';
 import { Alert } from '@shared/ui/alert';
+import { CrudPage } from '@shared/ui/crud-page';
 import { EmptyState } from '@shared/ui/empty-state';
+import { FormActions } from '@shared/ui/form-actions';
+import { Modal } from '@shared/ui/modal';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/loader';
+import { Pager } from '@shared/ui/pager';
+import { RowActions } from '@shared/ui/row-actions';
+import { WorkTaskService } from '../data-access/work-task.service';
+import { WorkTask, WorkTaskRequest } from '../data-access/work-task.models';
+import { SelectValue } from '@shared/ui/select-value';
 
 const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧', '📁', '🧮', '🗂️', '📞'];
 
-/** إدارة مهام العمل لكل فرع وإسنادها لموظفيه (ManageWorkTasks — السوبر ادمن) */
+/** إدارة مهام العمل لكل فرع وإسنادها لموظفيه — النمط الموحّد (CrudPage) بنافذة كبيرة */
 @Component({
-  selector: 'app-work-tasks-page', standalone: true, imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager],
+  selector: 'app-work-tasks-page', standalone: true,
+  imports: [SelectValue, PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
   styleUrls: ['../../../shared/styles/page-base.scss', './work-tasks-page.scss'],
-  templateUrl: './work-tasks-page.html',
-  
+  templateUrl: './work-tasks-page.html'
 })
 export class WorkTasksPage {
-  pager = new Pagination(() => this.filtered());
   private auth = inject(AuthService);
-  /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والنموذج والأزرار تظهر حسب الإضافة/التعديل/الحذف */
-  can = computed(() => ({
-    create: this.auth.hasPermission(AppPermission.CreateWorkTask),
-    edit: this.auth.hasPermission(AppPermission.EditWorkTask),
-    delete: this.auth.hasPermission(AppPermission.DeleteWorkTask)
-  }));
   private service = inject(WorkTaskService);
   private lookups = inject(LookupsService);
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
 
+  /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والأزرار تظهر حسب الإضافة/التعديل/الحذف */
+  can = computed(() => ({
+    create: this.auth.hasPermission(AppPermission.CreateWorkTask),
+    edit: this.auth.hasPermission(AppPermission.EditWorkTask),
+    delete: this.auth.hasPermission(AppPermission.DeleteWorkTask)
+  }));
+
   icons = ICONS;
   label = roleLabel;
   Number = Number;
 
-  tasks = signal<WorkTask[]>([]);
   branches = signal<Branch[]>([]);
   branchUsers = signal<User[]>([]);
+  usersLoading = signal(false);
   selected = signal(new Set<number>());
   filterBranch = signal(0);
-  editing = signal<number | null>(null);
-  deleting = signal<WorkTask | null>(null);
-  loading = signal(false); usersLoading = signal(false); saving = signal(false);
-  error = signal(''); success = signal('');
-
-  filtered = computed(() => {
-    const b = this.filterBranch();
-    return b ? this.tasks().filter(t => t.branchId === b) : this.tasks();
-  });
 
   form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -65,13 +60,31 @@ export class WorkTasksPage {
     isActive: [true]
   });
 
-  constructor() {
-    this.load();
-    this.lookups.branchOptions().subscribe({ next: b => this.branches.set(b), error: e => this.error.set(e.message) });
-  }
+  crud = new CrudPage<WorkTask, WorkTaskRequest>({
+    load: () => this.service.getAll(),
+    create: body => this.service.create(body),
+    update: (id, body) => this.service.update(id, body),
+    remove: t => this.service.delete(t.id),
+    can: { create: () => this.can().create, edit: () => this.can().edit, delete: () => this.can().delete },
+    onOpen: t => {
+      this.form.reset({ name: t?.name ?? '', description: t?.description ?? '', icon: t?.icon || '📋', branchId: t?.branchId ?? 0, isActive: t?.isActive ?? true });
+      this.selected.set(new Set(t?.assignees.map(a => a.userId) ?? []));
+      this.branchChanged(true);
+    },
+    messages: {
+      saved: 'تم حفظ المهمة', deleted: 'تم حذف المهمة', plural: 'مهام العمل',
+      confirmDelete: t => `حذف المهمة «${t.name}»؟ ستُزال من لوحات كل الموظفين المسنَدة إليهم.`
+    }
+  });
 
-  load() {
-    trackRequest(this.service.getAll(), this.loading, this.error, t => { this.tasks.set(t); });
+  filtered = computed(() => {
+    const b = this.filterBranch();
+    return b ? this.crud.items().filter(t => t.branchId === b) : this.crud.items();
+  });
+  pager = new Pagination(() => this.filtered());
+
+  constructor() {
+    this.lookups.branchOptions().subscribe({ next: b => this.branches.set(b), error: () => this.branches.set([]) });
   }
 
   assigneeNames(t: WorkTask) { return t.assignees.map(a => a.fullName).join('، '); }
@@ -79,7 +92,7 @@ export class WorkTasksPage {
   toggle(userId: number) {
     this.selected.update(set => {
       const next = new Set(set);
-      next.has(userId) ? next.delete(userId) : next.add(userId);
+      if (next.has(userId)) next.delete(userId); else next.add(userId);
       return next;
     });
   }
@@ -93,44 +106,18 @@ export class WorkTasksPage {
     this.usersLoading.set(true);
     this.userService.getByBranch(branchId).subscribe({
       next: users => { this.branchUsers.set(users.filter(u => u.isActive)); this.usersLoading.set(false); },
-      error: e => { this.error.set(e.message); this.usersLoading.set(false); }
+      error: e => { this.crud.fail(e.message); this.usersLoading.set(false); }
     });
-  }
-
-  edit(t: WorkTask) {
-    this.editing.set(t.id); this.deleting.set(null); this.success.set('');
-    this.form.setValue({ name: t.name, description: t.description, icon: t.icon || '📋', branchId: t.branchId, isActive: t.isActive });
-    this.selected.set(new Set(t.assignees.map(a => a.userId)));
-    this.branchChanged(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  reset() {
-    this.editing.set(null);
-    this.form.reset({ name: '', description: '', icon: '📋', branchId: 0, isActive: true });
-    this.selected.set(new Set()); this.branchUsers.set([]);
   }
 
   save() {
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    const body = {
+    const body: WorkTaskRequest = {
       name: v.name.trim(), description: v.description.trim(), icon: v.icon,
-      branchId: Number(v.branchId), isActive: v.isActive,
-      userIds: [...this.selected()]
+      branchId: Number(v.branchId), isActive: v.isActive, userIds: [...this.selected()]
     };
-    if (!body.name) { this.error.set('أدخل اسم المهمة'); return; }
-    this.saving.set(true); this.error.set(''); this.success.set('');
-    const id = this.editing();
-    (id ? this.service.update(id, body) : this.service.create(body)).subscribe({
-      next: () => { this.saving.set(false); this.success.set('تم حفظ المهمة'); this.reset(); this.load(); },
-      error: e => { this.saving.set(false); this.error.set(e.message); }
-    });
-  }
-
-  remove(t: WorkTask) {
-    if (this.saving()) return;
-    this.success.set('');
-    trackRequest(this.service.delete(t.id), this.saving, this.error, () => { this.deleting.set(null); if (this.editing() === t.id) this.reset(); this.success.set('تم حذف المهمة'); this.load(); });
+    if (!body.name) return this.crud.fail('أدخل اسم المهمة');
+    this.crud.save(body);
   }
 }

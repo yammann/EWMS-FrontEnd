@@ -1,8 +1,8 @@
 <section class="offices-page" dir="rtl">
 
   <!-- Header -->
-  <app-admin-header eyebrow="الهيكل التنظيمي" heading="المكاتب" subtitle="إدارة مكاتب الأقسام وربطها بالموظفين." [loading]="loading()"
-    [createLabel]="can().create ? 'مكتب جديد' : ''" (refresh)="load(true)" (create)="crud.openCreate()" />
+  <app-admin-header eyebrow="الهيكل التنظيمي" heading="المكاتب" subtitle="إدارة مكاتب الأقسام وربطها بالموظفين." [loading]="crud.busy()"
+    [createLabel]="can().create ? 'مكتب جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
   <!-- Offices List -->
   <section class="panel">
@@ -15,7 +15,7 @@
       <span class="pill">{{ items().length }} مكتب</span>
     </div>
 
-    @if (loading()) {
+    @if (crud.loading()) {
       <div class="skeleton-list">
         @for (item of [1,2,3,4,5]; track item) {
           <div class="skeleton-row offices-skeleton">
@@ -37,7 +37,7 @@
           </thead>
           <tbody>
             @for (office of pager.items(); track office.id) {
-              <tr [class.selected]="crud.selected()?.id === office.id">
+              <tr [class.selected]="crud.dialog()?.item?.id === office.id">
                 <td>
                   <div class="office-cell-name">
                     <div class="office-avatar">{{ (office.name || 'م').charAt(0) }}</div>
@@ -57,7 +57,7 @@
                   }
                 </td>
                 <td>
-                  <app-row-actions [canEdit]="can().edit" [canDelete]="can().delete" [deleting]="saving() === 'delete-' + office.id" (edit)="crud.openEdit(office)" (remove)="crud.remove(office)" />
+                  <app-row-actions [canEdit]="can().edit" [canDelete]="can().delete" [deleting]="crud.deletingId() === office.id" (edit)="crud.openEdit(office)" (remove)="crud.remove(office)" />
                 </td>
               </tr>
             }
@@ -82,24 +82,24 @@
   <!-- ============================================================
        Modals
        ============================================================ -->
-  @if (crud.activeModal(); as modal) {
-    <app-modal kicker="إجراء" [heading]="crud.modalTitle(modal)" [busy]="!!saving()" (closed)="crud.closeModal()">
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title(dlg.mode)" [busy]="crud.saving()" (closed)="crud.close()">
 
         <div class="modal-body">
-          <app-entity-form [mode]="modal" [form]="modal === 'create' ? createForm : editForm" nameLabel="اسم المكتب"
+          <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم المكتب"
                            namePlaceholder="مثال: مكتب المتابعة" descPlaceholder="وصف مختصر عن المكتب..." createLabel="إنشاء المكتب" [iconed]="false" [nameMaxLength]="100" [descMaxLength]="500"
-                           [saving]="saving()" (submitted)="modal === 'create' ? crud.create() : crud.update()" (dismissed)="crud.closeModal()">
+                           [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
             
-          <ng-container ngProjectAs="[before]" [formGroup]="modal === 'create' ? createForm : editForm">
+          <ng-container ngProjectAs="[before]" [formGroup]="form">
             <div class="form-field">
-              <label class="form-label" [attr.for]="modal + '-dept'">القسم</label>
-              <select [id]="modal + '-dept'" formControlName="departmentId">
+              <label class="form-label" [attr.for]="dlg.mode + '-dept'">القسم</label>
+              <select [id]="dlg.mode + '-dept'" formControlName="departmentId">
                 <option value="">اختر القسم</option>
                 @for (department of departments(); track department.id) {
                   <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
                 }
               </select>
-              @if (modal === 'create' && createForm.controls.departmentId.touched && createForm.controls.departmentId.invalid) {
+              @if (dlg.mode === 'create' && form.controls.departmentId.touched && form.controls.departmentId.invalid) {
                 <small class="form-error">اختر القسم التابع له المكتب.</small>
               }
             </div>

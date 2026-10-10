@@ -1,17 +1,17 @@
 <div class="page">
   <app-page-header eyebrow="توثيق الأجهزة" heading="الأجهزة" subtitle="أنواع وموديلات الأجهزة — الجهاز الواحد يمكن تركيبه عدة مرات في نفس الموقع أو في مواقع مختلفة">
 
-        @if (access().canCreate) { <button class="btn" type="button" (click)="openForm(null)">+ جهاز جديد</button> }
-        <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+        @if (access().canCreate) { <button class="btn" type="button" (click)="crud.openCreate()">+ جهاز جديد</button> }
+        <button class="btn btn-ghost" type="button" (click)="crud.refresh()" [disabled]="crud.busy()">تحديث</button>
   </app-page-header>
 
-  <app-alert [message]="error()" />
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
 
   <section class="panel">
     <div class="panel-heading"><h2>الأجهزة <span class="count">({{ filtered().length }})</span></h2>
       <input #t1 class="search" type="search" placeholder="بحث بالاسم أو الموديل أو الفئة أو الشركة…" [value]="search()" (input)="search.set(t1.value)" aria-label="بحث">
     </div>
-    @if (loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @if (crud.loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
     @else if (!filtered().length) { <app-empty-state>{{ search() ? 'لا توجد نتائج' : 'لا توجد أجهزة بعد' }}</app-empty-state> }
     @else {
       <div class="table-wrap"><table>
@@ -24,11 +24,9 @@
               <td>{{ d.category || '—' }}</td>
               <td>{{ d.manufacturer || '—' }}</td>
               <td><a class="cell-link" [routerLink]="['/devices/installations']" [queryParams]="{ deviceId: d.id }">{{ d.installationsCount }} تركيب ←</a></td>
-              <td><div class="row-actions">
+              <td><app-row-actions [canEdit]="access().canEdit" [canDelete]="access().canDelete" [deleting]="crud.deletingId() === d.id" (edit)="crud.openEdit(d)" (remove)="crud.remove(d)">
                 <button class="btn btn-ghost btn-sm" type="button" (click)="history.set(d)">السجل</button>
-                @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="openForm(d)">تعديل</button> }
-                @if (access().canDelete) { <button class="btn btn-danger btn-sm" type="button" (click)="askDelete(d)">حذف</button> }
-              </div></td>
+              </app-row-actions></td>
             </tr>
           }
         </tbody>
@@ -38,11 +36,11 @@
   </section>
 </div>
 
-@if (formOpen()) {
-  <app-modal [heading]="editing() ? 'تعديل الجهاز' : 'جهاز جديد'" [busy]="saving()" (closed)="closeForm()">
+@if (crud.dialog(); as dlg) {
+  <app-modal [heading]="dlg.mode === 'edit' ? 'تعديل الجهاز' : 'جهاز جديد'" [busy]="crud.saving()" (closed)="crud.close()">
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="modal-body form-grid-2">
-          @if (formError()) { <p class="alert alert-error full" role="alert">{{ formError() }}</p> }
+          <div class="full"><app-alert [message]="crud.formError()" /></div>
           <label class="form-field full"><span class="form-label">اسم الجهاز</span><input formControlName="name" maxlength="100" placeholder="مثال: راوتر رئيسي"></label>
           <label class="form-field full"><span class="form-label">الموديل <small class="hint">(اختياري — الاسم والموديل لا يتكرران معاً)</small></span><input formControlName="model" maxlength="100" dir="ltr"></label>
           <label class="form-field"><span class="form-label">الفئة <small class="hint">(اختياري)</small></span><input formControlName="category" maxlength="50" list="device-categories" placeholder="كاميرا، سويتش…">
@@ -52,7 +50,7 @@
           <p class="hint full">الرقم التسلسلي يُسجَّل لكل قطعة عند تركيبها (صفحة التركيبات).</p>
           <label class="form-field full"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="3" maxlength="500"></textarea></label>
         </div>
-        <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closeForm()" />
+        <app-form-actions [busy]="crud.saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="crud.close()" />
       </form>
   </app-modal>
 }

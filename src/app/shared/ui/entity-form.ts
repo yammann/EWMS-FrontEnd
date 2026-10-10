@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Alert } from './alert';
 
 /**
  * نموذج الاسم + الوصف لنوافذ إنشاء/تعديل كيانات الإدارة (فرع/قسم/مكتب) — بدل نسختين متطابقتين تقريباً في كل صفحة.
@@ -7,9 +8,10 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
  * أيقونة حقل الاسم: عنصر svg بسمة `nameIcon` (تظهر في الإنشاء فقط، كما كان).
  */
 @Component({
-  selector: 'app-entity-form', standalone: true, imports: [ReactiveFormsModule],
+  selector: 'app-entity-form', standalone: true, imports: [ReactiveFormsModule, Alert],
   template: `
     <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="form-stack">
+      <app-alert [message]="error()" />
       <div class="form-field">
         <label class="form-label" [attr.for]="mode() + '-name'">{{ nameLabel() }}</label>
         @if (mode() === 'create' && iconed()) {
@@ -63,6 +65,8 @@ export class EntityForm {
   createLabel = input.required<string>();
   /** مفتاح الإجراء الجاري من PageActions ('create' | 'edit' | ...) */
   saving = input<string | null>(null);
+  /** خطأ الحفظ من الخادم — يظهر داخل النافذة فوق الحقول */
+  error = input('');
   descMaxLength = input(0);
   nameMaxLength = input(0);
   /** أيقونة داخل حقل الاسم في الإنشاء (الفروع والأقسام فقط) */

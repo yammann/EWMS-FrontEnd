@@ -45,6 +45,8 @@ export class CoordinatePicker {
   picked = output<Coordinates>();
 
   features = signal<GovernorateFeature[]>([]);
+  /** قيمة مكتوبة يدوياً لم تكتمل بعد (الإحداثي الآخر فارغ) — كي لا تضيع قبل كتابة الثاني */
+  private typed: { lat: number | null; lng: number | null } = { lat: null, lng: null };
   focus = signal<string | null>(null);
 
   private current = computed(() => governorateOf(this.latitude(), this.longitude(), this.features()));
@@ -73,8 +75,9 @@ export class CoordinatePicker {
   manual(which: 'lat' | 'lng', raw: string) {
     const value = Number(raw);
     if (!raw || Number.isNaN(value)) return;
-    const lat = which === 'lat' ? value : this.latitude();
-    const lng = which === 'lng' ? value : this.longitude();
+    this.typed[which] = value;
+    const lat = which === 'lat' ? value : this.latitude() ?? this.typed.lat;
+    const lng = which === 'lng' ? value : this.longitude() ?? this.typed.lng;
     if (lat != null && lng != null) this.picked.emit({ latitude: lat, longitude: lng });
   }
 }
