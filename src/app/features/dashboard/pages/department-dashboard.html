@@ -6,16 +6,7 @@
       <nav class="crumbs" aria-label="المسار"><a routerLink="/">{{ d.branchName }}</a><span>/</span><span>{{ d.departmentName }}</span></nav>
     }
   }
-  @if (showMap()) {
-    <!-- خريطة فرعه مثبّتة في رأس الصفحة (لمن يملك ViewBranchMap) — الصفحة تنزلق فوقها أثناء السكرول -->
-    <app-branch-map>
-      <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
-      <ng-container *ngTemplateOutlet="bodyTpl" />
-    </app-branch-map>
-  } @else {
-    <header class="page-header"><ng-container *ngTemplateOutlet="headerTpl" /></header>
-    <ng-container *ngTemplateOutlet="bodyTpl" />
-  }
+  <app-dashboard-frame [showMap]="showMap()" [header]="headerTpl" [body]="bodyTpl" />
 </div>
 
 <ng-template #headerTpl>

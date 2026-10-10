@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { DashboardFrame } from '../components/dashboard-frame';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -8,7 +8,6 @@ import { NotificationService } from '@core/services/notification.service';
 import { BranchDashboard } from '../data-access/dashboard.models';
 import { ActivityList, TaskCards, TaskDistributionTable } from '../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
-import { BranchMapComponent } from '@features/map';
 import { AppPermission } from '@core/constants/access';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -17,7 +16,7 @@ import { trackRequest } from '@shared/ui/loader';
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({
   selector: 'app-branch-dashboard', standalone: true,
-  imports: [EmptyState, Alert, RouterLink, NgTemplateOutlet, StatTile, TaskCards, TaskDistributionTable, ActivityList, BranchMapComponent],
+  imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
   styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './branch-dashboard.html'
 })

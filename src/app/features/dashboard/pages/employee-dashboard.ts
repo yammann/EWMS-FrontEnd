@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { NgTemplateOutlet } from '@angular/common';
-import { BranchMapComponent } from '@features/map';
+import { DashboardFrame } from '../components/dashboard-frame';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -21,7 +20,7 @@ import { trackRequest } from '@shared/ui/loader';
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({
   selector: 'app-employee-dashboard', standalone: true,
-  imports: [EmptyState, Alert, CommonModule, RouterLink, StatTile, TaskCards, NgTemplateOutlet, BranchMapComponent],
+  imports: [DashboardFrame, EmptyState, Alert, CommonModule, RouterLink, StatTile, TaskCards],
   styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './employee-dashboard.html'
 })

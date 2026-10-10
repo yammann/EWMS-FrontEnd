@@ -1,5 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
-import { BranchMapComponent } from '@features/map';
+import { DashboardFrame } from '../components/dashboard-frame';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -17,7 +16,7 @@ import { trackRequest } from '@shared/ui/loader';
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */
 @Component({
   selector: 'app-overview-dashboard', standalone: true,
-  imports: [EmptyState, Alert, RouterLink, NgTemplateOutlet, StatTile, ActivityList, BranchMapComponent],
+  imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './overview-dashboard.html'
 })

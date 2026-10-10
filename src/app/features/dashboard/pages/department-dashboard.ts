@@ -1,5 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
-import { BranchMapComponent } from '@features/map';
+import { DashboardFrame } from '../components/dashboard-frame';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -19,7 +18,7 @@ import { trackRequest } from '@shared/ui/loader';
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
   selector: 'app-department-dashboard', standalone: true,
-  imports: [EmptyState, Alert, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList, NgTemplateOutlet, BranchMapComponent],
+  imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
   styleUrl: '../../../shared/styles/dashboard-layout.scss',
   templateUrl: './department-dashboard.html'
 })
