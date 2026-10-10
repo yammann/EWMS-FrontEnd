@@ -70,11 +70,11 @@
         </label>
 
         @if (mode() !== 'edit') {
-          <label class="form-field">
-            <span class="form-label">بنود التحقق <small class="muted">(اختياري — بند في كل سطر، حتى {{ maxItems }})</small></span>
-            <textarea [ngModel]="itemsText()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="itemsText.set($event)" rows="3"
-                      placeholder="خطوات صغيرة تُنشأ مع المهمة ويعلّمها المنفِّذ"></textarea>
-          </label>
+          <div class="form-field">
+            <span class="form-label">بنود التحقق <small class="muted">(اختياري — ▼ أو Enter لبند جديد، ▲ للحذف)</small></span>
+            <app-line-list [(values)]="items" [max]="maxItems" [disabled]="saving()" label="بند التحقق"
+                           placeholder="خطوة صغيرة تُنشأ مع المهمة ويعلّمها المنفِّذ" />
+          </div>
           <div class="form-field">
             <span class="form-label">مرفقات <small class="muted">(اختياري — حتى {{ maxFiles }} ملفات، 10MB للملف: PDF وصور وWord وExcel وPowerPoint)</small></span>
             <input #picker type="file" multiple hidden [accept]="accept" (change)="pick($event)">

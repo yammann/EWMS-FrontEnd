@@ -12,6 +12,7 @@ import {
 import { fileSize } from '@core/utils/file-size';
 import { fileIcon } from './task-attachments';
 import { Alert } from '@shared/ui/alert';
+import { LineList, cleanLines } from '@shared/ui/line-list';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';
 
@@ -19,7 +20,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
 
 /** نافذة إنشاء مهمة / تعديلها / تفويض جزء من مهمة واردة لجهة أدنى */
 @Component({
-  selector: 'app-task-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, FormsModule, Modal],
+  selector: 'app-task-form-dialog', standalone: true, imports: [Alert, LineList, ReactiveFormsModule, FormsModule, Modal],
   templateUrl: './task-form-dialog.html',
   styleUrl: './task-form-dialog.scss'
 })
@@ -41,7 +42,8 @@ export class TaskFormDialog implements OnInit {
 
   maxItems = 30;
   templates = signal<TaskTemplate[]>([]);
-  itemsText = signal('');
+  /** بنود التحقق كما في الحقول (كل بند سطر، بنمط وينبوكس) */
+  items = signal<string[]>(['']);
   templateNaming = signal(false);
   templateName = signal('');
   templateBusy = signal(false);
@@ -105,10 +107,10 @@ export class TaskFormDialog implements OnInit {
     if (!t) return;
     const due = t.defaultDueDays === null ? '' : new Date(Date.now() + t.defaultDueDays * 86_400_000).toISOString().slice(0, 10);
     this.form.patchValue({ title: t.title, description: t.description, priority: t.priority, dueDate: due });
-    this.itemsText.set(t.items.join('\n'));
+    this.items.set(t.items.length ? [...t.items] : ['']);
   }
 
-  private items() { return this.itemsText().split('\n').map(i => i.trim()).filter(Boolean); }
+  private checklist() { return cleanLines(this.items()); }
 
   saveAsTemplate() {
     const v = this.form.getRawValue();
@@ -118,7 +120,7 @@ export class TaskFormDialog implements OnInit {
     this.templateBusy.set(true);
     this.service.createTemplate({
       name, title: v.title.trim(), description: v.description.trim(), priority: TASK_PRIORITY_VALUE[v.priority],
-      defaultDueDays: due, items: this.items()
+      defaultDueDays: due, items: this.checklist()
     }).subscribe({
       next: t => { this.templateBusy.set(false); this.templateNaming.set(false); this.templateName.set(''); this.templates.update(l => [...l, t]); this.toast.success(`حُفظ القالب «${t.name}»`); },
       error: e => { this.templateBusy.set(false); this.error.set(e.message); }
@@ -173,7 +175,7 @@ export class TaskFormDialog implements OnInit {
         ...common, targetId: Number(v.targetId),
         targetType: this.mode() === 'create' ? this.kind() : null,
         parentTaskId: this.mode() === 'delegate' ? this.task()!.id : null,
-        checklistItems: this.items()
+        checklistItems: this.checklist()
       });
 
     request.subscribe({

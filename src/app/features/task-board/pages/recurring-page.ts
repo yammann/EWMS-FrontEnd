@@ -15,13 +15,14 @@ import { ToastService } from '@shared/ui/toast.service';
 import { Alert } from '@shared/ui/alert';
 import { PageHeader } from '@shared/ui/page-header';
 import { FormActions } from '@shared/ui/form-actions';
+import { LineList, cleanLines } from '@shared/ui/line-list';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };
 
 /** نافذة قالب: الاسم والعنوان والوصف والأولوية والمدة وبنود التحقق (بند في كل سطر) */
 @Component({
-  selector: 'app-template-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
+  selector: 'app-template-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, LineList, Modal],
   template: `
     <app-modal [heading]="template() ? 'تعديل القالب' : 'قالب جديد'" size="lg" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
@@ -41,8 +42,8 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
             <label class="form-field"><span class="form-label">مدة التسليم <small class="muted">(أيام من الإنشاء، فارغ = بلا موعد)</small></span>
               <input name="days" type="number" min="0" max="365" [(ngModel)]="days"></label>
           </div>
-          <label class="form-field"><span class="form-label">بنود التحقق <small class="muted">(بند في كل سطر، حتى 30)</small></span>
-            <textarea name="items" rows="5" [(ngModel)]="items" placeholder="جرد الأصناف&#10;مطابقة السجلات&#10;رفع التقرير"></textarea></label>
+          <div class="form-field"><span class="form-label">بنود التحقق <small class="muted">(▼ أو Enter لبند جديد، ▲ للحذف)</small></span>
+            <app-line-list [(values)]="items" [max]="30" [disabled]="saving()" label="بند التحقق" placeholder="مثال: جرد الأصناف" /></div>
         </div>
         <app-form-actions [busy]="saving()" [disabled]="!name.trim() || !title.trim()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
       </form>
@@ -57,13 +58,13 @@ export class TemplateDialog implements OnInit {
 
   priorities: TaskPriority[] = ['Low', 'Normal', 'High', 'Urgent'];
   priorityLabel = TASK_PRIORITY_LABEL;
-  name = ''; title = ''; description = ''; priority: TaskPriority = 'Normal'; days: number | null = null; items = '';
+  name = ''; title = ''; description = ''; priority: TaskPriority = 'Normal'; days: number | null = null; items: string[] = [''];
   saving = signal(false);
   error = signal('');
 
   ngOnInit() {
     const t = this.template();
-    if (t) { this.name = t.name; this.title = t.title; this.description = t.description; this.priority = t.priority; this.days = t.defaultDueDays; this.items = t.items.join('\n'); }
+    if (t) { this.name = t.name; this.title = t.title; this.description = t.description; this.priority = t.priority; this.days = t.defaultDueDays; this.items = t.items.length ? [...t.items] : ['']; }
   }
 
   save() {
@@ -71,7 +72,7 @@ export class TemplateDialog implements OnInit {
     const body: SaveTemplateRequest = {
       name: this.name.trim(), title: this.title.trim(), description: this.description.trim(),
       priority: TASK_PRIORITY_VALUE[this.priority], defaultDueDays: this.days === null || this.days === ('' as unknown) ? null : Number(this.days),
-      items: this.items.split('\n').map(i => i.trim()).filter(Boolean)
+      items: cleanLines(this.items)
     };
     this.saving.set(true); this.error.set('');
     const t = this.template();
