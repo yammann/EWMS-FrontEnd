@@ -15,7 +15,7 @@ import { TaskCards } from '../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /** لوحة الموظف: مهامه الدورية أولاً، ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({

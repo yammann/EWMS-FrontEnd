@@ -12,7 +12,7 @@ import { DeviceRepairHistory } from '../components/device-repair-history';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 
 type SearchField = 'serialNumber' | 'model' | 'name';

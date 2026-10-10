@@ -11,7 +11,7 @@ import { Modal } from '@shared/ui/modal';
 import { isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceFormDialog } from './device-form-dialog';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 export interface RequestLookups {
   deviceTypes: MaintenanceLookup[];

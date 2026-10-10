@@ -11,7 +11,7 @@ import { Branch } from '@core/models/ewms.models';
 import { ActionsTable, CountBars, VacationRows } from '@features/dashboard';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 
 /**

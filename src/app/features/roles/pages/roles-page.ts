@@ -1,20 +1,19 @@
 import { Pagination } from '@core/utils/pagination';
 import { StatTile } from '@shared/ui/stat-tile';
 import { AdminHeader } from '@shared/ui/admin-header';
-import { loader } from '@shared/ui/loader';
+import { Alert } from '@shared/ui/alert';
+import { CrudPage } from '@shared/ui/crud-page';
+import { RowActions } from '@shared/ui/row-actions';
 import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 import { Permission, Role } from '@core/models/ewms.models';
 import { RoleService } from '../data-access/role.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
-import { ToastService } from '@shared/ui/toast.service';
-import { ConfirmService } from '@shared/ui/confirm.service';
-import { PageActions } from '@shared/ui/page-actions';
 import { normalizePlaceText } from '@core/utils/places';
 
 type ModalType = 'create' | 'edit';
@@ -70,7 +69,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
 @Component({
   selector: 'app-roles-page',
   standalone: true,
-  imports: [StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss'
 })
@@ -79,10 +78,7 @@ export class RolesPage {
   private roleService = inject(RoleService);
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
-  private toast = inject(ToastService);
-  private confirm = inject(ConfirmService);
 
-  roles = signal<Role[]>([]);
   /** بحث في الأدوار: باسم الدور، أو باسم صلاحية يملكها أو وصفها العربي (مثل «اعتماد» أو ApproveVacationFinal) */
   search = signal('');
   /** دور اختير من قائمة الاقتراحات: يُعرض وحده في الجدول (يزول بالكتابة من جديد) */
@@ -135,10 +131,6 @@ export class RolesPage {
     else if (event.key === 'Enter' && this.activeSuggestion() >= 0) { event.preventDefault(); this.pickSuggestion(list[this.activeSuggestion()].role); }
   }
   permissions = signal<Permission[]>([]);
-  selectedRole = signal<Role | null>(null);
-  activeModal = signal<ModalType | null>(null);
-  private actions = new PageActions(() => this.load(true));
-  saving = this.actions.saving;
 
 
   createForm = this.fb.group({
@@ -154,6 +146,28 @@ export class RolesPage {
   canCreate = computed(() => this.auth.hasPermission(AppPermission.CreateRole));
   canEdit = computed(() => this.auth.hasPermission(AppPermission.EditRole));
   canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteRole));
+
+  crud = new CrudPage<Role, FormData>({
+    load: () => forkJoin({ roles: this.roleService.getAll(), permissions: this.roleService.getPermissions() })
+      .pipe(map(r => { this.permissions.set(r.permissions); return r.roles; })),
+    create: body => this.roleService.create(body),
+    update: (id, body) => this.roleService.update(id, body),
+    remove: role => this.roleService.delete(role.id),
+    can: { create: this.canCreate, edit: this.canEdit, delete: this.canDelete },
+    onOpen: role => {
+      this.collapseAllGroups();
+      this.activeSectionKey.set('');
+      if (role) this.editForm.reset({ name: role.name, permissionIds: role.permissions?.map(p => p.id) ?? [] });
+      else this.createForm.reset({ name: '', permissionIds: [] });
+    },
+    messages: {
+      saved: (_, mode) => mode === 'create' ? 'تم إنشاء الدور بنجاح' : 'تم تعديل الدور بنجاح',
+      deleted: 'تم حذف الدور بنجاح', plural: 'الأدوار', confirmLabel: 'تأكيد الحذف',
+      confirmDelete: role => `هل أنت متأكد من حذف الدور "${role.name}"؟ سيؤثر هذا على المستخدمين المرتبطين به.`
+    }
+  });
+
+  roles = this.crud.items;
 
   stats = computed(() => {
     const roles = this.roles();
@@ -181,73 +195,13 @@ export class RolesPage {
     };
   });
 
-  /* =====================================================
-   * Data loading
-   * ===================================================== */
-  private force = false;
-  private data = loader(() => forkJoin({ roles: this.roleService.getAll(this.force), permissions: this.roleService.getPermissions() }), null, {
-    onLoaded: result => { if (result) { this.roles.set(result.roles); this.permissions.set(result.permissions); } },
-    onError: error => this.actions.loadFailed(error)
-  });
-  loading = this.data.loading;
-
-  /** force = true يتجاوز التخزين المؤقت (زر «تحديث» وبعد أي تعديل) */
-  load(force = false) { this.force = force; this.data.reload(); }
-
-  /* =====================================================
-   * Modal control
-   * ===================================================== */
-  openCreate() {
-    if (!this.canCreate()) {
-      this.toast.show('لا تملك صلاحية إدارة الأدوار', 'error');
-      return;
-    }
-
-    this.selectedRole.set(null);
-    this.createForm.reset({ permissionIds: [] });
-    this.collapseAllGroups();
-    this.activeSectionKey.set('');
-    this.activeModal.set('create');
-  }
-
   /**
    * نسخ دور: نافذة الإنشاء بنفس صلاحيات الدور ووحدته واسم مقترح — لإنشاء دور شخص جديد من دور مشابه
    * ثم تعديل الاسم والوحدة وما يختلف من صلاحيات (قرار المستخدم 2026-10-03: دور لكل شخص).
    */
   openClone(role: Role) {
-    if (!this.canCreate()) {
-      this.toast.show('لا تملك صلاحية إدارة الأدوار', 'error');
-      return;
-    }
-
-    this.selectedRole.set(null);
-    this.collapseAllGroups();
-    this.activeSectionKey.set('');
-    this.createForm.reset({
-      name: `${role.name} - نسخة`,
-      permissionIds: role.permissions?.map(p => p.id) ?? []
-    });
-    this.activeModal.set('create');
-  }
-
-  openEdit(role: Role) {
-    if (!this.canEdit()) {
-      this.toast.show('لا تملك صلاحية إدارة الأدوار', 'error');
-      return;
-    }
-
-    this.selectedRole.set(role);
-    this.collapseAllGroups();
-    this.activeSectionKey.set('');
-    this.editForm.patchValue({
-      name: role.name,
-      permissionIds: role.permissions?.map(p => p.id) ?? []
-    });
-    this.activeModal.set('edit');
-  }
-
-  closeModal() {
-    this.activeModal.set(null);
+    this.crud.openCreate();
+    if (this.crud.dialog()) this.createForm.reset({ name: `${role.name} - نسخة`, permissionIds: role.permissions?.map(p => p.id) ?? [] });
   }
 
   modalTitle(type: ModalType): string {
@@ -363,66 +317,20 @@ export class RolesPage {
     for (const id of form.value.permissionIds ?? []) data.append('PermissionIds', String(id));
   }
 
-  /* =====================================================
-   * CRUD actions
-   * ===================================================== */
   create() {
     if (this.createForm.invalid) return;
-
     const form = new FormData();
     form.append('Name', this.createForm.value.name ?? '');
     this.appendRole(form, this.createForm);
-
-    this.actions.run(
-      'create',
-      this.roleService.create(form),
-      'تم إنشاء الدور بنجاح',
-      () => {
-        this.createForm.reset({ permissionIds: [] });
-        this.closeModal();
-      }
-    );
+    this.crud.save(form);
   }
 
   update() {
-    const role = this.selectedRole();
-    if (!role || this.editForm.invalid) return;
-
+    if (this.editForm.invalid) return;
     const form = new FormData();
     form.append('Name', this.editForm.value.name ?? '');
     this.appendRole(form, this.editForm);
-
-    this.actions.run(
-      'edit',
-      this.roleService.update(role.id, form),
-      'تم تعديل الدور بنجاح',
-      () => this.closeModal()
-    );
-  }
-
-  deleteRole(role: Role) {
-    if (!this.canDelete()) {
-      this.toast.show('لا تملك صلاحية حذف الأدوار', 'error');
-      return;
-    }
-
-    this.confirm.ask(
-      `هل أنت متأكد من حذف الدور "${role.name}"؟ سيؤثر هذا على المستخدمين المرتبطين به.`,
-      'تأكيد الحذف'
-    ).then(confirmed => { if (confirmed) this.performDelete(role); });
-  }
-
-  private performDelete(role: Role) {
-    this.actions.run(
-      `delete-${role.id}`,
-      this.roleService.delete(role.id),
-      'تم حذف الدور بنجاح',
-      () => {
-        if (this.selectedRole()?.id === role.id) {
-          this.selectedRole.set(null);
-        }
-      }
-    );
+    this.crud.save(form);
   }
 
   /* =====================================================

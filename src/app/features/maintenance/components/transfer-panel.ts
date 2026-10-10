@@ -10,7 +10,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
 import { SelectValue } from '@shared/ui/select-value';
 

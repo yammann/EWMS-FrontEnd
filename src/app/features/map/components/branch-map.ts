@@ -5,7 +5,7 @@ import { BranchMap, MapBranchOption, MapSite } from '@features/devices';
 import { GovernorateFeature } from '@core/utils/geo';
 import { ToastService } from '@shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */

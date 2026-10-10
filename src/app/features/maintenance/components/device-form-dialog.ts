@@ -4,7 +4,7 @@ import { MaintenanceService } from '../data-access/maintenance.service';
 import { MaintenanceDevice, MaintenanceLookup } from '../data-access/maintenance.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /** مقارنة الرقمين بعد حذف الفراغات وبلا تمييز لحالة الأحرف (الباكاند يعامل الرقم كذلك) */
 const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim().toUpperCase();

@@ -20,7 +20,7 @@ import { AppPermission } from '@core/constants/access';
 import { SignaturePanel } from '../components/signature-panel';
 import { formatPhone } from '@core/utils/phone';
 import { utcDate } from '@core/utils/format';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 
 /** لا تقديم بأثر رجعي، واليوم الحالي مسموح (قرار المستخدم 2026-10-04) */

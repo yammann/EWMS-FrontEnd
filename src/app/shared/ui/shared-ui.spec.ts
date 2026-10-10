@@ -1,9 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
-import { PageActions, errorMessage } from '@shared/ui/page-actions';
+import { errorMessage } from '@shared/ui/error-message';
 import { roleLabel } from '@core/utils/roles';
 
 describe('ConfirmService', () => {
@@ -39,31 +38,7 @@ describe('ToastService', () => {
   });
 });
 
-describe('PageActions', () => {
-  const create = (reload: () => void) => TestBed.runInInjectionContext(() => new PageActions(reload));
-
-  it('tracks the running action, toasts success, runs "after" and reloads', () => {
-    const reload = vi.fn(); const after = vi.fn();
-    const actions = create(reload);
-    const request = new Subject<void>();
-    actions.run('delete-3', request, 'تم الحذف', after);
-    expect(actions.saving()).toBe('delete-3');
-    request.next(); request.complete();
-    expect(actions.saving()).toBeNull();
-    expect(after).toHaveBeenCalled();
-    expect(reload).toHaveBeenCalled();
-    expect(TestBed.inject(ToastService).toasts().at(-1)).toMatchObject({ type: 'success', message: 'تم الحذف' });
-  });
-
-  it('shows the API message on failure without reloading', () => {
-    const reload = vi.fn();
-    const actions = create(reload);
-    actions.run('create', throwError(() => ({ status: 400, message: 'يوجد فرع بنفس الاسم' })), 'تم');
-    expect(actions.saving()).toBeNull();
-    expect(reload).not.toHaveBeenCalled();
-    expect(TestBed.inject(ToastService).toasts().at(-1)).toMatchObject({ type: 'error', message: 'يوجد فرع بنفس الاسم' });
-  });
-
+describe('errorMessage', () => {
   it('errorMessage falls back when the error has no message', () => {
     expect(errorMessage({}, 'بديل')).toBe('بديل');
     expect(errorMessage(null, 'بديل')).toBe('بديل');

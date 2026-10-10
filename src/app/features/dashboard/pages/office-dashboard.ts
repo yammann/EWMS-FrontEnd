@@ -15,7 +15,7 @@ import { ActivityList, TaskCards, TaskDistributionTable } from '../components/da
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /** لوحة رئيس المكتب */
 @Component({

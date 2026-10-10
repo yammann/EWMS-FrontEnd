@@ -1,8 +1,8 @@
 <section class="users-page" dir="rtl">
 
   <!-- Header -->
-  <app-admin-header eyebrow="إدارة المستخدمين" heading="المستخدمون" subtitle="إدارة حسابات المستخدمين وتوزيعهم على الأقسام والفروع." [loading]="loading()"
-    [createLabel]="canCreate() ? 'مستخدم جديد' : ''" (refresh)="load(true)" (create)="openCreate()" />
+  <app-admin-header eyebrow="إدارة المستخدمين" heading="المستخدمون" subtitle="إدارة حسابات المستخدمين وتوزيعهم على الأقسام والفروع." [loading]="crud.busy()"
+    [createLabel]="canCreate() ? 'مستخدم جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
   <!-- Stats -->
   <section class="stats-grid">
@@ -49,7 +49,7 @@
       <span class="pill">{{ users().length }} مستخدم</span>
     </div>
 
-    @if (loading()) {
+    @if (crud.loading()) {
       <div class="skeleton-list">
         @for (item of [1,2,3,4,5]; track item) {
           <div class="skeleton-row users-skeleton">
@@ -73,7 +73,7 @@
           </thead>
           <tbody>
             @for (user of pager.items(); track user.id) {
-              <tr [class.selected]="selectedUser()?.id === user.id">
+              <tr [class.selected]="crud.dialog()?.item?.id === user.id">
                 <td>
                   <div class="user-cell-name">
                     <div class="user-avatar">{{ (user.fullName || 'م').charAt(0) }}</div>
@@ -125,7 +125,7 @@
                 </td>
                 <td class="nowrap">{{ utc(user.createdAt) | date:'yyyy/MM/dd' }}</td>
                 <td>
-                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="saving() === 'delete-' + user.id" (edit)="openEdit(user)" (remove)="deleteUser(user)" />
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === user.id" (edit)="crud.openEdit(user)" (remove)="crud.remove(user)" />
                 </td>
               </tr>
             }
@@ -150,16 +150,17 @@
   <!-- ============================================================
        Modals
        ============================================================ -->
-  @if (activeModal(); as modal) {
-    <app-modal kicker="إجراء" [heading]="modalTitle(modal)" size="lg" [busy]="!!saving()" (closed)="closeModal()">
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="title()" size="lg" [busy]="crud.saving()" (closed)="crud.close()">
 
         <div class="modal-body">
 
-          @switch (modal) {
+          @switch (dlg.mode) {
 
             <!-- CREATE -->
             @case ('create') {
               <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
+                <app-alert [message]="crud.formError()" />
                 <div class="form-grid">
 
                   <div class="form-field">
@@ -285,9 +286,9 @@
                 </div>
 
                 <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="createForm.invalid || saving() === 'create'">
-                    @if (saving() === 'create') {
+                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
+                  <button type="submit" [disabled]="createForm.invalid || crud.saving()">
+                    @if (crud.saving()) {
                       <span class="button-spinner"></span>
                       <span>جاري الإنشاء...</span>
                     } @else {
@@ -304,6 +305,7 @@
             <!-- EDIT -->
             @case ('edit') {
               <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
+                <app-alert [message]="crud.formError()" />
                 <div class="form-grid">
 
                   <div class="form-field">
@@ -401,9 +403,9 @@
                 </label>
 
                 <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="editForm.invalid || saving() === 'edit'">
-                    @if (saving() === 'edit') {
+                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
+                  <button type="submit" [disabled]="editForm.invalid || crud.saving()">
+                    @if (crud.saving()) {
                       <span class="button-spinner"></span>
                       <span>جاري الحفظ...</span>
                     } @else {

@@ -3,7 +3,7 @@ import { MaintenanceService } from '@features/maintenance';
 import { ToastService } from '@shared/ui/toast.service';
 import { SignaturePad } from './signature-pad';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /**
  * توقيعي الإلكتروني (ManageMySignature): بطاقة بالتوقيع الحالي، و«تغيير التوقيع» يفتح لوحة الرسم/الرفع في نافذة.

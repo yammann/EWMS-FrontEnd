@@ -4,7 +4,7 @@ import { ToDoService } from '../data-access/todo.service';
 import { TODO_LIMITS, ToDoList } from '../data-access/todo.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /** إضافة عدة بنود دفعة واحدة: كل سطر بند (يناسب لصق نص منسوخ من رسالة أو محضر) */
 @Component({

@@ -9,7 +9,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
 import { UtcPipe, MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /**
  * قطع الغيار المصروفة على طلب الصيانة: الصرف من مخزون قسم الطلب (المتوافقة مع الجهاز أولاً)، والإرجاع للمخزون،

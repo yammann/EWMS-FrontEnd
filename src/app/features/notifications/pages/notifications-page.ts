@@ -9,7 +9,7 @@ import { storePageSize, storedPageSize } from '@core/utils/pagination';
 import { Pager } from '@shared/ui/pager';
 import { Icon } from '@shared/ui/icon';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 type Tone = 'green' | 'blue' | 'orange' | 'purple' | 'red';
 interface Kind { icon: string; tone: Tone; }

@@ -15,7 +15,7 @@ import { MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 const PAGE_SIZE = 25;
 

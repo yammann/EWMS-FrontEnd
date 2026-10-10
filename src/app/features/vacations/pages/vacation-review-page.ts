@@ -14,7 +14,7 @@ import { Vacation } from '../data-access/vacation.models';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 
 @Component({

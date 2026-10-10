@@ -2,7 +2,7 @@ import { DestroyRef, Signal, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable, Subject, catchError, finalize, switchMap } from 'rxjs';
 import { ConfirmService } from './confirm.service';
-import { errorMessage } from './page-actions';
+import { errorMessage } from './error-message';
 import { ToastService } from './toast.service';
 
 export type CrudMode = 'create' | 'edit';

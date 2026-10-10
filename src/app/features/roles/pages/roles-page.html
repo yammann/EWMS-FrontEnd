@@ -1,8 +1,8 @@
 <section class="roles-page" dir="rtl">
 
   <!-- Header -->
-  <app-admin-header eyebrow="الأدوار والصلاحيات" heading="الأدوار" subtitle="إدارة الأدوار وتوزيع الصلاحيات على كل دور في النظام." [loading]="loading()"
-    [createLabel]="canCreate() ? 'دور جديد' : ''" (refresh)="load(true)" (create)="openCreate()" />
+  <app-admin-header eyebrow="الأدوار والصلاحيات" heading="الأدوار" subtitle="إدارة الأدوار وتوزيع الصلاحيات على كل دور في النظام." [loading]="crud.busy()"
+    [createLabel]="canCreate() ? 'دور جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
   <!-- Stats -->
   <section class="stats-grid">
@@ -47,7 +47,7 @@
       <span class="pill">{{ search() || pickedId() !== null ? filteredRoles().length + ' من ' + roles().length : roles().length }} دور</span>
     </div>
 
-    @if (!loading() && roles().length) {
+    @if (!crud.loading() && roles().length) {
       <div class="roles-search">
         <div class="search-box">
           <input #t1 type="search" placeholder="بحث باسم الدور أو بصلاحية يملكها…" [value]="search()" autocomplete="off"
@@ -72,7 +72,7 @@
       </div>
     }
 
-    @if (loading()) {
+    @if (crud.loading()) {
       <div class="skeleton-list">
         @for (item of [1,2,3,4,5]; track item) {
           <div class="skeleton-row roles-skeleton">
@@ -96,7 +96,7 @@
           </thead>
           <tbody>
             @for (role of pager.items(); track role.id) {
-              <tr [class.selected]="selectedRole()?.id === role.id">
+              <tr [class.selected]="crud.dialog()?.item?.id === role.id">
                 <td>
                   <div class="role-cell-name">
                     <div class="role-avatar">
@@ -152,43 +152,16 @@
                   }
                 </td>
                 <td>
-                  <div class="row-actions">
-                    @if (canEdit()) {
-                      <button type="button" class="icon-btn edit" title="تعديل"
-                              (click)="openEdit(role)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M12 20h9"></path>
-                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-                        </svg>
-                      </button>
-                    }
-
+                  <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === role.id" (edit)="crud.openEdit(role)" (remove)="crud.remove(role)">
                     @if (canCreate()) {
-                      <button type="button" class="icon-btn" title="نسخ الدور" [attr.aria-label]="'نسخ الدور ' + role.name"
-                              (click)="openClone(role)">
+                      <button type="button" class="icon-btn" title="نسخ الدور" [attr.aria-label]="'نسخ الدور ' + role.name" (click)="openClone(role)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <rect x="9" y="9" width="12" height="12" rx="2"></rect>
                           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
                       </button>
                     }
-
-                    @if (canDelete()) {
-                      <button type="button" class="icon-btn danger" title="حذف"
-                              (click)="deleteRole(role)"
-                              [disabled]="saving() === 'delete-' + role.id">
-                        @if (saving() === 'delete-' + role.id) {
-                          <span class="button-spinner dark"></span>
-                        } @else {
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                          </svg>
-                        }
-                      </button>
-                    }
-                  </div>
+                  </app-row-actions>
                 </td>
               </tr>
             }
@@ -212,16 +185,17 @@
   <!-- ============================================================
        Modals
        ============================================================ -->
-  @if (activeModal(); as modal) {
-    <app-modal kicker="إجراء" [heading]="modalTitle(modal)" size="lg" [busy]="!!saving()" (closed)="closeModal()">
+  @if (crud.dialog(); as dlg) {
+    <app-modal kicker="إجراء" [heading]="modalTitle(dlg.mode)" size="lg" [busy]="crud.saving()" (closed)="crud.close()">
 
         <div class="modal-body">
 
-          @switch (modal) {
+          @switch (dlg.mode) {
 
             <!-- CREATE -->
             @case ('create') {
               <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
+                <app-alert [message]="crud.formError()" />
                 <div class="form-field">
                   <label class="form-label" for="create-name">اسم الدور</label>
                   <div class="input-wrapper">
@@ -240,9 +214,9 @@
                 <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'create' }" />
 
                 <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="createForm.invalid || saving() === 'create'">
-                    @if (saving() === 'create') {
+                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
+                  <button type="submit" [disabled]="createForm.invalid || crud.saving()">
+                    @if (crud.saving()) {
                       <span class="button-spinner"></span>
                       <span>جاري الإنشاء...</span>
                     } @else {
@@ -259,6 +233,7 @@
             <!-- EDIT -->
             @case ('edit') {
               <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
+                <app-alert [message]="crud.formError()" />
                 <div class="form-field">
                   <label class="form-label" for="edit-name">اسم الدور</label>
                   <input id="edit-name" type="text" formControlName="name" />
@@ -271,9 +246,9 @@
                 <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'edit' }" />
 
                 <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="closeModal()">إلغاء</button>
-                  <button type="submit" [disabled]="editForm.invalid || saving() === 'edit'">
-                    @if (saving() === 'edit') {
+                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
+                  <button type="submit" [disabled]="editForm.invalid || crud.saving()">
+                    @if (crud.saving()) {
                       <span class="button-spinner"></span>
                       <span>جاري الحفظ...</span>
                     } @else {

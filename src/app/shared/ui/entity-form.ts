@@ -63,7 +63,7 @@ export class EntityForm {
   descPlaceholder = input('');
   /** نص زر الإنشاء، مثل «إنشاء الفرع» */
   createLabel = input.required<string>();
-  /** مفتاح الإجراء الجاري من PageActions ('create' | 'edit' | ...) */
+  /** وضع النافذة الجاري حفظه ('create' | 'edit')، أو null */
   saving = input<string | null>(null);
   /** خطأ الحفظ من الخادم — يظهر داخل النافذة فوق الحقول */
   error = input('');

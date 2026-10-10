@@ -3,7 +3,7 @@ import { Component, inject, input, signal } from '@angular/core';
 import { VacationService } from '../data-access/vacation.service';
 import { VacationApprovalContext } from '../data-access/vacation.models';
 import { daysAr, vacationsAr } from '@core/utils/arabic-count';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /**
  * «سجل الموظف» داخل بطاقة طلب الإجازة قبل القرار (قرار المستخدم 2026-10-04): مطوي، ويُحمَّل عند أول فتح.

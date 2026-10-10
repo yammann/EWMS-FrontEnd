@@ -14,7 +14,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { AddToTodoDialog } from '@features/todo';
 import { TaskNoteDialog } from './task-note-dialog';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({

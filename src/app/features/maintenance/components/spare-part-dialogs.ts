@@ -12,7 +12,7 @@ import { MoneyPipe, QtyPipe, UtcPipe } from '@shared/pipes/format.pipes';
 import { localDateInput } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };

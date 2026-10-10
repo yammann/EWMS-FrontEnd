@@ -15,7 +15,7 @@ import { Icon } from '@shared/ui/icon';
 import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from '../components/todo-list-dialog';
 import { Alert } from '@shared/ui/alert';
-import { trackRequest } from '@shared/ui/loader';
+import { trackRequest } from '@shared/ui/track-request';
 
 type View = 'lists' | 'today';
 
