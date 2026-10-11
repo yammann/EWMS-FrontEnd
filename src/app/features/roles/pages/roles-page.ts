@@ -53,7 +53,9 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
   ] },
   { key: 'sites', title: 'الخريطة والمواقع', groups: [
     { key: 'sites', title: 'سجل المواقع المشترك بين الفروع', names: ['ViewSites', 'CreateSite', 'EditSite', 'DeleteSite'] },
-    { key: 'branch-map', title: 'خريطة الفرع', names: ['ViewBranchMap'] }
+    { key: 'branch-map', title: 'خريطة الفرع', names: ['ViewBranchMap'] },
+    { key: 'map-layers', title: 'طبقات الفرع وحقولها (الطبقة ملك الفرع)', names: ['ViewMapLayers', 'CreateMapLayer', 'EditMapLayer', 'DeleteMapLayer'] },
+    { key: 'map-entries', title: 'سجلات الطبقات على المواقع (السجل ملك قسم من أضافه)', names: ['ViewDepartmentMapEntries', 'ViewBranchMapEntries', 'CreateMapEntry', 'EditMapEntry', 'DeleteMapEntry'] }
   ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
     { key: 'devices', title: 'كتالوج الأجهزة والتركيبات (التركيب ملك قسم من أضافه)', names: ['ViewDevices', 'ViewBranchDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }

@@ -1,7 +1,7 @@
 <div class="page">
   <header class="page-header">
     <div>
-      <span class="eyebrow">توثيق الأجهزة · تفاصيل الموقع</span>
+      <span class="eyebrow">الخريطة والمواقع · تفاصيل الموقع</span>
       <h1>{{ site()?.name || (loading() ? 'جارٍ التحميل…' : 'الموقع') }}</h1>
       @if (site(); as s) { <p class="muted">{{ s.governorateName ? 'محافظة ' + s.governorateName : '' }}</p> }
     </div>
@@ -46,6 +46,8 @@
         <app-syria-svg-map [focus]="s.governorateCode || null" [points]="points()" height="min(52vh, 440px)" (pointSelect)="openSite($event)" />
       </section>
     }
+
+    @if (canViewEntries()) { <app-site-entries-panel [siteId]="s.id" [siteName]="s.name" /> }
 
     @if (access().canView) {
     <section class="panel">

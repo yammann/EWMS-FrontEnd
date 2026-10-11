@@ -14,6 +14,7 @@ import { formatPhone } from '@core/utils/phone';
 import { deviceUrl } from '@core/utils/network';
 import { DeviceHistory, DevicePassword, InstallStatus } from '../components/device-ui';
 import { LinkedTasks } from '@features/task-board';
+import { MapLayersService, SiteEntriesPanel } from '@features/map-layers';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 
@@ -22,7 +23,7 @@ import { EmptyState } from '@shared/ui/empty-state';
  * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, Pager],
+  selector: 'app-site-details-page', standalone: true, imports: [EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, Pager],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './site-details-page.scss'],
   templateUrl: './site-details-page.html',
   
@@ -34,6 +35,9 @@ export class SiteDetailsPage {
   private router = inject(Router);
 
   access = this.service.access;
+  /** معلومات الفروع (طبقاتها) على الموقع — لمن يملك أي صلاحية سجلات */
+  private layersAccess = inject(MapLayersService).access;
+  canViewEntries = computed(() => this.layersAccess().canViewEntries);
   site = signal<Site | null>(null);
   installations = signal<DeviceSite[]>([]);
   allSites = signal<Site[]>([]);

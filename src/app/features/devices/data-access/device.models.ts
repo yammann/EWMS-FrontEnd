@@ -145,12 +145,15 @@ export interface MapSite {
   longitude: number | null;
   installationsCount: number;
   deviceTypesCount: number;
+  /** عدد سجلات الطبقة على الموقع (طبقات الفروع، kind = entries) */
+  entriesCount: number;
 }
 
 /** طبقة على خريطة الفرع — kind "devices" = المواقع التي فيها تركيبات مسجّلة باسم الفرع */
 export interface MapLayer {
   key: string;
-  kind: 'devices' | string;
+  /** 'devices' = تركيبات الأجهزة، 'entries' = طبقة يعرّفها الفرع */
+  kind: 'devices' | 'entries' | string;
   title: string;
   /** #RRGGBB — فارغ = لون الواجهة */
   color: string;

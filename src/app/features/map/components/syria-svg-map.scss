@@ -74,6 +74,10 @@ svg { display: block; width: 100%; overflow: hidden; user-select: none; }
 }
 .point:hover circle, .point:focus-visible circle { fill: var(--brand-700); }
 .point.selected circle { fill: var(--accent); }
+/* نقاط بألوان الطبقات (خريطة الفرع): اللون من البيانات، والمرور يغمّقها */
+.point circle.ring { stroke-width: 1.5; filter: none; }
+.point.colored:hover circle, .point.colored:focus-visible circle { filter: brightness(.82) drop-shadow(0 2px 3px rgba(0, 0, 0, .3)); }
+.point.colored:hover circle.ring, .point.colored:focus-visible circle.ring { filter: brightness(.82); }
 .point text {
   font-family: var(--font-sans);
   font-weight: 700;

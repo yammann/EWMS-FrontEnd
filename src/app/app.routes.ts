@@ -7,6 +7,7 @@ import { DASHBOARD_ROUTES } from '@features/dashboard/dashboard.routes';
 import { DEPARTMENTS_ROUTES } from '@features/departments/departments.routes';
 import { DEVICES_ROUTES } from '@features/devices/devices.routes';
 import { MAINTENANCE_PRINT_ROUTES, MAINTENANCE_ROUTES } from '@features/maintenance/maintenance.routes';
+import { MAP_LAYERS_ROUTES } from '@features/map-layers/map-layers.routes';
 import { NOTIFICATIONS_ROUTES } from '@features/notifications/notifications.routes';
 import { OFFICES_ROUTES } from '@features/offices/offices.routes';
 import { PROFILE_ROUTES } from '@features/profile/profile.routes';
@@ -40,6 +41,7 @@ export const routes: Routes = [
       ...TASK_BOARD_ROUTES,
       ...TODO_ROUTES,
       ...DEVICES_ROUTES,
+      ...MAP_LAYERS_ROUTES,
       ...MAINTENANCE_ROUTES,
       ...VACATIONS_ROUTES,
       // إدارة الهيكل والمستخدمين

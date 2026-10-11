@@ -1,0 +1,14 @@
+.panel-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tools select { width: auto; min-width: 160px; }
+td small { display: block; color: var(--ink-500); }
+.layer-name { display: inline-flex; align-items: center; gap: 8px; }
+.dot { width: 12px; height: 12px; flex: none; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--border-strong); }
+.field-chip {
+  display: inline-flex; align-items: center; gap: 2px; margin: 2px 0 2px 6px; padding: 2px 10px;
+  border-radius: var(--radius-full); background: var(--fill); color: var(--ink-700); font-size: 12px;
+  b { color: var(--danger-600); }
+}
+.pill.muted { background: var(--fill); color: var(--ink-500); }
+tr.inactive td { color: var(--ink-500); }
+tr.inactive .dot { opacity: .45; }

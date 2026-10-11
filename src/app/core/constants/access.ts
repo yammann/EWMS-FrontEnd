@@ -37,6 +37,11 @@ export const AppPermission = {
   // سجل المواقع المشترك بين الفروع (أساس خرائط الفروع) — الحد: كل المواقع
   ViewSites: 'ViewSites', CreateSite: 'CreateSite', EditSite: 'EditSite', DeleteSite: 'DeleteSite',
 
+  // طبقات خرائط الفروع: الطبقة ملك الفرع (طبقات فرعي)، والسجل يحمل قسم من أدخله (قسمي / فرعي مع ViewBranchMapEntries)
+  ViewMapLayers: 'ViewMapLayers', CreateMapLayer: 'CreateMapLayer', EditMapLayer: 'EditMapLayer', DeleteMapLayer: 'DeleteMapLayer',
+  ViewDepartmentMapEntries: 'ViewDepartmentMapEntries', ViewBranchMapEntries: 'ViewBranchMapEntries',
+  CreateMapEntry: 'CreateMapEntry', EditMapEntry: 'EditMapEntry', DeleteMapEntry: 'DeleteMapEntry',
+
   // توثيق الأجهزة: التركيب ملك قسم من أضافه وفرعه — ViewDevices = تركيبات قسمي، ViewBranchDevices = فرعي كله
   ViewDevices: 'ViewDevices', ViewBranchDevices: 'ViewBranchDevices',
   CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
@@ -95,9 +100,18 @@ export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
 export const DEVICE_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewDevices, AppPermission.ViewBranchDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
 ];
-/** سجل المواقع: لمن يدير المواقع، ولمن يوثّق الأجهزة (يختار الموقع في نموذج التركيب) — سياسة AnySiteView */
+/** سجلات طبقات الخرائط: أي صلاحية سجلات (سياسة AnyMapEntryView) */
+export const MAP_ENTRY_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewDepartmentMapEntries, AppPermission.ViewBranchMapEntries,
+  AppPermission.CreateMapEntry, AppPermission.EditMapEntry, AppPermission.DeleteMapEntry
+];
+/** صفحة «طبقات الفروع»: من يدير الطبقات أو يعمل على سجلاتها (سياسة AnyMapLayerRead) */
+export const MAP_LAYER_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewMapLayers, AppPermission.CreateMapLayer, AppPermission.EditMapLayer, AppPermission.DeleteMapLayer, ...MAP_ENTRY_ACCESS
+];
+/** سجل المواقع: لمن يدير المواقع، ولمن يوثّق الأجهزة أو يسجّل معلومات الطبقات (يختار الموقع) — سياسة AnySiteView */
 export const SITE_ACCESS: readonly AppPermissionName[] = [
-  AppPermission.ViewSites, AppPermission.CreateSite, AppPermission.EditSite, AppPermission.DeleteSite, ...DEVICE_ACCESS
+  AppPermission.ViewSites, AppPermission.CreateSite, AppPermission.EditSite, AppPermission.DeleteSite, ...DEVICE_ACCESS, ...MAP_ENTRY_ACCESS
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [

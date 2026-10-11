@@ -2,7 +2,7 @@ import { Injectable, computed, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
-import { AppPermission, AppPermissionName } from '@core/constants/access';
+import { AppPermission, AppPermissionName, MAP_ENTRY_ACCESS } from '@core/constants/access';
 import {
   BranchMap, Device, DeviceAccess, DeviceInventoryLog, DeviceSite, ImportReport, InstallationFilter, InstallationStatus, IpInUse,
   MapBranchOption, NearbySite, Site, SiteAccess
@@ -56,7 +56,8 @@ export class DeviceService {
     const canEdit = has(AppPermission.EditSite);
     const canDelete = has(AppPermission.DeleteSite);
     return {
-      canView: has(AppPermission.ViewSites) || canCreate || canEdit || canDelete || this.access().canView,
+      // من يوثّق الأجهزة أو يسجّل معلومات طبقات الفروع يرى المواقع أيضاً (سياسة AnySiteView)
+      canView: has(AppPermission.ViewSites) || canCreate || canEdit || canDelete || this.access().canView || MAP_ENTRY_ACCESS.some(has),
       canCreate, canEdit, canDelete,
       canManage: canCreate || canEdit || canDelete
     };

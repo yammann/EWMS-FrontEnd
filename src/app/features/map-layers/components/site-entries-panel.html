@@ -1,0 +1,62 @@
+<section class="panel entries-panel" aria-labelledby="site-entries-title">
+  <div class="panel-heading">
+    <div>
+      <h2 id="site-entries-title">معلومات الفروع <span class="count">({{ data()?.entries?.length ?? 0 }})</span></h2>
+      <p>ما تسجّله الفروع على هذا الموقع حسب طبقاتها — تظهر سجلات قسمك، أو فرعك كله حسب صلاحيتك</p>
+    </div>
+    @if (creatable().length) { <button class="btn" type="button" (click)="dialog.set({ entry: null })">+ إضافة معلومات</button> }
+  </div>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (loading() && !data()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+  @else if (data(); as d) {
+    @if (!groups().length) {
+      <app-empty-state>
+        @if (d.layers.length) { لا توجد معلومات مسجّلة على هذا الموقع بعد }
+        @else {
+          لا توجد طبقات لفرعك بعد
+          @if (access().canCreateLayer) { — <a routerLink="/map-layers">أنشئ طبقة وحدّد حقولها</a> }
+        }
+      </app-empty-state>
+    }
+    @for (g of groups(); track g.layer.id) {
+      <div class="layer-group">
+        <h3><i class="dot" [style.background]="g.layer.color" aria-hidden="true"></i>{{ g.layer.name }}
+          @if (multiBranch()) { <span class="branch">{{ g.layer.branchName }}</span> }
+          @if (!g.layer.isActive) { <span class="pill muted">معطّلة — للقراءة</span> }
+          <span class="count">({{ g.entries.length }})</span></h3>
+        @for (e of g.entries; track e.id) {
+          <article class="entry">
+            @if (g.layer.fields.length) {
+              <dl>
+                @for (f of g.layer.fields; track f.id) {
+                  <div [class.wide]="f.type === 2"><dt>{{ f.label }}</dt><dd>{{ format(f, e.values[f.id]) }}</dd></div>
+                }
+              </dl>
+            }
+            <footer>
+              <span class="meta">
+                {{ e.departmentName || 'على مستوى الفرع' }}
+                · أضافه {{ e.createdByName || '—' }} في {{ e.createdAt.slice(0, 10) }}
+                @if (e.updatedAt) { · عدّله {{ e.updatedByName || '—' }} في {{ e.updatedAt.slice(0, 10) }} }
+              </span>
+              <span class="actions">
+                @if (e.canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="dialog.set({ entry: e })">تعديل</button> }
+                @if (e.canDelete) {
+                  <button class="btn btn-ghost btn-sm danger" type="button" [disabled]="deletingId() === e.id" (click)="remove(e)">{{ deletingId() === e.id ? 'جارٍ الحذف…' : 'حذف' }}</button>
+                }
+              </span>
+            </footer>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>
+
+@if (dialog(); as dlg) {
+  <app-entry-form-dialog [siteId]="siteId()" [siteName]="siteName()" [layers]="dialogLayers()" [entry]="dlg.entry"
+                         [departments]="access().canChooseUnit ? departments() : []"
+                         (saved)="saved($event, !!dlg.entry)" (closed)="dialog.set(null)" />
+}

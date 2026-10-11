@@ -1,0 +1,5 @@
+.layer-line { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; color: var(--ink-700); }
+.dot { width: 12px; height: 12px; flex: none; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--border-strong); }
+.req { margin-inline-start: 3px; color: var(--danger-600); }
+.warn { margin: 12px 0 0; color: var(--warning-700); }
+textarea { resize: vertical; }
