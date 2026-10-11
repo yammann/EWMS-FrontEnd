@@ -3,7 +3,8 @@ import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { PagedResult } from '@core/models/paged-result.model';
 import { DeviceService, formatCoords } from '../data-access/device.service';
 import { DeviceSite, Site } from '../data-access/device.models';
 import { StatTile } from '@shared/ui/stat-tile';
@@ -79,7 +80,11 @@ export class SiteDetailsPage {
   }
 
   private load(id: number) {
-    this.loading.set(true); this.error.set(''); forkJoin({ site: this.service.site(id), installations: this.service.installations({ siteId: id, pageSize: 200 }), sites: this.service.sites() }).subscribe({
+    // التركيبات لمن يرى الأجهزة فقط (وضمن قسمه/فرعه)؛ من يملك صلاحيات المواقع وحدها يرى بيانات الموقع
+    const installations = this.access().canView
+      ? this.service.installations({ siteId: id, pageSize: 200 })
+      : of<PagedResult<DeviceSite>>({ items: [], totalCount: 0, page: 1, pageSize: 200, totalPages: 0 });
+    this.loading.set(true); this.error.set(''); forkJoin({ site: this.service.site(id), installations, sites: this.service.sites() }).subscribe({
       next: r => { this.site.set(r.site); this.installations.set(r.installations.items); this.total.set(r.installations.totalCount); this.allSites.set(r.sites); this.loading.set(false); },
       error: e => { this.site.set(null); this.loading.set(false); this.error.set(e.message); }
     });

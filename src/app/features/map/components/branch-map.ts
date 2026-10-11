@@ -47,7 +47,8 @@ export class BranchMapComponent {
   error = signal('');
   coords = formatCoords;
 
-  layer = computed(() => this.data()?.devicesLayer ?? null);
+  /** طبقة تركيبات الأجهزة في خريطة الفرع (الإصدار 1.2.0 يضيف طبقات الفروع بجانبها) */
+  layer = computed(() => this.data()?.layers.find(l => l.kind === 'devices') ?? null);
 
   /** المحافظة (code) لكل موقع — يحددها الخادم من الإحداثيات ويحفظها مع الموقع (مصدر واحد) */
   private siteGov = computed(() => {

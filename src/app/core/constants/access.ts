@@ -34,8 +34,12 @@ export const AppPermission = {
   // قوائم المهام الشخصية: كل صلاحية على قوائمه هو فقط
   ViewToDoLists: 'ViewToDoLists', CreateToDoList: 'CreateToDoList', EditToDoList: 'EditToDoList', DeleteToDoList: 'DeleteToDoList',
 
-  // توثيق الأجهزة (Devices/MyAccess يعيد نفس النتيجة من صلاحيات الدور)
-  ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
+  // سجل المواقع المشترك بين الفروع (أساس خرائط الفروع) — الحد: كل المواقع
+  ViewSites: 'ViewSites', CreateSite: 'CreateSite', EditSite: 'EditSite', DeleteSite: 'DeleteSite',
+
+  // توثيق الأجهزة: التركيب ملك قسم من أضافه وفرعه — ViewDevices = تركيبات قسمي، ViewBranchDevices = فرعي كله
+  ViewDevices: 'ViewDevices', ViewBranchDevices: 'ViewBranchDevices',
+  CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
   // إظهار كلمات سر الأجهزة ونسخها (يُسجَّل كل إظهار) — مستقلة عن العرض
   RevealDevicePasswords: 'RevealDevicePasswords',
 
@@ -89,7 +93,11 @@ export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
 ];
 /** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس سياسة AnyDeviceView في الباكاند) */
 export const DEVICE_ACCESS: readonly AppPermissionName[] = [
-  AppPermission.ViewDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
+  AppPermission.ViewDevices, AppPermission.ViewBranchDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
+];
+/** سجل المواقع: لمن يدير المواقع، ولمن يوثّق الأجهزة (يختار الموقع في نموذج التركيب) — سياسة AnySiteView */
+export const SITE_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewSites, AppPermission.CreateSite, AppPermission.EditSite, AppPermission.DeleteSite, ...DEVICE_ACCESS
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [

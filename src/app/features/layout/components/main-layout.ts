@@ -13,12 +13,12 @@ import { Icon, IconName } from '@shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
 import { BackButton } from '@shared/ui/back-button';
 import { roleLabel } from '@core/utils/roles';
-import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN } from '@core/constants/access';
+import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN } from '@core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
-interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'devices' | 'admin'; title: string; items: NavItem[]; }
+interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'sites' | 'devices' | 'admin'; title: string; items: NavItem[]; }
 
 @Component({
   selector: 'app-main-layout',
@@ -82,9 +82,11 @@ export class MainLayout {
         can(AppPermission.ViewMaintenanceStats) && { path: '/maintenance/stats', label: 'إحصائيات الصيانة', icon: 'chart' },
         canAny(MANAGE_MAINTENANCE_LOOKUPS) && { path: '/maintenance/settings', label: 'إعدادات الصيانة', icon: 'gear' }
       ].filter(Boolean) as NavItem[] },
+      { id: 'sites', title: 'الخريطة والمواقع', items: canAny(SITE_ACCESS) ? [
+        { path: '/devices/sites', label: 'المواقع', icon: 'map' }
+      ] : [] },
       { id: 'devices', title: 'توثيق الأجهزة', items: canAny(DEVICE_ACCESS) ? [
         { path: '/devices/installations', label: 'التركيبات', icon: 'device' },
-        { path: '/devices/sites', label: 'المواقع', icon: 'landmark' },
         { path: '/devices/catalog', label: 'الأجهزة', icon: 'layers' }
       ] : [] },
       { id: 'admin', title: 'الإدارة', items: [

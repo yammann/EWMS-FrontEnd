@@ -8,7 +8,7 @@
     <div class="header-actions">
       @if (site(); as s) {
         <button class="btn btn-ghost" type="button" (click)="historyOpen.set(true)">سجل الموقع</button>
-        <a class="btn" [routerLink]="['/devices/installations']" [queryParams]="{ siteId: s.id }">{{ access().canManage ? 'إدارة التركيبات' : 'صفحة التركيبات' }}</a>
+        @if (access().canView) { <a class="btn" [routerLink]="['/devices/installations']" [queryParams]="{ siteId: s.id }">{{ access().canManage ? 'إدارة التركيبات' : 'صفحة التركيبات' }}</a> }
       }
     </div>
   </header>
@@ -47,6 +47,7 @@
       </section>
     }
 
+    @if (access().canView) {
     <section class="panel">
       <div class="panel-heading"><div><h2>الأجهزة المركّبة <span class="count">({{ total() }})</span></h2><p>{{ access().canRevealPasswords ? 'كلمات السر مخفية — 👁 للإظهار أو ⧉ للنسخ (يُسجَّل كل إظهار)' : 'كلمات السر تحتاج صلاحية الإظهار' }}{{ total() > installations().length ? ' — يُعرض أول ' + installations().length + '، والباقي في صفحة التركيبات' : '' }}</p></div></div>
       @if (!installations().length) { <app-empty-state>لا توجد أجهزة مركّبة في هذا الموقع بعد</app-empty-state> }
@@ -72,6 +73,7 @@
   <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
       }
     </section>
+    }
 
     <app-linked-tasks entityType="Site" [entityId]="s.id" />
 

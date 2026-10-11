@@ -51,11 +51,15 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
     { key: 'notifications', title: 'الإشعارات', names: ['ViewNotifications'] },
     { key: 'signature', title: 'التوقيع الإلكتروني', names: ['ManageMySignature'] }
   ] },
+  { key: 'sites', title: 'الخريطة والمواقع', groups: [
+    { key: 'sites', title: 'سجل المواقع المشترك بين الفروع', names: ['ViewSites', 'CreateSite', 'EditSite', 'DeleteSite'] },
+    { key: 'branch-map', title: 'خريطة الفرع', names: ['ViewBranchMap'] }
+  ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
-    { key: 'devices', title: 'المواقع والأجهزة والتركيبات', names: ['ViewDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
+    { key: 'devices', title: 'كتالوج الأجهزة والتركيبات (التركيب ملك قسم من أضافه)', names: ['ViewDevices', 'ViewBranchDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
   ] },
   { key: 'dashboards', title: 'لوحات المتابعة', groups: [
-    { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard', 'ViewBranchMap'] }
+    { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard'] }
   ] },
   { key: 'admin', title: 'الإدارة والهيكل', groups: [
     { key: 'users', title: 'الموظفون', names: ['ViewUsers', 'CreateUser', 'EditUser', 'ToggleUserActive', 'DeleteUser'] },

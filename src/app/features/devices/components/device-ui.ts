@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { DeviceService, saveBlob } from '../data-access/device.service';
 import { DeviceInventoryLog, ImportReport, INSTALLATION_STATUSES } from '../data-access/device.models';
+import { Department } from '@core/models/ewms.models';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { Pager } from '@shared/ui/pager';
@@ -153,6 +154,9 @@ export class InstallationsImport {
   private service = inject(DeviceService);
   imported = output<number>();
   closed = output<void>();
+  /** أقسام يمكن تسجيل الأسطر باسمها (لمن يختار القسم) — فارغة = قسم المستورد */
+  departments = input<Department[]>([]);
+  departmentId = signal(0);
 
   file = signal<File | null>(null);
   report = signal<ImportReport | null>(null);
@@ -175,9 +179,15 @@ export class InstallationsImport {
 
   commit() { this.send(false); }
 
+  /** تغيير القسم يعيد المعاينة (الأسطر ستُسجَّل باسمه) */
+  setDepartment(id: number) {
+    this.departmentId.set(id);
+    if (this.file()) this.send(true);
+  }
+
   private send(dryRun: boolean) {
     const file = this.file();
     if (!file) return;
-    trackRequest(this.service.importInstallations(file, dryRun), this.busy, this.error, r => { this.report.set(r); if (!dryRun) this.imported.emit(r.imported); });
+    trackRequest(this.service.importInstallations(file, dryRun, this.departmentId() || null), this.busy, this.error, r => { this.report.set(r); if (!dryRun) this.imported.emit(r.imported); });
   }
 }

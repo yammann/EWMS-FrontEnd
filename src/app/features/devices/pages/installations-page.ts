@@ -7,6 +7,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, catchError, debounceTime, forkJoin, merge, of, switchMap } from 'rxjs';
 import { DeviceService, saveBlob } from '../data-access/device.service';
 import { Device, DeviceSite, INSTALLATION_STATUSES, InstallationStatus, IpInUse, Site } from '../data-access/device.models';
+import { LookupsService } from '@core/services/lookups.service';
+import { AuthService } from '@core/services/auth.service';
+import { AppPermission } from '@core/constants/access';
+import { Department } from '@core/models/ewms.models';
 import { GOVERNORATES } from '@core/constants/governorates';
 import { deviceUrl, ipv4Validator, isIpv4, isSubnetMask, macValidator, sameSubnet, subnetValidator } from '@core/utils/network';
 import { Modal } from '@shared/ui/modal';
@@ -59,6 +63,19 @@ export class InstallationsPage {
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
   private router = inject(Router);
+  private lookups = inject(LookupsService);
+  private auth = inject(AuthService);
+  /**
+   * أقسام يمكن تسجيل التركيب باسمها: لمن يملك نظرة المؤسسة (كل الأقسام) أو ViewBranchDevices (أقسام فرعه —
+   * Department/GetAll يعيد فرعه فقط). فارغة = يُسجَّل باسم قسم المستخدم تلقائياً بلا اختيار.
+   */
+  unitDepartments = signal<Department[]>([]);
+  /** الأقسام مجمّعة بفروعها لقائمة الاختيار */
+  unitGroups = computed(() => {
+    const groups = new Map<string, Department[]>();
+    for (const d of this.unitDepartments()) groups.set(d.branchName, [...(groups.get(d.branchName) ?? []), d]);
+    return [...groups.entries()].map(([branch, departments]) => ({ branch, departments }));
+  });
   access = this.service.access;
 
   pageSize = PAGE_SIZE;
@@ -106,7 +123,9 @@ export class InstallationsPage {
     vlan: [null as number | null, [Validators.min(1), Validators.max(4094)]],
     firmware: ['', Validators.maxLength(100)],
     installDate: [''],
-    status: [1 as InstallationStatus]
+    status: [1 as InstallationStatus],
+    /** 0 = قسم من يضيف (أو يبقى القسم الحالي عند التعديل) */
+    departmentId: [0]
   }, { validators: gatewayInSubnet });
 
   constructor() {
@@ -137,6 +156,9 @@ export class InstallationsPage {
       next: r => { this.sites.set(r.sites); this.devices.set(r.devices); },
       error: e => this.error.set(e.message)
     });
+    if (this.access().canChooseUnit && this.auth.hasPermission(AppPermission.ViewDepartments)) {
+      this.lookups.departments().subscribe({ next: list => this.unitDepartments.set(list), error: () => this.unitDepartments.set([]) });
+    }
   }
 
   join(...parts: (string | null | undefined)[]) { return parts.filter(p => !!p).join(' · '); }
@@ -180,7 +202,8 @@ export class InstallationsPage {
       ip: i?.ip ?? '', subnetMask: i?.subnetMask ?? '255.255.255.0', gateway: i?.gateway ?? '',
       userName: i?.userName ?? '', pass: '', note: i?.note ?? '', installLocation: i?.installLocation ?? '', sn: i?.sn ?? '',
       macAddress: i?.macAddress ?? '', port: i?.port ?? '', vlan: i?.vlan ?? null, firmware: i?.firmware ?? '',
-      installDate: i?.installDate ? i.installDate.slice(0, 10) : '', status: i?.status ?? 1
+      installDate: i?.installDate ? i.installDate.slice(0, 10) : '', status: i?.status ?? 1,
+      departmentId: i?.departmentId ?? 0
     });
     // كلمة السر مطلوبة عند الإضافة فقط (عند التعديل فارغة = تبقى الحالية)
     this.form.controls.pass.setValidators(i ? [Validators.maxLength(200)] : [Validators.required, Validators.maxLength(200)]);
@@ -215,7 +238,8 @@ export class InstallationsPage {
       deviceId: Number(v.deviceId), siteId: Number(v.siteId), ip: v.ip.trim(), subnetMask: v.subnetMask.trim(), gateway: v.gateway.trim(),
       userName: v.userName.trim(), pass: v.pass, note: v.note.trim(), installLocation: v.installLocation.trim(), sn: v.sn.trim(),
       macAddress: v.macAddress.trim(), port: v.port.trim(), vlan: v.vlan ? Number(v.vlan) : null, firmware: v.firmware.trim(),
-      installDate: v.installDate || null, status: Number(v.status) as InstallationStatus, rowVersion: i?.rowVersion ?? null
+      installDate: v.installDate || null, status: Number(v.status) as InstallationStatus, rowVersion: i?.rowVersion ?? null,
+      departmentId: this.unitDepartments().length && Number(v.departmentId) ? Number(v.departmentId) : null
     };
     trackRequest((i ? this.service.updateInstallation(i.id, body) : this.service.createInstallation(body)), this.saving, this.formError, () => { this.formOpen.set(false); this.toast.success('تم الحفظ'); this.load(); });
   }

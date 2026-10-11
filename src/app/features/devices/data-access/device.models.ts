@@ -72,8 +72,16 @@ export interface DeviceSite {
   statusAr: string;
   /** تركيب آخر بنفس الـ IP في نفس الموقع (تنبيه فقط) */
   duplicateIp: boolean;
+  /** الوحدة المالكة: قسم من أضاف التركيب وفرعه (null للقديم غير المصنّف) */
+  branchId: number | null;
+  branchName: string;
+  departmentId: number | null;
+  departmentName: string;
   rowVersion: string;
 }
+
+/** موقع قريب من النقطة المختارة (تنبيه قبل إضافة موقع مكرر) */
+export interface NearbySite { id: number; name: string; distanceMeters: number; }
 
 export interface InstallationFilter {
   q?: string;
@@ -116,7 +124,12 @@ export interface DeviceAccess {
   canManage: boolean;
   /** يظهر كلمات سر الأجهزة وينسخها (RevealDevicePasswords) */
   canRevealPasswords: boolean;
+  /** يختار القسم المالك للتركيب: نظرة المؤسسة (أي قسم) أو ViewBranchDevices (أقسام فرعه) */
+  canChooseUnit: boolean;
 }
+
+/** صلاحياتي على سجل المواقع المشترك (مستقلة عن الأجهزة) */
+export interface SiteAccess { canView: boolean; canCreate: boolean; canEdit: boolean; canDelete: boolean; canManage: boolean; }
 
 // ════════════════════ خريطة الفرع (GET api/Map/Branch/{id}) ════════════════════
 
@@ -134,17 +147,22 @@ export interface MapSite {
   deviceTypesCount: number;
 }
 
-export interface DevicesMapLayer {
+/** طبقة على خريطة الفرع — kind "devices" = المواقع التي فيها تركيبات مسجّلة باسم الفرع */
+export interface MapLayer {
+  key: string;
+  kind: 'devices' | string;
   title: string;
+  /** #RRGGBB — فارغ = لون الواجهة */
+  color: string;
   sites: MapSite[];
   sitesWithoutCoordinates: number;
 }
 
 export interface MapBranchOption { id: number; name: string; hasMapData: boolean; }
 
-/** طبقات بيانات الخريطة حسب الفرع — devicesLayer = null إن لم تكن للفرع بيانات خريطة بعد */
+/** خريطة الفرع: طبقات تُبنى من بياناته — layers فارغة إن لم تكن له بيانات بعد */
 export interface BranchMap {
   branchId: number;
   branchName: string;
-  devicesLayer: DevicesMapLayer | null;
+  layers: MapLayer[];
 }
