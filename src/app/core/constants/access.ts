@@ -70,7 +70,16 @@ export const AppPermission = {
   // مخزون قطع الغيار: مخزون لكل قسم، والصرف على طلبات الصيانة
   ViewSpareParts: 'ViewSpareParts', CreateSparePart: 'CreateSparePart', EditSparePart: 'EditSparePart', DeleteSparePart: 'DeleteSparePart',
   ReceiveSpareParts: 'ReceiveSpareParts', AdjustSparePartStock: 'AdjustSparePartStock',
-  IssueSparePart: 'IssueSparePart', ViewSparePartReports: 'ViewSparePartReports'
+  IssueSparePart: 'IssueSparePart', ViewSparePartReports: 'ViewSparePartReports',
+
+  // مركز التقارير: صلاحية سحب لكل تقرير (معاينة + Excel + طباعة) بحدود صفحة بياناته، وكل سحب يُسجَّل
+  ExportVacationsReport: 'ExportVacationsReport', ExportVacationUsageReport: 'ExportVacationUsageReport',
+  ExportUsersReport: 'ExportUsersReport', ExportStructureReport: 'ExportStructureReport',
+  ExportMaintenanceRequestsReport: 'ExportMaintenanceRequestsReport', ExportTechniciansReport: 'ExportTechniciansReport',
+  ExportSparePartMovementsReport: 'ExportSparePartMovementsReport', ExportSparePartStockReport: 'ExportSparePartStockReport',
+  ExportInstallationsReport: 'ExportInstallationsReport', ExportSitesReport: 'ExportSitesReport', ExportMapEntriesReport: 'ExportMapEntriesReport',
+  // تصدير لوحة المهام (من صفحتها) وسجل السحب
+  ExportTasksReport: 'ExportTasksReport', ViewReportLog: 'ViewReportLog'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -112,6 +121,12 @@ export const MAP_LAYER_ACCESS: readonly AppPermissionName[] = [
 /** سجل المواقع: لمن يدير المواقع، ولمن يوثّق الأجهزة أو يسجّل معلومات الطبقات (يختار الموقع) — سياسة AnySiteView */
 export const SITE_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewSites, AppPermission.CreateSite, AppPermission.EditSite, AppPermission.DeleteSite, ...DEVICE_ACCESS, ...MAP_ENTRY_ACCESS
+];
+/** مركز التقارير: صلاحية سحب أي تقرير (نفس سياسة AnyReportExport في الباكاند) */
+export const REPORT_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ExportVacationsReport, AppPermission.ExportVacationUsageReport, AppPermission.ExportUsersReport, AppPermission.ExportStructureReport,
+  AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
+  AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [

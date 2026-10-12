@@ -1,0 +1,53 @@
+<div class="bar no-print" [class.wide]="data()?.landscape">
+  <app-back-button />
+  @if (data(); as d) { <span class="bar-note">{{ d.table.rows.length.toLocaleString('en-US') }} صفاً — «حفظ PDF» متاح من نافذة الطباعة</span> }
+  <button type="button" class="btn" (click)="print()" [disabled]="!data()"><app-icon name="printer" [size]="16" /> طباعة</button>
+</div>
+
+@if (error()) { <p class="alert alert-error no-print" role="alert">{{ error() }}</p> }
+@else if (!data()) { <p class="loading no-print" role="status">جارٍ إعداد التقرير للطباعة…</p> }
+
+@if (data(); as d) {
+  <article class="sheet" [class.landscape]="d.landscape" dir="rtl">
+    <header class="head">
+      <div class="side right">
+        <strong>{{ header.countryAr }}</strong>
+        @if (d.branchName) { <strong class="branch">{{ d.branchName }}</strong> }
+      </div>
+      <div class="center"><app-logo class="emblem" /></div>
+      <div class="side left" dir="ltr"><strong>{{ header.countryEn }}</strong></div>
+    </header>
+
+    <h1>{{ d.title }}</h1>
+
+    <dl class="meta">
+      <div class="wide-meta"><dt>الفلاتر:</dt><dd>{{ d.filtersText }}</dd></div>
+      <div><dt>طُبع بواسطة:</dt><dd>{{ d.printedBy }}</dd></div>
+      <div><dt>تاريخ الطباعة:</dt><dd class="ltr">{{ d.printedAt | utc | date:'yyyy/M/d HH:mm' }}</dd></div>
+      <div><dt>عدد الصفوف:</dt><dd>{{ d.table.rows.length.toLocaleString('en-US') }}</dd></div>
+    </dl>
+
+    <table class="grid">
+      <thead>
+        <tr>
+          <th class="idx">#</th>
+          @for (c of columns(); track c.column.key) { <th [class.num]="numeric(c.column.type)">{{ c.column.header }}</th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of d.table.rows; track $index) {
+          <tr>
+            <td class="idx">{{ $index + 1 }}</td>
+            @for (c of columns(); track c.column.key) { <td [class.num]="numeric(c.column.type)" [class.date]="c.column.type === 'date' || c.column.type === 'datetime'">{{ format(row[c.index], c.column.type) }}</td> }
+          </tr>
+        }
+        @if (hasSums()) {
+          <tr class="totals">
+            <th class="idx" scope="row">المجموع</th>
+            @for (t of totals(); track $index) { <td class="num">{{ t }}</td> }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </article>
+}

@@ -7,12 +7,7 @@ import { Logo } from '@shared/ui/logo';
 import { daysAr } from '@core/utils/arabic-count';
 import { BackButton } from '@shared/ui/back-button';
 import { Icon } from '@shared/ui/icon';
-
-/** ترويسة نموذج طلب الإجازة: الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
-export const VACATION_PRINT_HEADER = {
-  countryAr: 'الجمهورية العربية السورية',
-  countryEn: 'Syrian Arab Republic'
-};
+import { PRINT_HEADER } from '@core/constants/print';
 
 
 /**
@@ -29,7 +24,8 @@ export class VacationPrintPage {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  header = VACATION_PRINT_HEADER;
+  /** الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
+  header = PRINT_HEADER;
   days = daysAr;
   data = signal<VacationPrint | null>(null);
   error = signal('');

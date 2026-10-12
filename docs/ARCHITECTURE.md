@@ -48,6 +48,9 @@ src/app/
 | قيمة `<select>` مربوطة بإشارة | `[appSelectValue]` (لا `[value]` على select: يُطبَّق قبل وصول الخيارات فيظهر خيار خاطئ) |
 | قوائم الهيكل (فروع/أقسام/مكاتب/أدوار) | `LookupsService` (تخزين 60 ث، يُبطَل بعد أي تعديل؛ `branchOptions()` لمن لا يملك ViewBranches) |
 | تنسيق تاريخ UTC / مبلغ / كمية | أنابيب `utc` `money` `qty` (`shared/pipes/format.pipes.ts`) أو `core/utils/format.ts` |
+| تنزيل ملف من الخادم | `api.getBlob` / `api.postBlob` ثم `saveBlob(blob, اسم)` (`core/utils/download.ts`)؛ رسالة الخطأ العربية تُقرأ من Blob في `apiErrorInterceptor` |
+| ترويسة المطبوعات (اسم الدولة) | `PRINT_HEADER` (`core/constants/print.ts`) — نموذج الإجازة وطباعة التقارير |
+| تقرير جديد في «مركز التقارير» | صنف في الباكاند فقط (`Infrastructure/Reports`) + صلاحيته في `access.ts` (`REPORT_ACCESS`) وصفحة الأدوار: الواجهة تبني الفلاتر والمعاينة والطباعة من تعريفه |
 
 ### النمط الموحّد لصفحات الإدارة (CrudPage)
 ```ts

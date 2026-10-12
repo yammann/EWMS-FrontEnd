@@ -13,7 +13,7 @@
       @if (canCreate()) { <button class="btn" type="button" (click)="newTask()">+ مهمة جديدة</button> }
       @if (canRecurring()) { <a class="btn btn-ghost" routerLink="/task-board/recurring">المهام الدورية والقوالب</a> }
       @if (canStats()) { <a class="btn btn-ghost" routerLink="/task-board/stats">الإحصائيات</a> }
-      <button class="btn btn-ghost" type="button" (click)="exportExcel()" [disabled]="exporting() || !tasks().length">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button>
+      @if (canExport()) { <button class="btn btn-ghost" type="button" (click)="exportExcel()" [disabled]="exporting() || !tasks().length">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button> }
       <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
     </div>
   </header>

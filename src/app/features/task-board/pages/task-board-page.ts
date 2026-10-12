@@ -74,6 +74,8 @@ export class TaskBoardPage {
   exporting = signal(false);
   canRecurring = computed(() => this.auth.hasAnyPermission(TASK_ASSIGN));
   canStats = computed(() => this.auth.hasPermission(AppPermission.ViewTaskStats));
+  /** تصدير اللوحة بصلاحية ExportTasksReport (ويُسجَّل في سجل التقارير) */
+  canExport = computed(() => this.auth.hasPermission(AppPermission.ExportTasksReport));
   filtersActive = computed(() => !!(this.creatorFilter() || this.targetFilter() || this.dueFrom() || this.dueTo() || this.doneDays() !== 30));
 
   /** خيارات الفلاتر المشتقة من المهام المحمّلة */

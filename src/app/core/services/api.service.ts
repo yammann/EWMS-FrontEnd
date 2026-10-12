@@ -18,6 +18,11 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}${path}`, { responseType: 'blob' });
   }
 
+  /** ملف ناتج عن طلب POST (تصدير بفلاتر في جسم الطلب) */
+  postBlob(path: string, body: unknown): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}${path}`, body, { responseType: 'blob' });
+  }
+
   post<T>(path: string, body: unknown): Observable<T> {
     return this.http.post<T>(`${this.baseUrl}${path}`, body);
   }

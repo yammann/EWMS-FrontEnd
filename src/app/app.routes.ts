@@ -11,6 +11,7 @@ import { MAP_LAYERS_ROUTES } from '@features/map-layers/map-layers.routes';
 import { NOTIFICATIONS_ROUTES } from '@features/notifications/notifications.routes';
 import { OFFICES_ROUTES } from '@features/offices/offices.routes';
 import { PROFILE_ROUTES } from '@features/profile/profile.routes';
+import { REPORT_PRINT_ROUTES, REPORTS_ROUTES } from '@features/reports/reports.routes';
 import { ROLES_ROUTES } from '@features/roles/roles.routes';
 import { TASK_BOARD_ROUTES } from '@features/task-board/task-board.routes';
 import { TODO_ROUTES } from '@features/todo/todo.routes';
@@ -28,6 +29,7 @@ export const routes: Routes = [
   // صفحات الطباعة خارج الإطار العام (بلا سايدبار)
   ...MAINTENANCE_PRINT_ROUTES,
   ...VACATION_PRINT_ROUTES,
+  ...REPORT_PRINT_ROUTES,
   {
     path: '',
     component: MainLayout,
@@ -44,6 +46,7 @@ export const routes: Routes = [
       ...MAP_LAYERS_ROUTES,
       ...MAINTENANCE_ROUTES,
       ...VACATIONS_ROUTES,
+      ...REPORTS_ROUTES,
       // إدارة الهيكل والمستخدمين
       ...BRANCHES_ROUTES,
       ...DEPARTMENTS_ROUTES,

@@ -64,6 +64,13 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
   { key: 'dashboards', title: 'لوحات المتابعة', groups: [
     { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard'] }
   ] },
+  { key: 'reports', title: 'التقارير', groups: [
+    { key: 'reports-vac', title: 'تقارير الإجازات', names: ['ExportVacationsReport', 'ExportVacationUsageReport'] },
+    { key: 'reports-staff', title: 'تقارير الموظفين والهيكل', names: ['ExportUsersReport', 'ExportStructureReport'] },
+    { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
+    { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
+    { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
+  ] },
   { key: 'admin', title: 'الإدارة والهيكل', groups: [
     { key: 'users', title: 'الموظفون', names: ['ViewUsers', 'CreateUser', 'EditUser', 'ToggleUserActive', 'DeleteUser'] },
     { key: 'roles', title: 'الأدوار والصلاحيات', names: ['ViewRoles', 'CreateRole', 'EditRole', 'DeleteRole'] },

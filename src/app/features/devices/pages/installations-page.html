@@ -5,7 +5,7 @@
           <button class="btn" type="button" (click)="openForm(null)" [disabled]="!devices().length || !sites().length">+ تركيب جديد</button>
           <button class="btn btn-ghost" type="button" (click)="importOpen.set(true)">استيراد Excel</button>
         }
-        <button class="btn btn-ghost" type="button" (click)="export()" [disabled]="exporting() || !total()">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button>
+        @if (canExport()) { <button class="btn btn-ghost" type="button" (click)="export()" [disabled]="exporting() || !total()">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button> }
         <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
   </app-page-header>
 

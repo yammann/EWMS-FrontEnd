@@ -93,6 +93,8 @@ export class InstallationsPage {
   search = signal('');
   governorate = signal(''); siteId = signal(0); deviceId = signal(0); status = signal(0);
   loading = signal(false); saving = signal(false); exporting = signal(false);
+  /** التصدير بصلاحية سحب تقرير التركيبات (ويُسجَّل في سجل التقارير) */
+  canExport = computed(() => this.auth.hasPermission(AppPermission.ExportInstallationsReport));
   error = signal(''); formError = signal('');
   formOpen = signal(false); editing = signal<DeviceSite | null>(null);
   showPass = signal(false);
