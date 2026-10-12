@@ -1,4 +1,4 @@
-<main class="shell" [class.collapsed]="collapsed()">
+<main class="shell" [class.collapsed]="collapsed()" [class.menu-open]="menuOpen()">
   <!-- السايدبار بأسلوب macOS: مادة شفافة، أقسام قابلة للطي، ووضع الأيقونات فقط -->
   <aside class="sidebar" aria-label="القائمة الرئيسية">
     <div class="sidebar-head">
@@ -13,11 +13,17 @@
               [attr.aria-label]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'" [attr.title]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'">
         <app-icon name="sidebar" />
       </button>
+      <!-- الشاشات الصغيرة: الروابط مغلقة حتى يُضغط «القائمة» -->
+      <button type="button" class="menu-toggle" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-controls="main-nav">
+        <app-icon [name]="menuOpen() ? 'xmark' : 'menu'" [weight]="2" /><span>{{ menuOpen() ? 'إغلاق' : 'القائمة' }}</span>
+      </button>
     </div>
 
-    <nav aria-label="التنقل الرئيسي">
+    <nav id="main-nav" aria-label="التنقل الرئيسي">
       @for (section of sections(); track section.id) {
-        @if (section.title) {
+        @if (section.title && compact()) {
+          <h3 class="nav-heading">{{ section.title }}</h3>
+        } @else if (section.title) {
           <button type="button" class="nav-section" [class.has-active]="!isOpen(section) && hasActive(section)"
                   (click)="toggleSection(section)" [attr.aria-expanded]="isOpen(section)" [attr.aria-controls]="'nav-' + section.id">
             <span>{{ section.title }}</span>
@@ -25,12 +31,12 @@
           </button>
         }
         <!-- في وضع الأيقونات تظهر كل الروابط (الأقسام بلا عناوين) -->
-        <div class="nav-group" [id]="'nav-' + section.id" [class.closed]="!collapsed() && !isOpen(section)">
+        <div class="nav-group" [id]="'nav-' + section.id" [class.closed]="!compact() && !collapsed() && !isOpen(section)">
           <div class="nav-group-inner">
             @for (item of section.items; track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ paths: item.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
                  [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null"
-                 [attr.tabindex]="!collapsed() && !isOpen(section) ? -1 : null">
+                 [attr.tabindex]="!compact() && !collapsed() && !isOpen(section) ? -1 : null">
                 <app-icon [name]="item.icon" /><span class="label">{{ item.label }}</span>
               </a>
             }

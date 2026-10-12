@@ -27,6 +27,7 @@ const ICONS = {
   map: '<path d="m9 4-6 2.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5Z"/><path d="M9 4v13.5M15 6.5V20"/>',
   device: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   sidebar: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/><path d="M17.5 8h1M17.5 11h1"/>',
   back: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',

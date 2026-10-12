@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
@@ -12,10 +12,13 @@ import { Logo } from '@shared/ui/logo';
 import { Icon, IconName } from '@shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
 import { BackButton } from '@shared/ui/back-button';
+import { hasOpenModal } from '@shared/ui/modal';
 import { roleLabel } from '@core/utils/roles';
 import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN } from '@core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
+/** عرض الشاشة الذي تتحول عنده القائمة إلى أزرار تُفتح بزر «القائمة» (مطابق لـ @media في main-layout.scss) */
+const COMPACT_QUERY = '(max-width: 860px)';
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
 interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'sites' | 'devices' | 'admin'; title: string; items: NavItem[]; }
@@ -25,7 +28,8 @@ interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'sites' | 'dev
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton],
   templateUrl: './main-layout.html',
-  styleUrl: './main-layout.scss'
+  styleUrl: './main-layout.scss',
+  host: { '(document:keydown.escape)': 'closeMenu()' }
 })
 export class MainLayout {
   private auth = inject(AuthService);
@@ -45,6 +49,9 @@ export class MainLayout {
     // (لمن يملك ViewNotifications فقط — الباكاند يرفض الاتصال لغيره)
     effect(() => { if (this.canNotify()) untracked(() => this.notifications.start(() => this.auth.getToken() ?? '')); });
     this.loadSidebar();
+    this.watchCompact();
+    // اختيار رابط يغلق القائمة على الشاشات الصغيرة
+    effect(() => { this.url(); untracked(() => this.menuOpen.set(false)); });
     // الصلاحيات الفعّالة قد تتغيّر بعد تسجيل الدخول (إسناد خدمة لوحدتي، تعديل دوري)
     this.auth.refreshPermissions();
   }
@@ -101,6 +108,24 @@ export class MainLayout {
     ];
     return all.filter(section => section.items.length);
   });
+
+  /** شاشة ضيقة: الروابط شبكة أزرار بعناوين أقسامها، مغلقة حتى زر «القائمة» (حالة الفتح لا تُحفظ) */
+  readonly compact = signal(false);
+  readonly menuOpen = signal(false);
+
+  private watchCompact() {
+    if (typeof matchMedia !== 'function') return;
+    const query = matchMedia(COMPACT_QUERY);
+    const apply = () => { this.compact.set(query.matches); if (!query.matches) this.menuOpen.set(false); };
+    apply();
+    query.addEventListener('change', apply);
+    inject(DestroyRef).onDestroy(() => query.removeEventListener('change', apply));
+  }
+
+  /** Esc يغلق القائمة (ما لم تكن نافذة مفتوحة فوقها — Esc لها) */
+  closeMenu() {
+    if (this.menuOpen() && !hasOpenModal()) this.menuOpen.set(false);
+  }
 
   /** حالة السايدبار المحفوظة: مطوي (أيقونات فقط) + الأقسام المغلقة */
   readonly collapsed = signal(false);
