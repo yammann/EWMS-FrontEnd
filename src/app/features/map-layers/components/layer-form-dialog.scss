@@ -57,3 +57,20 @@ input[type="color"] { width: 34px; height: 30px; padding: 2px; border: 1px solid
 .limits { display: grid; gap: 8px; align-content: start; }
 .limits .hint { margin: 0; }
 @media (max-width: 640px) { .file-settings, .kinds { grid-template-columns: minmax(0, 1fr); } }
+
+/* مصدر النقاط: يدوي أو من بيانات النظام */
+.sources { display: grid; gap: 6px; }
+.source { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+.source.on { border-color: var(--brand-600); background: var(--brand-50); }
+.source input { margin-top: 3px; }
+.source span { display: grid; gap: 2px; }
+.source strong { font-size: 13px; color: var(--ink-900); }
+.source small { font-size: 12px; color: var(--ink-500); }
+.source-fixed { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink-800); }
+.filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.filter { margin: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-md); min-width: 0; }
+.filter legend { padding: 0 4px; font-size: 12px; font-weight: 700; color: var(--ink-700); }
+.filter .options { display: grid; gap: 4px; max-height: 160px; overflow-y: auto; font-size: 13px; }
+.filter .options label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+@media (max-width: 640px) { .filters { grid-template-columns: minmax(0, 1fr); } }

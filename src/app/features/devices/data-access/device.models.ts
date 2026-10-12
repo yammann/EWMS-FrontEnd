@@ -147,6 +147,8 @@ export interface MapSite {
   deviceTypesCount: number;
   /** عدد سجلات الطبقة على الموقع (طبقات الفروع، kind = entries) */
   entriesCount: number;
+  /** عدد عناصر الطبقة في الموقع بوحدتها (تركيبات، سجلات…) — العدد العام لكل الطبقات */
+  count: number;
 }
 
 /** طبقة على خريطة الفرع — kind "devices" = المواقع التي فيها تركيبات مسجّلة باسم الفرع */
@@ -157,6 +159,8 @@ export interface MapLayer {
   title: string;
   /** #RRGGBB — فارغ = لون الواجهة */
   color: string;
+  /** وحدة العدّ في الموقع: «تركيب»، «سجل»… */
+  unit: string;
   sites: MapSite[];
   sitesWithoutCoordinates: number;
 }

@@ -13,15 +13,13 @@
       @if (hasData()) {
         <div class="summary">
           <span><strong>{{ totals().sites }}</strong> موقع</span>
-          @if (totals().installations) { <span><strong>{{ totals().installations }}</strong> تركيب</span> }
-          @if (totals().entries) { <span><strong>{{ totals().entries }}</strong> سجل</span> }
           <span>في <strong>{{ totals().governorates }}</strong> محافظة</span>
           @if (totals().withoutCoordinates) { <span class="warn">⚠ <a routerLink="/devices/sites">{{ totals().withoutCoordinates }} موقع بلا إحداثيات</a> لا يظهر على الخريطة</span> }
         </div>
         <div class="layer-keys" role="group" aria-label="طبقات الخريطة — انقر لإظهار أو إخفاء">
           @for (l of layers(); track l.key) {
             <button type="button" class="layer-key" [class.off]="hidden().has(l.key)" [attr.aria-pressed]="!hidden().has(l.key)"
-                    [title]="hidden().has(l.key) ? 'إظهار الطبقة' : 'إخفاء الطبقة'" (click)="toggleLayer(l.key)">
+                    [title]="(hidden().has(l.key) ? 'إظهار الطبقة' : 'إخفاء الطبقة') + ' — ' + l.sites.length + ' موقع'" (click)="toggleLayer(l.key)">
               <i [style.background]="layerColor(l)" aria-hidden="true"></i>{{ l.title }} <b>{{ l.sites.length }}</b>
             </button>
           }
@@ -73,7 +71,7 @@
                   <td class="wrap">{{ s.description || '—' }}</td>
                   <td class="wrap">
                     @for (l of s.layers; track l.key) {
-                      <span class="site-layer"><i [style.background]="l.color" aria-hidden="true"></i>{{ l.kind === 'devices' ? l.count + ' تركيب · ' + s.deviceTypesCount + ' نوع' : l.title + ' (' + l.count + ')' }}</span>
+                      <span class="site-layer"><i [style.background]="l.color" aria-hidden="true"></i>{{ l.title }} ({{ l.count }}{{ l.unit ? ' ' + l.unit : '' }})</span>
                     }
                   </td>
                   <td><span class="mono">{{ coords(s.latitude, s.longitude) }}</span></td>
@@ -87,14 +85,13 @@
       <div class="details">
         <div class="details-head"><h3>المحافظات التي فيها مواقع</h3></div>
         <div class="table-wrap"><table>
-          <thead><tr><th>المحافظة</th><th>المواقع</th>@if (hasDevices()) { <th>التركيبات</th> }@if (hasEntries()) { <th>سجلات الطبقات</th> }</tr></thead>
+          <thead><tr><th>المحافظة</th><th>المواقع</th><th>الطبقات</th></tr></thead>
           <tbody>
             @for (g of governorateRows(); track g.code) {
               <tr>
                 <td><button type="button" class="cell-link" (click)="openGovernorate(g.code)">{{ g.name }}</button></td>
                 <td class="num">{{ g.sites }}</td>
-                @if (hasDevices()) { <td class="num">{{ g.installations }}</td> }
-                @if (hasEntries()) { <td class="num">{{ g.entries }}</td> }
+                <td class="wrap">@for (l of g.layers; track l.key) { <span class="site-layer"><i [style.background]="l.color" aria-hidden="true"></i>{{ l.title }} ({{ l.count }})</span> }</td>
               </tr>
             }
           </tbody>

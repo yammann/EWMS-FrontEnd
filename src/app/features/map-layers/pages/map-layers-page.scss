@@ -12,3 +12,4 @@ td small { display: block; color: var(--ink-500); }
 .pill.muted { background: var(--fill); color: var(--ink-500); }
 tr.inactive td { color: var(--ink-500); }
 tr.inactive .dot { opacity: .45; }
+.source-chip { display: inline-block; padding: 2px 10px; border-radius: var(--radius-full); background: var(--brand-50); color: var(--brand-700); font-size: 12px; font-weight: 600; }

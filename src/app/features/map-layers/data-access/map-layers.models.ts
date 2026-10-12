@@ -50,6 +50,10 @@ export interface MapEntryFile {
 
 export interface MapFileKind { key: string; label: string; formats: string; extensions: string[]; }
 
+/** مصدر من بيانات النظام (GET MapLayers/Sources) بفلاتره من بيانات الفرع */
+export interface MapSource { key: string; title: string; unit: string; filters: MapSourceFilter[]; }
+export interface MapSourceFilter { key: string; label: string; options: { value: string; label: string }[]; }
+
 /** سقف النظام لحجم الملف ومجموعات الصيغ (GET MapLayers/FileOptions) */
 export interface MapFileOptions { maxFileMegabytes: number; maxFilesPerField: number; kinds: MapFileKind[]; }
 
@@ -64,6 +68,11 @@ export interface MapLayerDefinition {
   allowMultiple: boolean;
   isActive: boolean;
   sortOrder: number;
+  /** فارغ = إدخال يدوي؛ وإلا مفتاح مزوّد من بيانات النظام (نقاطه من جداوله بلا إدخال) */
+  source: string;
+  sourceTitle: string;
+  /** فلتر المزوّد: مفتاح ← قيم (المفتاح الغائب = الكل) */
+  sourceFilter: Record<string, string[]>;
   entriesCount: number;
   fields: MapLayerField[];
   rowVersion: string;
@@ -109,6 +118,8 @@ export interface LayerFieldInput {
 }
 export interface LayerInput {
   branchId?: number | null; name: string; description: string; color: string; allowMultiple: boolean; isActive: boolean;
+  /** فارغ = يدوي؛ لا يتغير بعد الإنشاء */
+  source: string; sourceFilter: Record<string, string[]>;
   fields: LayerFieldInput[]; rowVersion?: string | null;
 }
 export interface EntryInput {

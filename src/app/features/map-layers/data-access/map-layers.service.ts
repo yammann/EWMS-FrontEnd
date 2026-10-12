@@ -5,7 +5,7 @@ import { environment } from '@env/environment';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission, AppPermissionName } from '@core/constants/access';
-import { EntryInput, LayerInput, MapEntry, MapEntryFile, MapFileOptions, MapLayerDefinition, SiteEntries } from './map-layers.models';
+import { EntryInput, LayerInput, MapEntry, MapEntryFile, MapFileOptions, MapLayerDefinition, MapSource, SiteEntries } from './map-layers.models';
 
 /** طبقات خرائط الفروع وسجلاتها (api/MapLayers و api/MapEntries) */
 @Injectable({ providedIn: 'root' })
@@ -51,6 +51,11 @@ export class MapLayersService {
   /** بلا قيم يُحذف؛ له قيم: purge=false يخفيه، purge=true يحذفه مع قيمه */
   deleteField(fieldId: number, purge: boolean) { return this.api.delete<MapLayerDefinition>(`/MapLayers/Field/${fieldId}?purge=${purge}`); }
   restoreField(fieldId: number) { return this.api.put<MapLayerDefinition>(`/MapLayers/Field/${fieldId}/Restore`, {}); }
+
+  /** مصادر بيانات النظام وفلاترها من بيانات الفرع (branchId لنظرة المؤسسة؛ وإلا فرعي) */
+  sources(branchId: number | null) {
+    return this.api.get<MapSource[]>('/MapLayers/Sources' + (branchId ? `?branchId=${branchId}` : ''));
+  }
 
   /** سقف حجم الملف ومجموعات الصيغ — يُجلب مرة في الجلسة */
   fileOptions() {

@@ -45,7 +45,7 @@ describe('Branch map layers', () => {
 
   it('sends the layer with its fields in order and rowVersion', () => {
     service.updateLayer(3, {
-      name: 'المشاريع', description: '', color: '#16A34A', allowMultiple: true, isActive: true, rowVersion: 'AAA=',
+      name: 'المشاريع', description: '', color: '#16A34A', allowMultiple: true, isActive: true, rowVersion: 'AAA=', source: '', sourceFilter: {},
       fields: [
         { id: 9, label: 'الحالة', type: 5, isRequired: true, options: ['قيد التنفيذ', 'منجز'], maxFiles: 0, maxFileMegabytes: 0, fileKinds: [] },
         { id: null, label: 'الكلفة', type: 3, isRequired: false, options: [], maxFiles: 0, maxFileMegabytes: 0, fileKinds: [] }
@@ -115,5 +115,15 @@ describe('Branch map layers', () => {
     expect(fileProblem(new File(['x'], 'photo.png'), files, options)).toContain('.dwg');
     expect(fileProblem(new File([new Uint8Array(51 * 1024 * 1024)], 'big.dxf'), files, options)).toContain('50MB');
     expect(fileProblem(new File([], 'empty.dwg'), files, options)).toContain('فارغ');
+  });
+
+  it('creates a layer from system data with its filter and no fields', () => {
+    service.sources(3).subscribe();
+    http.expectOne('/api/MapLayers/Sources?branchId=3').flush([]);
+    service.createLayer({ name: 'الكاميرات', description: '', color: '#DC2626', allowMultiple: false, isActive: true,
+      source: 'devices', sourceFilter: { category: ['كاميرا'] }, fields: [] }).subscribe();
+    const req = http.expectOne('/api/MapLayers/Create');
+    expect(req.request.body).toMatchObject({ source: 'devices', sourceFilter: { category: ['كاميرا'] }, fields: [] });
+    req.flush({});
   });
 });

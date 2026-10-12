@@ -26,12 +26,58 @@
         </div>
         <label class="form-field full"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span>
           <textarea formControlName="description" rows="2" maxlength="500" placeholder="ما الذي تسجّله هذه الطبقة على المواقع؟"></textarea></label>
+
+        <div class="form-field full">
+          <span class="form-label">مصدر النقاط</span>
+          @if (isEdit) {
+            <p class="source-fixed">{{ isSystem() ? 'من بيانات النظام: ' + (layer()!.sourceTitle || source()) : 'إدخال يدوي' }}
+              <small class="hint">— لا يتغير بعد الإنشاء</small></p>
+          } @else {
+            <div class="sources" role="radiogroup" aria-label="مصدر النقاط">
+              <label class="source" [class.on]="!isSystem()">
+                <input type="radio" name="layer-source" [checked]="!isSystem()" (change)="chooseSource('')">
+                <span><strong>إدخال يدوي</strong><small>حقول تصممها، ويُدخل موظفو الفرع معلوماتها على المواقع</small></span>
+              </label>
+              @for (s of sources(); track s.key) {
+                <label class="source" [class.on]="source() === s.key">
+                  <input type="radio" name="layer-source" [checked]="source() === s.key" (change)="chooseSource(s.key)">
+                  <span><strong>من بيانات النظام: {{ s.title }}</strong><small>تُقرأ النقاط من جداوله تلقائياً بلا إدخال، ويمكن تصفيتها</small></span>
+                </label>
+              }
+            </div>
+            @if (sourcesLoading()) { <small class="hint">جارٍ تحميل مصادر البيانات…</small> }
+            @else if (branches().length && !form.controls.branchId.value) { <small class="hint">اختر الفرع لعرض مصادر بياناته</small> }
+          }
+        </div>
+
+        @if (!isSystem()) {
         <label class="check full"><input type="checkbox" formControlName="allowMultiple">
           <span><strong>عدة سجلات للموقع الواحد</strong><small class="hint">مثل المشاريع (عدة مشاريع في موقع). أوقفه لمعلومات وحيدة لكل موقع.</small></span></label>
+        }
         <label class="check full"><input type="checkbox" formControlName="isActive">
           <span><strong>فعّالة</strong><small class="hint">المعطّلة تختفي من الخريطة ومن نماذج الإضافة، وتبقى سجلاتها للقراءة.</small></span></label>
       </div>
 
+      @if (isSystem()) {
+        <section class="builder" aria-labelledby="filter-title">
+          <header><h3 id="filter-title">تصفية {{ selectedSource()?.title || 'البيانات' }}</h3></header>
+          <p class="hint">بلا اختيار في مجموعة = كل القيم. مثال: اختر «كاميرا» من فئة الجهاز لطبقة «الكاميرات».</p>
+          @if (selectedSource(); as s) {
+            <div class="filters">
+              @for (f of s.filters; track f.key) {
+                <fieldset class="filter">
+                  <legend>{{ f.label }} <small class="hint">{{ (filter()[f.key] ?? []).length ? (filter()[f.key] ?? []).length + ' مختار' : 'الكل' }}</small></legend>
+                  <div class="options">
+                    @for (o of f.options; track o.value) {
+                      <label><input #fo type="checkbox" [checked]="isPicked(f.key, o.value)" (change)="togglePick(f.key, o.value, fo.checked)"> {{ o.label }}</label>
+                    } @empty { <span class="hint">لا توجد قيم في بيانات الفرع بعد</span> }
+                  </div>
+                </fieldset>
+              }
+            </div>
+          } @else if (!sourcesLoading()) { <p class="hint">المصدر غير متاح لهذا الفرع.</p> }
+        </section>
+      } @else {
       <section class="builder" aria-labelledby="fields-title">
         <header>
           <h3 id="fields-title">الحقول <span class="count">({{ visibleRows().length }})</span></h3>
@@ -101,6 +147,7 @@
         }
         @if (isEdit) { <p class="hint">حذف حقل محفوظ أو إعادته يُنفَّذ فوراً؛ تعديل العناوين والترتيب يُحفظ بزر «حفظ».</p> }
       </section>
+      }
     </div>
     <app-form-actions [busy]="busy()" [disabled]="form.invalid || !!fieldsError()" (dismissed)="closed.emit()" />
   </form>

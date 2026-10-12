@@ -11,7 +11,7 @@ import { SelectValue } from '@shared/ui/select-value';
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */
 const RAMP = ['var(--map-1)', 'var(--map-2)', 'var(--map-3)', 'var(--map-4)'];
 const EMPTY = 'var(--map-empty)';
-/** لون طبقة بلا لون محدد (طبقة تركيبات الأجهزة) */
+/** لون طبقة بلا لون محدد (الطبقة التلقائية لمصدر من بيانات النظام) */
 const DEFAULT_LAYER_COLOR = 'var(--brand-600)';
 
 /** آخر عرض للخريطة (الفرع + المحافظة) — حتى يرجع المستخدم لنفس المكان بعد فتح صفحة موقع */
@@ -19,32 +19,47 @@ let lastView: { branchId: number; focus: string | null } | null = null;
 /** الطبقات المخفية من مفتاح الخريطة (مفاتيح الطبقات) — تبقى أثناء الجلسة */
 let hiddenLayers = new Set<string>();
 
-/** طبقة الموقع في الخريطة المدمجة */
-export interface SiteLayerRef { key: string; kind: string; title: string; color: string; count: number; }
+/** طبقة الموقع في الخريطة المدمجة: عدد عناصرها فيه بوحدتها */
+export interface SiteLayerRef { key: string; kind: string; title: string; color: string; count: number; unit: string; }
 
 /** موقع واحد مهما تعددت طبقاته: نقطة واحدة بألوان طبقاته */
 export interface MergedSite extends MapSite { layers: SiteLayerRef[]; }
 
-/** دمج طبقات الخريطة الظاهرة في مواقع فريدة (الموقع مشترك بين الطبقات) */
+/** عدد عناصر الطبقة في الموقع (count من الخادم؛ والحقول القديمة احتياطاً) */
+const siteCount = (s: MapSite) => s.count ?? (s.installationsCount || s.entriesCount || 0);
+
+/**
+ * دمج طبقات الخريطة الظاهرة في مواقع فريدة (الموقع مشترك بين الطبقات والمصادر): نقطة واحدة بألوان طبقاته،
+ * ولكل طبقة عددها بوحدتها — يدوية كانت أو من بيانات النظام، بلا معاملة خاصة لأي مصدر.
+ */
 export function mergeLayers(layers: readonly MapLayer[]): MergedSite[] {
   const sites = new Map<number, MergedSite>();
   for (const layer of layers) {
     const color = layer.color || DEFAULT_LAYER_COLOR;
     for (const s of layer.sites) {
-      const site = sites.get(s.id) ?? { ...s, installationsCount: 0, deviceTypesCount: 0, entriesCount: 0, layers: [] };
-      const isDevices = layer.kind === 'devices';
-      if (isDevices) { site.installationsCount = s.installationsCount; site.deviceTypesCount = s.deviceTypesCount; }
-      else site.entriesCount += s.entriesCount;
-      site.layers.push({ key: layer.key, kind: layer.kind, title: layer.title, color, count: isDevices ? s.installationsCount : s.entriesCount });
+      const site = sites.get(s.id) ?? { ...s, layers: [] };
+      site.layers.push({ key: layer.key, kind: layer.kind, title: layer.title, color, count: siteCount(s), unit: layer.unit || '' });
       sites.set(s.id, site);
     }
   }
   return [...sites.values()].sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 }
 
-/** وصف طبقات موقع في سطر: «3 تركيب · المشاريع (2)» */
+/** وصف طبقات موقع في سطر: «تركيبات الأجهزة (3) · المشاريع (2)» */
 export function describeLayers(site: MergedSite): string {
-  return site.layers.map(l => l.kind === 'devices' ? `${l.count} تركيب` : `${l.title} (${l.count})`).join(' · ');
+  return site.layers.map(l => `${l.title} (${l.count})`).join(' · ');
+}
+
+/** عدد كل طبقة في مجموعة مواقع (للمحافظة): «تركيبات الأجهزة 40 · المشاريع 3» */
+export function layerTotals(sites: readonly MergedSite[]): { key: string; title: string; color: string; count: number }[] {
+  const totals = new Map<string, { key: string; title: string; color: string; count: number }>();
+  for (const s of sites)
+    for (const l of s.layers) {
+      const t = totals.get(l.key) ?? { key: l.key, title: l.title, color: l.color, count: 0 };
+      t.count += l.count;
+      totals.set(l.key, t);
+    }
+  return [...totals.values()];
 }
 
 /**
@@ -52,7 +67,7 @@ export function describeLayers(site: MergedSite): string {
  * سوريا كقطع (المحافظات) ← النقر على قطعة يكبّرها لتملأ الإطار مع نقاط المواقع ← النقر على موقع يفتح صفحة تفاصيله
  * (devices/sites/:id). الزر الأيمن (أو Esc) يرجع إلى كل سوريا.
  *
- * الطبقات (1.2.0): تركيبات الأجهزة + طبقات الفرع؛ الموقع نقطة واحدة بألوان طبقاته، ومفتاح الطبقات يظهرها ويخفيها.
+ * الطبقات (1.2.0): مصادر بيانات النظام (التركيبات…) وطبقات الفرع؛ الموقع نقطة واحدة بألوان طبقاته، ومفتاح الطبقات يظهرها ويخفيها.
  *
  * الخريطة مثبّتة في رأس الصفحة (sticky)، وما بعدها (رأس الصفحة + الملخص + محتوى اللوحة عبر ng-content) ينزلق فوقها
  * أثناء السكرول بينما تصغر وتخفت تدريجياً حتى تنغلق.
@@ -89,17 +104,13 @@ export class BranchMapComponent {
 
   /** المواقع الفريدة في الطبقات الظاهرة */
   sites = computed(() => mergeLayers(this.layers().filter(l => !this.hidden().has(l.key))));
-  hasDevices = computed(() => this.sites().some(s => s.installationsCount > 0));
-  hasEntries = computed(() => this.sites().some(s => s.entriesCount > 0));
 
+  /** لكل محافظة: مواقعها، وعدد كل طبقة فيها */
   private govStats = computed(() => {
-    const stats = new Map<string, { sites: number; installations: number; entries: number }>();
-    for (const s of this.sites()) {
-      if (!s.governorateCode) continue;
-      const c = stats.get(s.governorateCode) ?? { sites: 0, installations: 0, entries: 0 };
-      c.sites++; c.installations += s.installationsCount; c.entries += s.entriesCount;
-      stats.set(s.governorateCode, c);
-    }
+    const byGov = new Map<string, MergedSite[]>();
+    for (const s of this.sites()) if (s.governorateCode) byGov.set(s.governorateCode, [...(byGov.get(s.governorateCode) ?? []), s]);
+    const stats = new Map<string, { sites: number; layers: ReturnType<typeof layerTotals> }>();
+    for (const [code, list] of byGov) stats.set(code, { sites: list.length, layers: layerTotals(list) });
     return stats;
   });
 
@@ -117,7 +128,7 @@ export class BranchMapComponent {
     return (code: string) => {
       const c = stats.get(code);
       if (!c) return 'لا توجد مواقع';
-      return [`${c.sites} موقع`, c.installations ? `${c.installations} تركيب` : '', c.entries ? `${c.entries} سجل` : ''].filter(Boolean).join(' · ');
+      return [`${c.sites} موقع`, ...c.layers.map(l => `${l.title} ${l.count}`)].join(' · ');
     };
   });
   badgeFor = computed(() => { const stats = this.govStats(); return (code: string) => stats.get(code)?.sites ?? 0; });
@@ -147,7 +158,7 @@ export class BranchMapComponent {
 
   /** المحافظات التي فيها مواقع (جدول أسفل الخريطة في عرض سوريا) */
   governorateRows = computed(() => this.features()
-    .map(f => ({ code: f.properties.code, name: f.properties.nameAr, ...(this.govStats().get(f.properties.code) ?? { sites: 0, installations: 0, entries: 0 }) }))
+    .map(f => ({ code: f.properties.code, name: f.properties.nameAr, ...(this.govStats().get(f.properties.code) ?? { sites: 0, layers: [] }) }))
     .filter(r => r.sites > 0)
     .sort((a, b) => b.sites - a.sites));
 
@@ -155,8 +166,6 @@ export class BranchMapComponent {
     const sites = this.sites();
     return {
       sites: sites.length,
-      installations: sites.reduce((sum, s) => sum + s.installationsCount, 0),
-      entries: sites.reduce((sum, s) => sum + s.entriesCount, 0),
       governorates: this.governorateRows().length,
       withoutCoordinates: sites.filter(s => s.latitude == null || s.longitude == null).length
     };

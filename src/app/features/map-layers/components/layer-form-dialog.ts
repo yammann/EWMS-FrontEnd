@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { Branch } from '@core/models/ewms.models';
@@ -9,7 +10,7 @@ import { FormActions } from '@shared/ui/form-actions';
 import { Modal } from '@shared/ui/modal';
 import { SelectValue } from '@shared/ui/select-value';
 import { ToastService } from '@shared/ui/toast.service';
-import { FIELD_TYPES, LAYER_COLORS, LayerInput, MapFieldType, MapFileOptions, MapLayerDefinition } from '../data-access/map-layers.models';
+import { FIELD_TYPES, LAYER_COLORS, LayerInput, MapFieldType, MapFileOptions, MapLayerDefinition, MapSource } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
 
 /** حدود الخادم (MapLayerRules) */
@@ -52,6 +53,7 @@ export class LayerFormDialog implements OnInit {
   private service = inject(MapLayersService);
   private confirm = inject(ConfirmService);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   /** null = طبقة جديدة */
   layer = input<MapLayerDefinition | null>(null);
@@ -70,6 +72,14 @@ export class LayerFormDialog implements OnInit {
   colors = LAYER_COLORS;
   /** سقف النظام لحجم الملف ومجموعات الصيغ (لحقول الملفات) */
   fileOptions = signal<MapFileOptions | null>(null);
+
+  /** مصادر بيانات النظام المتاحة لفرع الطبقة، والمصدر المختار ('' = إدخال يدوي) وفلتره */
+  sources = signal<MapSource[]>([]);
+  sourcesLoading = signal(false);
+  source = signal('');
+  filter = signal<Record<string, string[]>>({});
+  isSystem = computed(() => this.source() !== '');
+  selectedSource = computed(() => this.sources().find(s => s.key === this.source()) ?? null);
 
   form = inject(FormBuilder).nonNullable.group({
     branchId: [''],
@@ -91,6 +101,7 @@ export class LayerFormDialog implements OnInit {
 
   /** سبب تعطيل الحفظ في الحقول (يظهر تحت المنشئ) */
   fieldsError = computed(() => {
+    if (this.isSystem()) return '';
     const visible = this.visibleRows();
     if (visible.some(r => !r.label.trim())) return 'اكتب عنوان كل حقل';
     if (visible.some(r => r.label.trim().length > 100)) return 'عنوان الحقل لا يتجاوز 100 حرف';
@@ -127,6 +138,44 @@ export class LayerFormDialog implements OnInit {
     })));
     if (!l) this.addField();
     this.service.fileOptions().subscribe({ next: o => this.fileOptions.set(o), error: () => this.fileOptions.set(null) });
+
+    this.source.set(l?.source ?? '');
+    this.filter.set(structuredClone(l?.sourceFilter ?? {}));
+    // مصادر فرع الطبقة: فرعها عند التعديل، والمختار في النموذج عند الإنشاء (نظرة المؤسسة)، وإلا فرعي
+    this.loadSources(l ? l.branchId : this.chosenBranch());
+    if (!l) this.form.controls.branchId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.filter.set({});
+      this.loadSources(this.chosenBranch());
+    });
+  }
+
+  private chosenBranch() { const v = this.form.controls.branchId.value; return v ? Number(v) : null; }
+
+  private loadSources(branchId: number | null) {
+    // من يختار الفرع: لا مصادر قبل اختياره
+    if (this.branches().length && !branchId && !this.layer()) { this.sources.set([]); return; }
+    this.sourcesLoading.set(true);
+    this.service.sources(branchId).subscribe({
+      next: list => { this.sources.set(list); this.sourcesLoading.set(false); },
+      error: () => { this.sources.set([]); this.sourcesLoading.set(false); }
+    });
+  }
+
+  chooseSource(key: string) {
+    this.source.set(key);
+    this.filter.set({});
+  }
+
+  isPicked(filterKey: string, value: string) { return (this.filter()[filterKey] ?? []).includes(value); }
+
+  togglePick(filterKey: string, value: string, on: boolean) {
+    this.filter.update(all => {
+      const values = new Set(all[filterKey] ?? []);
+      if (on) values.add(value); else values.delete(value);
+      const next = { ...all, [filterKey]: [...values] };
+      if (!next[filterKey].length) delete next[filterKey];
+      return next;
+    });
   }
 
   optionList(text: string) {
@@ -242,9 +291,12 @@ export class LayerFormDialog implements OnInit {
       name: v.name.trim(),
       description: v.description.trim(),
       color: v.color.toUpperCase(),
-      allowMultiple: v.allowMultiple,
+      allowMultiple: !this.isSystem() && v.allowMultiple,
       isActive: v.isActive,
-      fields: ordered.map(r => ({
+      source: this.source(),
+      sourceFilter: this.isSystem() ? this.filter() : {},
+      // طبقة بيانات النظام بلا حقول — نقاطها من جداوله
+      fields: this.isSystem() ? [] : ordered.map(r => ({
         id: r.id, label: r.label.trim(), type: r.type, isRequired: r.isRequired,
         options: r.type === 5 ? this.optionList(r.options) : [],
         maxFiles: r.type === 7 ? r.maxFiles : 0,

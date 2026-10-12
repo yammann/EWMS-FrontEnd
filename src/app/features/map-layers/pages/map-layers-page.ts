@@ -68,6 +68,12 @@ export class MapLayersPage {
   visibleFields(l: MapLayerDefinition) { return l.fields.filter(f => !f.isHidden); }
   hiddenCount(l: MapLayerDefinition) { return l.fields.filter(f => f.isHidden).length; }
 
+  /** ملخص فلتر طبقة بيانات النظام */
+  filterSummary(l: MapLayerDefinition) {
+    const n = Object.values(l.sourceFilter ?? {}).reduce((sum, v) => sum + v.length, 0);
+    return n ? `مُصفّاة بـ ${n} قيمة` : 'كل بيانات الفرع';
+  }
+
   /** تغيّر حقل من داخل النافذة (حذف/إخفاء/إعادة): تحديث الطبقة المفتوحة وإعادة قراءة القائمة بصمت */
   fieldChanged(layer: MapLayerDefinition) {
     this.crud.dialog.update(d => d && { ...d, item: layer });
