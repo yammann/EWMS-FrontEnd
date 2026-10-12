@@ -5,14 +5,14 @@ import { TASK_ATTACHMENTS, TaskAttachment, attachmentProblem } from '../data-acc
 import { Modal } from '@shared/ui/modal';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { fileSize } from '@core/utils/file-size';
+import { Icon, IconName } from '@shared/ui/icon';
 
 /** أيقونة حسب نوع الملف */
-export function fileIcon(contentType: string): string {
-  if (contentType === 'application/pdf') return '📄';
-  if (contentType.startsWith('image/')) return '🖼';
-  if (contentType.includes('sheet') || contentType.includes('excel')) return '📊';
-  if (contentType.includes('presentation') || contentType.includes('powerpoint')) return '📽';
-  return '📝';
+export function fileIcon(contentType: string): IconName {
+  if (contentType.startsWith('image/')) return 'photo';
+  if (contentType.includes('sheet') || contentType.includes('excel')) return 'table';
+  if (contentType.includes('presentation') || contentType.includes('powerpoint')) return 'presentation';
+  return 'docText';
 }
 
 /**
@@ -21,7 +21,7 @@ export function fileIcon(contentType: string): string {
  * قائمة «readonly» (مرفقات الأصل) بلا حذف ولا رفع.
  */
 @Component({
-  selector: 'app-task-attachments', standalone: true, imports: [Modal],
+  selector: 'app-task-attachments', standalone: true, imports: [Modal, Icon],
   templateUrl: './task-attachments.html',
   styleUrl: './task-attachments.scss'
 })

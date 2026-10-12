@@ -13,13 +13,13 @@
     <div class="drawer-body">
       <h2 id="task-drawer-title">{{ t.title }}</h2>
       @if (t.parentTaskId) {
-        <button type="button" class="link-btn" (click)="openTask.emit(t.parentTaskId)">↰ جزء من: {{ t.parentTitle }}</button>
+        <button type="button" class="link-btn" (click)="openTask.emit(t.parentTaskId)"><app-icon name="turnUp" [size]="14" /> جزء من: {{ t.parentTitle }}</button>
       }
 
       <app-alert [message]="error()" />
 
       @if (t.reviewLocked) {
-        <p class="review-lock" role="status">🔒 أُرسلت للمراجعة — لا تُعدَّل حتى يعتمدها المُسنِد أو يعيدها للتنفيذ. يمكنك التعليق.</p>
+        <p class="review-lock" role="status"><app-icon name="lock" [size]="15" /> أُرسلت للمراجعة — لا تُعدَّل حتى يعتمدها المُسنِد أو يعيدها للتنفيذ. يمكنك التعليق.</p>
       }
 
       @if (t.canChangeStatus || t.allowedStatuses.length) {
@@ -121,7 +121,7 @@
         <ol class="timeline">
           @for (a of t.activities; track a.id) {
             <li [class.comment]="a.type === 'Comment'">
-              <span class="dot" aria-hidden="true">{{ icon(a.type) }}</span>
+              <span class="dot" aria-hidden="true"><app-icon [name]="icon(a.type)" [size]="14" /></span>
               <div>
                 <p><strong>{{ a.userName }}</strong> @if (a.type !== 'Comment') { {{ a.text }} }</p>
                 @if (a.type === 'Comment') { <p class="comment-text">{{ a.text }}</p> }

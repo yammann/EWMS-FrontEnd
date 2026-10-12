@@ -19,13 +19,14 @@ import { CrudPage } from '@shared/ui/crud-page';
 import { RowActions } from '@shared/ui/row-actions';
 import { FormActions } from '@shared/ui/form-actions';
 import { SelectValue } from '@shared/ui/select-value';
+import { Icon } from '@shared/ui/icon';
 
 /**
  * سجل المواقع المشترك بين الفروع (النمط الموحّد CrudPage) — لكل موقع إحداثيات تظهر على خريطة سوريا، والمحافظة تُحدَّد
  * تلقائياً من النقطة. الصلاحيات ViewSites/CreateSite/EditSite/DeleteSite؛ وعمود التركيبات لمن يرى الأجهزة (ضمن حدّه).
  */
 @Component({
-  selector: 'app-sites-page', standalone: true, imports: [SelectValue, FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager, RowActions],
+  selector: 'app-sites-page', standalone: true, imports: [Icon, SelectValue, FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager, RowActions],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss'],
   templateUrl: './sites-page.html',
   styles: [`td small { display: block; color: var(--ink-500); }

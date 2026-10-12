@@ -21,6 +21,7 @@ import { SignaturePanel } from '../components/signature-panel';
 import { formatPhone } from '@core/utils/phone';
 import { utcDate } from '@core/utils/format';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
+import { Icon } from '@shared/ui/icon';
 
 
 /** لا تقديم بأثر رجعي، واليوم الحالي مسموح (قرار المستخدم 2026-10-04) */
@@ -30,7 +31,7 @@ export function notInPast(control: AbstractControl) {
 
 @Component({
   selector: 'app-profile-page', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, SignaturePanel, VacationAttachments, Pager],
+  imports: [Icon, CommonModule, ReactiveFormsModule, RouterLink, SignaturePanel, VacationAttachments, Pager],
   templateUrl: './profile-page.html', styleUrl: '../../../shared/styles/page-base.scss'
 })
 export class ProfilePage {

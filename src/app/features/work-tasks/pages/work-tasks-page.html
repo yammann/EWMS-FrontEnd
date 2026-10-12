@@ -22,7 +22,7 @@
         <tbody>
           @for (t of pager.items(); track t.id) {
             <tr>
-              <td><strong><span aria-hidden="true">{{ t.icon }}</span> {{ t.name }}</strong>@if (t.description) { <small>{{ t.description }}</small> }</td>
+              <td><strong><app-icon [name]="iconFor(t.icon)" class="task-ico" /> {{ t.name }}</strong>@if (t.description) { <small>{{ t.description }}</small> }</td>
               <td>{{ t.branchName }}</td>
               <td><span class="status-badge" [class.status-active]="t.isActive" [class.status-draft]="!t.isActive"><span class="status-badge-dot"></span>{{ t.isActive ? 'فعّالة' : 'معطّلة' }}</span></td>
               <td class="wrap">{{ assigneeNames(t) || '—' }}</td>
@@ -56,7 +56,7 @@
         <fieldset class="full-width icon-picker">
           <legend class="form-label">الأيقونة</legend>
           @for (icon of icons; track icon) {
-            <button type="button" class="icon-option" [class.selected]="form.value.icon === icon" (click)="form.patchValue({ icon })" [attr.aria-label]="'اختيار الأيقونة ' + icon" [attr.aria-pressed]="form.value.icon === icon">{{ icon }}</button>
+            <button type="button" class="icon-option" [class.selected]="form.value.icon === icon" (click)="form.patchValue({ icon })" [attr.aria-label]="'الأيقونة ' + ($index + 1)" [attr.aria-pressed]="form.value.icon === icon"><app-icon [name]="iconFor(icon)" /></button>
           }
         </fieldset>
 

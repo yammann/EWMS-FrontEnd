@@ -10,6 +10,7 @@ import { EmptyState } from './empty-state';
 import { FormActions } from './form-actions';
 import { PageHeader } from './page-header';
 import { StatTile } from './stat-tile';
+import { iconFor } from './icon';
 
 @Component({ template: '', standalone: true }) class Blank {}
 
@@ -67,12 +68,22 @@ describe('shared components', () => {
     expect(dismissed).toHaveBeenCalledTimes(1);
   });
 
-  it('StatTile shows label, value and optional hint', async () => {
+  it('StatTile shows label, value, optional hint and its SVG icon', async () => {
     const f = TestBed.createComponent(StatTile);
+    f.componentRef.setInput('icon', 'alarm');
     f.componentRef.setInput('label', 'متأخرة'); f.componentRef.setInput('value', 7); f.componentRef.setInput('hint', 'تجاوزت الموعد');
     await f.whenStable();
     const text = f.nativeElement.textContent;
     expect(text).toContain('متأخرة'); expect(text).toContain('7'); expect(text).toContain('تجاوزت الموعد');
+    expect(f.nativeElement.querySelector('.stat-icon app-icon svg')).not.toBeNull();
+  });
+
+  it('iconFor shows stored emoji keys as icons and falls back safely', () => {
+    expect(iconFor('📋')).toBe('clipboard');
+    expect(iconFor('✈️')).toBe('airplane');
+    expect(iconFor('lock')).toBe('lock');
+    expect(iconFor('🦄')).toBe('clipboard');
+    expect(iconFor(null, 'info')).toBe('info');
   });
 });
 

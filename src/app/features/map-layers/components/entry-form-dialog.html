@@ -43,8 +43,8 @@
                 @if ((files()[f.id] ?? []).length || uploadsOf(f.id).length) {
                   <ul class="picked">
                     @for (x of files()[f.id] ?? []; track x.id) {
-                      <li><span class="ico" aria-hidden="true">{{ icon(x.kind) }}</span><span class="name">{{ x.fileName }}</span><small>{{ size(x.size) }}</small>
-                        <button type="button" class="del" (click)="removeFile(f, x)" [attr.aria-label]="'إزالة ' + x.fileName" title="إزالة">✕</button></li>
+                      <li><span class="ico" aria-hidden="true"><app-icon [name]="icon(x.kind)" [size]="16" /></span><span class="name">{{ x.fileName }}</span><small>{{ size(x.size) }}</small>
+                        <button type="button" class="del" (click)="removeFile(f, x)" [attr.aria-label]="'إزالة ' + x.fileName" title="إزالة"><app-icon name="xmark" [size]="14" [weight]="2.2" /></button></li>
                     }
                     @for (u of uploadsOf(f.id); track u.key) {
                       <li class="uploading"><span class="name">{{ u.name }}</span><progress max="100" [value]="u.percent"></progress><small>{{ u.percent }}%</small></li>

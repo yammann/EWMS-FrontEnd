@@ -3,11 +3,11 @@
     @for (a of attachments(); track a.id) {
       <li>
         <button type="button" class="file" (click)="open(a)" [title]="canPreview(a) ? 'معاينة ' + a.fileName : 'تنزيل ' + a.fileName">
-          <span class="ico" aria-hidden="true">{{ icon(a.contentType) }}</span>
+          <span class="ico" aria-hidden="true"><app-icon [name]="icon(a.contentType)" /></span>
           <span class="meta"><span class="name">{{ a.fileName }}</span><small>{{ size(a.size) }} · {{ a.uploadedByName }}</small></span>
         </button>
         @if (a.canDelete && !readonly()) {
-          <button type="button" class="del" (click)="remove(a)" [disabled]="busy()" [attr.aria-label]="'حذف ' + a.fileName" title="حذف">🗑</button>
+          <button type="button" class="del" (click)="remove(a)" [disabled]="busy()" [attr.aria-label]="'حذف ' + a.fileName" title="حذف"><app-icon name="trash" [size]="17" /></button>
         }
       </li>
     }

@@ -20,7 +20,7 @@ import { FormActions } from '@shared/ui/form-actions';
           @else {
             <label class="form-field"><span class="form-label">القائمة</span>
               <select name="list" [(ngModel)]="listId" autofocus>
-                @for (l of lists(); track l.id) { <option [ngValue]="l.id">{{ l.icon }} {{ l.name }}</option> }
+                @for (l of lists(); track l.id) { <option [ngValue]="l.id">{{ l.name }}</option> }
               </select></label>
             <p class="note">يُنشأ بند بعنوان المهمة وموعدها، ويبقى مرتبطاً بها: ترى حالتها من مفكرتك وتفتحها بنقرة.</p>
           }

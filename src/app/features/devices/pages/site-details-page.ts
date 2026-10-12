@@ -17,13 +17,14 @@ import { LinkedTasks } from '@features/task-board';
 import { MapLayersService, SiteEntriesPanel } from '@features/map-layers';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { Icon } from '@shared/ui/icon';
 
 /**
  * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):
  * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, Pager],
+  selector: 'app-site-details-page', standalone: true, imports: [Icon, EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, Pager],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './site-details-page.scss'],
   templateUrl: './site-details-page.html',
   

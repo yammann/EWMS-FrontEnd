@@ -378,7 +378,8 @@ test('المواقع: كتابة الإحداثيين يدوياً تحدد ال
   await startCreate(page, /موقع جديد/);
   await (await field(page, 'خط العرض')).fill('33.5138'); await page.keyboard.press('Tab');
   await (await field(page, 'خط الطول')).fill('36.2765'); await page.keyboard.press('Tab');
-  await expect((await scope(page)).getByText('📍 دمشق')).toBeVisible();
+  // المحافظة تُعرض بعد أيقونة الموقع (SVG) في .gov
+  await expect((await scope(page)).locator('.gov', { hasText: 'دمشق' })).toBeVisible();
   await closeDialogIfOpen(page);
 });
 

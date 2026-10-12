@@ -1,14 +1,15 @@
 import { Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Alert } from './alert';
+import { Icon } from './icon';
 
 /**
  * نموذج الاسم + الوصف لنوافذ إنشاء/تعديل كيانات الإدارة (فرع/قسم/مكتب) — بدل نسختين متطابقتين تقريباً في كل صفحة.
  * حقول إضافية: محتوى عادي = بعد الوصف، و`ngProjectAs="[before]"` = قبله (يجب أن يلفّها `[formGroup]` بنفس النموذج).
- * أيقونة حقل الاسم: عنصر svg بسمة `nameIcon` (تظهر في الإنشاء فقط، كما كان).
+ * أيقونة حقل الاسم: `<app-icon nameIcon name="…" />` (تظهر في الإنشاء فقط، كما كان).
  */
 @Component({
-  selector: 'app-entity-form', standalone: true, imports: [ReactiveFormsModule, Alert],
+  selector: 'app-entity-form', standalone: true, imports: [ReactiveFormsModule, Alert, Icon],
   template: `
     <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="form-stack">
       <app-alert [message]="error()" />
@@ -46,9 +47,7 @@ import { Alert } from './alert';
             <span class="button-spinner"></span>
             <span>{{ mode() === 'create' ? 'جاري الإنشاء...' : 'جاري الحفظ...' }}</span>
           } @else {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-              @if (mode() === 'create') { <path d="M12 5v14M5 12h14"></path> } @else { <path d="M20 6 9 17l-5-5"></path> }
-            </svg>
+            <app-icon [name]="mode() === 'create' ? 'plus' : 'checkmark'" [size]="16" [weight]="2" />
             <span>{{ mode() === 'create' ? createLabel() : 'حفظ التعديل' }}</span>
           }
         </button>

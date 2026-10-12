@@ -18,6 +18,7 @@ import { LookupsService } from '@core/services/lookups.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
+import { Icon } from '@shared/ui/icon';
 
 /** أي حقول المكان تُعرض في نموذج الموظف */
 type UserPlacement = { needsBranch: boolean; needsDepartment: boolean; needsOffice: boolean };
@@ -25,7 +26,7 @@ type UserPlacement = { needsBranch: boolean; needsDepartment: boolean; needsOffi
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss'
 })

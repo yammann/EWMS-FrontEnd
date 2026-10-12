@@ -16,7 +16,7 @@
           </select>
           @if (!due) { <small class="form-hint">يحتاج التكرار موعداً.</small> }</label>
       </div>
-      <label class="check"><input name="important" type="checkbox" [(ngModel)]="important"> ★ مهم</label>
+      <label class="check"><input name="important" type="checkbox" [(ngModel)]="important"> <app-icon name="starFill" [size]="14" class="star" /> مهم</label>
       @if (item().linkedTask; as t) {
         <p class="linked">مرتبط بمهمة في لوحة المهام: <strong>{{ t.available ? t.title : 'مهمة غير متاحة لك' }}</strong>@if (t.available) { — {{ t.statusAr }} }</p>
       }

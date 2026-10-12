@@ -22,10 +22,10 @@
 
   @if (report(); as r) {
     <section class="stats-4" aria-label="ملخص">
-      <app-stat-tile label="قيمة المخزون" [value]="(r.stockValue | money)" icon="📦" tone="green" [hint]="r.partsCount + ' قطعة'" />
-      <app-stat-tile label="تحت الحد الأدنى" [value]="r.lowStockCount" icon="⚠" tone="orange" hint="قطع تحتاج إدخالاً" />
-      <app-stat-tile label="المصروف في الفترة" [value]="(r.issuedCost | money)" icon="🧾" tone="blue" hint="قطع صُرفت على الطلبات" />
-      <app-stat-tile label="أجهزة بقطع مصروفة" [value]="r.deviceCosts.length" icon="🖥" tone="purple" hint="من الأعلى تكلفة" />
+      <app-stat-tile label="قيمة المخزون" [value]="(r.stockValue | money)" icon="box" tone="green" [hint]="r.partsCount + ' قطعة'" />
+      <app-stat-tile label="تحت الحد الأدنى" [value]="r.lowStockCount" icon="warning" tone="orange" hint="قطع تحتاج إدخالاً" />
+      <app-stat-tile label="المصروف في الفترة" [value]="(r.issuedCost | money)" icon="docText" tone="blue" hint="قطع صُرفت على الطلبات" />
+      <app-stat-tile label="أجهزة بقطع مصروفة" [value]="r.deviceCosts.length" icon="device" tone="purple" hint="من الأعلى تكلفة" />
     </section>
 
     <section class="panel">

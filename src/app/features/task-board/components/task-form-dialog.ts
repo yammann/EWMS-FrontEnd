@@ -13,6 +13,7 @@ import { fileSize } from '@core/utils/file-size';
 import { fileIcon } from './task-attachments';
 import { Alert } from '@shared/ui/alert';
 import { LineList, cleanLines } from '@shared/ui/line-list';
+import { Icon } from '@shared/ui/icon';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';
 
@@ -20,7 +21,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
 
 /** نافذة إنشاء مهمة / تعديلها / تفويض جزء من مهمة واردة لجهة أدنى */
 @Component({
-  selector: 'app-task-form-dialog', standalone: true, imports: [Alert, LineList, ReactiveFormsModule, FormsModule, Modal],
+  selector: 'app-task-form-dialog', standalone: true, imports: [Icon, Alert, LineList, ReactiveFormsModule, FormsModule, Modal],
   templateUrl: './task-form-dialog.html',
   styleUrl: './task-form-dialog.scss'
 })

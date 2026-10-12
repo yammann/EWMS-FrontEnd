@@ -3,13 +3,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { fileSize } from '@core/utils/file-size';
 import { errorMessage } from '@shared/ui/error-message';
 import { Modal } from '@shared/ui/modal';
+import { Icon, IconName } from '@shared/ui/icon';
 import { ToastService } from '@shared/ui/toast.service';
 import { MapEntryFile } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
 
 /** أيقونة حسب مجموعة الصيغة */
-export function kindIcon(kind: string): string {
-  return ({ images: '🖼', pdf: '📄', office: '📝', text: '🧾', cad: '📐', maps: '🗺', archives: '🗜', media: '🎞' } as Record<string, string>)[kind] ?? '📎';
+export function kindIcon(kind: string): IconName {
+  return ({ images: 'photo', pdf: 'docText', office: 'docText', text: 'textLines', cad: 'ruler', maps: 'map', archives: 'zip', media: 'film' } as Record<string, IconName>)[kind] ?? 'paperclip';
 }
 
 /**
@@ -17,13 +18,13 @@ export function kindIcon(kind: string): string {
  * الملف يُجلب كـ Blob (عبر معترض رمز الدخول)، ولا يُفتح شيء غير الصورة/PDF داخل الصفحة.
  */
 @Component({
-  selector: 'app-entry-files', standalone: true, imports: [Modal],
+  selector: 'app-entry-files', standalone: true, imports: [Modal, Icon],
   template: `
     <ul class="files">
       @for (f of files(); track f.id) {
         <li>
           <button type="button" class="file" (click)="open(f)" [title]="(f.previewable ? 'معاينة ' : 'تنزيل ') + f.fileName" [disabled]="busyId() === f.id">
-            <span class="ico" aria-hidden="true">{{ icon(f.kind) }}</span>
+            <span class="ico" aria-hidden="true"><app-icon [name]="icon(f.kind)" /></span>
             <span class="meta"><span class="name">{{ f.fileName }}</span><small>{{ size(f.size) }}{{ f.previewable ? '' : ' · تنزيل' }}</small></span>
           </button>
         </li>
@@ -49,7 +50,7 @@ export function kindIcon(kind: string): string {
     .file { display: inline-flex; align-items: center; gap: 8px; max-width: 280px; min-height: 36px; padding: 4px 10px; text-align: start;
       border-radius: var(--radius-md); background: var(--fill); color: var(--ink-800); box-shadow: none; font-weight: 600; font-size: 12.5px; }
     .file:hover:not(:disabled) { background: var(--fill-strong); transform: none; box-shadow: none; }
-    .ico { font-size: 16px; flex: none; }
+    .ico { display: grid; flex: none; color: var(--brand-700); }
     .meta { display: grid; min-width: 0; }
     .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .meta small { color: var(--ink-500); font-weight: 400; font-size: 11px; }

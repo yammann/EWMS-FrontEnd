@@ -136,7 +136,7 @@ button.btn-sm {
   color: var(--ink-600);
   cursor: pointer;
 }
-.icon-btn svg { width: 15px; height: 15px; }
+.icon-btn svg, .icon-btn app-icon { width: 15px; height: 15px; }
 .icon-btn:hover:not(:disabled) { filter: none; }
 
 .icon-btn.edit:hover     { background: var(--info-100);   color: var(--info-500); }
@@ -178,7 +178,7 @@ button.btn-sm {
 }
 
 .input-wrapper { position: relative; }
-.input-wrapper > svg {
+.input-wrapper > svg, .input-wrapper > app-icon {
   position: absolute;
   top: 50%;
   right: 13px;

@@ -26,6 +26,7 @@ import { PageHeader } from '@shared/ui/page-header';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
 import { SelectValue } from '@shared/ui/select-value';
+import { Icon } from '@shared/ui/icon';
 
 const PAGE_SIZE = 50;
 
@@ -42,7 +43,7 @@ function gatewayInSubnet(group: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-installations-page', standalone: true,
-  imports: [RowActions, SelectValue, FormActions, PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
+  imports: [Icon, RowActions, SelectValue, FormActions, PageHeader, EmptyState, Alert, DatePipe, ReactiveFormsModule, Modal, CopyText, Pager, DevicePassword, InstallStatus, DeviceHistory, InstallationsImport],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss'],
   templateUrl: './installations-page.html',
   styles: [`

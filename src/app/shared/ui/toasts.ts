@@ -1,23 +1,24 @@
 import { Component, inject } from '@angular/core';
+import { Icon } from './icon';
 import { ToastService } from '@shared/ui/toast.service';
 
 /** حاوية التنبيهات — مرة واحدة في MainLayout */
 @Component({
-  selector: 'app-toasts', standalone: true,
+  selector: 'app-toasts', standalone: true, imports: [Icon],
   template: `
     <div class="toast-container" aria-live="polite">
       @for (toast of toasts(); track toast.id) {
         <div class="toast toast-{{ toast.type }}" [attr.role]="toast.type === 'error' ? 'alert' : 'status'" (click)="service.dismiss(toast.id)">
           <div class="toast-icon" aria-hidden="true">
             @switch (toast.type) {
-              @case ('success') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> }
-              @case ('error') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> }
-              @default { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> }
+              @case ('success') { <app-icon name="checkmark" [weight]="2.2" /> }
+              @case ('error') { <app-icon name="alert" [weight]="2" /> }
+              @default { <app-icon name="info" [weight]="2" /> }
             }
           </div>
           <span class="toast-message">{{ toast.message }}</span>
           <button type="button" class="toast-close" aria-label="إغلاق" (click)="service.dismiss(toast.id); $event.stopPropagation()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            <app-icon name="xmark" [weight]="2.2" />
           </button>
         </div>
       }

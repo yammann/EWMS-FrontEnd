@@ -47,8 +47,8 @@
               <td>@if (i.branchName) { {{ i.departmentName || i.branchName }}@if (i.departmentName) { <small>{{ i.branchName }}</small> } } @else { <span class="missing" title="سُجّل قبل ربط التركيبات بالأقسام — حدّد قسمه من التعديل">بلا قسم</span> }</td>
               <td>
                 <app-copy-text [value]="i.ip" label="IP">
-                  <a class="open-link" [href]="url(i.ip)" target="_blank" rel="noopener noreferrer" title="فتح واجهة الجهاز في المتصفح" aria-label="فتح واجهة الجهاز">↗</a>
-                  @if (i.duplicateIp) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع">⚠ مكرر</span> }
+                  <a class="open-link" [href]="url(i.ip)" target="_blank" rel="noopener noreferrer" title="فتح واجهة الجهاز في المتصفح" aria-label="فتح واجهة الجهاز"><app-icon name="external" [size]="14" /></a>
+                  @if (i.duplicateIp) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع"><app-icon name="warning" [size]="12" /> مكرر</span> }
                 </app-copy-text>
                 <small class="mono">{{ join(i.subnetMask, i.gateway ? 'GW ' + i.gateway : '') }}</small>
                 @if (i.macAddress || i.port || i.vlan) { <small class="mono">{{ join(i.macAddress, i.port ? 'Port ' + i.port : '', i.vlan ? 'VLAN ' + i.vlan : '') }}</small> }
@@ -58,7 +58,7 @@
               <td><app-install-status [status]="i.status" />
                 <small>{{ i.lastVerifiedAt ? 'تحقق ' + (i.lastVerifiedAt | date:'yyyy/MM/dd') : 'لم يُتحقق بعد' }}</small></td>
               <td><app-row-actions [canEdit]="access().canEdit" [canDelete]="access().canDelete" [deleting]="deletingId() === i.id" (edit)="openForm(i)" (remove)="askDelete(i)">
-                @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="verify(i)" title="تأكيد أن بيانات التركيب صحيحة اليوم">✓ تحققت</button> }
+                @if (access().canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="verify(i)" title="تأكيد أن بيانات التركيب صحيحة اليوم"><app-icon name="checkmark" [size]="14" /> تحققت</button> }
                 <button class="btn btn-ghost btn-sm" type="button" (click)="history.set(i)">السجل</button>
               </app-row-actions></td>
             </tr>
@@ -91,7 +91,7 @@
         <label class="form-field"><span class="form-label">عنوان IP</span><input formControlName="ip" dir="ltr" placeholder="192.168.1.10">
           @if (form.controls.ip.touched && form.controls.ip.invalid) { <small class="form-error">صيغة IPv4 غير صحيحة (بلا أصفار بادئة)</small> }
           @if (duplicates().length) {
-            <small class="dup-warning" role="status">⚠ هذا الـ IP مستخدم في نفس الموقع:
+            <small class="dup-warning" role="status"><app-icon name="warning" [size]="13" /> هذا الـ IP مستخدم في نفس الموقع:
               @for (d of duplicates(); track d.id) { <span>{{ d.deviceName }}{{ d.installLocation ? ' — ' + d.installLocation : '' }}</span> }
               — يمكنك الحفظ رغم ذلك.</small>
           }</label>
@@ -110,7 +110,7 @@
         <label class="form-field"><span class="form-label">كلمة السر @if (editing()) { <small class="hint">(اتركها فارغة للإبقاء على الحالية)</small> }</span>
           <span class="secret">
             <input formControlName="pass" dir="ltr" maxlength="200" [type]="showPass() ? 'text' : 'password'" autocomplete="new-password">
-            <button type="button" class="icon-btn-sm" (click)="showPass.set(!showPass())" [attr.aria-label]="showPass() ? 'إخفاء' : 'إظهار'">{{ showPass() ? '🙈' : '👁' }}</button>
+            <button type="button" class="icon-btn-sm" (click)="showPass.set(!showPass())" [attr.aria-label]="showPass() ? 'إخفاء' : 'إظهار'"><app-icon [name]="showPass() ? 'eyeSlash' : 'eye'" /></button>
           </span></label>
         <label class="form-field"><span class="form-label">إصدار البرنامج الثابت <small class="hint">(اختياري)</small></span><input formControlName="firmware" dir="ltr" maxlength="100"></label>
         <label class="form-field"><span class="form-label">تاريخ التركيب <small class="hint">(اختياري)</small></span><input type="date" formControlName="installDate" [max]="today"></label>

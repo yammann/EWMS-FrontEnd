@@ -7,33 +7,13 @@
   <!-- Stats -->
   <section class="stats-grid">
 
-    <app-stat-tile tone="green" icon="" label="إجمالي الأقسام" [value]="stats().total" hint="جميع الأقسام المسجلة">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 21h18"></path>
-                  <path d="M5 21V5l7-3 7 3v16"></path>
-                  <path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="green" icon="building" label="إجمالي الأقسام" [value]="stats().total" hint="جميع الأقسام المسجلة" />
 
-    <app-stat-tile tone="blue" icon="" label="أقسام بوصف" [value]="stats().withDescription" hint="لها وصف موثق">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 7h16M4 12h16M4 17h10"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="blue" icon="textLines" label="أقسام بوصف" [value]="stats().withDescription" hint="لها وصف موثق" />
 
-    <app-stat-tile tone="purple" icon="" label="فروع مغطاة" [value]="stats().branchesCovered" hint="من أصل {{ stats().totalBranches }} فرع">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 21h18"></path>
-                  <path d="M5 21V5l7-3 7 3v16"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="purple" icon="landmark" label="فروع مغطاة" [value]="stats().branchesCovered" hint="من أصل {{ stats().totalBranches }} فرع" />
 
-    <app-stat-tile tone="orange" icon="" label="إجمالي الفروع" [value]="stats().totalBranches" hint="الفروع المتاحة في النظام">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 21h18"></path>
-                  <path d="M5 21V5l7-3 7 3v16"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="orange" icon="landmark" label="إجمالي الفروع" [value]="stats().totalBranches" hint="الفروع المتاحة في النظام" />
   </section>
 
   <!-- Departments List -->
@@ -80,10 +60,7 @@
                 </td>
                 <td>
                   <span class="branch-chip">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                      <path d="M3 21h18"></path>
-                      <path d="M5 21V5l7-3 7 3v16"></path>
-                    </svg>
+                    <app-icon name="landmark" [size]="12" />
                     {{ department.branchName || branchName(department.branchId) }}
                   </span>
                 </td>
@@ -106,10 +83,7 @@
     } @else {
       <div class="empty-state">
         <div class="empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M3 21h18"></path>
-            <path d="M5 21V5l7-3 7 3v16"></path>
-          </svg>
+          <app-icon name="building" />
         </div>
         <h3>لا توجد أقسام</h3>
         <p>ابدأ بالضغط على زر "قسم جديد" في الأعلى.</p>
@@ -127,10 +101,7 @@
           <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم القسم"
                            namePlaceholder="مثال: قسم الأرشيف" descPlaceholder="وصف مختصر عن القسم..." createLabel="إنشاء القسم"
                            [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
-            <svg nameIcon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 21h18"></path>
-            <path d="M5 21V5l7-3 7 3v16"></path>
-            </svg>
+            <app-icon nameIcon name="building" />
           <ng-container [formGroup]="form">
             <div class="form-field">
               <label class="form-label" [attr.for]="dlg.mode + '-branch'">الفرع</label>

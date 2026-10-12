@@ -3,6 +3,7 @@ import { GovernorateFeature, governorateOf } from '@core/utils/geo';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 import { PlaceSearch } from './place-search';
 import { Place } from '@core/utils/places';
+import { Icon } from '@shared/ui/icon';
 
 export interface Coordinates { latitude: number; longitude: number; }
 
@@ -11,7 +12,7 @@ export interface Coordinates { latitude: number; longitude: number; }
  * أو ابحث باسم المكان (مدينة/بلدة/قرية/حي) فتقفز الخريطة إليه، أو اكتب الإحداثيات يدوياً. يُستخدم في نموذج الموقع.
  */
 @Component({
-  selector: 'app-coordinate-picker', standalone: true, imports: [SyriaSvgMap, PlaceSearch],
+  selector: 'app-coordinate-picker', standalone: true, imports: [Icon, SyriaSvgMap, PlaceSearch],
   template: `
     <div class="picker">
       <app-place-search (selected)="onPlace($event)" />
@@ -27,7 +28,7 @@ export interface Coordinates { latitude: number; longitude: number; }
       <div class="picker-bar">
         <label>خط العرض<input #t1 type="number" step="0.00001" dir="ltr" [value]="latitude() ?? ''" (change)="manual('lat', t1.value)"></label>
         <label>خط الطول<input #t2 type="number" step="0.00001" dir="ltr" [value]="longitude() ?? ''" (change)="manual('lng', t2.value)"></label>
-        <span class="gov">{{ governorate() ? '📍 ' + governorate() : (latitude() != null ? 'خارج حدود المحافظات' : 'لم تُحدَّد النقطة بعد') }}</span>
+        <span class="gov">@if (governorate()) { <app-icon name="mappin" [size]="14" /> {{ governorate() }} } @else { {{ latitude() != null ? 'خارج حدود المحافظات' : 'لم تُحدَّد النقطة بعد' }} }</span>
       </div>
     </div>`,
   styles: [`

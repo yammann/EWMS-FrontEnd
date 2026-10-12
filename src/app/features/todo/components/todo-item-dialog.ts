@@ -6,10 +6,11 @@ import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
+import { Icon } from '@shared/ui/icon';
 
 /** تعديل بند: العنوان والملاحظة والموعد والتكرار والأهمية (المهمة المرتبطة تُعرض للاطلاع) */
 @Component({
-  selector: 'app-todo-item-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
+  selector: 'app-todo-item-dialog', standalone: true, imports: [Icon, FormActions, Alert, FormsModule, Modal],
   templateUrl: './todo-item-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

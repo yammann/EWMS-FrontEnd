@@ -81,7 +81,7 @@
             @if (files().length) {
               <ul class="picked">
                 @for (f of files(); track f) {
-                  <li><span aria-hidden="true">{{ icon(f.type) }}</span><span class="n">{{ f.name }}</span><small>{{ size(f.size) }}</small>
+                  <li><app-icon [name]="icon(f.type)" [size]="16" /><span class="n">{{ f.name }}</span><small>{{ size(f.size) }}</small>
                     <button type="button" class="x" (click)="dropFile(f)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name">×</button></li>
                 }
               </ul>

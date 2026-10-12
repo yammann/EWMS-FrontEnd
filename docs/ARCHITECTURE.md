@@ -35,7 +35,8 @@ src/app/
 | رأس الصفحة (عنوان صغير/رئيسي/وصف + أزرار) | `<app-page-header eyebrow heading subtitle>` + الأزرار كمحتوى |
 | زر الرجوع | **موحّد في الشريط العلوي** (`app-back-button` في `MainLayout`): يظهر للمسار الذي يعلن `data: { back: '/المسار' }` |
 | رسالة خطأ / حالة فارغة | `<app-alert [message]>` / `<app-empty-state [panel]>` |
-| بطاقة رقم | `<app-stat-tile>` |
+| بطاقة رقم | `<app-stat-tile icon="users" …>` (اسم أيقونة إلزامي) |
+| أيقونة | **`<app-icon name="lock" [size] [weight]>`** (`shared/ui/icon.ts`): مجموعة موحّدة خطية 24×24 بأسلوب SF Symbols مرسومة للمشروع، تأخذ لون النص. **لا Emoji ولا SVG مضمّنة في القوالب** — رمز جديد = أيقونة تُضاف هناك. القيم المخزّنة كـ Emoji (أيقونة مهمة العمل، قائمة «مفكرتي»، «آخر الإجراءات») تُعرض بـ `iconFor(قيمة)`. (أيقونات Apple الأصلية لا يجيز ترخيصها الاستعمال في تطبيق ويب.) |
 | أزرار نافذة النموذج | `<app-form-actions [busy] [disabled] label busyLabel (dismissed)>` |
 | نافذة / تأكيد / تنبيه | `app-modal` / `ConfirmService` / `ToastService` |
 | تقسيم الصفحات | `Pagination<T>` + `<app-pager>` |

@@ -15,6 +15,7 @@ import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
 import { normalizePlaceText } from '@core/utils/places';
+import { Icon } from '@shared/ui/icon';
 
 type ModalType = 'create' | 'edit';
 
@@ -75,7 +76,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
 @Component({
   selector: 'app-roles-page',
   standalone: true,
-  imports: [Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss'
 })

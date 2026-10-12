@@ -4,13 +4,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WorkTaskService } from '../data-access/work-task.service';
 import { WorkTaskCard } from '../data-access/work-task.models';
 import { EmptyState } from '@shared/ui/empty-state';
+import { Icon, iconFor } from '@shared/ui/icon';
 
 /**
  * صفحة مهمة العمل. صفحات المهام الفعلية (مثل المخزن: إدخال/إخراج/تقارير) ستُبنى لاحقاً
  * كل مهمة على حدة — عندها تُضاف لها route خاص بها بدلاً من هذه الصفحة.
  */
 @Component({
-  selector: 'app-task-placeholder', standalone: true, imports: [EmptyState, RouterLink],
+  selector: 'app-task-placeholder', standalone: true, imports: [Icon, EmptyState, RouterLink],
   styleUrl: '../../../shared/styles/page-base.scss',
   template: `
     <div class="page">
@@ -19,12 +20,12 @@ import { EmptyState } from '@shared/ui/empty-state';
         <a class="btn btn-ghost" routerLink="/">العودة للوحة المتابعة</a>
       } @else if (task(); as t) {
         <header class="page-header">
-          <div><span class="eyebrow">مهمة عمل · {{ t.branchName }}</span><h1><span aria-hidden="true">{{ t.icon }}</span> {{ t.name }}</h1>
+          <div><span class="eyebrow">مهمة عمل · {{ t.branchName }}</span><h1><app-icon [name]="iconFor(t.icon)" [size]="26" /> {{ t.name }}</h1>
             @if (t.description) { <p class="muted">{{ t.description }}</p> }</div>
           <a class="btn btn-ghost" routerLink="/">العودة للوحة المتابعة</a>
         </header>
         <section class="panel wip">
-          <span class="wip-icon" aria-hidden="true">🚧</span>
+          <app-icon class="wip-icon" name="cone" [size]="54" [weight]="1.5" />
           <h2>جاري العمل عليها</h2>
           <p class="muted">صفحة هذه المهمة قيد التطوير وستكون متاحة قريباً.</p>
         </section>
@@ -34,11 +35,12 @@ import { EmptyState } from '@shared/ui/empty-state';
     </div>`,
   styles: [`
     .wip { display: grid; justify-items: center; gap: 10px; padding: 56px 24px; text-align: center; }
-    .wip-icon { font-size: 54px; line-height: 1; }
+    .wip-icon { color: var(--warning-500); }
     .wip h2 { font-size: 24px; }
   `]
 })
 export class TaskPlaceholderPage {
+  iconFor = iconFor;
   private service = inject(WorkTaskService);
   task = signal<WorkTaskCard | null>(null);
   error = signal('');

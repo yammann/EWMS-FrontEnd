@@ -12,6 +12,7 @@ import { SelectValue } from '@shared/ui/select-value';
 import { ToastService } from '@shared/ui/toast.service';
 import { FIELD_TYPES, LAYER_COLORS, LayerInput, MapFieldType, MapFileOptions, MapLayerDefinition, MapSource } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
+import { Icon } from '@shared/ui/icon';
 
 /** حدود الخادم (MapLayerRules) */
 const MAX_FIELDS = 40;
@@ -45,7 +46,7 @@ let keySeq = 0;
  */
 @Component({
   selector: 'app-layer-form-dialog', standalone: true,
-  imports: [Modal, FormActions, Alert, ReactiveFormsModule, SelectValue],
+  imports: [Icon, Modal, FormActions, Alert, ReactiveFormsModule, SelectValue],
   templateUrl: './layer-form-dialog.html',
   styleUrls: ['../../../shared/styles/data-tools.scss', './layer-form-dialog.scss']
 })

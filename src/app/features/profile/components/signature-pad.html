@@ -6,19 +6,19 @@
       <span class="pill" aria-hidden="true"></span>
       <button type="button" role="tab" [attr.aria-selected]="method() === 'draw'" [attr.tabindex]="method() === 'draw' ? 0 : -1" autofocus
               (click)="setMethod('draw')" (keydown)="tabKeys($event)">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>رسم</button>
+        <app-icon name="pencil" />رسم</button>
       <button type="button" role="tab" [attr.aria-selected]="method() === 'upload'" [attr.tabindex]="method() === 'upload' ? 0 : -1"
               (click)="setMethod('upload')" (keydown)="tabKeys($event)">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L5 21"/></svg>رفع صورة</button>
+        <app-icon name="photo" />رفع صورة</button>
     </div>
 
     <div class="toolbar">
       @if (method() === 'draw') {
         <div class="tools">
           <button type="button" class="ghost-btn" (click)="undo()" [disabled]="!strokes().length || busy()">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>تراجع</button>
+            <app-icon name="undo" />تراجع</button>
           <button type="button" class="ghost-btn" (click)="clear()" [disabled]="!strokes().length || busy()">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4-4L14 6l7 7-8 8Z"/><path d="M22 21H7"/></svg>مسح</button>
+            <app-icon name="eraser" />مسح</button>
         </div>
         <div class="inks" role="radiogroup" aria-label="لون الحبر">
           @for (ink of inks; track ink.value) {
@@ -50,7 +50,7 @@
       } @else {
         <button type="button" class="drop" [class.over]="over()" (click)="file.click()"
                 (dragover)="$event.preventDefault(); over.set(true)" (dragleave)="over.set(false)" (drop)="dropped($event)">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L5 21"/></svg>
+          <app-icon name="photo" />
           <strong>{{ reading() ? 'جارٍ قراءة الصورة…' : 'اسحب الصورة إلى هنا أو اخترها' }}</strong>
           <small>PNG أو JPG — يُزال بياض الورق تلقائياً</small>
         </button>
@@ -67,6 +67,6 @@
   <footer class="modal-actions">
     <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">إلغاء</button>
     <button type="button" (click)="accept()" [disabled]="!ready() || !password() || busy()">
-      {{ busy() ? 'جارٍ الحفظ…' : '✓ اعتماد التوقيع' }}</button>
+      @if (busy()) { جارٍ الحفظ… } @else { <app-icon name="checkmark" [weight]="2.2" /> اعتماد التوقيع }</button>
   </footer>
 </app-modal>

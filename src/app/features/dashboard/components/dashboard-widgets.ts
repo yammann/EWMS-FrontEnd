@@ -3,6 +3,7 @@ import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DashboardAction, DashboardActivity, DashboardCountItem, DashboardVacationRow, WorkTaskDistribution } from '../data-access/dashboard.models';
 import { WorkTaskCard } from '@features/work-tasks';
+import { Icon, iconFor } from '@shared/ui/icon';
 
 /* =====================================================
  * مكوّنات مشتركة بين لوحات المتابعة (الفرع/القسم/المكتب/الموظف/المؤسسة)
@@ -10,13 +11,13 @@ import { WorkTaskCard } from '@features/work-tasks';
 
 /** بطاقات مهام العمل — كل بطاقة تفتح صفحة المهمة (حالياً: جاري العمل عليها) */
 @Component({
-  selector: 'app-task-cards', standalone: true, imports: [RouterLink],
+  selector: 'app-task-cards', standalone: true, imports: [RouterLink, Icon],
   template: `
     @if (tasks().length) {
       <div class="task-grid">
         @for (t of tasks(); track t.id) {
           <a class="task-card" [routerLink]="['/tasks', t.id]">
-            <span class="task-icon" aria-hidden="true">{{ t.icon || '📋' }}</span>
+            <span class="task-icon" aria-hidden="true"><app-icon [name]="iconFor(t.icon)" /></span>
             <span class="task-text">
               <strong>{{ t.name }}</strong>
               @if (t.description) { <span>{{ t.description }}</span> }
@@ -32,6 +33,7 @@ import { WorkTaskCard } from '@features/work-tasks';
   styleUrl: './dashboard-widgets-task-cards.scss'
 })
 export class TaskCards {
+  iconFor = iconFor;
   tasks = input.required<WorkTaskCard[]>();
   emptyText = input('لا توجد مهام بعد');
   showAssignees = input(false);
@@ -145,13 +147,13 @@ export class CountBars {
 
 /** آخر الإجراءات العامة (انضمام موظفين، إضافة مهام وإسنادها) */
 @Component({
-  selector: 'app-activity-list', standalone: true, imports: [CommonModule],
+  selector: 'app-activity-list', standalone: true, imports: [CommonModule, Icon],
   template: `
     @if (items().length) {
       <ol class="activity">
         @for (a of items(); track $index) {
           <li>
-            <span class="a-icon" aria-hidden="true">{{ a.icon }}</span>
+            <span class="a-icon" aria-hidden="true"><app-icon [name]="iconFor(a.icon, 'info')" /></span>
             <span class="a-text">{{ a.text }}@if (a.scope) { <small>{{ a.scope }}</small> }</span>
             <time class="a-date" [attr.datetime]="a.date">{{ a.date | date:'yyyy/MM/dd' }}</time>
           </li>
@@ -164,7 +166,8 @@ export class CountBars {
     .activity { list-style: none; margin: 0; padding: 0; display: grid; }
     .activity li { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px; padding: 11px 4px; border-bottom: 1px solid var(--ink-100); }
     .activity li:last-child { border-bottom: 0; }
-    .a-icon { width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--ink-50); font-size: 17px; }
+    .a-icon { width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--ink-50); color: var(--ink-700); }
+    .a-icon app-icon { width: 18px; height: 18px; }
     .a-text { font-size: 13px; color: var(--ink-800); line-height: 1.6; }
     .a-text small { display: block; font-size: 11px; color: var(--ink-400); }
     .a-date { font-size: 12px; color: var(--ink-500); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -172,12 +175,13 @@ export class CountBars {
   `]
 })
 export class ActivityList {
+  iconFor = iconFor;
   items = input.required<DashboardActivity[]>();
 }
 
 /** توزيع مهام العمل على موظفي القسم/المكتب */
 @Component({
-  selector: 'app-task-distribution', standalone: true, imports: [RouterLink],
+  selector: 'app-task-distribution', standalone: true, imports: [RouterLink, Icon],
   template: `
     @if (items().length) {
       <div class="table-wrap"><table class="compact">
@@ -185,7 +189,7 @@ export class ActivityList {
         <tbody>
           @for (t of items(); track t.taskId) {
             <tr>
-              <td><a class="cell-link" [routerLink]="['/tasks', t.taskId]"><span aria-hidden="true">{{ t.icon }}</span> {{ t.taskName }}</a></td>
+              <td><a class="cell-link" [routerLink]="['/tasks', t.taskId]"><app-icon [name]="iconFor(t.icon)" [size]="15" /> {{ t.taskName }}</a></td>
               <td class="wrap-cell">{{ t.assigneeNames.join('، ') }}</td>
             </tr>
           }
@@ -197,5 +201,6 @@ export class ActivityList {
   styleUrl: '../styles/dashboard-table.scss'
 })
 export class TaskDistributionTable {
+  iconFor = iconFor;
   items = input.required<WorkTaskDistribution[]>();
 }

@@ -18,10 +18,10 @@
   </header>
 
   <section class="t-tiles" aria-label="ملخص المفكرة">
-    <app-stat-tile label="القوائم" [value]="activeLists().length" icon="🗂️" tone="blue" [hint]="archivedCount() ? archivedCount() + ' مؤرشفة' : ''" />
-    <app-stat-tile label="بنود مفتوحة" [value]="openItems()" icon="⏳" tone="orange" hint="في كل قوائمي" />
-    <app-stat-tile label="مستحقة اليوم" [value]="today()?.todayCount ?? 0" icon="📅" tone="green" />
-    <app-stat-tile label="متأخرة" [value]="today()?.overdueCount ?? 0" icon="⏰" tone="red" [alert]="(today()?.overdueCount ?? 0) > 0" hint="تجاوزت موعدها" />
+    <app-stat-tile label="القوائم" [value]="activeLists().length" icon="stack" tone="blue" [hint]="archivedCount() ? archivedCount() + ' مؤرشفة' : ''" />
+    <app-stat-tile label="بنود مفتوحة" [value]="openItems()" icon="hourglass" tone="orange" hint="في كل قوائمي" />
+    <app-stat-tile label="مستحقة اليوم" [value]="today()?.todayCount ?? 0" icon="calendar" tone="green" />
+    <app-stat-tile label="متأخرة" [value]="today()?.overdueCount ?? 0" icon="alarm" tone="red" [alert]="(today()?.overdueCount ?? 0) > 0" hint="تجاوزت موعدها" />
   </section>
 
   @if (lists().length && view() === 'lists') {
@@ -44,7 +44,7 @@
   @if (view() === 'today') {
     @if (today(); as t) {
       @if (!t.items.length) {
-        <div class="panel empty-state"><p>لا شيء مستحق اليوم ولا متأخر 🎉</p><small class="muted">أضف موعداً لأي بند ليظهر هنا في يومه.</small></div>
+        <div class="panel empty-state"><p><app-icon name="sparkles" [size]="20" /> لا شيء مستحق اليوم ولا متأخر</p><small class="muted">أضف موعداً لأي بند ليظهر هنا في يومه.</small></div>
       } @else {
         @for (group of todayGroups(); track group.title) {
           @if (group.items.length) {
@@ -55,15 +55,15 @@
                   <div class="t-row">
                     <button type="button" class="t-tick" role="checkbox" aria-checked="false" [disabled]="!canEdit() || busy()"
                             (click)="complete(i); $event.stopPropagation()" [attr.aria-label]="'إنجاز ' + i.title">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+                      <app-icon name="checkmark" [weight]="3" />
                     </button>
                     <div class="t-body">
-                      <h3 class="t-name">@if (i.isImportant) { <span class="t-star" aria-label="مهم">★</span> }{{ i.title }}</h3>
+                      <h3 class="t-name">@if (i.isImportant) { <app-icon class="t-star" name="starFill" [size]="14" aria-label="مهم" /> }{{ i.title }}</h3>
                       <div class="t-meta">
-                        <span class="t-chip">{{ i.listIcon || '📋' }} {{ i.listName }}</span>
-                        <span class="t-chip" [class.late]="i.isOverdue" [class.today]="!i.isOverdue">📅 {{ i.isOverdue ? 'متأخر · ' + (i.dueDate | date:'MM/dd') : 'اليوم' }}</span>
-                        @if (i.repeatAr) { <span class="t-chip">🔁 {{ i.repeatAr }}</span> }
-                        @if (i.linkedTask?.available) { <span class="t-chip info">🔗 {{ i.linkedTask!.statusAr }}</span> }
+                        <span class="t-chip"><app-icon [name]="iconFor(i.listIcon)" /> {{ i.listName }}</span>
+                        <span class="t-chip" [class.late]="i.isOverdue" [class.today]="!i.isOverdue"><app-icon name="calendar" /> {{ i.isOverdue ? 'متأخر · ' + (i.dueDate | date:'MM/dd') : 'اليوم' }}</span>
+                        @if (i.repeatAr) { <span class="t-chip"><app-icon name="repeat" /> {{ i.repeatAr }}</span> }
+                        @if (i.linkedTask?.available) { <span class="t-chip info"><app-icon name="link" /> {{ i.linkedTask!.statusAr }}</span> }
                       </div>
                     </div>
                   </div>
@@ -82,7 +82,7 @@
         @for (l of pager.items(); track l.id) {
           <li class="t-card click" [class.done]="l.isArchived" tabindex="0" role="button" (click)="open(l)" (keydown.enter)="open(l)" [attr.aria-label]="'فتح القائمة ' + l.name">
             <div class="t-row">
-              <span class="l-icon" [style.--c]="color(l.color)" aria-hidden="true">{{ l.icon || '📋' }}</span>
+              <span class="l-icon" [style.--c]="color(l.color)" aria-hidden="true"><app-icon [name]="iconFor(l.icon)" /></span>
               <div class="t-body">
                 <h3 class="t-name">{{ l.name }}</h3>
                 @if (l.description) { <p class="t-note">{{ l.description }}</p> }
@@ -105,9 +105,9 @@
             <div class="l-bar" aria-hidden="true"><span [style.width.%]="percent(l)"></span></div>
             <div class="t-meta">
               <span class="t-chip" [class.ok]="l.itemsTotal > 0 && l.itemsDone === l.itemsTotal">{{ l.itemsTotal ? l.itemsDone + ' من ' + l.itemsTotal + ' منجزة' : 'قائمة فارغة' }}</span>
-              @if (l.itemsOverdue) { <span class="t-chip late">⏰ {{ l.itemsOverdue }} متأخرة</span> }
-              @else if (l.nextDueDate) { <span class="t-chip">📅 {{ l.nextDueDate | date:'MM/dd' }}</span> }
-              @if (l.isPinned) { <span class="t-chip" title="مثبّتة">📌</span> }
+              @if (l.itemsOverdue) { <span class="t-chip late"><app-icon name="alarm" /> {{ l.itemsOverdue }} متأخرة</span> }
+              @else if (l.nextDueDate) { <span class="t-chip"><app-icon name="calendar" /> {{ l.nextDueDate | date:'MM/dd' }}</span> }
+              @if (l.isPinned) { <span class="t-chip" title="مثبّتة" aria-label="مثبّتة"><app-icon name="pin" /></span> }
               @if (l.isArchived) { <span class="t-chip">مؤرشفة</span> }
               @if (l.ownerName !== me()) { <span class="t-chip info">{{ l.ownerName }}</span> }
             </div>

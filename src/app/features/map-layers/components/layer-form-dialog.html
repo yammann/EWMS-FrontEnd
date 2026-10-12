@@ -88,8 +88,8 @@
           @for (r of visibleRows(); track r.key; let i = $index, first = $first, last = $last) {
             <li class="field" [class.saved]="r.id != null">
               <div class="order">
-                <button type="button" class="icon-btn icon-btn-sm" title="للأعلى" aria-label="نقل للأعلى" [disabled]="first" (click)="move(r.key, -1)">▲</button>
-                <button type="button" class="icon-btn icon-btn-sm" title="للأسفل" aria-label="نقل للأسفل" [disabled]="last" (click)="move(r.key, 1)">▼</button>
+                <button type="button" class="icon-btn icon-btn-sm" title="للأعلى" aria-label="نقل للأعلى" [disabled]="first" (click)="move(r.key, -1)"><app-icon name="chevronUp" [size]="14" [weight]="2.2" /></button>
+                <button type="button" class="icon-btn icon-btn-sm" title="للأسفل" aria-label="نقل للأسفل" [disabled]="last" (click)="move(r.key, 1)"><app-icon name="chevron" [size]="14" [weight]="2.2" /></button>
               </div>
               <div class="inputs">
                 <input #lbl class="label-input" [value]="r.label" (input)="patch(r.key, { label: lbl.value })" maxlength="100"
@@ -127,7 +127,7 @@
               </div>
               <button type="button" class="icon-btn danger" [title]="r.id != null ? 'حذف الحقل (يُسأل عن قيمه)' : 'إزالة'" aria-label="حذف الحقل"
                       [disabled]="workingKey() === r.key" (click)="removeField(r)">
-                @if (workingKey() === r.key) { <span class="button-spinner dark"></span> } @else { ✕ }
+                @if (workingKey() === r.key) { <span class="button-spinner dark"></span> } @else { <app-icon name="xmark" [weight]="2.2" /> }
               </button>
             </li>
           }

@@ -73,4 +73,5 @@ export const TODO_COLORS: { key: string; label: string; css: string }[] = [
   { key: 'gray', label: 'رمادي', css: 'var(--ink-400)' }
 ];
 export const todoColor = (key: string) => TODO_COLORS.find(c => c.key === key)?.css ?? 'var(--brand-600)';
+/** مفاتيح أيقونة القائمة كما تُحفظ في القاعدة (≤ 8 أحرف) — تُعرض بالأيقونة المقابلة عبر iconFor */
 export const TODO_ICONS = ['📝', '📌', '🏠', '💼', '🛒', '📚', '✈️', '💡', '🎯', '🔧'];

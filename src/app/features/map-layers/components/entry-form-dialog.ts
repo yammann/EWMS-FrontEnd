@@ -13,6 +13,7 @@ import {
 } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
 import { kindIcon } from './entry-files';
+import { Icon } from '@shared/ui/icon';
 
 /** حدود الخادم (MapLayerRules) */
 const TEXT_MAX = 500;
@@ -28,7 +29,7 @@ interface Upload { key: number; fieldId: number; name: string; percent: number; 
  */
 @Component({
   selector: 'app-entry-form-dialog', standalone: true,
-  imports: [Modal, FormActions, Alert, SelectValue],
+  imports: [Icon, Modal, FormActions, Alert, SelectValue],
   templateUrl: './entry-form-dialog.html',
   styleUrls: ['../../../shared/styles/data-tools.scss', './entry-form-dialog.scss']
 })

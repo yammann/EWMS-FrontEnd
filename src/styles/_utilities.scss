@@ -54,9 +54,9 @@
   border-radius: var(--radius-xs);
   background: var(--fill);
   color: var(--ink-600);
-  font-size: 12px;
 }
 .icon-btn-sm:hover:not(:disabled) { background: var(--fill-strong); color: var(--ink-900); filter: none; }
+.icon-btn-sm app-icon { width: 14px; height: 14px; }
 
 /* احترام تفضيل تقليل الحركة */
 @media (prefers-reduced-motion: reduce) {

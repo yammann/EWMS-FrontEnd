@@ -11,13 +11,13 @@ import { AppPermission } from '@core/constants/access';
 import { TODO_LIMITS, ToDoItem, ToDoList } from '../data-access/todo.models';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
-import { Icon } from '@shared/ui/icon';
 import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from '../components/todo-list-dialog';
 import { TodoItemDialog } from '../components/todo-item-dialog';
 import { TodoBulkDialog } from '../components/todo-bulk-dialog';
 import { Alert } from '@shared/ui/alert';
 import { SelectValue } from '@shared/ui/select-value';
+import { Icon, iconFor } from '@shared/ui/icon';
 
 type Filter = 'all' | 'today' | 'tomorrow' | 'late' | 'done' | 'important';
 type Sort = 'manual' | 'due' | 'important';
@@ -43,6 +43,7 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
   `]
 })
 export class TodoListPage {
+  iconFor = iconFor;
   private service = inject(ToDoService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);

@@ -6,6 +6,7 @@ import { VacationPrint } from '../data-access/vacation.models';
 import { Logo } from '@shared/ui/logo';
 import { daysAr } from '@core/utils/arabic-count';
 import { BackButton } from '@shared/ui/back-button';
+import { Icon } from '@shared/ui/icon';
 
 /** ترويسة نموذج طلب الإجازة: الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
 export const VACATION_PRINT_HEADER = {
@@ -20,7 +21,7 @@ export const VACATION_PRINT_HEADER = {
  * صفحة خارج الإطار العام، والورقة بألوان ثابتة (ورق أبيض) بصرف النظر عن مظهر التطبيق.
  */
 @Component({
-  selector: 'app-vacation-print', standalone: true, imports: [BackButton, DatePipe, Logo],
+  selector: 'app-vacation-print', standalone: true, imports: [Icon, BackButton, DatePipe, Logo],
   templateUrl: './vacation-print-page.html',
   styleUrl: './vacation-print-page.scss'
 })

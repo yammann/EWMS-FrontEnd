@@ -21,9 +21,8 @@
         <legend class="form-label">الرمز <small class="muted">(اختياري)</small></legend>
         <div class="icons" role="radiogroup" aria-label="رمز القائمة">
           @for (i of icons; track i) {
-            <button type="button" class="ico" role="radio" [attr.aria-checked]="icon === i" [class.on]="icon === i" (click)="icon = icon === i ? '' : i">{{ i }}</button>
+            <button type="button" class="ico" role="radio" [attr.aria-checked]="icon === i" [class.on]="icon === i" (click)="icon = icon === i ? '' : i" [attr.aria-label]="'الأيقونة ' + ($index + 1)"><app-icon [name]="iconFor(i)" /></button>
           }
-          <input class="own" name="icon" maxlength="8" [(ngModel)]="icon" placeholder="أو اكتب رمزاً" aria-label="رمز مخصص" autocomplete="off">
         </div>
       </fieldset>
     </div>

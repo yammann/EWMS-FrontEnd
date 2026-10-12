@@ -46,7 +46,7 @@
           </label>
           @for (f of files(); track $index) {
             <span class="status-badge">{{ f.name }} · {{ size(f.size) }}
-              <button type="button" class="btn btn-ghost btn-sm" (click)="removeFile($index)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name">✕</button></span>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="removeFile($index)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name"><app-icon name="xmark" [size]="13" [weight]="2.2" /></button></span>
           }
         </div>
         @if (filesError()) { <p class="form-error">{{ filesError() }}</p> }

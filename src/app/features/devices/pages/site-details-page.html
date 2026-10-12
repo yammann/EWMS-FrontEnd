@@ -17,10 +17,10 @@
 
   @if (site(); as s) {
     <section class="site-stats" aria-label="ملخص الموقع">
-      <app-stat-tile label="التركيبات" [value]="total()" icon="🔌" tone="green" [hint]="s.activeInstallationsCount + ' تعمل'" />
-      <app-stat-tile label="أنواع الأجهزة" [value]="deviceTypes().length" icon="🧩" tone="blue" />
-      <app-stat-tile label="عناوين IP" [value]="uniqueIps()" icon="🌐" tone="purple" [hint]="duplicateCount() ? duplicateCount() + ' تركيب بعنوان مكرر' : 'بدون تكرار'" [alert]="duplicateCount() > 0" />
-      <app-stat-tile label="مواقع المحافظة" [value]="governorateSites().length" icon="📍" tone="orange" [hint]="s.governorateName" />
+      <app-stat-tile label="التركيبات" [value]="total()" icon="plug" tone="green" [hint]="s.activeInstallationsCount + ' تعمل'" />
+      <app-stat-tile label="أنواع الأجهزة" [value]="deviceTypes().length" icon="puzzle" tone="blue" />
+      <app-stat-tile label="عناوين IP" [value]="uniqueIps()" icon="globe" tone="purple" [hint]="duplicateCount() ? duplicateCount() + ' تركيب بعنوان مكرر' : 'بدون تكرار'" [alert]="duplicateCount() > 0" />
+      <app-stat-tile label="مواقع المحافظة" [value]="governorateSites().length" icon="mappin" tone="orange" [hint]="s.governorateName" />
     </section>
 
     <section class="panel">
@@ -31,7 +31,7 @@
         <div><dt>الإحداثيات</dt><dd>
           @if (coords(s.latitude, s.longitude); as c) {
             <app-copy-text [value]="c" label="الإحداثيات" />
-          } @else { <span class="missing">⚠ بلا إحداثيات — لا يظهر على الخريطة</span> }
+          } @else { <span class="missing"><app-icon name="warning" [size]="13" /> بلا إحداثيات — لا يظهر على الخريطة</span> }
         </dd></div>
         <div><dt>مسؤول الموقع</dt><dd>{{ s.contactName || '—' }}</dd></div>
         <div><dt>هاتف المسؤول</dt><dd>@if (s.contactPhone) { <app-copy-text [value]="phone(s.contactPhone)" label="الهاتف" /> } @else { — }</dd></div>
@@ -51,7 +51,7 @@
 
     @if (access().canView) {
     <section class="panel">
-      <div class="panel-heading"><div><h2>الأجهزة المركّبة <span class="count">({{ total() }})</span></h2><p>{{ access().canRevealPasswords ? 'كلمات السر مخفية — 👁 للإظهار أو ⧉ للنسخ (يُسجَّل كل إظهار)' : 'كلمات السر تحتاج صلاحية الإظهار' }}{{ total() > installations().length ? ' — يُعرض أول ' + installations().length + '، والباقي في صفحة التركيبات' : '' }}</p></div></div>
+      <div class="panel-heading"><div><h2>الأجهزة المركّبة <span class="count">({{ total() }})</span></h2><p>@if (access().canRevealPasswords) { كلمات السر مخفية — <app-icon name="eye" [size]="13" /> للإظهار أو <app-icon name="copy" [size]="13" /> للنسخ (يُسجَّل كل إظهار) } @else { كلمات السر تحتاج صلاحية الإظهار }{{ total() > installations().length ? ' — يُعرض أول ' + installations().length + '، والباقي في صفحة التركيبات' : '' }}</p></div></div>
       @if (!installations().length) { <app-empty-state>لا توجد أجهزة مركّبة في هذا الموقع بعد</app-empty-state> }
       @else {
         <div class="table-wrap"><table>
@@ -62,7 +62,7 @@
                 <td><strong class="cell-strong">{{ i.deviceName }}</strong>@if (i.deviceModel) { <small class="sub">{{ i.deviceModel }}</small> }</td>
                 <td>@if (i.sn) { <span class="mono">{{ i.sn }}</span> } @else { — }</td>
                 <td class="wrap">{{ i.installLocation || '—' }}</td>
-                <td><app-copy-text [value]="i.ip" label="IP"><a class="open-link" [href]="url(i.ip)" target="_blank" rel="noopener noreferrer" title="فتح واجهة الجهاز" aria-label="فتح واجهة الجهاز">↗</a>@if (i.duplicateIp) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع">⚠ مكرر</span> }</app-copy-text></td>
+                <td><app-copy-text [value]="i.ip" label="IP"><a class="open-link" [href]="url(i.ip)" target="_blank" rel="noopener noreferrer" title="فتح واجهة الجهاز" aria-label="فتح واجهة الجهاز"><app-icon name="external" [size]="14" /></a>@if (i.duplicateIp) { <span class="dup" title="يوجد أكثر من تركيب بنفس الـ IP في هذا الموقع"><app-icon name="warning" [size]="12" /> مكرر</span> }</app-copy-text></td>
                 <td><span class="mono">{{ i.subnetMask }}</span></td>
                 <td><app-copy-text [value]="i.userName" label="اسم المستخدم" /></td>
                 <td><app-device-password [installationId]="i.id" [hasPassword]="i.hasPassword" /></td>

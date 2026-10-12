@@ -15,12 +15,13 @@ import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { StatTile } from '@shared/ui/stat-tile';
 import { DepartmentService } from '../data-access/department.service';
+import { Icon } from '@shared/ui/icon';
 
 /** الأقسام — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-departments-page',
   standalone: true,
-  imports: [EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './departments-page.html',
   styleUrl: './departments-page.scss'
 })

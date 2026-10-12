@@ -3,7 +3,8 @@
 .file { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 44px; padding: 6px 12px; text-align: start;
   border-radius: var(--radius-md); background: var(--fill); color: var(--ink-800); box-shadow: none; font-weight: 600; font-size: 13px; }
 .file:hover:not(:disabled) { background: var(--fill-strong); transform: none; box-shadow: none; }
-.ico { font-size: 20px; flex: none; }
+.ico { display: grid; flex: none; color: var(--brand-700); }
+.ico app-icon { width: 20px; height: 20px; }
 .meta { display: grid; min-width: 0; }
 .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .meta small { color: var(--ink-500); font-weight: 400; font-size: 11.5px; }

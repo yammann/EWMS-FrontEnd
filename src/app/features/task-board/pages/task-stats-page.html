@@ -16,10 +16,10 @@
 
     @if (stats(); as s) {
       <section class="stats-4" aria-label="ملخص">
-        <app-stat-tile label="المهام" [value]="s.total" icon="🗂️" tone="blue" [hint]="s.done + ' منجزة · ' + s.open + ' مفتوحة'" />
-        <app-stat-tile label="الإنجاز في الموعد" [value]="rate(s.onTimeRate)" icon="🎯" tone="green" hint="من المنجزة ذات الموعد" />
-        <app-stat-tile label="متوسط زمن التنفيذ" [value]="s.avgDays === null ? '—' : s.avgDays + ' يوم'" icon="⏱" tone="purple" hint="من الإسناد إلى الإنجاز" />
-        <app-stat-tile label="متأخرة الآن" [value]="s.overdue" icon="⏰" tone="red" [alert]="s.overdue > 0"
+        <app-stat-tile label="المهام" [value]="s.total" icon="stack" tone="blue" [hint]="s.done + ' منجزة · ' + s.open + ' مفتوحة'" />
+        <app-stat-tile label="الإنجاز في الموعد" [value]="rate(s.onTimeRate)" icon="target" tone="green" hint="من المنجزة ذات الموعد" />
+        <app-stat-tile label="متوسط زمن التنفيذ" [value]="s.avgDays === null ? '—' : s.avgDays + ' يوم'" icon="timer" tone="purple" hint="من الإسناد إلى الإنجاز" />
+        <app-stat-tile label="متأخرة الآن" [value]="s.overdue" icon="alarm" tone="red" [alert]="s.overdue > 0"
           [hint]="s.returnedTasks ? 'أُعيدت ' + s.returnedTasks + ' مهمة من المراجعة' : 'لم تُعَد مهام من المراجعة'" />
       </section>
 

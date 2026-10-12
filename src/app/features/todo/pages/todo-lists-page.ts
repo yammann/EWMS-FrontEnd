@@ -11,11 +11,11 @@ import { AppPermission } from '@core/constants/access';
 import { ToDoList, ToDoToday, ToDoTodayItem, todoColor } from '../data-access/todo.models';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
-import { Icon } from '@shared/ui/icon';
 import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from '../components/todo-list-dialog';
 import { Alert } from '@shared/ui/alert';
 import { latestRequest } from '@shared/ui/track-request';
+import { Icon, iconFor } from '@shared/ui/icon';
 
 type View = 'lists' | 'today';
 
@@ -31,6 +31,7 @@ type View = 'lists' | 'today';
   
 })
 export class TodoListsPage {
+  iconFor = iconFor;
   /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
   private latest = latestRequest();
   pager = new Pagination(() => this.filtered(), { size: 12, sizes: [12, 24, 48] });

@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { Logo } from '@shared/ui/logo';
 import { Stamp } from '@shared/ui/stamp';
+import { Icon } from '@shared/ui/icon';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, Logo, Stamp],
+  imports: [Icon, ReactiveFormsModule, Logo, Stamp],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

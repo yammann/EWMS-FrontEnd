@@ -121,7 +121,7 @@
 }
 .toggle-password:hover:not(:disabled) { background: var(--fill); color: var(--ink-900); filter: none; }
 .toggle-password:active:not(:disabled) { transform: translateY(-50%) scale(.94); }
-.toggle-password svg { width: 19px; height: 19px; }
+.toggle-password app-icon { width: 19px; height: 19px; }
 
 .submit-btn { width: 100%; min-height: 50px; border-radius: var(--radius-lg); font-size: 16px; }
 

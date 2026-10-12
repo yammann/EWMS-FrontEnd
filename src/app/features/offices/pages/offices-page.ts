@@ -14,12 +14,13 @@ import { Modal } from '@shared/ui/modal';
 import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { OfficeService } from '../data-access/office.service';
+import { Icon } from '@shared/ui/icon';
 
 /** المكاتب — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-offices-page',
   standalone: true,
-  imports: [EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './offices-page.html',
   styleUrl: './offices-page.scss'
 })

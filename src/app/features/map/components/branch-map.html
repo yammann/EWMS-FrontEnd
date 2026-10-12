@@ -14,7 +14,7 @@
         <div class="summary">
           <span><strong>{{ totals().sites }}</strong> موقع</span>
           <span>في <strong>{{ totals().governorates }}</strong> محافظة</span>
-          @if (totals().withoutCoordinates) { <span class="warn">⚠ <a routerLink="/devices/sites">{{ totals().withoutCoordinates }} موقع بلا إحداثيات</a> لا يظهر على الخريطة</span> }
+          @if (totals().withoutCoordinates) { <span class="warn"><app-icon name="warning" [size]="13" /> <a routerLink="/devices/sites">{{ totals().withoutCoordinates }} موقع بلا إحداثيات</a> لا يظهر على الخريطة</span> }
         </div>
         <div class="layer-keys" role="group" aria-label="طبقات الخريطة — انقر لإظهار أو إخفاء">
           @for (l of layers(); track l.key) {

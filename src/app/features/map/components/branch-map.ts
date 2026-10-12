@@ -7,6 +7,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 import { latestRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
+import { Icon } from '@shared/ui/icon';
 
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */
 const RAMP = ['var(--map-1)', 'var(--map-2)', 'var(--map-3)', 'var(--map-4)'];
@@ -73,7 +74,7 @@ export function layerTotals(sites: readonly MergedSite[]): { key: string; title:
  * أثناء السكرول بينما تصغر وتخفت تدريجياً حتى تنغلق.
  */
 @Component({
-  selector: 'app-branch-map', standalone: true, imports: [SelectValue, RouterLink, SyriaSvgMap],
+  selector: 'app-branch-map', standalone: true, imports: [Icon, SelectValue, RouterLink, SyriaSvgMap],
   templateUrl: './branch-map.html',
   styleUrl: './branch-map.scss'
 })

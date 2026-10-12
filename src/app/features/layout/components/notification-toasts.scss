@@ -5,7 +5,8 @@
 .toast { transition: border-color .15s ease; }
 .toast:hover { border-color: var(--brand-300); }
 .toast-body:hover:not(:disabled) { background: none; box-shadow: none; transform: none; }
-.toast-icon { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--brand-100); font-size: 17px; }
+.toast-icon { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--brand-100); color: var(--brand-700); }
+.toast-icon app-icon { width: 18px; height: 18px; }
 .toast-text { display: grid; gap: 4px; min-width: 0; }
 .toast-text strong { font-size: 14px; color: var(--ink-900); }
 .toast-text span { font-size: 13px; line-height: 1.6; color: var(--ink-600); overflow-wrap: anywhere; }
