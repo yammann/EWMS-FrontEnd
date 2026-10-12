@@ -163,14 +163,8 @@ export class BranchMapComponent {
     .filter(r => r.sites > 0)
     .sort((a, b) => b.sites - a.sites));
 
-  totals = computed(() => {
-    const sites = this.sites();
-    return {
-      sites: sites.length,
-      governorates: this.governorateRows().length,
-      withoutCoordinates: sites.filter(s => s.latitude == null || s.longitude == null).length
-    };
-  });
+  /** مواقع الطبقات الظاهرة التي لا تُرسم لأنها بلا إحداثيات (تنبيه بجانب مفتاح الطبقات) */
+  withoutCoordinates = computed(() => this.sites().filter(s => s.latitude == null || s.longitude == null).length);
 
   constructor() {
     afterNextRender(() => this.trackCollapse());
