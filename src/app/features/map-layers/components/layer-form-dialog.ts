@@ -9,7 +9,7 @@ import { FormActions } from '@shared/ui/form-actions';
 import { Modal } from '@shared/ui/modal';
 import { SelectValue } from '@shared/ui/select-value';
 import { ToastService } from '@shared/ui/toast.service';
-import { FIELD_TYPES, LAYER_COLORS, LayerInput, MapFieldType, MapLayerDefinition } from '../data-access/map-layers.models';
+import { FIELD_TYPES, LAYER_COLORS, LayerInput, MapFieldType, MapFileOptions, MapLayerDefinition } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
 
 /** حدود الخادم (MapLayerRules) */
@@ -25,7 +25,15 @@ interface FieldRow {
   /** خيارات القائمة: خيار في كل سطر */
   options: string;
   isHidden: boolean;
+  /** حقل الملفات: مجموعات الصيغ، وأقصى عدد، وأقصى حجم للملف بالـ MB */
+  fileKinds: string[];
+  maxFiles: number;
+  maxFileMegabytes: number;
 }
+
+/** إعدادات حقل ملفات جديد (يعدّلها مدير الطبقة) */
+const DEFAULT_MAX_FILES = 5;
+const DEFAULT_FILE_MB = 25;
 
 let keySeq = 0;
 
@@ -60,6 +68,8 @@ export class LayerFormDialog implements OnInit {
 
   types = FIELD_TYPES;
   colors = LAYER_COLORS;
+  /** سقف النظام لحجم الملف ومجموعات الصيغ (لحقول الملفات) */
+  fileOptions = signal<MapFileOptions | null>(null);
 
   form = inject(FormBuilder).nonNullable.group({
     branchId: [''],
@@ -87,6 +97,13 @@ export class LayerFormDialog implements OnInit {
     const labels = visible.map(r => r.label.trim());
     if (new Set(labels).size !== labels.length) return 'عناوين الحقول متكررة';
     if (visible.some(r => r.type === 5 && !this.optionList(r.options).length)) return 'حقل القائمة يحتاج خياراً واحداً على الأقل';
+    const files = visible.filter(r => r.type === 7);
+    if (files.some(r => !r.fileKinds.length)) return 'اختر صيغة واحدة على الأقل لكل حقل ملفات';
+    const maxFiles = this.fileOptions()?.maxFilesPerField ?? 20;
+    if (files.some(r => !Number.isInteger(r.maxFiles) || r.maxFiles < 1 || r.maxFiles > maxFiles)) return `عدد ملفات الحقل من 1 إلى ${maxFiles}`;
+    const cap = this.fileOptions()?.maxFileMegabytes;
+    if (files.some(r => !Number.isInteger(r.maxFileMegabytes) || r.maxFileMegabytes < 1)) return 'حدّد أقصى حجم للملف بالـ MB';
+    if (cap && files.some(r => r.maxFileMegabytes > cap)) return `حجم الملف لا يتجاوز سقف النظام ${cap}MB`;
     return '';
   });
 
@@ -105,9 +122,11 @@ export class LayerFormDialog implements OnInit {
     if (this.branches().length && !l) this.form.controls.branchId.addValidators(Validators.required);
     this.form.controls.branchId.updateValueAndValidity();
     this.rows.set((l?.fields ?? []).map(f => ({
-      key: ++keySeq, id: f.id, label: f.label, type: f.type, isRequired: f.isRequired, options: f.options.join('\n'), isHidden: f.isHidden
+      key: ++keySeq, id: f.id, label: f.label, type: f.type, isRequired: f.isRequired, options: f.options.join('\n'), isHidden: f.isHidden,
+      fileKinds: [...(f.fileKinds ?? [])], maxFiles: f.maxFiles || DEFAULT_MAX_FILES, maxFileMegabytes: f.maxFileMegabytes || DEFAULT_FILE_MB
     })));
     if (!l) this.addField();
+    this.service.fileOptions().subscribe({ next: o => this.fileOptions.set(o), error: () => this.fileOptions.set(null) });
   }
 
   optionList(text: string) {
@@ -116,10 +135,21 @@ export class LayerFormDialog implements OnInit {
 
   addField() {
     if (this.rows().length >= MAX_FIELDS) { this.toast.error(`الحد الأقصى ${MAX_FIELDS} حقلاً للطبقة`); return; }
-    this.rows.update(list => [...list, { key: ++keySeq, id: null, label: '', type: 1, isRequired: false, options: '', isHidden: false }]);
+    this.rows.update(list => [...list, {
+      key: ++keySeq, id: null, label: '', type: 1, isRequired: false, options: '', isHidden: false,
+      fileKinds: [], maxFiles: DEFAULT_MAX_FILES, maxFileMegabytes: this.defaultMegabytes()
+    }]);
   }
 
   setType(key: number, value: string) { this.patch(key, { type: Number(value) as MapFieldType }); }
+
+  /** حجم افتراضي لحقل ملفات جديد: 25MB أو سقف النظام إن كان أقل */
+  private defaultMegabytes() { return Math.min(DEFAULT_FILE_MB, this.fileOptions()?.maxFileMegabytes ?? DEFAULT_FILE_MB); }
+
+  toggleKind(key: number, kind: string, on: boolean) {
+    this.rows.update(list => list.map(r => r.key !== key ? r
+      : { ...r, fileKinds: on ? [...new Set([...r.fileKinds, kind])] : r.fileKinds.filter(k => k !== kind) }));
+  }
 
   patch(key: number, change: Partial<FieldRow>) {
     this.rows.update(list => list.map(r => r.key === key ? { ...r, ...change } : r));
@@ -216,7 +246,10 @@ export class LayerFormDialog implements OnInit {
       isActive: v.isActive,
       fields: ordered.map(r => ({
         id: r.id, label: r.label.trim(), type: r.type, isRequired: r.isRequired,
-        options: r.type === 5 ? this.optionList(r.options) : []
+        options: r.type === 5 ? this.optionList(r.options) : [],
+        maxFiles: r.type === 7 ? r.maxFiles : 0,
+        maxFileMegabytes: r.type === 7 ? r.maxFileMegabytes : 0,
+        fileKinds: r.type === 7 ? r.fileKinds : []
       }))
     });
   }

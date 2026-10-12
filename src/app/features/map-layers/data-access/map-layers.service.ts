@@ -1,14 +1,19 @@
 import { Injectable, computed, inject } from '@angular/core';
+import { HttpClient, HttpEvent } from '@angular/common/http';
+import { Observable, shareReplay } from 'rxjs';
+import { environment } from '@env/environment';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission, AppPermissionName } from '@core/constants/access';
-import { EntryInput, LayerInput, MapEntry, MapLayerDefinition, SiteEntries } from './map-layers.models';
+import { EntryInput, LayerInput, MapEntry, MapEntryFile, MapFileOptions, MapLayerDefinition, SiteEntries } from './map-layers.models';
 
 /** طبقات خرائط الفروع وسجلاتها (api/MapLayers و api/MapEntries) */
 @Injectable({ providedIn: 'root' })
 export class MapLayersService {
   private api = inject(ApiService);
+  private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private fileOptions$?: Observable<MapFileOptions>;
 
   /** صلاحياتي — الحدود (فرعي/قسمي) يطبّقها الخادم */
   access = computed(() => {
@@ -46,6 +51,22 @@ export class MapLayersService {
   /** بلا قيم يُحذف؛ له قيم: purge=false يخفيه، purge=true يحذفه مع قيمه */
   deleteField(fieldId: number, purge: boolean) { return this.api.delete<MapLayerDefinition>(`/MapLayers/Field/${fieldId}?purge=${purge}`); }
   restoreField(fieldId: number) { return this.api.put<MapLayerDefinition>(`/MapLayers/Field/${fieldId}/Restore`, {}); }
+
+  /** سقف حجم الملف ومجموعات الصيغ — يُجلب مرة في الجلسة */
+  fileOptions() {
+    return this.fileOptions$ ??= this.api.get<MapFileOptions>('/MapLayers/FileOptions').pipe(shareReplay({ bufferSize: 1, refCount: false }));
+  }
+
+  // ─────────── ملفات حقول «ملفات» ───────────
+  /** رفع ملف واحد لحقل (يبقى معلّقاً حتى يُحفظ السجل) — مع أحداث التقدّم */
+  uploadFile(fieldId: number, file: File): Observable<HttpEvent<MapEntryFile>> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<MapEntryFile>(`${environment.apiUrl}/MapEntries/Files?fieldId=${fieldId}`, form, { reportProgress: true, observe: 'events' });
+  }
+  fileBlob(id: number) { return this.api.getBlob(`/MapEntries/File/${id}`); }
+  /** حذف ملف معلّق رفعته ولم أحفظ السجل (إلغاء النموذج) */
+  deletePendingFile(id: number) { return this.api.delete<{ message: string }>(`/MapEntries/File/${id}`); }
 
   // ─────────── السجلات ───────────
   siteEntries(siteId: number) { return this.api.get<SiteEntries>(`/MapEntries/Site/${siteId}`); }

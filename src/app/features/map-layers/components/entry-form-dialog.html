@@ -1,4 +1,4 @@
-<app-modal [heading]="isEdit ? 'تعديل السجل' : 'إضافة معلومات للموقع'" [subheading]="siteName()" [busy]="saving()" (closed)="closed.emit()">
+<app-modal [heading]="isEdit ? 'تعديل السجل' : 'إضافة معلومات للموقع'" [subheading]="siteName()" [busy]="saving()" (closed)="cancel()">
   <form (submit)="$event.preventDefault(); save()">
     <div class="modal-body">
       <app-alert [message]="error()" />
@@ -35,6 +35,30 @@
                   @for (o of f.options; track o) { <option [value]="o">{{ o }}</option> }
                 </select></label>
             }
+            @case (7) {
+              <div class="form-field full files-field" [class.over]="dragOver() === f.id"
+                   (dragover)="$event.preventDefault(); dragOver.set(f.id)" (dragleave)="dragOver.set(null)" (drop)="dropped(f, $event)">
+                <span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}
+                  <small class="hint">— حتى {{ f.maxFiles }} ملفات، {{ maxMb(f) }}MB للملف</small></span>
+                @if ((files()[f.id] ?? []).length || uploadsOf(f.id).length) {
+                  <ul class="picked">
+                    @for (x of files()[f.id] ?? []; track x.id) {
+                      <li><span class="ico" aria-hidden="true">{{ icon(x.kind) }}</span><span class="name">{{ x.fileName }}</span><small>{{ size(x.size) }}</small>
+                        <button type="button" class="del" (click)="removeFile(f, x)" [attr.aria-label]="'إزالة ' + x.fileName" title="إزالة">✕</button></li>
+                    }
+                    @for (u of uploadsOf(f.id); track u.key) {
+                      <li class="uploading"><span class="name">{{ u.name }}</span><progress max="100" [value]="u.percent"></progress><small>{{ u.percent }}%</small></li>
+                    }
+                  </ul>
+                }
+                <div class="pick">
+                  <input #pk type="file" multiple hidden [accept]="accept(f)" (change)="picked(f, pk)">
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="pk.click()" [disabled]="remaining(f) <= 0">+ إرفاق ملفات</button>
+                  <small class="hint">{{ remaining(f) > 0 ? 'أو اسحبها إلى هنا — ' + formats(f) : 'بلغت الحد الأقصى ' + f.maxFiles + ' ملفات' }}</small>
+                </div>
+                @if (fileErrors()[f.id]; as m) { <p class="form-error" role="alert">{{ m }}</p> }
+              </div>
+            }
             @case (6) {
               <label class="form-field"><span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}</span>
                 <select #yn [appSelectValue]="yesNo(f)" (change)="setYesNo(f, yn.value)">
@@ -60,6 +84,6 @@
       </div>
       @if (problem() && layer()) { <p class="hint warn">{{ problem() }}</p> }
     </div>
-    <app-form-actions [busy]="saving()" [disabled]="!!problem()" (dismissed)="closed.emit()" />
+    <app-form-actions [busy]="saving()" [disabled]="!!problem()" (dismissed)="cancel()" />
   </form>
 </app-modal>

@@ -10,6 +10,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { latestRequest } from '@shared/ui/track-request';
 import { MapEntry, MapLayerDefinition, SiteEntries, formatFieldValue } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
+import { EntryFiles } from './entry-files';
 import { EntryFormDialog } from './entry-form-dialog';
 
 /**
@@ -18,7 +19,7 @@ import { EntryFormDialog } from './entry-form-dialog';
  */
 @Component({
   selector: 'app-site-entries-panel', standalone: true,
-  imports: [EntryFormDialog, EmptyState, Alert, RouterLink],
+  imports: [EntryFormDialog, EntryFiles, EmptyState, Alert, RouterLink],
   templateUrl: './site-entries-panel.html',
   styleUrl: './site-entries-panel.scss'
 })
@@ -41,6 +42,7 @@ export class SiteEntriesPanel {
   dialog = signal<{ entry: MapEntry | null } | null>(null);
   deletingId = signal<number | null>(null);
   format = formatFieldValue;
+  filesOf = (e: MapEntry, fieldId: number) => e.files.filter(f => f.fieldId === fieldId);
 
   /** السجلات مجمّعة حسب الطبقة بترتيب الطبقات */
   groups = computed(() => {

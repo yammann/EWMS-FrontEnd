@@ -31,7 +31,8 @@
             @if (g.layer.fields.length) {
               <dl>
                 @for (f of g.layer.fields; track f.id) {
-                  <div [class.wide]="f.type === 2"><dt>{{ f.label }}</dt><dd>{{ format(f, e.values[f.id]) }}</dd></div>
+                  <div [class.wide]="f.type === 2 || f.type === 7"><dt>{{ f.label }}</dt>
+                    <dd>@if (f.type === 7) { <app-entry-files [files]="filesOf(e, f.id)" /> } @else { {{ format(f, e.values[f.id]) }} }</dd></div>
                 }
               </dl>
             }

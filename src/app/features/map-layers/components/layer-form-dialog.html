@@ -56,6 +56,28 @@
                   <textarea #opt class="options" rows="3" [value]="r.options" (input)="patch(r.key, { options: opt.value })"
                             [attr.aria-label]="'خيارات الحقل ' + (i + 1)" placeholder="خيار في كل سطر"></textarea>
                 }
+                @if (r.type === 7) {
+                  <div class="file-settings">
+                    <fieldset class="kinds">
+                      <legend>الصيغ المسموحة</legend>
+                      @for (k of fileOptions()?.kinds ?? []; track k.key) {
+                        <label class="kind" [title]="k.formats">
+                          <input #kk type="checkbox" [checked]="r.fileKinds.includes(k.key)" (change)="toggleKind(r.key, k.key, kk.checked)">
+                          <span><strong>{{ k.label }}</strong><small>{{ k.formats }}</small></span>
+                        </label>
+                      } @empty { <p class="hint">جارٍ تحميل الصيغ…</p> }
+                    </fieldset>
+                    <div class="limits">
+                      <label class="form-field"><span class="form-label">أقصى عدد ملفات</span>
+                        <input #mf type="number" min="1" [max]="fileOptions()?.maxFilesPerField ?? 20" step="1" dir="ltr" [value]="r.maxFiles"
+                               (input)="patch(r.key, { maxFiles: +mf.value })"></label>
+                      <label class="form-field"><span class="form-label">أقصى حجم للملف (MB)</span>
+                        <input #mb type="number" min="1" [max]="fileOptions()?.maxFileMegabytes ?? null" step="1" dir="ltr" [value]="r.maxFileMegabytes"
+                               (input)="patch(r.key, { maxFileMegabytes: +mb.value })"></label>
+                      @if (fileOptions(); as o) { <p class="hint">سقف النظام {{ o.maxFileMegabytes }}MB للملف. البرامج والسكربتات وHTML/SVG والمستندات ذات الماكرو ممنوعة دائماً.</p> }
+                    </div>
+                  </div>
+                }
               </div>
               <button type="button" class="icon-btn danger" [title]="r.id != null ? 'حذف الحقل (يُسأل عن قيمه)' : 'إزالة'" aria-label="حذف الحقل"
                       [disabled]="workingKey() === r.key" (click)="removeField(r)">

@@ -3,3 +3,16 @@
 .req { margin-inline-start: 3px; color: var(--danger-600); }
 .warn { margin: 12px 0 0; color: var(--warning-700); }
 textarea { resize: vertical; }
+
+/* حقل الملفات */
+.files-field { padding: 10px 12px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); }
+.files-field.over { background: var(--brand-50); border-color: var(--brand-600); }
+.picked { list-style: none; margin: 4px 0 8px; padding: 0; display: grid; gap: 4px; }
+.picked li { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 2px 8px; border-radius: var(--radius-sm); background: var(--fill); font-size: 13px; }
+.picked .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picked small { color: var(--ink-500); font-size: 11.5px; white-space: nowrap; }
+.picked progress { width: 90px; }
+.picked .del { min-height: 26px; width: 26px; padding: 0; border-radius: var(--radius-sm); background: transparent; color: var(--danger-700); box-shadow: none; }
+.picked .del:hover { background: var(--danger-50); transform: none; box-shadow: none; }
+.pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pick .hint { font-size: 11.5px; }

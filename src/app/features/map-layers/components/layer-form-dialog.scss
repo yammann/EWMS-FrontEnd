@@ -45,3 +45,15 @@ input[type="color"] { width: 34px; height: 30px; padding: 2px; border: 1px solid
 @media (max-width: 640px) {
   .inputs { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* حقل الملفات: الصيغ والحدود */
+.file-settings { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 12px; padding: 10px; border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); }
+.kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.kinds legend { grid-column: 1 / -1; padding: 0; margin-bottom: 4px; font-size: 12px; font-weight: 700; color: var(--ink-600); }
+.kind { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; }
+.kind input { margin-top: 3px; }
+.kind span { display: grid; min-width: 0; }
+.kind small { color: var(--ink-500); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.limits { display: grid; gap: 8px; align-content: start; }
+.limits .hint { margin: 0; }
+@media (max-width: 640px) { .file-settings, .kinds { grid-template-columns: minmax(0, 1fr); } }

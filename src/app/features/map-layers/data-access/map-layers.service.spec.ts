@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from '@core/services/auth.service';
 import { MapLayersService } from './map-layers.service';
-import { MapLayerField, formatFieldValue } from './map-layers.models';
+import { MapFileOptions, MapLayerField, fieldExtensions, fieldMaxMegabytes, fileProblem, formatFieldValue } from './map-layers.models';
 
 describe('Branch map layers', () => {
   let service: MapLayersService;
@@ -46,7 +46,10 @@ describe('Branch map layers', () => {
   it('sends the layer with its fields in order and rowVersion', () => {
     service.updateLayer(3, {
       name: 'المشاريع', description: '', color: '#16A34A', allowMultiple: true, isActive: true, rowVersion: 'AAA=',
-      fields: [{ id: 9, label: 'الحالة', type: 5, isRequired: true, options: ['قيد التنفيذ', 'منجز'] }, { id: null, label: 'الكلفة', type: 3, isRequired: false, options: [] }]
+      fields: [
+        { id: 9, label: 'الحالة', type: 5, isRequired: true, options: ['قيد التنفيذ', 'منجز'], maxFiles: 0, maxFileMegabytes: 0, fileKinds: [] },
+        { id: null, label: 'الكلفة', type: 3, isRequired: false, options: [], maxFiles: 0, maxFileMegabytes: 0, fileKinds: [] }
+      ]
     }).subscribe();
     const req = http.expectOne('/api/MapLayers/Update/3');
     expect(req.request.method).toBe('PUT');
@@ -72,12 +75,45 @@ describe('Branch map layers', () => {
   });
 
   it('formats field values for reading', () => {
-    const field = (type: MapLayerField['type']): MapLayerField => ({ id: 1, label: 'x', type, isRequired: false, options: [], sortOrder: 0, isHidden: false });
+    const field = (type: MapLayerField['type']): MapLayerField => ({ id: 1, label: 'x', type, isRequired: false, options: [], sortOrder: 0, isHidden: false, maxFiles: 0, maxFileMegabytes: 0, fileKinds: [] });
     expect(formatFieldValue(field(1), undefined)).toBe('—');
     expect(formatFieldValue(field(1), '')).toBe('—');
     expect(formatFieldValue(field(6), true)).toBe('نعم');
     expect(formatFieldValue(field(6), false)).toBe('لا');
     expect(formatFieldValue(field(4), '2026-10-11')).toBe('2026-10-11');
     expect(formatFieldValue(field(5), 'منجز')).toBe('منجز');
+  });
+
+  it('uploads one file per request to its field and deletes a pending upload', () => {
+    const file = new File(['%PDF-1.7'], 'plan.pdf', { type: 'application/pdf' });
+    service.uploadFile(15, file).subscribe();
+    const req = http.expectOne('/api/MapEntries/Files?fieldId=15');
+    expect(req.request.method).toBe('POST');
+    expect((req.request.body as FormData).get('file')).toBeTruthy();
+    req.flush({ id: 101 });
+    service.deletePendingFile(101).subscribe();
+    expect(http.expectOne('/api/MapEntries/File/101').request.method).toBe('DELETE');
+  });
+
+  it('sends a files field as the full list of its file ids', () => {
+    service.updateEntry(40, { layerId: 5, siteId: 7, values: { '15': [101, 102] }, rowVersion: 'AQ==' }).subscribe();
+    const req = http.expectOne('/api/MapEntries/Update/40');
+    expect(req.request.body.values).toEqual({ '15': [101, 102] });
+    req.flush({});
+  });
+
+  it('checks a file against the field formats and size before uploading', () => {
+    const options: MapFileOptions = { maxFileMegabytes: 50, maxFilesPerField: 20, kinds: [
+      { key: 'images', label: 'صور', formats: 'JPG, PNG', extensions: ['.jpg', '.jpeg', '.png'] },
+      { key: 'cad', label: 'مخططات', formats: 'DWG, DXF', extensions: ['.dwg', '.dxf'] }
+    ] };
+    const files: MapLayerField = { id: 15, label: 'المخططات', type: 7, isRequired: false, options: [], sortOrder: 0, isHidden: false,
+      maxFiles: 3, maxFileMegabytes: 80, fileKinds: ['cad'] };
+    expect(fieldExtensions(files, options)).toEqual(['.dwg', '.dxf']);
+    expect(fieldMaxMegabytes(files, options)).toBe(50);   // سقف النظام يغلب إعداد الحقل
+    expect(fileProblem(new File(['x'], 'site.DWG'), files, options)).toBeNull();
+    expect(fileProblem(new File(['x'], 'photo.png'), files, options)).toContain('.dwg');
+    expect(fileProblem(new File([new Uint8Array(51 * 1024 * 1024)], 'big.dxf'), files, options)).toContain('50MB');
+    expect(fileProblem(new File([], 'empty.dwg'), files, options)).toContain('فارغ');
   });
 });
