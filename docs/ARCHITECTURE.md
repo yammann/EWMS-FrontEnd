@@ -75,6 +75,14 @@ crud = new CrudPage<Item, Body>({
 `apiErrorInterceptor` يحوّل كل خطأ لـ `/api/*` إلى `{ status, message }` (الرسالة عربية جاهزة للعرض). لا تفكّ `HttpErrorResponse` في الصفحات.
 `jwtInterceptor` يسجّل الخروج عند 401. ترتيبهما في `app.config.ts`: `[jwt, apiError]`.
 
+### الأمان (CSP، 2026-10-13)
+الخادم وNginx يرسلان `Content-Security-Policy` (`API/Middlewares/SecurityHeadersMiddleware.cs` في الباكاند): `script-src 'self'`
+(**لا سكربت مضمّن**: تهيئة المظهر في `public/theme-init.js`، والبناء الإنتاجي بـ `inlineCritical: false` لأن تضمين CSS الحرج
+يضيف `onload` مضمّناً)، الأنماط المضمّنة مسموحة، الصور `data:`/`blob:`، معاينة PDF من `blob:`، والاتصال بالأصل نفسه فقط
+(فلا `fetch` لروابط `data:` ولا أي مكتبة أو خط من CDN). بعد أي تغيير من هذا النوع: ابنِ واعرض النسخة الإنتاجية مع الترويسة
+وتأكد أن الكونسول بلا «Refused to …».
+سياسة كلمة المرور في `core/utils/password.ts` (مطابقة لـ `PasswordRules` في الباكاند): `passwordValidator` لحقول النماذج، و`passwordChecks` لقائمة الشروط.
+
 ### الأداء
 - كل صفحة `loadComponent`؛ التحميل المسبق في الخلفية للصفحات المسموحة فقط (`PermissionPreloadStrategy`، بعد 1.5 ث من التنقل؛ `data.noPreload` لصفحات الطباعة).
 - `@defer` للمكوّنات الثقيلة التي تُفتح عند الطلب (الدرج، نوافذ المهام، التقويم، لوحة التوقيع).

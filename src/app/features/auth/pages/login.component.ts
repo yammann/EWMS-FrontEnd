@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { Logo } from '@shared/ui/logo';
 import { Stamp } from '@shared/ui/stamp';
@@ -20,6 +20,10 @@ export class LoginComponent {
 
   loading = signal(false);
   errorMessage = signal<string | null>(null);
+  /** بعد تغيير كلمة المرور (كل الجلسات انتهت) */
+  successMessage = signal<string | null>(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('notice') === 'password-changed'
+      ? 'تم تغيير كلمة المرور. سجّل الدخول بكلمة المرور الجديدة.' : null);
   showPassword = signal(false);
   currentYear = new Date().getFullYear();
 
@@ -46,6 +50,7 @@ export class LoginComponent {
 
     this.loading.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     this.auth.login({
       Email: this.form.value.email!,

@@ -21,6 +21,7 @@ function kindOf(type: string): Kind {
   if (type === 'TaskOverdue') return { icon: 'alarm', tone: 'red' };
   if (type === 'TaskDueSoon') return { icon: 'hourglass', tone: 'orange' };
   if (type.startsWith('Task') || type === 'WorkTaskAssigned') return { icon: 'clipboard', tone: 'blue' };
+  if (type === 'LoginLocked') return { icon: 'lock', tone: 'red' };
   if (type === 'SparePartLowStock') return { icon: 'box', tone: 'orange' };
   if (type.startsWith('Maintenance')) return { icon: 'wrench', tone: 'orange' };
   return { icon: 'bell', tone: 'blue' };

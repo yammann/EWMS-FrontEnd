@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { formatPhone, isValidPhone, normalizePhone } from '@core/utils/phone';
+import { PASSWORD_HINT, passwordValidator } from '@core/utils/password';
 import { utcDate } from '@core/utils/format';
 import { forkJoin, map } from 'rxjs';
 import { orEmpty } from '@core/http/or-empty';
@@ -57,7 +58,7 @@ export class UsersPage {
     email: ['', [Validators.required, Validators.email]],
     personalIdNumber: ['', [Validators.maxLength(20), Validators.pattern(/^\s*[A-Za-z0-9-]*\s*$/)]],
     phoneNumber: ['', (c: AbstractControl<string | null>) => isValidPhone(c.value) ? null : { phone: true }],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', passwordValidator()],
     roleId: ['', Validators.required],
     departmentId: [''],
     branchId: ['']
@@ -69,7 +70,7 @@ export class UsersPage {
     email: ['', [Validators.required, Validators.email]],
     personalIdNumber: ['', [Validators.maxLength(20), Validators.pattern(/^\s*[A-Za-z0-9-]*\s*$/)]],
     phoneNumber: ['', (c: AbstractControl<string | null>) => isValidPhone(c.value) ? null : { phone: true }],
-    password: [''],
+    password: ['', passwordValidator(true)],
     roleId: ['', Validators.required],
     departmentId: [''],
     branchId: [''],
@@ -115,6 +116,9 @@ export class UsersPage {
 
   /** الموظف قيد التعديل — قيمه الحالية خيارٌ وحيد إن لم تُحمَّل القائمة الكاملة (فلا يظهر الحقل فارغاً ولا تضيع قيمته) */
   private editing = computed(() => { const d = this.crud.dialog(); return d?.mode === 'edit' ? d.item : null; });
+  /** الموظف المفتوح للتعديل مقفل مؤقتاً (محاولات دخول خاطئة) — تعيين كلمة مرور جديدة يفك القفل */
+  editingLockedUntil = computed(() => this.editing()?.lockedUntil ?? null);
+  passwordHint = PASSWORD_HINT;
   roleList = computed<Pick<Role, 'id' | 'name'>[]>(() => {
     const u = this.editing();
     return this.roles().length || !u ? this.roles() : [{ id: u.roleId, name: u.roleName }];

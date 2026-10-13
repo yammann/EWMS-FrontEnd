@@ -21,5 +21,11 @@
     }
   </section>
   @if (profileError()) { <div class="alert alert-error" role="alert">تعذر تحميل البيانات الوظيفية: {{ profileError() }} <button class="btn btn-ghost" (click)="loadProfile()">إعادة المحاولة</button></div> }
+  <section class="panel">
+    <div class="panel-heading" style="margin-bottom: 0"><div><span class="panel-kicker">الأمان</span><h2>كلمة المرور</h2>
+      <p>8 أحرف على الأقل، فيها حرف ورقم. بعد التغيير تُغلق كل جلساتك وتدخل بالكلمة الجديدة.</p></div>
+      <button type="button" class="btn" (click)="passwordOpen.set(true)"><app-icon name="lock" [size]="16" /> تغيير كلمة المرور</button></div>
+  </section>
   @if (canSign()) { <app-signature-panel /> }
+  @if (passwordOpen()) { <app-password-dialog [email]="profile()?.email || user()?.email" (closed)="passwordOpen.set(false)" /> }
 </div>

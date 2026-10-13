@@ -19,6 +19,12 @@
     </header>
 
     <div class="login-card">
+      @if (successMessage()) {
+        <div class="alert alert-success" role="status">
+          <div class="alert-icon"><app-icon name="checkmark" [weight]="2.4" /></div>
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
       @if (errorMessage()) {
         <div class="alert alert-error" role="alert">
           <div class="alert-icon">

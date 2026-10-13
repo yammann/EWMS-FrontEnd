@@ -98,6 +98,12 @@
                       معطّل
                     </span>
                   }
+                  @if (user.lockedUntil) {
+                    <span class="status-badge status-pending" style="margin-inline-start: 6px" [title]="'محاولات دخول خاطئة متكررة — الدخول موقوف حتى ' + (utc(user.lockedUntil) | date:'HH:mm')">
+                      <app-icon name="lock" [size]="11" [weight]="2.2" />
+                      مقفل مؤقتاً
+                    </span>
+                  }
                 </td>
                 <td class="nowrap">{{ utc(user.createdAt) | date:'yyyy/MM/dd' }}</td>
                 <td>
@@ -192,10 +198,10 @@
                     <div class="input-wrapper">
                       <app-icon name="lock" />
                       <input id="create-password" type="password" formControlName="password"
-                             placeholder="6 أحرف على الأقل" autocomplete="new-password" />
+                             [placeholder]="passwordHint" autocomplete="new-password" />
                     </div>
-                    @if (createForm.controls.password.touched && createForm.controls.password.invalid) {
-                      <small class="form-error">كلمة المرور مطلوبة (6 أحرف على الأقل).</small>
+                    @if (createForm.controls.password.touched && createForm.controls.password.errors?.['password']; as problem) {
+                      <small class="form-error">{{ problem }}.</small>
                     }
                   </div>
 
@@ -306,7 +312,14 @@
                     <label class="form-label" for="edit-password">كلمة المرور الجديدة</label>
                     <input id="edit-password" type="password" formControlName="password"
                            placeholder="اتركها فارغة لعدم التغيير" autocomplete="new-password" />
-                    <small class="form-hint">اترك الحقل فارغاً إن لم ترغب بتغيير كلمة المرور.</small>
+                    @if (editForm.controls.password.errors?.['password']; as problem) {
+                      <small class="form-error">{{ problem }}.</small>
+                    } @else {
+                      <small class="form-hint">اترك الحقل فارغاً إن لم ترغب بتغيير كلمة المرور ({{ passwordHint }}).</small>
+                    }
+                    @if (editingLockedUntil(); as until) {
+                      <small class="form-hint"><app-icon name="lock" [size]="11" /> الحساب مقفل مؤقتاً بسبب محاولات دخول خاطئة حتى {{ utc(until) | date:'HH:mm' }} — تعيين كلمة مرور جديدة يفك القفل.</small>
+                    }
                   </div>
 
                   <div class="form-field">
