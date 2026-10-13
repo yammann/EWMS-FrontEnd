@@ -19,8 +19,12 @@ export function webglAvailable(): boolean {
 
 const LNG0 = 38.6, LAT0 = 34.85, SCALE = 9, K = Math.cos(LAT0 * Math.PI / 180);
 const project = (lng: number, lat: number): [number, number] => [(lng - LNG0) * K * SCALE, (lat - LAT0) * SCALE];
-/** محافظات صغيرة داخل جاراتها (دمشق، القنيطرة): أعلى قليلاً حتى تبرز ويسهل الوصول إليها */
-const SMALL = new Set(['SY01', 'SY14']);
+/**
+ * سماكة المحافظة: واحدة للجميع بلا مواقع، وتزيد بلطف مع عدد المواقع (لوغاريتمياً، لا نسبةً لأكبر محافظة)
+ * — موقعان يرفعانها قليلاً فقط، والفرق يبقى واضحاً بين محافظة فيها مواقع كثيرة وأخرى فيها القليل (قرار المستخدم 2026-10-13).
+ */
+const BASE_DEPTH = 1.4;
+const depthFor = (sites: number) => BASE_DEPTH + Math.min(6, Math.log2(1 + sites) * .9);
 /** عرض المحافظة في عرضها المنفصل، وارتفاعها الأقصى فيه (بوحدات المشهد) */
 const FIT = 40, ISO_HEIGHT = 4;
 const HOME = { target: [-2, 0, 2] as const, camera: [6, 52, 50] as const };
@@ -30,8 +34,8 @@ interface Pin { point: MapPoint3d; piece: Piece; group: import('three').Group; h
 
 /**
  * خريطة سوريا ثلاثية الأبعاد (Three.js، تُحمَّل عند الطلب ومضمّنة في الحزمة — بلا إنترنت؛ قرار المستخدم 2026-10-13):
- * - كل محافظة قطعة مجسّمة يرتفع سطحها حسب عدد مواقعها (badgeFor)، ولونها من fillFor (متغيرات الثيم).
- * - المواقع دبابيس مجسّمة بلون طبقتها الأولى؛ الضغط على دبوس = pointSelect.
+ * - كل محافظة قطعة مجسّمة تزيد سماكتها بلطف مع عدد مواقعها (badgeFor)، ولونها من fillFor (متغيرات الثيم).
+ * - المواقع دبابيس مجسّمة بلون طبقتها الأولى، في عرض المحافظة فقط؛ الضغط على دبوس = pointSelect.
  * - الضغط على محافظة (أو اسمها، أو من قائمة «انتقال إلى محافظة») = governorateSelect؛ وحين يضبط الأب focus
  *   تختفي الباقية وتنتقل المحافظة إلى الوسط مكبّرة كخريطة منفصلة. الزر الأيمن أو Esc = back.
  * - السحب للتدوير والعجلة للتكبير. الرسم عند الحاجة فقط (أثناء الحركة والتفاعل) ثم يتوقف.
@@ -45,7 +49,7 @@ interface Pin { point: MapPoint3d; piece: Piece; group: import('three').Group; h
 })
 export class Syria3dMap {
   focus = input<string | null>(null);
-  /** كل المواقع الظاهرة (برموز محافظاتها) — في عرض المحافظة تظهر دبابيسها فقط */
+  /** كل المواقع الظاهرة (برموز محافظاتها) — تظهر دبابيس المحافظة المعروضة فقط */
   points = input<MapPoint3d[]>([]);
   height = input('min(66vh, 600px)');
   fillFor = input<(code: string) => string>(() => '#e3e8ef');
@@ -252,10 +256,8 @@ class SceneState {
     this.dark = document.documentElement.dataset['mode'] === 'dark'
       || (!document.documentElement.dataset['mode'] && matchMedia('(prefers-color-scheme: dark)').matches);
     this.colors.clear();
-    const max = Math.max(1, ...this.pieces.map(p => badgeFor(p.code)));
     for (const p of this.pieces) {
-      const n = badgeFor(p.code);
-      p.depth = 1.4 + (n / max) * 5 + (SMALL.has(p.code) ? 1.5 : 0);
+      p.depth = depthFor(badgeFor(p.code));
       const top = this.color(fillFor(p.code));
       const [face, side] = p.mesh.material as import('three').MeshStandardMaterial[];
       face.color.copy(top);
@@ -461,7 +463,8 @@ class SceneState {
     }
 
     for (const pin of this.pins) {
-      const show = !this.focus || pin.piece === this.focus;
+      // الدبابيس في عرض المحافظة فقط (خريطة سوريا بلا دبابيس)
+      const show = pin.piece === this.focus;
       pin.scale += ((show ? 1 : 0) - pin.scale) * a(.18);
       pin.group.visible = pin.scale > .02;
       const s = pin.scale * (pin === this.hovered ? 1.25 : 1);
