@@ -1,0 +1,24 @@
+<div #stage class="stage" [style.height]="height()">
+  <div #labels class="labels" aria-hidden="false"></div>
+
+  @if (!loading()) {
+    <div class="tools">
+      <select #jumpTo (change)="jump(jumpTo.value); jumpTo.value = ''" aria-label="انتقال إلى محافظة">
+        <option value="">انتقال إلى محافظة…</option>
+        @for (g of names(); track g.code) { <option [value]="g.code">{{ g.name }}</option> }
+      </select>
+      <button type="button" class="tool-btn" (click)="reset()" title="إعادة ضبط الزاوية" aria-label="إعادة ضبط الزاوية">
+        <app-icon name="refresh" [size]="17" />
+      </button>
+    </div>
+  } @else {
+    <div class="loading" role="status">جارٍ تحميل الخريطة…</div>
+  }
+
+  @if (tip(); as t) {
+    <div class="tip" [style.left.px]="t.x" [style.top.px]="t.y" role="tooltip">
+      <strong>{{ t.title }}</strong>@if (t.sub) { <span>{{ t.sub }}</span> }
+    </div>
+  }
+  <small class="attribution">{{ attribution }}</small>
+</div>

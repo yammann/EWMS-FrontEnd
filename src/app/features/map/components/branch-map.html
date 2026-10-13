@@ -31,8 +31,13 @@
   @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
 
   <div class="map-area">
-    <app-syria-svg-map [framed]="false" height="max(360px, calc(100vh - 176px))" [focus]="focus()" [points]="points()" [fillFor]="fillFor()" [subFor]="subFor()" [badgeFor]="badgeFor()"
-                       (governorateSelect)="openGovernorate($event)" (back)="back()" (pointSelect)="openSite($event)" (ready)="features.set($event)" />
+    @if (use3d()) {
+      <app-syria-3d-map height="max(360px, calc(100vh - 176px))" [focus]="focus()" [points]="allPoints()" [fillFor]="fillFor()" [subFor]="subFor()" [badgeFor]="badgeFor()"
+                        (governorateSelect)="openGovernorate($event)" (back)="back()" (pointSelect)="openSite($event)" (ready)="features.set($event)" (failed)="use3d.set(false)" />
+    } @else {
+      <app-syria-svg-map [framed]="false" height="max(360px, calc(100vh - 176px))" [focus]="focus()" [points]="points()" [fillFor]="fillFor()" [subFor]="subFor()" [badgeFor]="badgeFor()"  
+                         (governorateSelect)="openGovernorate($event)" (back)="back()" (pointSelect)="openSite($event)" (ready)="features.set($event)" />
+    }
     @if (loading()) { <div class="overlay" role="status">جارٍ تحميل بيانات الفرع…</div> }
     @else if (data() && !hasData()) { <div class="overlay">لا توجد بيانات على خريطة فرع {{ data()!.branchName }} بعد</div> }
     @if (!focus() && legend().length) {

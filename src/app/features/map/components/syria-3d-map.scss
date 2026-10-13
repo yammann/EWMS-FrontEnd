@@ -1,0 +1,47 @@
+/* الخريطة ثلاثية الأبعاد: اللوحة (canvas) + الأسماء والتلميح فوقها كعناصر HTML بخط الواجهة وألوان الثيم */
+:host { display: block; }
+.stage { position: relative; overflow: hidden; user-select: none; }
+.stage > canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: grab; outline: none; }
+.stage > canvas:active { cursor: grabbing; }
+
+.labels { position: absolute; inset: 0; pointer-events: none; }
+.labels ::ng-deep .gov-label {
+  position: absolute; top: 0; left: 0;
+  min-height: 0; padding: 3px 9px; border-radius: 10px;
+  background: transparent; color: var(--ink-900);
+  font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap;
+  text-shadow: 0 0 4px var(--page-bg), 0 0 9px var(--page-bg);
+  pointer-events: auto; cursor: pointer;
+  transition: opacity .25s var(--ease), background-color .15s var(--ease);
+}
+.labels ::ng-deep .gov-label:hover, .labels ::ng-deep .gov-label:focus-visible {
+  background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur);
+  color: var(--brand-700); filter: none; transform-origin: center;
+}
+.labels ::ng-deep .gov-label:active { filter: none; }
+.labels ::ng-deep .pin-label {
+  position: absolute; top: 0; left: 0;
+  color: var(--ink-900); font-size: 12px; font-weight: 700; white-space: nowrap;
+  text-shadow: 0 0 4px var(--page-bg), 0 0 9px var(--page-bg);
+  transition: opacity .2s var(--ease);
+}
+
+.tools { position: absolute; top: 12px; inset-inline-end: 14px; z-index: 4; display: flex; gap: 6px; }
+.tools select { height: 34px; min-height: 34px; padding-block: 0; font-size: 13px; background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur); }
+.tool-btn { width: 34px; height: 34px; min-height: 34px; padding: 0; border-radius: var(--radius-sm); background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur); color: var(--ink-700); }
+.tool-btn:hover:not(:disabled) { color: var(--brand-700); filter: none; }
+
+.loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-400); font-size: 13px; }
+
+.tip {
+  position: absolute; z-index: 5; pointer-events: none;
+  transform: translate(-50%, calc(-100% - 16px));
+  display: grid; gap: 2px; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur);
+  color: var(--ink-900); font-size: 12px; white-space: nowrap; box-shadow: var(--shadow-lg);
+}
+.tip strong { font-size: 14px; }
+.tip span { color: var(--ink-500); }
+
+.attribution { position: absolute; bottom: 6px; inset-inline-start: 10px; font-size: 10px; color: var(--ink-400); }
