@@ -1,6 +1,5 @@
 import { Component, DestroyRef, ElementRef, NgZone, afterNextRender, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { GOVERNORATES_ATTRIBUTION, GovernorateFeature, SyriaGeoService } from '@core/utils/geo';
-import { Icon } from '@shared/ui/icon';
 import { STAMP_LANDMARKS, Stamp } from '@shared/ui/stamp';
 import { MapPoint } from './syria-svg-map';
 
@@ -46,7 +45,7 @@ interface Pin { point: MapPoint3d; piece: Piece; group: import('three').Group; h
  * - بلا WebGL أو عند فشل التحميل يطلق failed فيعرض الأب الخريطة المسطحة.
  */
 @Component({
-  selector: 'app-syria-3d-map', standalone: true, imports: [Icon, Stamp],
+  selector: 'app-syria-3d-map', standalone: true, imports: [Stamp],
   templateUrl: './syria-3d-map.html',
   styleUrl: './syria-3d-map.scss',
   host: { '(document:keydown.escape)': 'escape()' }
@@ -72,9 +71,10 @@ export class Syria3dMap {
   protected tip = signal<Tip | null>(null);
   /** معلم المحافظة المعروضة لطابعها المؤطّر في زاوية الخريطة */
   protected landmark = (code: string) => STAMP_LANDMARKS[code] ?? null;
-  protected loading = signal(true);
+  /** حتى يجهز المشهد (الأب يُظهر أزرار التدوير وإعادة الضبط بعده) */
+  readonly loading = signal(true);
   /** تدوير تلقائي هادئ حول الخريطة (زر تشغيل/إيقاف) */
-  protected spinning = signal(false);
+  readonly spinning = signal(false);
 
   private host = viewChild.required<ElementRef<HTMLElement>>('stage');
   private labelsEl = viewChild.required<ElementRef<HTMLElement>>('labels');
@@ -127,8 +127,9 @@ export class Syria3dMap {
   private refresh() { this.scene?.update(this.fillFor(), this.badgeFor(), this.points()); }
   private applyFocus(code: string | null) { this.scene?.applyFocus(code); }
 
-  protected reset() { this.scene?.resetCamera(); }
-  protected toggleSpin() { this.spinning.update(v => !v); this.scene?.setAutoRotate(this.spinning()); }
+  /** أوامر أزرار رأس الخريطة (في branch-map) */
+  reset() { this.scene?.resetCamera(); }
+  toggleSpin() { this.spinning.update(v => !v); this.scene?.setAutoRotate(this.spinning()); }
   protected escape() { if (this.focus()) this.back.emit(); }
 }
 

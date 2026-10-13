@@ -62,6 +62,15 @@
 
 /* مفتاح الطبقات (1.2.0): زر لكل طبقة يظهرها أو يخفيها */
 .layer-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+/* زرّا الخريطة ثلاثية الأبعاد: مجموعة واحدة في بداية السطر قبل مفاتيح الطبقات */
+.map-tools { display: inline-flex; gap: 2px; padding: 3px; margin-inline-end: 6px; border-radius: var(--radius-full); background: var(--fill); }
+.map-tool {
+  display: inline-flex; align-items: center; gap: 5px; min-height: 26px; padding: 2px 11px;
+  border-radius: var(--radius-full); background: transparent; color: var(--ink-700); font-size: 12px; font-weight: 700;
+  &:hover:not(:disabled) { background: var(--surface); color: var(--brand-700); filter: none; }
+  &:active:not(:disabled) { transform: scale(.97); filter: none; }
+  &.on, &.on:hover:not(:disabled) { background: var(--brand-600); color: var(--on-brand); }
+}
 .layer-warn { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 3px 10px; border-radius: var(--radius-full); background: var(--warning-50); color: var(--warning-700); font-size: 12px; font-weight: 700; text-decoration: none; }
 .layer-key {
   display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 10px; cursor: pointer;

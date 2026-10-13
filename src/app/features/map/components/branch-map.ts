@@ -88,6 +88,9 @@ export class BranchMapComponent {
   private destroyRef = inject(DestroyRef);
   private pinned = viewChild<ElementRef<HTMLElement>>('pinned');
   private sheet = viewChild<ElementRef<HTMLElement>>('sheet');
+  private map3d = viewChild(Syria3dMap);
+  /** الخريطة ثلاثية الأبعاد بعد جاهزيتها — لزرّي التدوير وإعادة الضبط في رأس الخريطة */
+  mapTools = computed(() => { const m = this.map3d(); return m && !m.loading() ? m : null; });
 
   branches = signal<MapBranchOption[]>([]);
   branchId = signal(0);

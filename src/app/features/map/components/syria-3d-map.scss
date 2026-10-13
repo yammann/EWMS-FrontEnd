@@ -26,11 +26,6 @@
   transition: opacity .2s var(--ease);
 }
 
-.tools { position: absolute; top: 12px; inset-inline-end: 14px; z-index: 4; display: flex; gap: 6px; }
-.tool-btn { width: 34px; height: 34px; min-height: 34px; padding: 0; border-radius: var(--radius-sm); background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur); color: var(--ink-700); }
-.tool-btn:hover:not(:disabled) { color: var(--brand-700); filter: none; }
-.tool-btn.on { background: var(--brand-600); color: var(--on-brand); }
-.tool-btn.on:hover:not(:disabled) { color: var(--on-brand); }
 
 .loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-400); font-size: 13px; }
 

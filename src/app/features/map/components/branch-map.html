@@ -4,9 +4,19 @@
   <header class="map-head">
     <div class="title">
       <h2 id="branch-map-title">{{ focus() ? 'محافظة ' + focusName() : 'خريطة الفروع' }} — {{ data()?.branchName || '…' }}</h2>
-      @if (hasData()) {
+      @if (hasData() || mapTools()) {
         <div class="layer-keys" role="group" aria-label="طبقات الخريطة — انقر لإظهار أو إخفاء">
-          @for (l of layers(); track l.key) {
+          <!-- أزرار الخريطة ثلاثية الأبعاد: ثابتة في بداية السطر مهما زادت الطبقات -->
+          @if (mapTools(); as m) {
+            <div class="map-tools" role="group" aria-label="التحكم بالخريطة">
+              <button type="button" class="map-tool" [class.on]="m.spinning()" [attr.aria-pressed]="m.spinning()" (click)="m.toggleSpin()">
+                <app-icon name="repeat" [size]="14" /> {{ m.spinning() ? 'إيقاف التدوير' : 'تدوير تلقائي' }}
+              </button>
+              <button type="button" class="map-tool" (click)="m.reset()"><app-icon name="target" [size]="14" /> إعادة الضبط</button>
+            </div>
+          }
+          @if (hasData()) {
+            @for (l of layers(); track l.key) {
             <button type="button" class="layer-key" [class.off]="hidden().has(l.key)" [attr.aria-pressed]="!hidden().has(l.key)"
                     [title]="(hidden().has(l.key) ? 'إظهار الطبقة' : 'إخفاء الطبقة') + ' — ' + l.sites.length + ' موقع'" (click)="toggleLayer(l.key)">
               <i [style.background]="layerColor(l)" aria-hidden="true"></i>{{ l.title }} <b>{{ l.sites.length }}</b>
@@ -15,6 +25,7 @@
           <!-- يظهر فقط حين توجد مواقع لا تُرسم: تنبيه قابل للإجراء -->
           @if (withoutCoordinates()) {
             <a class="layer-warn" routerLink="/devices/sites" title="لا تظهر على الخريطة — أضف إحداثياتها من صفحة المواقع"><app-icon name="warning" [size]="13" /> {{ withoutCoordinates() }} موقع بلا إحداثيات</a>
+          }
           }
         </div>
       }

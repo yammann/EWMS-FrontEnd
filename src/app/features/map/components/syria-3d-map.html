@@ -1,19 +1,7 @@
 <div #stage class="stage" [style.height]="height()">
   <div #labels class="labels" aria-hidden="false"></div>
 
-  @if (!loading()) {
-    <div class="tools">
-      <button type="button" class="tool-btn" [class.on]="spinning()" (click)="toggleSpin()" [attr.aria-pressed]="spinning()"
-              [title]="spinning() ? 'إيقاف التدوير التلقائي' : 'تدوير تلقائي'" [attr.aria-label]="spinning() ? 'إيقاف التدوير التلقائي' : 'تدوير تلقائي'">
-        <app-icon name="repeat" [size]="17" />
-      </button>
-      <button type="button" class="tool-btn" (click)="reset()" title="إعادة ضبط الزاوية" aria-label="إعادة ضبط الزاوية">
-        <app-icon name="target" [size]="17" />
-      </button>
-    </div>
-  } @else {
-    <div class="loading" role="status">جارٍ تحميل الخريطة…</div>
-  }
+  @if (loading()) { <div class="loading" role="status">جارٍ تحميل الخريطة…</div> }
 
   <!-- طابع المحافظة المعروضة (من الهوية البصرية) — كطابع على رسالة -->
   @if (focus(); as code) {
