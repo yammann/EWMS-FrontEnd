@@ -1,4 +1,5 @@
 <div #stage class="stage" [style.height]="height()">
+  <app-map-backdrop [focused]="!!focus()" />
   <div #labels class="labels" aria-hidden="false"></div>
 
   @if (loading()) { <div class="loading" role="status">جارٍ تحميل الخريطة…</div> }

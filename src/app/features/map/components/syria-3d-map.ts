@@ -1,6 +1,7 @@
 import { Component, DestroyRef, ElementRef, NgZone, afterNextRender, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { GOVERNORATES_ATTRIBUTION, GovernorateFeature, SyriaGeoService } from '@core/utils/geo';
 import { STAMP_LANDMARKS, Stamp } from '@shared/ui/stamp';
+import { MapBackdrop } from './map-backdrop';
 import { MapPoint } from './syria-svg-map';
 
 type Three = typeof import('three');
@@ -45,7 +46,7 @@ interface Pin { point: MapPoint3d; piece: Piece; group: import('three').Group; h
  * - بلا WebGL أو عند فشل التحميل يطلق failed فيعرض الأب الخريطة المسطحة.
  */
 @Component({
-  selector: 'app-syria-3d-map', standalone: true, imports: [Stamp],
+  selector: 'app-syria-3d-map', standalone: true, imports: [Stamp, MapBackdrop],
   templateUrl: './syria-3d-map.html',
   styleUrl: './syria-3d-map.scss',
   host: { '(document:keydown.escape)': 'escape()' }
