@@ -3,12 +3,12 @@
 
   @if (!loading()) {
     <div class="tools">
-      <select #jumpTo (change)="jump(jumpTo.value); jumpTo.value = ''" aria-label="انتقال إلى محافظة">
-        <option value="">انتقال إلى محافظة…</option>
-        @for (g of names(); track g.code) { <option [value]="g.code">{{ g.name }}</option> }
-      </select>
+      <button type="button" class="tool-btn" [class.on]="spinning()" (click)="toggleSpin()" [attr.aria-pressed]="spinning()"
+              [title]="spinning() ? 'إيقاف التدوير التلقائي' : 'تدوير تلقائي'" [attr.aria-label]="spinning() ? 'إيقاف التدوير التلقائي' : 'تدوير تلقائي'">
+        <app-icon name="repeat" [size]="17" />
+      </button>
       <button type="button" class="tool-btn" (click)="reset()" title="إعادة ضبط الزاوية" aria-label="إعادة ضبط الزاوية">
-        <app-icon name="refresh" [size]="17" />
+        <app-icon name="target" [size]="17" />
       </button>
     </div>
   } @else {

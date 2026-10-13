@@ -36,7 +36,7 @@ interface Pin { point: MapPoint3d; piece: Piece; group: import('three').Group; h
  * خريطة سوريا ثلاثية الأبعاد (Three.js، تُحمَّل عند الطلب ومضمّنة في الحزمة — بلا إنترنت؛ قرار المستخدم 2026-10-13):
  * - كل محافظة قطعة مجسّمة تزيد سماكتها بلطف مع عدد مواقعها (badgeFor)، ولونها من fillFor (متغيرات الثيم).
  * - المواقع دبابيس مجسّمة بلون طبقتها الأولى، في عرض المحافظة فقط؛ الضغط على دبوس = pointSelect.
- * - الضغط على محافظة (أو اسمها، أو من قائمة «انتقال إلى محافظة») = governorateSelect؛ وحين يضبط الأب focus
+ * - الضغط على محافظة (أو اسمها) = governorateSelect؛ وحين يضبط الأب focus
  *   تختفي الباقية وتنتقل المحافظة إلى الوسط مكبّرة كخريطة منفصلة. الزر الأيمن أو Esc = back.
  * - السحب للتدوير والعجلة للتكبير. الرسم عند الحاجة فقط (أثناء الحركة والتفاعل) ثم يتوقف.
  * - بلا WebGL أو عند فشل التحميل يطلق failed فيعرض الأب الخريطة المسطحة.
@@ -64,9 +64,10 @@ export class Syria3dMap {
   failed = output<void>();
 
   attribution = GOVERNORATES_ATTRIBUTION;
-  protected names = signal<{ code: string; name: string }[]>([]);
   protected tip = signal<{ x: number; y: number; title: string; sub: string } | null>(null);
   protected loading = signal(true);
+  /** تدوير تلقائي هادئ حول الخريطة (زر تشغيل/إيقاف) */
+  protected spinning = signal(false);
 
   private host = viewChild.required<ElementRef<HTMLElement>>('stage');
   private labelsEl = viewChild.required<ElementRef<HTMLElement>>('labels');
@@ -106,7 +107,6 @@ export class Syria3dMap {
       this.refresh();
       this.scene.applyFocus(this.focus(), true);
       this.zone.run(() => {
-        this.names.set(data.map(f => ({ code: f.properties.code, name: f.properties.nameAr })).sort((a, b) => a.name.localeCompare(b.name, 'ar')));
         this.loading.set(false);
         this.ready.emit(data);
       });
@@ -120,8 +120,8 @@ export class Syria3dMap {
   private refresh() { this.scene?.update(this.fillFor(), this.badgeFor(), this.points()); }
   private applyFocus(code: string | null) { this.scene?.applyFocus(code); }
 
-  protected jump(code: string) { if (code) this.governorateSelect.emit(code); }
   protected reset() { this.scene?.resetCamera(); }
+  protected toggleSpin() { this.spinning.update(v => !v); this.scene?.setAutoRotate(this.spinning()); }
   protected escape() { if (this.focus()) this.back.emit(); }
 }
 
@@ -337,6 +337,13 @@ class SceneState {
 
   resetCamera() { this.applyFocus(this.focus?.code ?? null); }
 
+  /** التدوير التلقائي يحتاج رسماً مستمراً ما دام يعمل */
+  setAutoRotate(on: boolean) {
+    this.controls.autoRotate = on;
+    this.controls.autoRotateSpeed = .6;
+    this.wake();
+  }
+
   private flyTo(target: import('three').Vector3, pos: import('three').Vector3, instant: boolean) {
     if (instant || this.reduced) {
       this.controls.target.copy(target); this.camera.position.copy(pos);
@@ -476,7 +483,7 @@ class SceneState {
     this.renderer.render(this.world, this.camera);
     this.placeLabels(ms, mz);
 
-    if (moving) this.wake(100);
+    if (moving || this.controls.autoRotate) this.wake(100);
     if (now > this.activeUntil) { this.running = false; this.renderer.setAnimationLoop(null); }
   }
 
