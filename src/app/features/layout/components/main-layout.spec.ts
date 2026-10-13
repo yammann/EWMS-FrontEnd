@@ -34,7 +34,7 @@ describe('MainLayout — القائمة على الشاشات الصغيرة', (
     expect(el.querySelector('.shell')!.classList).toContain('menu-open');
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     // عناوين الأقسام تظهر كعناوين (لا أزرار طي) على الشاشة الصغيرة
-    expect(el.querySelector('.nav-heading')?.textContent).toContain('الإجازات');
+    expect(el.querySelector('.nav-heading')?.textContent).toContain('المهام');
     expect(el.querySelector('.nav-section')).toBeNull();
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await f.whenStable();
@@ -43,5 +43,23 @@ describe('MainLayout — القائمة على الشاشات الصغيرة', (
     layout.menuOpen.set(true); await f.whenStable();
     await TestBed.inject(Router).navigateByUrl('/todo-lists'); await f.whenStable();
     expect(layout.menuOpen()).toBe(false);
+  });
+
+  it('collapsed: one section open at a time, remembered', async () => {
+    const f = TestBed.createComponent(MainLayout);
+    const layout = f.componentInstance;
+    layout.collapsed.set(true);
+    await f.whenStable();
+    const el: HTMLElement = f.nativeElement;
+    const buttons = () => [...el.querySelectorAll<HTMLButtonElement>('.rail-section')];
+    expect(buttons().map(b => b.getAttribute('aria-label'))).toEqual(['المهام', 'الإجازات']);
+    expect(el.querySelectorAll('.rail-tray.closed').length).toBe(2);
+
+    buttons()[0].click(); await f.whenStable();
+    expect(buttons()[0].getAttribute('aria-expanded')).toBe('true');
+    buttons()[1].click(); await f.whenStable();
+    expect(buttons()[0].getAttribute('aria-expanded')).toBe('false');
+    expect(buttons()[1].getAttribute('aria-expanded')).toBe('true');
+    expect(layout.railOpen()).toBe('vacations');
   });
 });
