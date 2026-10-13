@@ -1,0 +1,45 @@
+<app-modal heading="تقديم طلب إجازة" kicker="طلب جديد" size="lg" [busy]="saving()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="modal-body form-stack">
+      <p class="note">تُحسب المدة بأيام العمل (بلا الجمعة والعطل الرسمية). يُحدَّد الدفع عند الاعتماد النهائي: يومان مدفوعان في الشهر لكل الأنواع المدفوعة معاً.</p>
+      <app-alert [message]="error()" />
+      @if (typesError()) { <p class="alert alert-error" role="alert">{{ typesError() }} <button type="button" class="btn btn-ghost btn-sm" (click)="loadTypes()">إعادة تحميل الأنواع</button></p> }
+      @if (!typesLoading() && !typesError() && !types().length) { <p class="alert alert-warning">لا توجد أنواع إجازات متاحة. تواصل مع المسؤول لإضافتها.</p> }
+
+      <label class="form-field"><span class="form-label">نوع الإجازة</span>
+        <select formControlName="vacationTypeId">
+          <option [ngValue]="0">{{ typesLoading() ? 'جارٍ التحميل…' : 'اختر النوع' }}</option>
+          @for (type of types(); track type.id) { <option [ngValue]="type.id">{{ type.name }} — {{ type.paymentTypeAr }}</option> }
+        </select>
+      </label>
+      <div class="two">
+        <label class="form-field"><span class="form-label">من تاريخ</span><input type="date" formControlName="startVac" [min]="today"></label>
+        <label class="form-field"><span class="form-label">إلى تاريخ</span><input type="date" formControlName="endVac" [min]="form.controls.startVac.value || today"></label>
+      </div>
+      @if (form.controls.startVac.hasError('past')) { <p class="form-error">لا يمكن تقديم إجازة بتاريخ سابق، أقرب تاريخ للبداية هو اليوم.</p> }
+      @if (form.hasError('dateRange')) { <p class="form-error">تاريخ النهاية يجب أن يساوي تاريخ البداية أو يليه.</p> }
+      @if (preview(); as p) {
+        <p class="preview" [class.empty]="!p.workingDays" role="status">{{ p.workingDays ? previewText(p) : 'المدة المختارة كلها أيام عطلة (جمعة أو عطل رسمية)، لا حاجة لطلب إجازة.' }}</p>
+      }
+
+      <label class="form-field"><span class="form-label">سبب الإجازة <small class="muted">(اختياري)</small></span>
+        <textarea rows="3" maxlength="500" formControlName="vacReason" placeholder="اكتب سبب الإجازة"></textarea>
+      </label>
+
+      <div class="form-field">
+        <span class="form-label">المرفقات <small class="muted">(اختياري — PDF أو صورة JPG/PNG، حتى {{ attachRules.maxFiles }} ملفات، 5MB لكل ملف)</small></span>
+        <div class="files">
+          <label class="btn btn-ghost btn-sm" [class.disabled]="files().length >= attachRules.maxFiles"><app-icon name="paperclip" [size]="15" /> إرفاق ملف
+            <input #t1 type="file" multiple hidden [accept]="attachRules.accept" (change)="addFiles(t1)" [disabled]="files().length >= attachRules.maxFiles || saving()">
+          </label>
+          @for (f of files(); track $index) {
+            <span class="file-chip">{{ f.name }} · {{ size(f.size) }}
+              <button type="button" class="btn btn-ghost" (click)="removeFile($index)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name"><app-icon name="xmark" [size]="13" [weight]="2.2" /></button></span>
+          }
+        </div>
+        @if (filesError()) { <p class="form-error">{{ filesError() }}</p> }
+      </div>
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="blocked()" label="تقديم الطلب" busyLabel="جارٍ تقديم الطلب…" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>

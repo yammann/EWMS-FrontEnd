@@ -94,6 +94,8 @@ export const MANAGE_MAINTENANCE_LOOKUPS: readonly AppPermissionName[] = [AppPerm
 
 /** أي صلاحية موافقة على الإجازات (الأولى أو النهائية) */
 export const APPROVE_VACATIONS: readonly AppPermissionName[] = [AppPermission.ApproveVacationFirst, AppPermission.ApproveVacationFinal];
+/** صفحة «إجازاتي»: سجل طلباتي (ViewVacations) أو تقديم طلب (CreateVacation) */
+export const MY_VACATIONS_ACCESS: readonly AppPermissionName[] = [AppPermission.ViewVacations, AppPermission.CreateVacation];
 /** إحصائيات الإجازات: لمن يرى إجازات قسمه أو فرعه */
 export const VACATION_STATS: readonly AppPermissionName[] = [AppPermission.ViewDepartmentVacations, AppPermission.ViewBranchVacations];
 /** يتابع مهام وحدة (يُظهر تبويب "كل مهام نطاقي") */

@@ -57,6 +57,9 @@ export const VACATION_ATTACHMENTS = {
 
 export interface VacationSegment { startDate: string; endDate: string; isPaid: boolean; days: number; }
 
+/** الحد الشهري للأيام المدفوعة لكل الأنواع المدفوعة معاً (VacationRules.MaxPaidVacationDaysPerMonth في الخادم) */
+export const VACATION_PAID_DAYS_PER_MONTH = 2;
+
 /** عطلة رسمية: بند واحد بفترة من–إلى (days أيامها شاملة، fridays منها أيام جمعة أصلاً) */
 export interface PublicHoliday { id: number; startDate: string; endDate: string; name: string; days: number; fridays: number; }
 

@@ -14,7 +14,7 @@ import { AppearanceMenu } from './appearance-menu';
 import { BackButton } from '@shared/ui/back-button';
 import { hasOpenModal } from '@shared/ui/modal';
 import { roleLabel } from '@core/utils/roles';
-import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN, REPORT_ACCESS } from '@core/constants/access';
+import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN, REPORT_ACCESS, MY_VACATIONS_ACCESS } from '@core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
 /** عرض الشاشة الذي تتحول عنده القائمة إلى أزرار تُفتح بزر «القائمة» (مطابق لـ @media في main-layout-compact.scss) */
@@ -74,6 +74,7 @@ export class MainLayout {
         can(AppPermission.ViewTaskStats) && { path: '/task-board/stats', label: 'إحصائيات المهام', icon: 'chart' }
       ].filter(Boolean) as NavItem[] },
       { id: 'vacations', title: 'الإجازات', items: [
+        canAny(MY_VACATIONS_ACCESS) && { path: '/vacations/my', label: 'إجازاتي', icon: 'beach' },
         this.auth.canReviewVacations() && { path: '/vacations/review', label: 'مراجعة الإجازات', icon: 'check' },
         canAny(VACATION_STATS) && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
         canAny(MANAGE_VACATION_TYPES) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' },
