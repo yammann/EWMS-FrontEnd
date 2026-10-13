@@ -156,7 +156,7 @@ nav a.active app-icon { color: var(--on-brand); }
   nav a .label { display: none; }
   nav a app-icon { width: 21px; height: 21px; }
 
-  nav a::after {
+  nav a::after, .rail-section::after {
     content: attr(data-label);
     position: absolute;
     inset-inline-start: calc(100% + 12px);
@@ -176,7 +176,8 @@ nav a.active app-icon { color: var(--on-brand); }
     transform: translate(-4px, -50%);
     transition: opacity .15s var(--ease), transform .2s var(--ease-spring);
   }
-  nav a:hover::after, nav a:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+  nav a:hover::after, nav a:focus-visible::after,
+  .rail-section:hover::after, .rail-section:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
 }
 
 .sidebar-foot {

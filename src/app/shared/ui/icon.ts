@@ -29,6 +29,13 @@ const ICONS = {
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   sidebar: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/><path d="M17.5 8h1M17.5 11h1"/>',
+  // أيقونات أقسام السايدبار المطوي (2026-10-13): لكل قسم أيقونته، تحتها سهم الانسدال
+  suitcase: '<rect x="5.5" y="7" width="13" height="12" rx="2.2"/><path d="M9.5 7V4.5h5V7M10 10.5v5M14 10.5v5M8.5 19v1.5M15.5 19v1.5"/>',
+  toolbox: '<rect x="3" y="8" width="18" height="12" rx="2.2"/><path d="M9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8M3 13h18M10 11.5v3M14 11.5v3"/>',
+  placeGround: '<path d="M12 14.5s-4.8-4.3-4.8-8.1a4.8 4.8 0 0 1 9.6 0c0 3.8-4.8 8.1-4.8 8.1Z"/><circle cx="12" cy="6.4" r="1.7"/><path d="M6.5 15.5C4.4 16.1 3 17 3 18c0 1.7 4 3 9 3s9-1.3 9-3c0-1-1.4-1.9-3.5-2.5"/>',
+  serverRack: '<rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01M8 16.5h.01M12 7.5h4M12 16.5h4"/>',
+  folderChart: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M8.5 16.5v-2.5M12 16.5v-5M15.5 16.5v-3.5"/>',
+  orgChart: '<rect x="9" y="3" width="6" height="5" rx="1.5"/><rect x="3" y="16" width="6" height="5" rx="1.5"/><rect x="15" y="16" width="6" height="5" rx="1.5"/><path d="M12 8v4M6 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/>',
   back: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
   wrench: '<path d="M14.5 6.5a4 4 0 0 0 5 5L21 13l-8.5 8.5a2.1 2.1 0 0 1-3-3L18 10"/><path d="M14.5 6.5 17 4a5.5 5.5 0 0 0-7.2 7.2L3.6 17.4a2.1 2.1 0 0 0 3 3l6.2-6.2"/>',

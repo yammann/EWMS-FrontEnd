@@ -21,14 +21,15 @@ const SIDEBAR_KEY = 'ewms_sidebar';
 const COMPACT_QUERY = '(max-width: 860px)';
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
-interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'sites' | 'devices' | 'reports' | 'admin'; title: string; items: NavItem[]; }
+/** icon: أيقونة القسم في السايدبار المطوي (تنسدل تحتها أيقونات صفحاته) */
+interface NavSection { id: 'main' | 'tasks' | 'vacations' | 'maintenance' | 'sites' | 'devices' | 'reports' | 'admin'; title: string; icon: IconName; items: NavItem[]; }
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton],
   templateUrl: './main-layout.html',
-  styleUrls: ['./main-layout.scss', './main-layout-compact.scss'],
+  styleUrls: ['./main-layout.scss', './main-layout-rail.scss', './main-layout-compact.scss'],
   host: { '(document:keydown.escape)': 'closeMenu()' }
 })
 export class MainLayout {
@@ -66,21 +67,23 @@ export class MainLayout {
     const can = (p: AppPermissionName) => this.auth.hasPermission(p);
     const canAny = (list: readonly AppPermissionName[]) => this.auth.hasAnyPermission(list);
     const all: NavSection[] = [
-      { id: 'main', title: '', items: [
+      { id: 'main', title: '', icon: 'home', items: [
         canAny(DASHBOARD_ACCESS) && { path: '/', label: 'لوحة المتابعة', icon: 'home', exact: true },
+      ].filter(Boolean) as NavItem[] },
+      { id: 'tasks', title: 'المهام', icon: 'checklist', items: [
         can(AppPermission.ViewTaskBoard) && { path: '/task-board', label: 'لوحة المهام', icon: 'board', exact: true },
         can(AppPermission.ViewToDoLists) && { path: '/todo-lists', label: 'مفكرتي', icon: 'clipboard' },
         canAny(TASK_ASSIGN) && { path: '/task-board/recurring', label: 'المهام الدورية والقوالب', icon: 'calendar' },
         can(AppPermission.ViewTaskStats) && { path: '/task-board/stats', label: 'إحصائيات المهام', icon: 'chart' }
       ].filter(Boolean) as NavItem[] },
-      { id: 'vacations', title: 'الإجازات', items: [
+      { id: 'vacations', title: 'الإجازات', icon: 'suitcase', items: [
         canAny(MY_VACATIONS_ACCESS) && { path: '/vacations/my', label: 'إجازاتي', icon: 'beach' },
         this.auth.canReviewVacations() && { path: '/vacations/review', label: 'مراجعة الإجازات', icon: 'check' },
         canAny(VACATION_STATS) && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
         canAny(MANAGE_VACATION_TYPES) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' },
         can(AppPermission.ViewHolidays) && { path: '/vacations/holidays', label: 'العطل الرسمية', icon: 'calendar' }
       ].filter(Boolean) as NavItem[] },
-      { id: 'maintenance', title: 'الصيانة', items: [
+      { id: 'maintenance', title: 'الصيانة', icon: 'toolbox', items: [
         can(AppPermission.ViewMaintenanceRequests) && { path: '/maintenance/requests', label: 'طلبات الصيانة', icon: 'wrench' },
         can(AppPermission.ViewMaintenanceDevices) && { path: '/maintenance/devices', label: 'أجهزة الصيانة', icon: 'device' },
         can(AppPermission.ViewSpareParts) && { path: '/maintenance/parts', label: 'قطع الغيار', icon: 'box', exact: true },
@@ -90,19 +93,19 @@ export class MainLayout {
         can(AppPermission.ViewMaintenanceStats) && { path: '/maintenance/stats', label: 'إحصائيات الصيانة', icon: 'chart' },
         canAny(MANAGE_MAINTENANCE_LOOKUPS) && { path: '/maintenance/settings', label: 'إعدادات الصيانة', icon: 'gear' }
       ].filter(Boolean) as NavItem[] },
-      { id: 'sites', title: 'الخريطة والمواقع', items: [
+      { id: 'sites', title: 'الخريطة والمواقع', icon: 'placeGround', items: [
         canAny(SITE_ACCESS) && { path: '/devices/sites', label: 'المواقع', icon: 'map' },
         canAny(MAP_LAYER_ACCESS) && { path: '/map-layers', label: 'طبقات الفروع', icon: 'layers' }
       ].filter(Boolean) as NavItem[] },
-      { id: 'devices', title: 'توثيق الأجهزة', items: canAny(DEVICE_ACCESS) ? [
+      { id: 'devices', title: 'توثيق الأجهزة', icon: 'serverRack', items: canAny(DEVICE_ACCESS) ? [
         { path: '/devices/installations', label: 'التركيبات', icon: 'device' },
         { path: '/devices/catalog', label: 'الأجهزة', icon: 'box' }
       ] : [] },
-      { id: 'reports', title: 'التقارير', items: [
+      { id: 'reports', title: 'التقارير', icon: 'folderChart', items: [
         canAny(REPORT_ACCESS) && { path: '/reports', label: 'مركز التقارير', icon: 'docText', exact: true },
         can(AppPermission.ViewReportLog) && { path: '/reports/log', label: 'سجل سحب التقارير', icon: 'clock' }
       ].filter(Boolean) as NavItem[] },
-      { id: 'admin', title: 'الإدارة', items: [
+      { id: 'admin', title: 'الإدارة', icon: 'orgChart', items: [
         can(AppPermission.ViewWorkTasks) && { path: '/work-tasks', label: 'مهام العمل', icon: 'briefcase' },
         can(AppPermission.ViewBranches) && { path: '/branches', label: 'الفروع', icon: 'landmark' },
         canAny(MANAGE_DEPARTMENTS) && { path: '/departments', label: 'الأقسام', icon: 'building' },
@@ -132,11 +135,28 @@ export class MainLayout {
     if (this.menuOpen() && !hasOpenModal()) this.menuOpen.set(false);
   }
 
-  /** حالة السايدبار المحفوظة: مطوي (أيقونات فقط) + الأقسام المغلقة */
+  /**
+   * حالة السايدبار المحفوظة: مطوي (أيقونات فقط) + الأقسام المغلقة في الوضع الموسّع
+   * + القسم المفتوح في الوضع المطوي (railOpen): كل قسم أيقونة تنسدل تحتها صفحاته، قسم واحد في كل مرة،
+   * ويبقى آخر قسم فُتح مفتوحاً (قرار المستخدم 2026-10-13). القسم الأول بلا عنوان فتظهر صفحاته دائماً.
+   */
   readonly collapsed = signal(false);
   readonly closedSections = signal<ReadonlySet<string>>(new Set());
+  readonly railOpen = signal<string | null>(null);
 
   isOpen(section: NavSection) { return !section.title || !this.closedSections().has(section.id); }
+
+  /** روابط القسم مطوية: في الوضع المطوي إلا القسم المفتوح، وفي الموسّع حسب طي القسم، ولا شيء على الشاشة الصغيرة */
+  groupClosed(section: NavSection) {
+    if (this.compact()) return false;
+    if (this.collapsed()) return !!section.title && this.railOpen() !== section.id;
+    return !this.isOpen(section);
+  }
+
+  toggleRail(section: NavSection) {
+    this.railOpen.update(id => id === section.id ? null : section.id);
+    this.saveSidebar();
+  }
 
   /** قسم مغلق يحتوي الصفحة الحالية — تظهر نقطة بجانب عنوانه */
   hasActive(section: NavSection) {
@@ -163,11 +183,12 @@ export class MainLayout {
       const saved = JSON.parse(localStorage.getItem(SIDEBAR_KEY) ?? 'null');
       this.collapsed.set(saved?.collapsed === true);
       this.closedSections.set(new Set(Array.isArray(saved?.closed) ? saved.closed : []));
+      this.railOpen.set(typeof saved?.rail === 'string' ? saved.rail : null);
     } catch { /* التخزين غير متاح — الإعداد الافتراضي */ }
   }
 
   private saveSidebar() {
-    try { localStorage.setItem(SIDEBAR_KEY, JSON.stringify({ collapsed: this.collapsed(), closed: [...this.closedSections()] })); }
+    try { localStorage.setItem(SIDEBAR_KEY, JSON.stringify({ collapsed: this.collapsed(), closed: [...this.closedSections()], rail: this.railOpen() })); }
     catch { /* تجاهل */ }
   }
 

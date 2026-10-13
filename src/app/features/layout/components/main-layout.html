@@ -30,13 +30,22 @@
             <app-icon name="chevron" class="chevron" />
           </button>
         }
-        <!-- في وضع الأيقونات تظهر كل الروابط (الأقسام بلا عناوين) -->
-        <div class="nav-group" [id]="'nav-' + section.id" [class.closed]="!compact() && !collapsed() && !isOpen(section)">
+        <!-- وضع الأيقونات: أيقونة القسم (اسمه عند المرور)، والضغط عليها يُنزل أيقونات صفحاته تحتها -->
+        @if (section.title && collapsed() && !compact()) {
+          <button type="button" class="rail-section" [class.open]="railOpen() === section.id"
+                  [class.has-active]="railOpen() !== section.id && hasActive(section)" (click)="toggleRail(section)"
+                  [attr.data-label]="section.title" [attr.aria-label]="section.title"
+                  [attr.aria-expanded]="railOpen() === section.id" [attr.aria-controls]="'nav-' + section.id">
+            <app-icon [name]="section.icon" class="rail-icon" /><app-icon name="chevron" class="rail-chevron" [weight]="2.4" />
+          </button>
+        }
+        <div class="nav-group" [id]="'nav-' + section.id" [class.nav-main]="!section.title"
+             [class.rail-tray]="!!section.title && collapsed() && !compact()" [class.closed]="groupClosed(section)">
           <div class="nav-group-inner">
             @for (item of section.items; track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ paths: item.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
                  [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null"
-                 [attr.tabindex]="!compact() && !collapsed() && !isOpen(section) ? -1 : null">
+                 [attr.tabindex]="groupClosed(section) ? -1 : null">
                 <app-icon [name]="item.icon" /><span class="label">{{ item.label }}</span>
               </a>
             }
