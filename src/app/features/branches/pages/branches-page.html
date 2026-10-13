@@ -4,6 +4,9 @@
   <app-admin-header eyebrow="إدارة الفروع" heading="الفروع" subtitle="إدارة فروع النظام التي تتبعها الأقسام والمستخدمون." [loading]="crud.busy()"
     [createLabel]="canCreate() ? 'فرع جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا بيانات -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Stats -->
   <section class="stats-grid">
 
@@ -73,7 +76,7 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
           <app-icon name="landmark" />

@@ -4,6 +4,9 @@
   <app-admin-header eyebrow="إدارة الأقسام" heading="الأقسام" subtitle="إدارة أقسام النظام وتوزيعها على الفروع." [loading]="crud.busy()"
     [createLabel]="canCreate() ? 'قسم جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا بيانات -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Stats -->
   <section class="stats-grid">
 
@@ -80,7 +83,7 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
           <app-icon name="building" />
@@ -107,13 +110,14 @@
               <label class="form-label" [attr.for]="dlg.mode + '-branch'">الفرع</label>
               <select [id]="dlg.mode + '-branch'" formControlName="branchId">
                 <option value="">اختر الفرع</option>
-                @for (branch of branches(); track branch.id) {
+                @for (branch of branchList(); track branch.id) {
                   <option [value]="branch.id">{{ branch.name }}</option>
                 }
               </select>
               @if (dlg.mode === 'create' && form.controls.branchId.touched && form.controls.branchId.invalid) {
                 <small class="form-error">اختر الفرع المرتبط بالقسم.</small>
               }
+              @if (branchesMissing()) { <small class="form-error">تعذّر تحميل قائمة الفروع — اختيار الفرع يحتاج صلاحية «عرض الفروع» أو «عرض الأقسام».</small> }
             </div>
           </ng-container>
           </app-entity-form>

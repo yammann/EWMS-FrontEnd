@@ -4,6 +4,9 @@
   <app-admin-header eyebrow="إدارة المستخدمين" heading="المستخدمون" subtitle="إدارة حسابات المستخدمين وتوزيعهم على الأقسام والفروع." [loading]="crud.busy()"
     [createLabel]="canCreate() ? 'مستخدم جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا موظفين -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Stats -->
   <section class="stats-grid">
 
@@ -106,7 +109,7 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
           <app-icon name="users" />
@@ -131,6 +134,9 @@
             @case ('create') {
               <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (missing().length) {
+                  <p class="alert alert-warning" role="status">لا تملك صلاحية عرض {{ missingText() }}، فلا تظهر خياراتها هنا. اطلب صلاحية العرض المقابلة من مسؤول الأدوار.</p>
+                }
                 <div class="form-grid">
 
                   <div class="form-field">
@@ -197,7 +203,7 @@
                     <label class="form-label" for="create-role">الدور</label>
                     <select id="create-role" formControlName="roleId">
                       <option value="">اختر الدور</option>
-                      @for (role of roles(); track role.id) {
+                      @for (role of roleList(); track role.id) {
                         <option [value]="role.id">{{ role.name }}</option>
                       }
                     </select>
@@ -208,7 +214,7 @@
                     <label class="form-label" for="create-branch">الفرع <small class="muted">(اختياري)</small></label>
                     <select id="create-branch" formControlName="branchId" (change)="branchChanged()">
                       <option value="">بدون فرع</option>
-                      @for (branch of branches(); track branch.id) {
+                      @for (branch of branchList(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
                     </select>
@@ -259,6 +265,9 @@
             @case ('edit') {
               <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (missing().length) {
+                  <p class="alert alert-warning" role="status">لا تملك صلاحية عرض {{ missingText() }}، فلا تظهر خياراتها هنا وتبقى القيم الحالية كما هي. اطلب صلاحية العرض المقابلة من مسؤول الأدوار.</p>
+                }
                 <div class="form-grid">
 
                   <div class="form-field">
@@ -304,7 +313,7 @@
                     <label class="form-label" for="edit-role">الدور</label>
                     <select id="edit-role" formControlName="roleId">
                       <option value="">اختر الدور</option>
-                      @for (role of roles(); track role.id) {
+                      @for (role of roleList(); track role.id) {
                         <option [value]="role.id">{{ role.name }}</option>
                       }
                     </select>
@@ -315,7 +324,7 @@
                     <label class="form-label" for="edit-branch">الفرع <small class="muted">(اختياري)</small></label>
                     <select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
                       <option value="">بدون فرع</option>
-                      @for (branch of branches(); track branch.id) {
+                      @for (branch of branchList(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
                     </select>

@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, map } from 'rxjs';
+import { orEmpty } from '@core/http/or-empty';
 import { Permission, Role } from '@core/models/ewms.models';
 import { RoleService } from '../data-access/role.service';
 import { AuthService } from '@core/services/auth.service';
@@ -145,6 +146,8 @@ export class RolesPage {
     else if (event.key === 'Enter' && this.activeSuggestion() >= 0) { event.preventDefault(); this.pickSuggestion(list[this.activeSuggestion()].role); }
   }
   permissions = signal<Permission[]>([]);
+  /** قائمة الصلاحيات لم تُحمَّل: الأدوار تظهر، ونافذة الدور تقول إن الصلاحيات غير متاحة الآن */
+  permissionsMissing = signal(false);
 
 
   createForm = this.fb.group({
@@ -162,8 +165,11 @@ export class RolesPage {
   canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteRole));
 
   crud = new CrudPage<Role, FormData>({
-    load: () => forkJoin({ roles: this.roleService.getAll(), permissions: this.roleService.getPermissions() })
-      .pipe(map(r => { this.permissions.set(r.permissions); return r.roles; })),
+    load: () => {
+      this.permissionsMissing.set(false);
+      return forkJoin({ roles: this.roleService.getAll(), permissions: this.roleService.getPermissions().pipe(orEmpty(() => this.permissionsMissing.set(true))) })
+        .pipe(map(r => { this.permissions.set(r.permissions); return r.roles; }));
+    },
     create: body => this.roleService.create(body),
     update: (id, body) => this.roleService.update(id, body),
     remove: role => this.roleService.delete(role.id),

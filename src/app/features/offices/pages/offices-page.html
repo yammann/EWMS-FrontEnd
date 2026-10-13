@@ -4,6 +4,9 @@
   <app-admin-header eyebrow="الهيكل التنظيمي" heading="المكاتب" subtitle="إدارة مكاتب الأقسام وربطها بالموظفين." [loading]="crud.busy()"
     [createLabel]="can().create ? 'مكتب جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا بيانات -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Offices List -->
   <section class="panel">
     <div class="panel-heading">
@@ -65,7 +68,7 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
           <app-icon name="door" />
@@ -92,13 +95,14 @@
               <label class="form-label" [attr.for]="dlg.mode + '-dept'">القسم</label>
               <select [id]="dlg.mode + '-dept'" formControlName="departmentId">
                 <option value="">اختر القسم</option>
-                @for (department of departments(); track department.id) {
+                @for (department of departmentList(); track department.id) {
                   <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
                 }
               </select>
               @if (dlg.mode === 'create' && form.controls.departmentId.touched && form.controls.departmentId.invalid) {
                 <small class="form-error">اختر القسم التابع له المكتب.</small>
               }
+              @if (departmentsMissing()) { <small class="form-error">تعذّر تحميل قائمة الأقسام — اختيار القسم يحتاج صلاحية «عرض الأقسام».</small> }
             </div>
           </ng-container>
           </app-entity-form>

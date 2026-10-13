@@ -11,6 +11,7 @@ import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validator
 import { formatPhone, isValidPhone, normalizePhone } from '@core/utils/phone';
 import { utcDate } from '@core/utils/format';
 import { forkJoin, map } from 'rxjs';
+import { orEmpty } from '@core/http/or-empty';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Branch, Department, Office, Role, User } from '@core/models/ewms.models';
 import { UserService } from '../data-access/user.service';
@@ -40,6 +41,13 @@ export class UsersPage {
   departments = signal<Department[]>([]);
   offices = signal<Office[]>([]);
   roles = signal<Role[]>([]);
+  /**
+   * القوائم المساعدة التي لم تُحمَّل (غالباً لنقص صلاحية عرضها): قائمة الموظفين لا تتوقف عليها (2026-10-13 — كان رفض
+   * قائمة الأدوار يُخفي الموظفين كلهم)، والنموذج يقول ما ينقص، والتعديل يُبقي القيم الحالية للموظف ظاهرة.
+   */
+  missing = signal<string[]>([]);
+  missingText = computed(() => this.missing().join('، '));
+  private miss = (label: string) => () => this.missing.update(list => list.includes(label) ? list : [...list, label]);
   phone = formatPhone;
   utc = utcDate;
 
@@ -74,16 +82,19 @@ export class UsersPage {
 
   crud = new CrudPage<User, FormData>({
     // المستخدمون + قوائم النموذج (الفروع/الأقسام/المكاتب/الأدوار من التخزين المشترك إن كانت حديثة)
-    load: () => forkJoin({
-      users: this.userService.getAll(),
-      branches: this.lookups.branchOptions(),
-      departments: this.lookups.departments(),
-      offices: this.lookups.offices(),
-      roles: this.lookups.roles()
-    }).pipe(map(r => {
-      this.branches.set(r.branches); this.departments.set(r.departments); this.offices.set(r.offices); this.roles.set(r.roles);
-      return r.users;
-    })),
+    load: () => {
+      this.missing.set([]);
+      return forkJoin({
+        users: this.userService.getAll(),
+        branches: this.lookups.branchOptions().pipe(orEmpty(this.miss('الفروع'))),
+        departments: this.lookups.departments().pipe(orEmpty(this.miss('الأقسام'))),
+        offices: this.lookups.offices().pipe(orEmpty(this.miss('المكاتب'))),
+        roles: this.lookups.roles().pipe(orEmpty(this.miss('الأدوار')))
+      }).pipe(map(r => {
+        this.branches.set(r.branches); this.departments.set(r.departments); this.offices.set(r.offices); this.roles.set(r.roles);
+        return r.users;
+      }));
+    },
     create: body => this.userService.create(body),
     update: (id, body) => this.userService.update(id, body),
     remove: u => this.userService.delete(u.id),
@@ -102,6 +113,27 @@ export class UsersPage {
   /** نوع النافذة المفتوحة */
   mode = computed(() => this.crud.dialog()?.mode ?? null);
 
+  /** الموظف قيد التعديل — قيمه الحالية خيارٌ وحيد إن لم تُحمَّل القائمة الكاملة (فلا يظهر الحقل فارغاً ولا تضيع قيمته) */
+  private editing = computed(() => { const d = this.crud.dialog(); return d?.mode === 'edit' ? d.item : null; });
+  roleList = computed<Pick<Role, 'id' | 'name'>[]>(() => {
+    const u = this.editing();
+    return this.roles().length || !u ? this.roles() : [{ id: u.roleId, name: u.roleName }];
+  });
+  branchList = computed<Branch[]>(() => {
+    const u = this.editing();
+    return this.branches().length || !u?.branchId ? this.branches() : [{ id: u.branchId, name: u.branchName, description: '' }];
+  });
+  private departmentList = computed<Department[]>(() => {
+    const u = this.editing();
+    return this.departments().length || !u?.departmentId ? this.departments()
+      : [{ id: u.departmentId, name: u.departmentName, branchId: u.branchId ?? 0, branchName: u.branchName, description: '' }];
+  });
+  private officeList = computed<Office[]>(() => {
+    const u = this.editing();
+    return this.offices().length || !u?.officeId ? this.offices()
+      : [{ id: u.officeId, name: u.officeName, departmentId: u.departmentId ?? 0, departmentName: u.departmentName, branchId: u.branchId ?? 0, branchName: u.branchName, description: '' }];
+  });
+
   stats = computed(() => {
     const users = this.users();
 
@@ -109,7 +141,8 @@ export class UsersPage {
       total: users.length,
       active: users.filter(u => u.isActive).length,
       inactive: users.filter(u => !u.isActive).length,
-      roles: this.roles().length
+      // بلا صلاحية عرض الأدوار: عدد الأدوار المختلفة بين الموظفين المعروضين
+      roles: this.roles().length || new Set(users.map(u => u.roleId)).size
     };
   });
 
@@ -178,13 +211,13 @@ export class UsersPage {
       ? this.createForm.value.branchId
       : this.editForm.value.branchId;
 
-    if (!branchId) return this.departments();
-    return this.departments().filter(d => String(d.branchId) === String(branchId));
+    if (!branchId) return this.departmentList();
+    return this.departmentList().filter(d => String(d.branchId) === String(branchId));
   }
 
   filteredOffices(): Office[] {
     const form = this.mode() === 'create' ? this.createForm : this.editForm;
-    return this.offices().filter(o => o.departmentId === Number(form.value.departmentId));
+    return this.officeList().filter(o => o.departmentId === Number(form.value.departmentId));
   }
 
   branchChanged() {
@@ -208,7 +241,7 @@ export class UsersPage {
   /** "needs…" هنا تعني: يُعرض الحقل (لا يُلزم) */
   private placementOf(form: FormGroup): UserPlacement {
     // قيمة الحقل نفسه وليس form.value: داخل valueChanges للدور لم تُحدَّث قيمة النموذج بعد
-    const role = this.roles().find(r => String(r.id) === String(form.get('roleId')?.value));
+    const role = this.roleList().find(r => String(r.id) === String(form.get('roleId')?.value));
     const placed = role?.name?.toLowerCase() !== 'superadmin';
     return { needsBranch: placed, needsDepartment: placed, needsOffice: placed };
   }

@@ -4,6 +4,9 @@
   <app-admin-header eyebrow="الأدوار والصلاحيات" heading="الأدوار" subtitle="إدارة الأدوار وتوزيع الصلاحيات على كل دور في النظام." [loading]="crud.busy()"
     [createLabel]="canCreate() ? 'دور جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا بيانات -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Stats -->
   <section class="stats-grid">
 
@@ -143,7 +146,7 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
           <app-icon name="shield" />
@@ -168,6 +171,7 @@
             @case ('create') {
               <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (permissionsMissing()) { <p class="alert alert-warning" role="status">تعذّر تحميل قائمة الصلاحيات — أعد تحميل الصفحة قبل تعديل صلاحيات الدور.</p> }
                 <div class="form-field">
                   <label class="form-label" for="create-name">اسم الدور</label>
                   <div class="input-wrapper">
@@ -202,6 +206,7 @@
             @case ('edit') {
               <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (permissionsMissing()) { <p class="alert alert-warning" role="status">تعذّر تحميل قائمة الصلاحيات — أعد تحميل الصفحة قبل تعديل صلاحيات الدور.</p> }
                 <div class="form-field">
                   <label class="form-label" for="edit-name">اسم الدور</label>
                   <input id="edit-name" type="text" formControlName="name" />
