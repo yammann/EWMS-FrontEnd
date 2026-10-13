@@ -274,6 +274,14 @@ select[multiple] option { padding: 6px 8px; border-radius: var(--radius-xs); }
 }
 
 /* شريط بحث بأسلوب Apple */
+/* حقول التاريخ: Chrome يفرض على أجزاء الحقل (يوم/شهر/سنة) عرضاً يقلب أحرف «يوم/شهر/سنة» العربية في الصفحات
+   العربية (يظهر «ةنس/رهش/موي»)؛ unicode-bidi: normal يعيدها صحيحة ولا يغيّر ترتيب الأجزاء ولا الأرقام */
+input::-webkit-datetime-edit-day-field,
+input::-webkit-datetime-edit-month-field,
+input::-webkit-datetime-edit-year-field,
+input::-webkit-datetime-edit-hour-field,
+input::-webkit-datetime-edit-minute-field { unicode-bidi: normal !important; }
+
 input[type="search"] {
   padding-right: 38px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");

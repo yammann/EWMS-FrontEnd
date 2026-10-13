@@ -16,7 +16,16 @@
           </select>
           @if (!due) { <small class="form-hint">يحتاج التكرار موعداً.</small> }</label>
       </div>
-      <label class="check"><input name="important" type="checkbox" [(ngModel)]="important"> <app-icon name="starFill" [size]="14" class="star" /> مهم</label>
+      <label class="check"><input name="important" type="checkbox" [(ngModel)]="important"> <app-icon name="starFill" [size]="14" class="star" /> مهم <small class="muted">(يظهر أول القائمة)</small></label>
+      <fieldset class="form-field">
+        <legend class="form-label">اللون <small class="muted">(اختياري)</small></legend>
+        <div class="swatches" role="radiogroup" aria-label="لون البند">
+          @for (c of colors; track c.key) {
+            <button type="button" class="swatch" role="radio" [attr.aria-checked]="color === c.key" [class.on]="color === c.key"
+                    [style.background]="c.css" [attr.aria-label]="c.label" [title]="c.label" (click)="color = color === c.key ? '' : c.key"></button>
+          }
+        </div>
+      </fieldset>
       @if (item().linkedTask; as t) {
         <p class="linked">مرتبط بمهمة في لوحة المهام: <strong>{{ t.available ? t.title : 'مهمة غير متاحة لك' }}</strong>@if (t.available) { — {{ t.statusAr }} }</p>
       }

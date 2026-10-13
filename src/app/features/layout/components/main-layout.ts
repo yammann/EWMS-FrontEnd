@@ -17,7 +17,7 @@ import { roleLabel } from '@core/utils/roles';
 import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN, REPORT_ACCESS } from '@core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
-/** عرض الشاشة الذي تتحول عنده القائمة إلى أزرار تُفتح بزر «القائمة» (مطابق لـ @media في main-layout.scss) */
+/** عرض الشاشة الذي تتحول عنده القائمة إلى أزرار تُفتح بزر «القائمة» (مطابق لـ @media في main-layout-compact.scss) */
 const COMPACT_QUERY = '(max-width: 860px)';
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
@@ -28,7 +28,7 @@ interface NavSection { id: 'main' | 'vacations' | 'maintenance' | 'sites' | 'dev
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton],
   templateUrl: './main-layout.html',
-  styleUrl: './main-layout.scss',
+  styleUrls: ['./main-layout.scss', './main-layout-compact.scss'],
   host: { '(document:keydown.escape)': 'closeMenu()' }
 })
 export class MainLayout {

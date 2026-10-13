@@ -57,7 +57,8 @@ export const VACATION_ATTACHMENTS = {
 
 export interface VacationSegment { startDate: string; endDate: string; isPaid: boolean; days: number; }
 
-export interface PublicHoliday { id: number; date: string; name: string; isFriday: boolean; }
+/** عطلة رسمية: بند واحد بفترة من–إلى (days أيامها شاملة، fridays منها أيام جمعة أصلاً) */
+export interface PublicHoliday { id: number; startDate: string; endDate: string; name: string; days: number; fridays: number; }
 
 /** معاينة المدة في نموذج الطلب */
 export interface VacationDaysPreview { calendarDays: number; workingDays: number; fridays: number; holidays: PublicHoliday[]; }

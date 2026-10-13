@@ -29,10 +29,9 @@
         <label class="sr-only" for="todo-search">بحث في البنود</label>
         <input #t1 id="todo-search" type="search" placeholder="بحث بالعنوان أو الملاحظة…" [value]="search()" (input)="search.set(t1.value)">
         <label class="sr-only" for="todo-sort">الترتيب</label>
-        <select #t2 id="todo-sort" [appSelectValue]="sort()" (change)="setSort(t2.value)">
+        <select #t2 id="todo-sort" [appSelectValue]="sort()" (change)="setSort(t2.value)" title="البنود الهامة تظهر أولاً دائماً">
           <option value="manual">ترتيبي اليدوي</option>
           <option value="due">حسب الموعد</option>
-          <option value="important">المهم أولاً</option>
         </select>
       </div>
     }
@@ -54,8 +53,47 @@
     }
 
     <ul class="t-grid" cdkDropList cdkDropListOrientation="mixed" [cdkDropListDisabled]="!canDrag()" (cdkDropListDropped)="drop($event)">
-      @for (item of visible(); track item.id) {
-        <li class="t-card" [class.imp]="item.isImportant && !item.isDone" [class.done]="item.isDone" [class.click]="editable()" cdkDrag [cdkDragData]="item" (click)="open(item)">
+      <!-- بطاقة الإضافة أول بطاقة في كل صفحة (قرار المستخدم 2026-10-13) — ليست عنصر سحب فلا تغيّر فهارس السحب -->
+      @if (editable() && l.itemsTotal < limits.maxItems) {
+        @if (adding()) {
+          <li class="t-card t-add open">
+            <form (ngSubmit)="add()">
+              <label class="sr-only" for="todo-new">بند جديد</label>
+              <input id="todo-new" name="title" [maxlength]="limits.titleLength" [(ngModel)]="newTitle" placeholder="عنوان البند… (الصق عدة أسطر لإضافتها دفعة واحدة)"
+                     autocomplete="off" [disabled]="busy()" (paste)="onPaste($event)" (keydown.escape)="cancelAdd()">
+              <div class="f-row">
+                <input name="due" type="date" [(ngModel)]="newDue" aria-label="موعد البند" title="موعد (اختياري)">
+                <button type="button" class="t-star-toggle" [class.on]="newImportant" [attr.aria-pressed]="newImportant" (click)="newImportant = !newImportant" title="مهم" aria-label="مهم"><app-icon name="starFill" /></button>
+              </div>
+              <div class="f-row t-colors" role="radiogroup" aria-label="لون البند">
+                @for (c of colors; track c.key) {
+                  <button type="button" class="t-swatch" role="radio" [attr.aria-checked]="newColor === c.key" [class.on]="newColor === c.key"
+                          [style.background]="c.css" [attr.aria-label]="c.label" [title]="c.label" (click)="newColor = newColor === c.key ? '' : c.key"></button>
+                }
+              </div>
+              <div class="f-row">
+                <button type="submit" class="btn btn-sm" [disabled]="busy() || !newTitle.trim()">إضافة</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="cancelAdd()">إلغاء</button>
+              </div>
+            </form>
+          </li>
+        } @else {
+          <li class="t-card t-add">
+            <div class="t-add-row">
+              <button type="button" class="t-add-btn t-tip" data-tip="بند جديد — اكتب العنوان والموعد" aria-label="بند جديد" (click)="startAdd()">
+                <app-icon name="note" />
+              </button>
+              <div class="t-add-text"><strong>أضف إلى القائمة</strong><small>بند واحد أو عدة بنود دفعة واحدة</small></div>
+              <button type="button" class="t-add-btn t-tip" data-tip="عدة بنود — كل سطر بند" aria-label="عدة بنود" (click)="openBulk('')">
+                <app-icon name="listPlus" />
+              </button>
+            </div>
+          </li>
+        }
+      }
+      @for (item of pager.items(); track item.id) {
+        <li class="t-card" [class.imp]="item.isImportant && !item.isDone" [class.done]="item.isDone" [class.click]="editable()"
+            [class.colored]="!!item.color" [style.--item-color]="item.color ? colorOf(item.color) : null" cdkDrag [cdkDragData]="item" (click)="open(item)">
           <div class="t-row">
             <button type="button" class="t-tick" role="checkbox" [attr.aria-checked]="item.isDone" [disabled]="!editable() || busy()"
                     (click)="toggle(item); $event.stopPropagation()" [attr.aria-label]="(item.isDone ? 'إلغاء إنجاز ' : 'إنجاز ') + item.title">
@@ -95,38 +133,8 @@
         @if (l.itemsTotal) { <li class="t-empty">لا بنود مطابقة.</li> }
       }
 
-      @if (editable() && l.itemsTotal < limits.maxItems) {
-        @if (adding()) {
-          <li class="t-card t-add open">
-            <form (ngSubmit)="add()">
-              <label class="sr-only" for="todo-new">بند جديد</label>
-              <input id="todo-new" name="title" [maxlength]="limits.titleLength" [(ngModel)]="newTitle" placeholder="عنوان البند… (الصق عدة أسطر لإضافتها دفعة واحدة)"
-                     autocomplete="off" [disabled]="busy()" (paste)="onPaste($event)" (keydown.escape)="cancelAdd()">
-              <div class="f-row">
-                <input name="due" type="date" [(ngModel)]="newDue" aria-label="موعد البند" title="موعد (اختياري)">
-                <button type="button" class="t-star-toggle" [class.on]="newImportant" [attr.aria-pressed]="newImportant" (click)="newImportant = !newImportant" title="مهم" aria-label="مهم"><app-icon name="starFill" /></button>
-              </div>
-              <div class="f-row">
-                <button type="submit" class="btn btn-sm" [disabled]="busy() || !newTitle.trim()">إضافة</button>
-                <button type="button" class="btn btn-ghost btn-sm" (click)="cancelAdd()">إلغاء</button>
-              </div>
-            </form>
-          </li>
-        } @else {
-          <li class="t-card t-add">
-            <div class="t-add-row">
-              <button type="button" class="t-add-btn t-tip" data-tip="بند جديد — اكتب العنوان والموعد" aria-label="بند جديد" (click)="startAdd()">
-                <app-icon name="note" />
-              </button>
-              <div class="t-add-text"><strong>أضف إلى القائمة</strong><small>بند واحد أو عدة بنود دفعة واحدة</small></div>
-              <button type="button" class="t-add-btn t-tip" data-tip="عدة بنود — كل سطر بند" aria-label="عدة بنود" (click)="openBulk('')">
-                <app-icon name="listPlus" />
-              </button>
-            </div>
-          </li>
-        }
-      }
     </ul>
+    <app-pager [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" [sizes]="[]" (pageChange)="pager.go($event)" />
     @if (l.itemsTotal >= limits.maxItems && editable()) { <p class="t-hint">بلغت الحد الأقصى ({{ limits.maxItems }} بنداً).</p> }
     @if (l.isArchived) { <p class="t-hint">القائمة مؤرشفة: أعدها من صفحة مفكرتي لتعديل بنودها.</p> }
   } @else if (error()) {

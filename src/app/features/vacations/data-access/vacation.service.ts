@@ -44,12 +44,12 @@ export class VacationService {
   }
   deleteType(id: number) { return this.api.delete(`/VacationTypes/Delete/${id}`); }
 
-  // العطل الرسمية — endDate اختياري لإضافة عدة أيام دفعة واحدة
+  // العطل الرسمية — بند واحد لكل عطلة؛ endDate اختياري (الفارغ = يوم واحد)
   holidays(year?: number) { return this.api.get<PublicHoliday[]>('/PublicHolidays/GetAll' + (year ? `?year=${year}` : '')); }
-  createHoliday(value: { date: string; endDate: string | null; name: string }) {
-    return this.api.post<PublicHoliday[]>('/PublicHolidays/Create', value);
+  createHoliday(value: { startDate: string; endDate: string | null; name: string }) {
+    return this.api.post<PublicHoliday>('/PublicHolidays/Create', value);
   }
-  updateHoliday(id: number, value: { date: string; name: string }) {
+  updateHoliday(id: number, value: { startDate: string; endDate: string | null; name: string }) {
     return this.api.put<PublicHoliday>(`/PublicHolidays/Update/${id}`, value);
   }
   deleteHoliday(id: number) { return this.api.delete(`/PublicHolidays/Delete/${id}`); }

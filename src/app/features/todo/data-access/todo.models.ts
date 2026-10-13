@@ -30,6 +30,8 @@ export interface ToDoItem {
   repeatAr: string | null;
   lastCompletedAt: string | null;
   linkedTask: ToDoLinkedTask | null;
+  /** لون البند (مفاتيح TODO_COLORS) أو فارغ */
+  color: string;
 }
 
 export interface ToDoList {
@@ -54,10 +56,21 @@ export interface ToDoTodayItem extends ToDoItem { listName: string; listColor: s
 export interface ToDoToday { overdueCount: number; todayCount: number; items: ToDoTodayItem[]; }
 
 export interface SaveToDoListRequest { name: string; description: string; color: string; icon: string; }
-export interface NewToDoItem { title: string; note?: string; isImportant?: boolean; dueDate?: string | null; repeat?: number | null; }
+export interface NewToDoItem { title: string; note?: string; isImportant?: boolean; color?: string; dueDate?: string | null; repeat?: number | null; }
 export interface ToDoItemChange {
-  title?: string; isDone?: boolean; note?: string; isImportant?: boolean;
+  title?: string; isDone?: boolean; note?: string; isImportant?: boolean; color?: string;
   dueDate?: string; clearDueDate?: boolean; repeat?: number;
+}
+
+/** بنود صفحة القائمة الواحدة (قرار المستخدم 2026-10-13) */
+export const TODO_PAGE_SIZE = 15;
+
+/**
+ * ترتيب العرض: الهامة غير المنجزة أولاً دائماً (قرار المستخدم 2026-10-13)، ثم البقية — بترتيب المصدر داخل كل مجموعة.
+ */
+export function importantFirst<T extends { isImportant: boolean; isDone: boolean }>(items: T[]): T[] {
+  const first = (i: T) => i.isImportant && !i.isDone;
+  return [...items.filter(first), ...items.filter(i => !first(i))];
 }
 
 /** الحدود نفسها في الباكاند (ToDoRules) */
