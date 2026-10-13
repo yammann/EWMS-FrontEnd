@@ -1,10 +1,14 @@
 import { Component, DestroyRef, ElementRef, NgZone, afterNextRender, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { GOVERNORATES_ATTRIBUTION, GovernorateFeature, SyriaGeoService } from '@core/utils/geo';
 import { Icon } from '@shared/ui/icon';
+import { STAMP_LANDMARKS, Stamp } from '@shared/ui/stamp';
 import { MapPoint } from './syria-svg-map';
 
 type Three = typeof import('three');
 type Ring = [number, number][];
+
+/** تلميح المرور: code = رمز المحافظة (يُعرض طابعها) — فارغ لتلميح الدبوس */
+interface Tip { x: number; y: number; title: string; sub: string; code?: string; }
 
 /** موقع في المشهد: نقطة الخريطة + رمز محافظته */
 export interface MapPoint3d extends MapPoint { governorateCode: string; }
@@ -42,7 +46,7 @@ interface Pin { point: MapPoint3d; piece: Piece; group: import('three').Group; h
  * - بلا WebGL أو عند فشل التحميل يطلق failed فيعرض الأب الخريطة المسطحة.
  */
 @Component({
-  selector: 'app-syria-3d-map', standalone: true, imports: [Icon],
+  selector: 'app-syria-3d-map', standalone: true, imports: [Icon, Stamp],
   templateUrl: './syria-3d-map.html',
   styleUrl: './syria-3d-map.scss',
   host: { '(document:keydown.escape)': 'escape()' }
@@ -64,7 +68,10 @@ export class Syria3dMap {
   failed = output<void>();
 
   attribution = GOVERNORATES_ATTRIBUTION;
-  protected tip = signal<{ x: number; y: number; title: string; sub: string } | null>(null);
+  /** code: رمز المحافظة — يعرض طابعها في التلميح (كالخريطة المسطحة) */
+  protected tip = signal<Tip | null>(null);
+  /** معلم المحافظة المعروضة لطابعها المؤطّر في زاوية الخريطة */
+  protected landmark = (code: string) => STAMP_LANDMARKS[code] ?? null;
   protected loading = signal(true);
   /** تدوير تلقائي هادئ حول الخريطة (زر تشغيل/إيقاف) */
   protected spinning = signal(false);
@@ -131,7 +138,7 @@ interface Callbacks {
   onGovernorate(code: string): void;
   onPoint(id: number): void;
   onBack(): void;
-  onTip(tip: { x: number; y: number; title: string; sub: string } | null): void;
+  onTip(tip: Tip | null): void;
   subFor(code: string): string;
   isFocused(): boolean;
   /** الثيم أو الوضع الداكن تغيّر: ألوان جديدة */
@@ -411,7 +418,7 @@ class SceneState {
   }
 
   private local(e: MouseEvent) { const r = this.host.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
-  private showGovTip(p: Piece, e: MouseEvent) { if (p !== this.focus) this.cb.onTip({ ...this.local(e), title: p.name, sub: this.cb.subFor(p.code) }); }
+  private showGovTip(p: Piece, e: MouseEvent) { if (p !== this.focus) this.cb.onTip({ ...this.local(e), title: p.name, sub: this.cb.subFor(p.code), code: p.code }); }
 
   private resize() {
     const { clientWidth: w, clientHeight: h } = this.host;
