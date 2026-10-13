@@ -65,7 +65,7 @@
         </a>
         }
         @if (user()) {
-          <a class="me" routerLink="/profile" routerLinkActive="active" title="ملفي وإجازاتي">
+          <a class="me" routerLink="/profile" routerLinkActive="active" title="ملفي الشخصي">
             <span class="avatar" aria-hidden="true">{{ initial() }}</span>
             <span class="me-text"><strong>{{ user()?.fullName || user()?.email }}</strong><small>{{ roleLabel(user()?.role) }}</small></span>
           </a>
