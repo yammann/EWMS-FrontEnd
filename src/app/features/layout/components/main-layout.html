@@ -1,4 +1,5 @@
-<main class="shell" [class.collapsed]="collapsed()" [class.menu-open]="menuOpen()">
+<main class="shell" [class.collapsed]="collapsed()" [class.menu-open]="menuOpen()"
+      [class.collapsing]="motion() === 'collapsing'" [class.expanding]="motion() === 'expanding'" [class.settling]="motion() === 'settling'">
   <!-- السايدبار بأسلوب macOS: مادة شفافة، أقسام قابلة للطي، ووضع الأيقونات فقط -->
   <aside class="sidebar" aria-label="القائمة الرئيسية">
     <div class="sidebar-head">
@@ -19,7 +20,8 @@
       </button>
     </div>
 
-    <nav id="main-nav" aria-label="التنقل الرئيسي">
+    <nav id="main-nav" aria-label="التنقل الرئيسي" #navEl>
+      <span class="nav-indicator" #indicator aria-hidden="true"></span>
       @for (section of sections(); track section.id) {
         @if (section.title && compact()) {
           <h3 class="nav-heading">{{ section.title }}</h3>
@@ -44,7 +46,7 @@
           <div class="nav-group-inner">
             @for (item of section.items; track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ paths: item.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
-                 [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null"
+                 [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null" [style.--i]="$index"
                  [attr.tabindex]="groupClosed(section) ? -1 : null">
                 <app-icon [name]="item.icon" /><span class="label">{{ item.label }}</span>
               </a>

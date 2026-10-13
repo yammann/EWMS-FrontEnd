@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, ElementRef, afterNextRender, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
@@ -19,6 +19,8 @@ import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANC
 const SIDEBAR_KEY = 'ewms_sidebar';
 /** عرض الشاشة الذي تتحول عنده القائمة إلى أزرار تُفتح بزر «القائمة» (مطابق لـ @media في main-layout-compact.scss) */
 const COMPACT_QUERY = '(max-width: 860px)';
+/** «تقليل الحركة» في إعدادات النظام */
+const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
 /** icon: أيقونة القسم في السايدبار المطوي (تنسدل تحتها أيقونات صفحاته) */
@@ -29,8 +31,8 @@ interface NavSection { id: 'main' | 'tasks' | 'vacations' | 'maintenance' | 'sit
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton],
   templateUrl: './main-layout.html',
-  styleUrls: ['./main-layout.scss', './main-layout-rail.scss', './main-layout-compact.scss'],
-  host: { '(document:keydown.escape)': 'closeMenu()' }
+  styleUrls: ['./main-layout.scss', './main-layout-rail.scss', './main-layout-motion.scss', './main-layout-compact.scss'],
+  host: { '(document:keydown.escape)': 'closeMenu()', '(window:resize)': 'placeIndicator(false)' }
 })
 export class MainLayout {
   private auth = inject(AuthService);
@@ -52,7 +54,10 @@ export class MainLayout {
     this.loadSidebar();
     this.watchCompact();
     // اختيار رابط يغلق القائمة على الشاشات الصغيرة
-    effect(() => { this.url(); untracked(() => this.menuOpen.set(false)); });
+    effect(() => { this.url(); untracked(() => { this.menuOpen.set(false); setTimeout(() => this.placeIndicator(true)); }); });
+    // تغيّر الروابط (الصلاحيات) أو أول رسم: المؤشر يتبع الروابط أثناء حركة ظهورها
+    effect(() => { this.sections(); untracked(() => setTimeout(() => this.followIndicator())); });
+    afterNextRender(() => this.followIndicator(700));
     // الصلاحيات الفعّالة قد تتغيّر بعد تسجيل الدخول (إسناد خدمة لوحدتي، تعديل دوري)
     this.auth.refreshPermissions();
   }
@@ -156,6 +161,7 @@ export class MainLayout {
   toggleRail(section: NavSection) {
     this.railOpen.update(id => id === section.id ? null : section.id);
     this.saveSidebar();
+    this.followIndicator();
   }
 
   /** قسم مغلق يحتوي الصفحة الحالية — تظهر نقطة بجانب عنوانه */
@@ -164,9 +170,62 @@ export class MainLayout {
     return section.items.some(i => i.exact ? url === i.path : url === i.path || url.startsWith(i.path + '/'));
   }
 
+  /**
+   * الطي: تتلاشى الأسماء أولاً (collapsing) ثم يضيق السايدبار؛ التوسيع: يتسع ثم تظهر الأسماء بالتتابع (expanding).
+   * مع «تقليل الحركة» في النظام يتغيّر فوراً.
+   */
+  readonly motion = signal<'' | 'collapsing' | 'settling' | 'expanding'>('');
+  private motionTimer?: ReturnType<typeof setTimeout>;
+
   toggleSidebar() {
-    this.collapsed.update(v => !v);
+    clearTimeout(this.motionTimer);
+    const collapse = !this.collapsed();
+    if (collapse && !reducedMotion()) {
+      this.motion.set('collapsing');
+      this.motionTimer = setTimeout(() => {
+        // التبديل إلى الأيقونات: يظهر العمود الجديد بتلاشٍ واحد بلا طيّ الأقسام أثناءه
+        this.collapsed.set(true); this.motion.set('settling'); this.saveSidebar(); this.followIndicator(700);
+        this.motionTimer = setTimeout(() => this.motion.set(''), 450);
+      }, 140);
+      return;
+    }
+    this.collapsed.set(collapse);
+    this.motion.set(collapse || reducedMotion() ? '' : 'expanding');
+    if (!collapse) this.motionTimer = setTimeout(() => this.motion.set(''), 800);
     this.saveSidebar();
+    this.followIndicator();
+  }
+
+  /** مؤشر الصفحة الحالية: خلفية واحدة تنزلق إلى الرابط النشط (تختفي إن كان رابطه داخل قسم مطوي) */
+  private navRef = viewChild<ElementRef<HTMLElement>>('navEl');
+  private indicatorRef = viewChild<ElementRef<HTMLElement>>('indicator');
+  private followUntil = 0;
+  private following = false;
+
+  placeIndicator(animate: boolean) {
+    const nav = this.navRef()?.nativeElement, indicator = this.indicatorRef()?.nativeElement;
+    if (!nav || !indicator) return;
+    const link = nav.querySelector<HTMLElement>('a.active');
+    const box = link?.getBoundingClientRect();
+    if (!link || !box?.height || this.compact() || link.closest('.nav-group.closed')) { indicator.style.opacity = '0'; return; }
+    const origin = nav.getBoundingClientRect();
+    indicator.style.transition = animate && !reducedMotion() ? '' : 'none';
+    indicator.style.width = box.width + 'px';
+    indicator.style.height = box.height + 'px';
+    indicator.style.transform = `translate(${box.left - origin.left}px, ${box.top - origin.top}px)`;
+    indicator.style.opacity = '1';
+  }
+
+  /** أثناء طي/فتح قسم أو السايدبار تتحرك الروابط: المؤشر يلحق بها إطاراً بإطار */
+  private followIndicator(ms = 550) {
+    this.followUntil = performance.now() + ms;
+    if (this.following || typeof requestAnimationFrame !== 'function') return;
+    this.following = true;
+    const step = () => {
+      this.placeIndicator(false);
+      if (performance.now() < this.followUntil) requestAnimationFrame(step); else this.following = false;
+    };
+    requestAnimationFrame(step);
   }
 
   toggleSection(section: NavSection) {
@@ -176,6 +235,7 @@ export class MainLayout {
       return next;
     });
     this.saveSidebar();
+    this.followIndicator();
   }
 
   private loadSidebar() {
