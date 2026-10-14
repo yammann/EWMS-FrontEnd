@@ -41,10 +41,6 @@
 
 .map-area { position: relative; }
 .overlay { position: absolute; inset: 0; display: grid; place-items: center; z-index: 6; pointer-events: none; font-size: 14px; font-weight: 700; color: var(--ink-600); background: color-mix(in srgb, var(--page-bg) 60%, transparent); border-radius: var(--radius-lg); }
-.legend { position: absolute; bottom: 14px; inset-inline-end: 14px; z-index: 6; display: grid; gap: 4px; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur); box-shadow: var(--shadow-md); font-size: 11px; color: var(--ink-700); }
-.legend strong { font-size: 11px; margin-bottom: 2px; }
-.legend span { display: flex; align-items: center; gap: 6px; }
-.legend i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
 
 
 .details { display: grid; gap: 10px; padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-md); }

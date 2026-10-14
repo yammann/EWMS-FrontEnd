@@ -140,14 +140,6 @@ export class BranchMapComponent {
   });
   badgeFor = computed(() => { const stats = this.govStats(); return (code: string) => stats.get(code)?.sites ?? 0; });
 
-  legend = computed(() => {
-    const max = this.maxSites();
-    if (!max) return [];
-    const step = Math.max(1, Math.ceil(max / RAMP.length));
-    return RAMP.slice(0, Math.min(RAMP.length, max)).map((color, i) =>
-      ({ color, label: step === 1 ? `${i + 1}${i === RAMP.length - 1 ? '+' : ''}` : `${i * step + 1}–${(i + 1) * step}` }));
-  });
-
   focusName = computed(() => this.features().find(f => f.properties.code === this.focus())?.properties.nameAr ?? '');
 
   sitesInFocus = computed<MergedSite[]>(() => {
