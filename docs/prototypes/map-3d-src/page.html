@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="forest">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>خريطة الفروع ثلاثية الأبعاد — نموذج محفوظ</title>
+<style>/*APP_CSS*/</style>
+<style>/*PAGE_CSS*/</style>
+</head>
+<body>
+<main class="page">
+  <header class="map-head">
+    <div class="title">
+      <span class="kicker">نموذج محفوظ · الخريطة ثلاثية الأبعاد كما وصلت إليه في 2026-10-14 · بيانات تجريبية</span>
+      <h2 id="title">خريطة الفروع — الفرع التقني</h2>
+      <div class="layer-keys" role="group" aria-label="التحكم بالخريطة وطبقاتها">
+        <div class="map-tools" role="group" aria-label="التحكم بالخريطة">
+          <button type="button" class="map-tool" id="tool-spin" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg> <span>تدوير تلقائي</span></button>
+          <button type="button" class="map-tool" id="tool-reset"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg> إعادة الضبط</button>
+        </div>
+        <span id="keys" class="keys"></span>
+      </div>
+    </div>
+    <div class="appearance">
+      <button type="button" class="swatch" data-palette="forest" title="أخضر الغابة" style="--c:#054239"></button>
+      <button type="button" class="swatch" data-palette="wheat" title="القمح الذهبي" style="--c:#988561"></button>
+      <button type="button" class="swatch" data-palette="charcoal" title="الفحمي" style="--c:#2c2c2e"></button>
+      <button type="button" class="swatch" data-palette="umber" title="الأحمر الترابي" style="--c:#6b2a2a"></button>
+      <button type="button" class="mode" id="mode">الوضع الداكن</button>
+    </div>
+  </header>
+
+  <div id="stage" class="stage">
+    <div class="backdrop" aria-hidden="true">
+      <div class="glow"></div>
+      <div class="dots"></div>
+      <svg class="contours" viewBox="0 0 1000 660" preserveAspectRatio="xMidYMid slice"><g class="spin" id="spin"></g></svg>
+      <div class="stamps" id="floats"></div>
+    </div>
+    <div id="labels" class="labels"></div>
+    <figure id="focus-stamp" class="focus-stamp" hidden></figure>
+    <div id="tip" class="tip" hidden role="tooltip"></div>
+    <div id="zoom-hint" class="zoom-hint" role="status">للتكبير: <kbd>Ctrl</kbd> + العجلة</div>
+    <div id="fallback" class="fallback" hidden>هذا الجهاز لا يدعم الرسوم ثلاثية الأبعاد (WebGL).</div>
+    <small class="attribution">حدود المحافظات: OCHA / HDX (CC BY-IGO)</small>
+  </div>
+  <p class="help">اسحب للتدوير · Ctrl + العجلة للتكبير · مرّر فوق محافظة لتلميحها · اضغط محافظة لفتحها منفصلة · الزر الأيمن أو Esc للرجوع · اضغط دبوساً لفتح موقعه</p>
+</main>
+<div id="toast" class="toast" role="status"></div>
+<script>/*DATA*/</script>
+<script>/*APP_JS*/</script>
+</body>
+</html>
