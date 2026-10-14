@@ -5,7 +5,6 @@ import { BranchMap, MapBranchOption, MapLayer, MapSite } from '@features/devices
 import { GovernorateFeature } from '@core/utils/geo';
 import { ToastService } from '@shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
-import { MapPoint3d, Syria3dMap, webglAvailable } from './syria-3d-map';
 import { latestRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 import { Icon } from '@shared/ui/icon';
@@ -75,7 +74,7 @@ export function layerTotals(sites: readonly MergedSite[]): { key: string; title:
  * أثناء السكرول بينما تصغر وتخفت تدريجياً حتى تنغلق.
  */
 @Component({
-  selector: 'app-branch-map', standalone: true, imports: [Icon, SelectValue, RouterLink, SyriaSvgMap, Syria3dMap],
+  selector: 'app-branch-map', standalone: true, imports: [Icon, SelectValue, RouterLink, SyriaSvgMap],
   templateUrl: './branch-map.html',
   styleUrl: './branch-map.scss'
 })
@@ -88,9 +87,6 @@ export class BranchMapComponent {
   private destroyRef = inject(DestroyRef);
   private pinned = viewChild<ElementRef<HTMLElement>>('pinned');
   private sheet = viewChild<ElementRef<HTMLElement>>('sheet');
-  private map3d = viewChild(Syria3dMap);
-  /** الخريطة ثلاثية الأبعاد بعد جاهزيتها — لزرّي التدوير وإعادة الضبط في رأس الخريطة */
-  mapTools = computed(() => { const m = this.map3d(); return m && !m.loading() ? m : null; });
 
   branches = signal<MapBranchOption[]>([]);
   branchId = signal(0);
@@ -101,8 +97,6 @@ export class BranchMapComponent {
   error = signal('');
   hidden = signal<ReadonlySet<string>>(hiddenLayers);
   coords = formatCoords;
-  /** الخريطة ثلاثية الأبعاد (2026-10-13)؛ بلا WebGL أو عند فشل تحميلها تُعرض الخريطة المسطحة */
-  use3d = signal(webglAvailable());
 
   /** كل طبقات الفرع (للمفتاح) */
   layers = computed(() => this.data()?.layers ?? []);
@@ -140,6 +134,14 @@ export class BranchMapComponent {
   });
   badgeFor = computed(() => { const stats = this.govStats(); return (code: string) => stats.get(code)?.sites ?? 0; });
 
+  legend = computed(() => {
+    const max = this.maxSites();
+    if (!max) return [];
+    const step = Math.max(1, Math.ceil(max / RAMP.length));
+    return RAMP.slice(0, Math.min(RAMP.length, max)).map((color, i) =>
+      ({ color, label: step === 1 ? `${i + 1}${i === RAMP.length - 1 ? '+' : ''}` : `${i * step + 1}–${(i + 1) * step}` }));
+  });
+
   focusName = computed(() => this.features().find(f => f.properties.code === this.focus())?.properties.nameAr ?? '');
 
   sitesInFocus = computed<MergedSite[]>(() => {
@@ -153,14 +155,6 @@ export class BranchMapComponent {
       id: s.id, latitude: s.latitude!, longitude: s.longitude!, label: s.name,
       sub: `${s.governorateName} · ${describeLayers(s)}`,
       colors: s.layers.map(l => l.color)
-    })));
-
-  /** كل مواقع الطبقات الظاهرة للخريطة ثلاثية الأبعاد (دبابيس في عرض سوريا، ودبابيس المحافظة في عرضها) */
-  allPoints = computed<MapPoint3d[]>(() => this.sites()
-    .filter(s => s.latitude != null && s.longitude != null && !!s.governorateCode)
-    .map(s => ({
-      id: s.id, latitude: s.latitude!, longitude: s.longitude!, label: s.name, governorateCode: s.governorateCode,
-      sub: `${s.governorateName} · ${describeLayers(s)}`, colors: s.layers.map(l => l.color)
     })));
 
   /** المحافظات التي فيها مواقع (جدول أسفل الخريطة في عرض سوريا) */

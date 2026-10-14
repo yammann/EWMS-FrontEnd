@@ -41,6 +41,10 @@
 
 .map-area { position: relative; }
 .overlay { position: absolute; inset: 0; display: grid; place-items: center; z-index: 6; pointer-events: none; font-size: 14px; font-weight: 700; color: var(--ink-600); background: color-mix(in srgb, var(--page-bg) 60%, transparent); border-radius: var(--radius-lg); }
+.legend { position: absolute; bottom: 14px; inset-inline-end: 14px; z-index: 6; display: grid; gap: 4px; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur); box-shadow: var(--shadow-md); font-size: 11px; color: var(--ink-700); }
+.legend strong { font-size: 11px; margin-bottom: 2px; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
 
 
 .details { display: grid; gap: 10px; padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-md); }
@@ -58,15 +62,6 @@
 
 /* مفتاح الطبقات (1.2.0): زر لكل طبقة يظهرها أو يخفيها */
 .layer-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
-/* زرّا الخريطة ثلاثية الأبعاد: مجموعة واحدة في بداية السطر قبل مفاتيح الطبقات */
-.map-tools { display: inline-flex; gap: 2px; padding: 3px; margin-inline-end: 6px; border-radius: var(--radius-full); background: var(--fill); }
-.map-tool {
-  display: inline-flex; align-items: center; gap: 5px; min-height: 26px; padding: 2px 11px;
-  border-radius: var(--radius-full); background: transparent; color: var(--ink-700); font-size: 12px; font-weight: 700;
-  &:hover:not(:disabled) { background: var(--surface); color: var(--brand-700); filter: none; }
-  &:active:not(:disabled) { transform: scale(.97); filter: none; }
-  &.on, &.on:hover:not(:disabled) { background: var(--brand-600); color: var(--on-brand); }
-}
 .layer-warn { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 3px 10px; border-radius: var(--radius-full); background: var(--warning-50); color: var(--warning-700); font-size: 12px; font-weight: 700; text-decoration: none; }
 .layer-key {
   display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 10px; cursor: pointer;
