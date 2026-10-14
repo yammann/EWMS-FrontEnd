@@ -36,7 +36,7 @@ src/app/
 | زر الرجوع | **موحّد في الشريط العلوي** (`app-back-button` في `MainLayout`): يظهر للمسار الذي يعلن `data: { back: '/المسار' }` |
 | رسالة خطأ / حالة فارغة | `<app-alert [message]>` / `<app-empty-state [panel]>` |
 | بطاقة رقم | `<app-stat-tile icon="users" …>` (اسم أيقونة إلزامي) |
-| أيقونة | **`<app-icon name="lock" [size] [weight]>`** (`shared/ui/icon.ts`): مجموعة موحّدة خطية 24×24 بأسلوب SF Symbols مرسومة للمشروع، تأخذ لون النص. **لا Emoji ولا SVG مضمّنة في القوالب** — رمز جديد = أيقونة تُضاف هناك. القيم المخزّنة كـ Emoji (أيقونة مهمة العمل، قائمة «مفكرتي»، «آخر الإجراءات») تُعرض بـ `iconFor(قيمة)`. (أيقونات Apple الأصلية لا يجيز ترخيصها الاستعمال في تطبيق ويب.) |
+| أيقونة | **`<app-icon name="lock" [size] [weight]>`** (`shared/ui/icon.ts`): مجموعة موحّدة خطية 24×24 بأسلوب SF Symbols مرسومة للمشروع، تأخذ لون النص. **لا Emoji ولا SVG مضمّنة في القوالب** — رمز جديد = أيقونة تُضاف في `scripts/icons/icon-paths.mjs` ثم `npm run icons` (يولّد `public/icons.svg` و`shared/ui/icon-names.ts` برقم نسخة). الرسومات في ملف واحد خارج حزمة JavaScript، وكل أيقونة `<use>` لرمز منه. القيم المخزّنة كـ Emoji (أيقونة مهمة العمل، قائمة «مفكرتي»، «آخر الإجراءات») تُعرض بـ `iconFor(قيمة)`. (أيقونات Apple الأصلية لا يجيز ترخيصها الاستعمال في تطبيق ويب.) |
 | أزرار نافذة النموذج | `<app-form-actions [busy] [disabled] label busyLabel (dismissed)>` |
 | نافذة / تأكيد / تنبيه | `app-modal` / `ConfirmService` / `ToastService` |
 | تقسيم الصفحات | `Pagination<T>` + `<app-pager>` |
@@ -87,7 +87,7 @@ crud = new CrudPage<Item, Body>({
 - كل صفحة `loadComponent`؛ التحميل المسبق في الخلفية للصفحات المسموحة فقط (`PermissionPreloadStrategy`، بعد 1.5 ث من التنقل؛ `data.noPreload` لصفحات الطباعة).
 - `@defer` للمكوّنات الثقيلة التي تُفتح عند الطلب (الدرج، نوافذ المهام، التقويم، لوحة التوقيع).
 - SignalR يُحمَّل بـ `import()` عند بدء الاتصال (خارج الحزمة الأولى).
-- ميزانية الحزمة الأولى: تحذير 430 kB / خطأ 480 kB.
+- ميزانية الحزمة الأولى: تحذير 430 kB / خطأ 480 kB. **2026-10-14: 412 kB** بعد نقل الأيقونات إلى `public/icons.svg`، والشعار إلى قناع CSS من `public/brand/logo.svg` (`shared/ui/logo.ts`)، وتأجيل قائمة المظهر ونوافذ الإشعارات المنبثقة بـ `@defer (on idle)` في `main-layout.html`. إطار Angular نفسه ≈ 355 kB منها. قِس قبل أي إضافة كبيرة: `ng build --stats-json` ثم حلّل `dist/EWMS.Client/stats.json`.
 - الخطوط WOFF2 (`npm run fonts:woff2` يولّدها من OTF، تحقق جدولاً بجدول؛ OTF يبقى احتياطاً في `@font-face`): 168 → 85 kB.
 - **OnPush**: هو الافتراضي في Angular 22 لكل المكوّنات (لا يوجد `Eager` في المشروع). أي حالة تُعرض في القالب وتتغيّر بعد طلب/مؤقّت يجب أن تكون إشارة.
 - أنماط `shared/styles/*.scss` تبقى في المكوّنات (تُضمَّن في كل قطعة كسولة ~2 kB) عمداً: نقلها عاماً لا يسرّع أي صفحة ويجعل محدّدات مثل `dl` و`.panel` و`.actions` تسري على التطبيق كله.

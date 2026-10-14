@@ -67,7 +67,8 @@
         <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
       </div>
       <div class="topbar-actions">
-        <app-appearance-menu />
+        <!-- قائمة المظهر تُحمَّل بعد أن تهدأ الصفحة (خارج الحزمة الأولى)؛ حتى ذلك زر بنفس الشكل -->
+        @defer (on idle) { <app-appearance-menu /> } @placeholder { <button type="button" class="top-btn" aria-label="المظهر" disabled><app-icon name="palette" /></button> }
         @if (canNotify()) {
         <a class="top-btn bell" routerLink="/notifications" routerLinkActive="active"
            [attr.aria-label]="unreadCount() ? 'الإشعارات — ' + unreadCount() + ' غير مقروء' : 'الإشعارات'" title="الإشعارات">
@@ -91,6 +92,7 @@
 </main>
 
 <!-- خارج .shell: الـ shell عبارة عن grid بعمودين، وأي عنصر إضافي داخله يأخذ خلية ويكسر التخطيط -->
-<app-notification-toasts />
+<!-- نوافذ الإشعارات المنبثقة تُحمَّل بعد أن تهدأ الصفحة (خارج الحزمة الأولى) -->
+@defer (on idle) { <app-notification-toasts /> }
 <app-toasts />
 <app-confirm-host />
