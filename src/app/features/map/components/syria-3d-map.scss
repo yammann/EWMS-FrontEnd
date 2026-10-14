@@ -4,20 +4,6 @@
 /* موضع لوحة الرسم وطبقتها يُضبطان من الكود (تُنشأ ديناميكياً فلا تصلها هذه الأنماط) */
 
 .labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-.labels ::ng-deep .gov-label {
-  position: absolute; top: 0; left: 0;
-  min-height: 0; padding: 3px 9px; border-radius: 10px;
-  background: transparent; color: var(--ink-900);
-  font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap;
-  text-shadow: 0 0 4px var(--page-bg), 0 0 9px var(--page-bg);
-  pointer-events: auto; cursor: pointer;
-  transition: opacity .25s var(--ease), background-color .15s var(--ease);
-}
-.labels ::ng-deep .gov-label:hover, .labels ::ng-deep .gov-label:focus-visible {
-  background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur);
-  color: var(--brand-700); filter: none; transform-origin: center;
-}
-.labels ::ng-deep .gov-label:active { filter: none; }
 .labels ::ng-deep .pin-label {
   position: absolute; top: 0; left: 0;
   color: var(--ink-900); font-size: 12px; font-weight: 700; white-space: nowrap;

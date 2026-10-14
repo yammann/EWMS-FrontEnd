@@ -28,6 +28,8 @@ const project = (lng: number, lat: number): [number, number] => [(lng - LNG0) * 
  * — موقعان يرفعانها قليلاً فقط، والفرق يبقى واضحاً بين محافظة فيها مواقع كثيرة وأخرى فيها القليل (قرار المستخدم 2026-10-13).
  */
 const BASE_DEPTH = 1.4;
+/** محافظات صغيرة يُختار بالاقتراب من مركزها (بلا أسماء على الخريطة) */
+const SMALL_TARGETS = new Set(['SY01', 'SY14']);
 const depthFor = (sites: number) => BASE_DEPTH + Math.min(6, Math.log2(1 + sites) * .9);
 /** عرض المحافظة في عرضها المنفصل، وارتفاعها الأقصى فيه (بوحدات المشهد) */
 const FIT = 40, ISO_HEIGHT = 4;
@@ -40,7 +42,7 @@ interface Pin { point: MapPoint3d; piece: Piece; group: import('three').Group; h
  * خريطة سوريا ثلاثية الأبعاد (Three.js، تُحمَّل عند الطلب ومضمّنة في الحزمة — بلا إنترنت؛ قرار المستخدم 2026-10-13):
  * - كل محافظة قطعة مجسّمة تزيد سماكتها بلطف مع عدد مواقعها (badgeFor)، ولونها من fillFor (متغيرات الثيم).
  * - المواقع دبابيس مجسّمة بلون طبقتها الأولى، في عرض المحافظة فقط؛ الضغط على دبوس = pointSelect.
- * - الضغط على محافظة (أو اسمها) = governorateSelect؛ وحين يضبط الأب focus
+ * - الضغط على محافظة = governorateSelect (بلا أسماء على الخريطة: اسمها في تلميح المرور؛ دمشق والقنيطرة تُختاران بالاقتراب)؛ وحين يضبط الأب focus
  *   تختفي الباقية وتنتقل المحافظة إلى الوسط مكبّرة كخريطة منفصلة. الزر الأيمن أو Esc = back.
  * - السحب للتدوير والعجلة للتكبير. الرسم عند الحاجة فقط (أثناء الحركة والتفاعل) ثم يتوقف.
  * - بلا WebGL أو عند فشل التحميل يطلق failed فيعرض الأب الخريطة المسطحة.
@@ -167,11 +169,9 @@ class SceneState {
   private ground: import('three').Mesh;
   private pieces: Piece[] = [];
   private pins: Pin[] = [];
-  private labels = new Map<string, HTMLElement>();
   private pinLabels = new Map<Pin, HTMLElement>();
   private focus: Piece | null = null;
   private hovered: Piece | Pin | null = null;
-  private labelHover: Piece | null = null;
   private iso = { k: 0, f: 1, z: 1, cx: 0, cy: 0 };
   private fly: { t0: number; ms: number; fromT: import('three').Vector3; toT: import('three').Vector3; fromP: import('three').Vector3; toP: import('three').Vector3 } | null = null;
   private activeUntil = 0;
@@ -260,18 +260,6 @@ class SceneState {
       this.map.add(mesh);
       this.pieces.push(piece);
 
-      // اسم المحافظة: زر فوق المشهد (هدف كبير حتى للمحافظات الصغيرة)
-      const el = document.createElement('button');
-      el.type = 'button'; el.className = 'gov-label'; el.textContent = piece.name;
-      el.setAttribute('aria-label', 'محافظة ' + piece.name);
-      el.addEventListener('mouseenter', e => { this.labelHover = piece; this.showGovTip(piece, e); this.wake(); });
-      el.addEventListener('mousemove', e => this.showGovTip(piece, e));
-      el.addEventListener('mouseleave', () => { this.labelHover = null; this.cb.onTip(null); this.wake(); });
-      el.addEventListener('mousedown', e => e.preventDefault());   // بلا تركيز بالماوس: لا يقفز المتصفح إلى الزر
-      el.addEventListener('click', () => this.cb.onGovernorate(piece.code));
-      el.addEventListener('contextmenu', e => this.contextMenu(e));
-      this.labelsEl.appendChild(el);
-      this.labels.set(piece.code, el);
     }
   }
 
@@ -391,8 +379,9 @@ class SceneState {
       mouse.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(mouse, this.camera);
       const heads = this.pins.filter(p => p.group.visible).map(p => p.head);
-      const hit = ray.intersectObjects([...heads, ...this.pieces.filter(p => p.mesh.visible).map(p => p.mesh)], false)[0];
-      const next = (hit?.object.userData['pin'] as Pin | undefined) ?? (hit?.object.userData['piece'] as Piece | undefined) ?? null;
+      const near = this.focus ? null : this.nearSmall(e);
+      const hit = near ? null : ray.intersectObjects([...heads, ...this.pieces.filter(p => p.mesh.visible).map(p => p.mesh)], false)[0];
+      const next = near ?? (hit?.object.userData['pin'] as Pin | undefined) ?? (hit?.object.userData['piece'] as Piece | undefined) ?? null;
       if (next !== this.hovered) { this.hovered = next; this.wake(); }
       canvas.style.cursor = next && next !== this.focus ? 'pointer' : 'grab';
       if (!next || next === this.focus) { this.cb.onTip(null); return; }
@@ -444,6 +433,21 @@ class SceneState {
     this.cb.onBack();
   }
 
+  /**
+   * بلا أسماء على الخريطة تصعب إصابة دمشق والقنيطرة لصغرهما: يكفي أن يقترب المؤشر من مركز إحداهما على الشاشة
+   * (22px) فتُختار، كالمغناطيس.
+   */
+  private nearSmall(e: MouseEvent): Piece | null {
+    const r = this.host.getBoundingClientRect(), v = new this.T.Vector3();
+    for (const p of this.pieces) {
+      if (!SMALL_TARGETS.has(p.code)) continue;
+      v.set(p.center[0], p.center[1], p.depth); this.map.localToWorld(v); v.project(this.camera);
+      const x = r.left + (v.x + 1) / 2 * r.width, y = r.top + (1 - v.y) / 2 * r.height;
+      if (Math.hypot(e.clientX - x, e.clientY - y) < 22) return p;
+    }
+    return null;
+  }
+
   private local(e: MouseEvent) { const r = this.host.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
   private showGovTip(p: Piece, e: MouseEvent) { if (p !== this.focus) this.cb.onTip({ ...this.local(e), title: p.name, sub: this.cb.subFor(p.code), code: p.code }); }
 
@@ -489,7 +493,7 @@ class SceneState {
     let moving = ek > 0 && ek < 1;
 
     for (const p of this.pieces) {
-      const lift = (p === this.hovered || p === this.labelHover) && !this.focus ? 1.6 : 0;
+      const lift = p === this.hovered && !this.focus ? 1.6 : 0;
       p.lift += (lift - p.lift) * a(.15);
       const mats = p.mesh.material as import('three').MeshStandardMaterial[];
       const fade = this.focus && p !== this.focus ? 0 : 1;
@@ -525,14 +529,6 @@ class SceneState {
     const T = this.T, v = new T.Vector3();
     const { clientWidth: w, clientHeight: h } = this.host;
     const at = (x: number, y: number, z: number) => { v.set(x, y, z); this.map.localToWorld(v); v.project(this.camera); return { x: (v.x + 1) / 2 * w, y: (1 - v.y) / 2 * h, behind: v.z > 1 }; };
-    for (const p of this.pieces) {
-      const el = this.labels.get(p.code)!;
-      const s = at(p.center[0], p.center[1], p.depth + p.lift / mz + 1.2 / mz);
-      const o = (p.mesh.material as import('three').MeshStandardMaterial[])[0].opacity;
-      el.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)`;
-      el.style.opacity = s.behind || this.focus ? '0' : String(o);
-      el.style.visibility = this.focus || s.behind ? 'hidden' : 'visible';
-    }
     for (const [pin, el] of this.pinLabels) {
       const s = at(pin.group.position.x, pin.group.position.y, pin.group.position.z + (pin.h + 1.1) / mz);
       el.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)`;
@@ -553,7 +549,6 @@ class SceneState {
     });
     this.renderer.dispose();
     this.renderer.domElement.remove();
-    this.labels.forEach(el => el.remove());
     this.pinLabels.forEach(el => el.remove());
     this.probe.remove();
   }
