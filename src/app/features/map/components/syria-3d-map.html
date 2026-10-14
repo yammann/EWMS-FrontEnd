@@ -2,6 +2,7 @@
   <app-map-backdrop [focused]="!!focus()" />
   <div #labels class="labels" aria-hidden="false"></div>
 
+  <div class="zoom-hint" [class.show]="zoomHint()" role="status">للتكبير: <kbd>Ctrl</kbd> + العجلة</div>
   @if (loading()) { <div class="loading" role="status">جارٍ تحميل الخريطة…</div> }
 
   <!-- طابع المحافظة المعروضة (من الهوية البصرية) — كطابع على رسالة -->

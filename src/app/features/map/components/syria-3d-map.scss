@@ -1,8 +1,7 @@
 /* الخريطة ثلاثية الأبعاد: اللوحة (canvas) + الأسماء والتلميح فوقها كعناصر HTML بخط الواجهة وألوان الثيم */
 :host { display: block; }
 .stage { position: relative; overflow: hidden; user-select: none; }
-.stage > canvas { position: absolute; inset: 0; z-index: 1; display: block; width: 100%; height: 100%; cursor: grab; outline: none; }
-.stage > canvas:active { cursor: grabbing; }
+/* موضع لوحة الرسم وطبقتها يُضبطان من الكود (تُنشأ ديناميكياً فلا تصلها هذه الأنماط) */
 
 .labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .labels ::ng-deep .gov-label {
@@ -27,6 +26,17 @@
 }
 
 
+/* تلميح التكبير بعد التمرير فوق الخريطة */
+.zoom-hint {
+  position: absolute; bottom: 18px; left: 50%; z-index: 3; transform: translate(-50%, 8px);
+  padding: 7px 14px; border-radius: var(--radius-full);
+  background: var(--material); backdrop-filter: var(--material-blur); -webkit-backdrop-filter: var(--material-blur);
+  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  color: var(--ink-700); font-size: 12px; font-weight: 700; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .25s var(--ease), transform .3s var(--ease-spring);
+}
+.zoom-hint.show { opacity: 1; transform: translate(-50%, 0); }
+.zoom-hint kbd { padding: 1px 6px; border-radius: 5px; background: var(--fill); font: inherit; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-400); font-size: 13px; }
 
 .tip {

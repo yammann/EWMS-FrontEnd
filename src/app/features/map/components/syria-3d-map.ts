@@ -76,6 +76,14 @@ export class Syria3dMap {
   readonly loading = signal(true);
   /** تدوير تلقائي هادئ حول الخريطة (زر تشغيل/إيقاف) */
   readonly spinning = signal(false);
+  /** تلميح التكبير بعد تمرير العجلة فوق الخريطة */
+  protected zoomHint = signal(false);
+  private hintTimer?: ReturnType<typeof setTimeout>;
+  private flashHint() {
+    this.zoomHint.set(true);
+    clearTimeout(this.hintTimer);
+    this.hintTimer = setTimeout(() => this.zoomHint.set(false), 1400);
+  }
 
   private host = viewChild.required<ElementRef<HTMLElement>>('stage');
   private labelsEl = viewChild.required<ElementRef<HTMLElement>>('labels');
@@ -110,7 +118,8 @@ export class Syria3dMap {
         onTip: tip => this.zone.run(() => this.tip.set(tip)),
         subFor: code => this.subFor()(code),
         isFocused: () => !!this.focus(),
-        onTheme: () => this.refresh()
+        onTheme: () => this.refresh(),
+        onZoomHint: () => this.zone.run(() => this.flashHint())
       });
       this.refresh();
       this.scene.applyFocus(this.focus(), true);
@@ -145,6 +154,8 @@ interface Callbacks {
   isFocused(): boolean;
   /** الثيم أو الوضع الداكن تغيّر: ألوان جديدة */
   onTheme(): void;
+  /** عجلة بلا Ctrl: تلميح «Ctrl + العجلة للتكبير» لحظةً (والصفحة تتحرك) */
+  onZoomHint(): void;
 }
 
 class SceneState {
@@ -179,17 +190,22 @@ class SceneState {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = T.PCFShadowMap;
+    // لوحة الرسم تُنشأ بالكود فلا تصلها أنماط المكوّن (العزل): موضعها وطبقتها هنا — فوق الخلفية وتحت الأسماء
+    Object.assign(this.renderer.domElement.style, { position: 'absolute', inset: '0', zIndex: '1', display: 'block', width: '100%', height: '100%', outline: 'none', cursor: 'grab' });
     host.prepend(this.renderer.domElement);
 
     this.world = new T.Scene();
     this.camera = new T.PerspectiveCamera(38, 1, .5, 2000);
     this.camera.position.set(...HOME.camera);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    Object.assign(this.controls, { enableDamping: true, dampingFactor: .08, minDistance: 14, maxDistance: 190, enablePan: false,
+    // العجلة تحرّك الصفحة (الخريطة تملأ الشاشة)؛ التكبير بـ Ctrl + العجلة أو بالزر الأوسط أو بإصبعين — انظر listen()
+    Object.assign(this.controls, { enableDamping: true, dampingFactor: .08, minDistance: 14, maxDistance: 190, enablePan: false, enableZoom: false,
       maxPolarAngle: Math.PI * .44, minPolarAngle: Math.PI * .08 });
     // الزر الأيمن للرجوع (لا للتحريك)
     this.controls.mouseButtons = { LEFT: T.MOUSE.ROTATE, MIDDLE: T.MOUSE.DOLLY, RIGHT: null as unknown as import('three').MOUSE };
     this.controls.target.set(...HOME.target);
+    // اللمس: السحب العمودي بإصبع يمرّر الصفحة، والتدوير بالسحب الأفقي
+    this.renderer.domElement.style.touchAction = 'pan-y';
     this.controls.addEventListener('change', () => this.wake());
 
     this.world.add(new T.HemisphereLight(0xffffff, 0x8a8f8c, 1.15));
@@ -402,13 +418,22 @@ class SceneState {
     canvas.addEventListener('pointerdown', pdown);
     canvas.addEventListener('pointerup', pup);
     canvas.addEventListener('contextmenu', ctx);
-    canvas.addEventListener('wheel', () => this.wake(), { passive: true });
+    // العجلة وحدها تمرّر الصفحة (لا نمنعها)؛ مع Ctrl (أو ⌘) تكبّر الخريطة وتصغّرها
+    const wheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) { this.cb.onZoomHint(); return; }
+      e.preventDefault();
+      const offset = this.camera.position.clone().sub(this.controls.target);
+      offset.setLength(Math.min(this.controls.maxDistance, Math.max(this.controls.minDistance, offset.length() * Math.exp(e.deltaY * .0015))));
+      this.camera.position.copy(this.controls.target).add(offset);
+      this.wake();
+    };
+    canvas.addEventListener('wheel', wheel, { passive: false });
     ro.observe(this.host);
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-mode'] });
     this.cleanup.push(() => {
       canvas.removeEventListener('pointermove', move); canvas.removeEventListener('pointerleave', leave);
       canvas.removeEventListener('pointerdown', pdown); canvas.removeEventListener('pointerup', pup);
-      canvas.removeEventListener('contextmenu', ctx); ro.disconnect(); theme.disconnect(); scheme?.removeEventListener('change', schemeChange);
+      canvas.removeEventListener('contextmenu', ctx); canvas.removeEventListener('wheel', wheel); ro.disconnect(); theme.disconnect(); scheme?.removeEventListener('change', schemeChange);
     });
   }
 
