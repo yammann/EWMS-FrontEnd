@@ -49,15 +49,6 @@ button.ghost:hover:not(:disabled),
 .btn-ghost:hover:not(:disabled),
 .ghost:hover:not(:disabled) { background: var(--fill-strong); filter: none; }
 
-/* ملوّن خفيف (Tinted) */
-.btn-tinted,
-button.tinted {
-  background: var(--brand-100);
-  color: var(--brand-700);
-}
-.btn-tinted:hover:not(:disabled),
-button.tinted:hover:not(:disabled) { background: var(--brand-200); filter: none; }
-
 button.danger,
 .btn-danger,
 .danger {
@@ -164,13 +155,11 @@ button.btn-sm {
 
 .form-field { display: flex; flex-direction: column; gap: 7px; }
 
-.form-label,
-.form-label-block {
+.form-label {
   color: var(--ink-700);
   font-size: 13px;
   font-weight: 700;
 }
-.form-label-block { display: grid; gap: 7px; }
 
 .form-hint {
   color: var(--ink-400);

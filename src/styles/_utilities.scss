@@ -8,38 +8,8 @@
 @keyframes alertIn { from { opacity: 0; transform: scale(1.12); } to { opacity: 1; transform: none; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes toastIn { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: none; } }
-@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-@keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-@keyframes shine { 0% { transform: translateX(-120%); } 40% { transform: translateX(120%); } 100% { transform: translateX(120%); } }
 
 .spin { animation: spin .8s linear infinite; }
-
-/* ظهور متتابع */
-.anim-fade-up {
-  opacity: 0;
-  transform: translateY(16px);
-  animation: fadeUp .7s var(--ease-spring) forwards;
-  animation-delay: var(--delay, 0ms);
-}
-
-.gradient-text {
-  background: linear-gradient(90deg, var(--brand-500), var(--accent), var(--brand-500));
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradientShift 4s ease-in-out infinite;
-}
-
-.btn-with-shine { position: relative; overflow: hidden; }
-.btn-shine {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, .3) 50%, transparent 70%);
-  transform: translateX(-120%);
-  pointer-events: none;
-  animation: shine 4s ease-in-out infinite;
-}
 
 /* قيم تقنية ونسخ (app-copy-text / app-secret-text) */
 .mono { font-family: var(--font-mono); font-size: .92em; direction: ltr; unicode-bidi: isolate; }
@@ -65,5 +35,4 @@
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
-  .anim-fade-up { opacity: 1; transform: none; }
 }

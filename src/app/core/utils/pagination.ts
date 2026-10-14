@@ -43,7 +43,7 @@ export class Pagination<T> {
     return this.source().slice(start, start + size);
   });
 
-  constructor(private source: () => T[], private options: PaginationOptions = {}) {
+  constructor(private source: () => T[], options: PaginationOptions = {}) {
     this.sizes = options.sizes ?? [10, 25, 50];
     this.pageSize.set(savedSize(options.size ?? this.sizes[0], this.sizes));
     if (options.urlKey) {

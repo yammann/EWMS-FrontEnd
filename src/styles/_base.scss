@@ -38,7 +38,6 @@ svg { display: block; }
    تخطيط الصفحة (مشترك بين كل الصفحات)
    ========================================================= */
 .page,
-.projects-page,
 .departments-page,
 .branches-page,
 .users-page,
@@ -104,35 +103,19 @@ svg { display: block; }
   flex-wrap: wrap;
 }
 
-.new-btn,
-.new-project-btn { white-space: nowrap; }
+.new-btn { white-space: nowrap; }
 
 /* =========================================================
    الشبكات
    ========================================================= */
-.stats-grid,
-.grid-2,
-.grid-3,
-.grid-4 { display: grid; gap: 16px; }
-
-.stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.grid-2     { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.grid-3     { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.grid-4     { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stats-grid { display: grid; gap: 16px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 @media (max-width: 1150px) {
-  .stats-grid,
-  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 980px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
   .page,
-  .projects-page,
   .departments-page,
   .branches-page,
   .users-page,

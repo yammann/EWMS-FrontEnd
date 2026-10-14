@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { VacationService } from '../data-access/vacation.service';
 import { VacationPrint } from '../data-access/vacation.models';
 import { Logo } from '@shared/ui/logo';
@@ -22,7 +22,6 @@ import { PRINT_HEADER } from '@core/constants/print';
 })
 export class VacationPrintPage {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
 
   /** الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
   header = PRINT_HEADER;
