@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ToDoService } from './todo.service';
+import { importantFirst } from './todo.models';
 
 describe('To-do lists API contract', () => {
   let service: ToDoService;
@@ -83,5 +84,22 @@ describe('To-do lists API contract', () => {
     const clear = http.expectOne('/api/ToDoLists/ClearDone/2');
     expect(clear.request.method).toBe('DELETE');
     clear.flush({});
+  });
+
+  it('sends the item color when adding and editing', () => {
+    service.addItem(1, { title: 'أ', color: 'red' }).subscribe();
+    const add = http.expectOne('/api/ToDoLists/Items/1');
+    expect(add.request.body).toMatchObject({ title: 'أ', color: 'red' });
+    add.flush({});
+    service.updateItem(5, { color: '' }).subscribe();
+    const edit = http.expectOne('/api/ToDoLists/Item/5');
+    expect(edit.request.body).toEqual({ color: '' });
+    edit.flush({});
+  });
+
+  it('shows open important items first and keeps the order inside each group', () => {
+    const item = (id: number, isImportant: boolean, isDone = false) => ({ id, isImportant, isDone });
+    const ordered = importantFirst([item(1, false), item(2, true), item(3, false), item(4, true, true), item(5, true)]);
+    expect(ordered.map(i => i.id)).toEqual([2, 5, 1, 3, 4]);   // المنجزة الهامة لا تتقدّم
   });
 });

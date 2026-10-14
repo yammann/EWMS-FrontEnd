@@ -9,6 +9,8 @@ export interface MapPoint {
   label: string;
   sub?: string;
   selected?: boolean;
+  /** ألوان الطبقات التي يقع فيها الموقع: الأول للنقطة، والتاليان حلقتان داخلها (فارغ = لون الواجهة) */
+  colors?: string[];
 }
 
 interface Tip { x: number; y: number; title: string; sub: string; /** رمز المحافظة — يعرض طابعها في التلميح */ code?: string; }

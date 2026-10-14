@@ -24,10 +24,10 @@
 
   @if (data(); as d) {
     <section class="dash-stats" aria-label="إحصائيات القسم">
-      <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="🚪" tone="purple" />
-      <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="👥" tone="green" />
-      <app-stat-tile label="مهام العمل" [value]="d.tasksCount" icon="📋" tone="blue" hint="المسنَدة لموظفي القسم" />
-      <app-stat-tile label="موظفون بلا مهام" [value]="d.employeesWithoutTasks" icon="🧩" tone="orange" [alert]="d.employeesWithoutTasks > 0" />
+      <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="door" tone="purple" />
+      <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="users" tone="green" />
+      <app-stat-tile label="مهام العمل" [value]="d.tasksCount" icon="clipboard" tone="blue" hint="المسنَدة لموظفي القسم" />
+      <app-stat-tile label="موظفون بلا مهام" [value]="d.employeesWithoutTasks" icon="puzzle" tone="orange" [alert]="d.employeesWithoutTasks > 0" />
     </section>
 
     @if (isOwn()) {

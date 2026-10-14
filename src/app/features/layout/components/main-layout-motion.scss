@@ -1,0 +1,65 @@
+/* =========================================================
+   حركات السايدبار (2026-10-13، طلب المستخدم):
+   - مؤشر الصفحة الحالية: خلفية واحدة تنزلق بين الروابط (موضعه من placeIndicator في main-layout.ts)
+   - الطي: تتلاشى الأسماء نحو الأيقونات ثم يضيق؛ التوسيع: تظهر الأسماء بالتتابع
+   - فتح قسم: صفحاته تنزل واحدة بعد الأخرى (--i = ترتيب الرابط)
+   - المرور والضغط على الأيقونات، وارتداد أيقونة القسم عند فتحه
+   كلها تتوقف مع «تقليل الحركة» في النظام.
+   ========================================================= */
+nav { position: relative; }
+
+.nav-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: var(--radius-sm);
+  background: var(--brand-600);
+  box-shadow: 0 6px 16px -8px var(--brand-600);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .45s var(--ease-spring), width .45s var(--ease-spring), height .45s var(--ease-spring), opacity .2s var(--ease);
+}
+nav a { z-index: 1; }
+nav a.active, nav a.active:hover { background: transparent; }
+
+/* الطي والتوسيع */
+nav a .label, .brand-text, .nav-section, .sidebar-foot { transition: opacity .14s var(--ease), transform .14s var(--ease); }
+.shell.collapsing {
+  nav a .label, .brand-text, .nav-section, .sidebar-foot { opacity: 0; transform: translateX(10px); }
+}
+.shell.expanding {
+  nav a .label { animation: label-in .42s var(--ease-spring) both; animation-delay: calc(90ms + var(--i, 0) * 18ms); }
+  .brand-text, .nav-section, .sidebar-foot { animation: label-in .42s var(--ease-spring) 60ms both; }
+}
+/* لحظة التبديل بين الوضعين: لا تُحرَّك الأقسام (تتغيّر بنيتها)، والعمود يظهر بتلاشٍ واحد */
+.shell.settling, .shell.expanding {
+  .nav-group, .rail-tray .nav-group-inner { transition: none; }
+}
+.shell.settling nav { animation: nav-in .3s var(--ease) both; }
+.shell.settling .nav-group a { animation: none; }
+@keyframes nav-in { from { opacity: 0; } }
+@keyframes label-in { from { opacity: 0; transform: translateX(10px); } }
+
+/* صفحات القسم بالتتابع عند فتحه */
+.nav-group:not(.closed) a { animation: item-in .34s var(--ease-spring) both; animation-delay: calc(var(--i, 0) * 28ms); }
+@keyframes item-in { from { opacity: 0; transform: translateY(-6px); } }
+
+/* المرور والضغط */
+nav a app-icon, .rail-section .rail-icon { transition: transform .28s var(--ease-spring), color .15s var(--ease); }
+nav a:hover app-icon { transform: translateX(-2px) scale(1.08); }
+nav a:active app-icon { transform: scale(.88); }
+.rail-section:hover .rail-icon { transform: translateY(-1px) scale(1.06); }
+.rail-section.open .rail-icon { animation: icon-pop .5s var(--ease-spring); }
+@keyframes icon-pop { 35% { transform: scale(.84); } 70% { transform: scale(1.1); } }
+
+/* الشاشة الصغيرة: شبكة أزرار بلا مؤشر منزلق */
+@media (max-width: 860px) {
+  .nav-indicator { display: none; }
+  nav a.active { background: var(--brand-600); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell, .nav-group, .nav-indicator, nav a, nav a .label, nav a app-icon, .rail-section .rail-icon,
+  .brand-text, .nav-section, .sidebar-foot, .rail-tray .nav-group-inner { animation: none !important; transition: none !important; }
+}

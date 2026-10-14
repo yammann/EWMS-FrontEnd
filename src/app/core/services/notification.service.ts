@@ -162,7 +162,7 @@ export class NotificationService {
   }
 }
 
-/** الوجهة عند فتح الإشعار: طلبات تنتظر قرار المدير → المراجعة، وغيرها → ملف الموظف */
+/** الوجهة عند فتح الإشعار: طلبات تنتظر قرار المدير → المراجعة، وبقية إشعارات الإجازات → «إجازاتي»، وغيرها → الملف الشخصي */
 export function notificationRoute(n: AppNotification, canReview: boolean): string {
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
@@ -173,6 +173,6 @@ export function notificationRoute(n: AppNotification, canReview: boolean): strin
   if (n.relatedEntityType === 'SparePart' && n.relatedEntityId) return `/maintenance/parts?part=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MaintenanceTask' && n.relatedEntityId) return `/maintenance/tasks?task=${n.relatedEntityId}`;
   const reviewTypes = ['VacationSubmitted', 'VacationForwardedToBranchManager', 'VacationCancelled'];
-  return n.relatedEntityType === 'Vacation' && reviewTypes.includes(n.type) && canReview
-    ? '/vacations/review' : '/profile';
+  if (n.relatedEntityType === 'Vacation') return reviewTypes.includes(n.type) && canReview ? '/vacations/review' : '/vacations/my';
+  return '/profile';
 }

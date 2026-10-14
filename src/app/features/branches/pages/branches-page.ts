@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { Alert } from '@shared/ui/alert';
 import { Component, computed, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AppPermission } from '@core/constants/access';
@@ -14,12 +15,13 @@ import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { StatTile } from '@shared/ui/stat-tile';
 import { BranchService } from '../data-access/branch.service';
+import { Icon } from '@shared/ui/icon';
 
 /** الفروع — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-branches-page',
   standalone: true,
-  imports: [EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './branches-page.html',
   styleUrl: './branches-page.scss'
 })

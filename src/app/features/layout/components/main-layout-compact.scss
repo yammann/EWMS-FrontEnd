@@ -1,0 +1,85 @@
+/* الشاشات الصغيرة (≤ 860px): السايدبار شريط ثابت بزر «القائمة» وشبكة أزرار — ملف مستقل عن main-layout.scss
+   كي يبقى كل ملف ضمن ميزانية أنماط المكوّن (8 kB). COMPACT_QUERY في main-layout.ts يطابق @media هنا. */
+/* زر «القائمة» للشاشات الصغيرة فقط */
+.menu-toggle { display: none; }
+
+@media (max-width: 860px) {
+  .shell, .shell.collapsed { grid-template-columns: 1fr; }
+  .sidebar-toggle { display: none; }
+
+  .sidebar, .shell.collapsed .sidebar {
+    position: static;
+    height: auto;
+    gap: 0;
+    padding: 10px 12px;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--separator);
+    overflow: visible;
+  }
+
+  .sidebar-head, .shell.collapsed .sidebar-head { flex-direction: row; padding-bottom: 0; border-bottom: 0; }
+  .brand, .shell.collapsed .brand { justify-content: flex-start; flex: 1; padding: 2px 4px; }
+  .brand-logo, .shell.collapsed .brand-logo { width: 38px; height: 34px; }
+  .shell.collapsed .brand-text { display: grid; }
+  .sidebar-foot { display: none; }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: var(--radius-md);
+    background: var(--fill);
+    color: var(--ink-800);
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: none;
+  }
+  .menu-toggle app-icon { width: 18px; height: 18px; }
+  .menu-toggle:hover:not(:disabled) { background: var(--fill-strong); filter: none; transform: none; }
+
+  /* الروابط مغلقة حتى «القائمة»، ثم شبكة أزرار متساوية العرض والارتفاع بعناوين أقسامها (لا زر يتمدد) */
+  nav { display: none; }
+  .shell.menu-open nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 6px;
+    border-top: 1px solid var(--separator);
+    animation: menu-in .2s var(--ease);
+  }
+  .nav-group, .nav-group-inner { display: contents; }
+  .nav-heading { grid-column: 1 / -1; margin: 10px 4px 2px; color: var(--ink-400); font-size: 12px; font-weight: 700; }
+
+  nav a, .shell.collapsed nav a {
+    min-width: 0;
+    min-height: 40px;
+    padding: 0 12px;
+    justify-content: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    background: var(--fill);
+  }
+  nav a app-icon, .shell.collapsed nav a app-icon { width: 17px; height: 17px; flex: none; }
+  .shell.collapsed nav a .label { display: inline; }
+  .shell.collapsed nav a::after { display: none; }
+
+  .topbar { padding: 0 16px; }
+  .greeting { display: none; }
+  .topbar-actions { margin-inline-start: auto; justify-content: flex-end; }
+}
+
+@keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
+
+@media (max-width: 560px) {
+  .me-text { display: none; }
+  .me { padding: 2px; }
+  .shell.menu-open nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell.menu-open nav { animation: none; }
+}

@@ -17,10 +17,10 @@
 
   @if (data(); as d) {
     <section class="dash-stats" aria-label="إحصائيات الفرع">
-      <app-stat-tile label="الأقسام" [value]="d.departmentsCount" icon="🏢" tone="blue" />
-      <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="🚪" tone="purple" />
-      <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="👥" tone="green" />
-      <app-stat-tile label="مهام الفرع" [value]="d.tasksCount" icon="📋" tone="orange" [hint]="d.employeesWithTasks + ' موظف مسؤول عن مهام'" />
+      <app-stat-tile label="الأقسام" [value]="d.departmentsCount" icon="building" tone="blue" />
+      <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="door" tone="purple" />
+      <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="users" tone="green" />
+      <app-stat-tile label="مهام الفرع" [value]="d.tasksCount" icon="clipboard" tone="orange" [hint]="d.employeesWithTasks + ' موظف مسؤول عن مهام'" />
     </section>
 
     <section class="panel">

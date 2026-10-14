@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { DeviceService, saveBlob } from '../data-access/device.service';
 import { DeviceInventoryLog, ImportReport, INSTALLATION_STATUSES } from '../data-access/device.models';
+import { Department } from '@core/models/ewms.models';
 import { Modal } from '@shared/ui/modal';
 import { ToastService } from '@shared/ui/toast.service';
 import { Pager } from '@shared/ui/pager';
@@ -9,22 +10,23 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
+import { Icon } from '@shared/ui/icon';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)
  * ويُسجَّل كل إظهار ونسخ في سجل التركيب. من لا يملك الصلاحية يرى «مخفية».
  */
 @Component({
-  selector: 'app-device-password', standalone: true,
+  selector: 'app-device-password', standalone: true, imports: [Icon],
   template: `
     @if (!hasPassword()) { <span class="muted-cell">—</span> }
-    @else if (!access().canRevealPasswords) { <span class="muted-cell" title="إظهار كلمات السر يحتاج صلاحية خاصة">مخفية 🔒</span> }
+    @else if (!access().canRevealPasswords) { <span class="muted-cell" title="إظهار كلمات السر يحتاج صلاحية خاصة">مخفية <app-icon name="lock" [size]="13" /></span> }
     @else {
       <span class="secret">
         <span class="mono">{{ value() ?? '••••••••' }}</span>
         <button type="button" class="icon-btn-sm" (click)="toggle()" [disabled]="busy()"
-                [attr.aria-label]="value() ? 'إخفاء كلمة السر' : 'إظهار كلمة السر'" [attr.aria-pressed]="!!value()">{{ value() ? '🙈' : '👁' }}</button>
-        <button type="button" class="icon-btn-sm" (click)="copy()" [disabled]="busy()" aria-label="نسخ كلمة السر">⧉</button>
+                [attr.aria-label]="value() ? 'إخفاء كلمة السر' : 'إظهار كلمة السر'" [attr.aria-pressed]="!!value()"><app-icon [name]="value() ? 'eyeSlash' : 'eye'" /></button>
+        <button type="button" class="icon-btn-sm" (click)="copy()" [disabled]="busy()" aria-label="نسخ كلمة السر" title="نسخ كلمة السر"><app-icon name="copy" /></button>
       </span>
     }`
 })
@@ -136,7 +138,7 @@ export class DeviceHistory implements OnInit {
  * الموقع يجب أن يكون موجوداً، والجهاز الجديد يُضاف إلى الكتالوج (قرار المستخدم 2026-10-05).
  */
 @Component({
-  selector: 'app-installations-import', standalone: true, imports: [Alert, Modal],
+  selector: 'app-installations-import', standalone: true, imports: [Alert, Modal, Icon],
   templateUrl: './device-ui-installations-import.html',
   styles: [`
     .steps { margin: 0; padding-inline-start: 20px; display: grid; gap: 4px; font-size: 13px; color: var(--ink-600); }
@@ -153,6 +155,9 @@ export class InstallationsImport {
   private service = inject(DeviceService);
   imported = output<number>();
   closed = output<void>();
+  /** أقسام يمكن تسجيل الأسطر باسمها (لمن يختار القسم) — فارغة = قسم المستورد */
+  departments = input<Department[]>([]);
+  departmentId = signal(0);
 
   file = signal<File | null>(null);
   report = signal<ImportReport | null>(null);
@@ -175,9 +180,15 @@ export class InstallationsImport {
 
   commit() { this.send(false); }
 
+  /** تغيير القسم يعيد المعاينة (الأسطر ستُسجَّل باسمه) */
+  setDepartment(id: number) {
+    this.departmentId.set(id);
+    if (this.file()) this.send(true);
+  }
+
   private send(dryRun: boolean) {
     const file = this.file();
     if (!file) return;
-    trackRequest(this.service.importInstallations(file, dryRun), this.busy, this.error, r => { this.report.set(r); if (!dryRun) this.imported.emit(r.imported); });
+    trackRequest(this.service.importInstallations(file, dryRun, this.departmentId() || null), this.busy, this.error, r => { this.report.set(r); if (!dryRun) this.imported.emit(r.imported); });
   }
 }

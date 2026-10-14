@@ -9,17 +9,8 @@
   <link rel="icon" type="image/svg+xml" href="brand/logo.svg">
   <link rel="preload" href="fonts/qomra-arabic-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/qomra-arabic-bold.woff2" as="font" type="font/woff2" crossorigin>
-  <script>
-    // المظهر المحفوظ قبل تحميل Angular (نفس منطق ThemeService) — حتى لا تومض الألوان عند الفتح
-    (function () {
-      try {
-        var saved = JSON.parse(localStorage.getItem('ewms_appearance') || 'null') || {};
-        var root = document.documentElement;
-        if (/^(forest|wheat|charcoal|umber)$/.test(saved.palette)) root.setAttribute('data-theme', saved.palette);
-        if (saved.mode === 'light' || saved.mode === 'dark') root.setAttribute('data-mode', saved.mode);
-      } catch (e) { /* التخزين غير متاح */ }
-    })();
-  </script>
+  <!-- المظهر المحفوظ قبل تحميل Angular (ملف مستقل: CSP تمنع السكربت المضمّن) -->
+  <script src="theme-init.js"></script>
 </head>
 <body>
   <app-root></app-root>

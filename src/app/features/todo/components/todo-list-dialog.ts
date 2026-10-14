@@ -6,10 +6,11 @@ import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
+import { Icon, iconFor } from '@shared/ui/icon';
 
-/** نافذة إنشاء قائمة أو تعديلها: الاسم والوصف واللون والرمز */
+/** نافذة إنشاء قائمة أو تعديلها: الاسم والوصف واللون والأيقونة (القيمة المحفوظة مفتاح من TODO_ICONS) */
 @Component({
-  selector: 'app-todo-list-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
+  selector: 'app-todo-list-dialog', standalone: true, imports: [Icon, FormActions, Alert, FormsModule, Modal],
   templateUrl: './todo-list-dialog.html',
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
@@ -17,13 +18,14 @@ import { FormActions } from '@shared/ui/form-actions';
     .swatch { width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 3px solid transparent; box-shadow: none; }
     .swatch.on { outline: 2px solid var(--ink-900); outline-offset: 2px; }
     .swatch:hover:not(:disabled) { transform: none; box-shadow: none; filter: brightness(.95); }
-    .ico { width: 38px; min-height: 38px; padding: 0; font-size: 18px; background: var(--fill); box-shadow: none; }
-    .ico.on { background: var(--brand-50); outline: 2px solid var(--brand-600); }
+    .ico { display: grid; place-items: center; width: 38px; min-height: 38px; padding: 0; background: var(--fill); color: var(--ink-700); box-shadow: none; }
+    .ico app-icon { width: 19px; height: 19px; }
+    .ico.on { background: var(--brand-50); color: var(--brand-700); outline: 2px solid var(--brand-600); }
     .ico:hover:not(:disabled) { transform: none; box-shadow: none; background: var(--fill-strong); }
-    .own { width: 130px; }
   `]
 })
 export class TodoListDialog implements OnInit {
+  iconFor = iconFor;
   private service = inject(ToDoService);
 
   list = input<ToDoList | null>(null);

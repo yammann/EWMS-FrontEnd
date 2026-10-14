@@ -7,8 +7,8 @@
     </div>
     <div class="header-actions">
       @if (request(); as r) {
-        <a class="btn btn-ghost" [routerLink]="['/maintenance/print', r.id, 'receipt']">🖨 إيصال الاستلام</a>
-        <a class="btn btn-ghost" [routerLink]="['/maintenance/print', r.id, 'delivery']">🖨 ورقة التسليم</a>
+        <a class="btn btn-ghost" [routerLink]="['/maintenance/print', r.id, 'receipt']"><app-icon name="printer" [size]="16" /> إيصال الاستلام</a>
+        <a class="btn btn-ghost" [routerLink]="['/maintenance/print', r.id, 'delivery']"><app-icon name="printer" [size]="16" /> ورقة التسليم</a>
         @if (canEdit()) { <button class="btn" type="button" (click)="openEdit()">تعديل</button> }
       }
     </div>
@@ -18,17 +18,17 @@
 
   @if (request(); as r) {
     @if (r.isClosed) {
-      <p class="alert notice closed-note" role="status">🔒 الطلب مُغلق ({{ stageLabel(r.statusStage) }}) — لا تعديل ولا تغيير حالة ولا نقل. إن عاد الجهاز يُسجَّل له طلب جديد.</p>
+      <p class="alert notice closed-note" role="status"><app-icon name="lock" [size]="15" /> الطلب مُغلق ({{ stageLabel(r.statusStage) }}) — لا تعديل ولا تغيير حالة ولا نقل. إن عاد الجهاز يُسجَّل له طلب جديد.</p>
     }
     <app-transfer-panel [request]="r" (changed)="load(false)" />
 
     @if (canChangeStatus() && statuses().length) {
       <section class="panel">
-        <div class="panel-heading"><div><h2>حالة الطلب</h2><p>انقر على الحالة الجديدة لتحديث الطلب — يُسجَّل التغيير ويصل إشعار للمعنيين. الحالات المعلَّمة بـ🔒 نهائية وتُقفل الطلب بعد التأكيد.</p></div></div>
+        <div class="panel-heading"><div><h2>حالة الطلب</h2><p>انقر على الحالة الجديدة لتحديث الطلب — يُسجَّل التغيير ويصل إشعار للمعنيين. الحالات المعلَّمة بـ<app-icon name="lock" [size]="12" /> نهائية وتُقفل الطلب بعد التأكيد.</p></div></div>
         <div class="status-pick" role="radiogroup" aria-label="حالة الطلب">
           @for (s of statuses(); track s.id) {
             <button type="button" role="radio" [attr.aria-checked]="s.id === r.maintenanceRequestStatusId" [class.on]="s.id === r.maintenanceRequestStatusId"
-                    [style.--c]="s.color" [disabled]="busy()" [title]="stageLabel(s.stage)" (click)="setStatus(s)"><i aria-hidden="true"></i>{{ s.name }}@if (isFinal(s.stage)) { <span aria-label="نهائية"> 🔒</span> }</button>
+                    [style.--c]="s.color" [disabled]="busy()" [title]="stageLabel(s.stage)" (click)="setStatus(s)"><i aria-hidden="true"></i>{{ s.name }}@if (isFinal(s.stage)) { <app-icon name="lock" [size]="13" aria-label="نهائية" /> }</button>
           }
         </div>
       </section>
@@ -83,7 +83,7 @@
         <ol class="timeline">
           @for (a of activities(); track a.id) {
             <li class="t-{{ a.type }}">
-              <span class="dot" aria-hidden="true">{{ icon(a) }}</span>
+              <span class="dot" aria-hidden="true"><app-icon [name]="icon(a)" [size]="14" /></span>
               <div><p><strong>{{ a.userName }}</strong> {{ a.text }}</p><time>{{ a.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }}</time></div>
             </li>
           }

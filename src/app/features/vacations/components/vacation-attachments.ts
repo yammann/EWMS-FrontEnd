@@ -4,13 +4,14 @@ import { VacationService } from '../data-access/vacation.service';
 import { VacationAttachment } from '../data-access/vacation.models';
 import { fileSize } from '@core/utils/file-size';
 import { Modal } from '@shared/ui/modal';
+import { Icon } from '@shared/ui/icon';
 
 /**
  * مرفقات طلب إجازة: قائمة، ومعاينة داخل نافذة (صورة أو PDF)، وتنزيل.
  * الملف يُجلب عبر الـ API مع رمز الدخول (لا رابط مفتوح)، ثم يُعرض من رابط محلي مؤقت يُحرَّر عند الإغلاق.
  */
 @Component({
-  selector: 'app-vacation-attachments', standalone: true, imports: [Modal],
+  selector: 'app-vacation-attachments', standalone: true, imports: [Icon, Modal],
   templateUrl: './vacation-attachments.html',
   styleUrl: './vacation-attachments.scss'
 })

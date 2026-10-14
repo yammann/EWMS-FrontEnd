@@ -1,0 +1,53 @@
+/* =========================================================
+   السايدبار المطوي: كل قسم أيقونة (مع سهم الانسدال) تنسدل تحتها أيقونات صفحاته في إطار.
+   قسم واحد مفتوح في كل مرة. ملف مستقل كي تبقى كل ورقة أنماط تحت ميزانية 8 kB للمكوّن.
+   ========================================================= */
+.shell.collapsed {
+  /* صفحات القسم الأول (بلا عنوان) ظاهرة دائماً، وتحتها خط يفصلها عن أيقونات الأقسام */
+  .nav-main { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--separator); }
+
+  .rail-section {
+    position: relative;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1px;
+    width: 46px;
+    min-height: 46px;
+    margin: 6px auto 0;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    background: var(--brand-50);
+    color: var(--brand-700);
+    transition: background-color .15s var(--ease);
+  }
+  .rail-section:hover:not(:disabled), .rail-section.open { background: var(--brand-100); filter: none; }
+  .rail-section:active:not(:disabled) { transform: scale(.96); filter: none; }
+  .rail-section .rail-icon { width: 21px; height: 21px; }
+  .rail-section .rail-chevron { width: 10px; height: 10px; transition: transform .3s var(--ease-spring); }
+  .rail-section.open .rail-chevron { transform: rotate(180deg); }
+  /* قسم مغلق فيه الصفحة الحالية */
+  .rail-section.has-active::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    inset-inline-end: 5px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand-600);
+  }
+
+  /* إطار صفحات القسم: يُقصّ عمودياً أثناء الانسدال، ويسمح أفقياً بتلميح الاسم خارج السايدبار */
+  .rail-tray .nav-group-inner {
+    margin-top: 4px;
+    padding-block: 4px;
+    border-radius: var(--radius-sm);
+    background: var(--fill);
+    clip-path: inset(0 -400px 0 -400px);
+    transition: padding .3s var(--ease-spring), clip-path .3s var(--ease-spring);
+  }
+  .rail-tray.closed .nav-group-inner { margin-top: 0; padding-block: 0; clip-path: inset(0 -400px 100% -400px); visibility: hidden; }
+  .rail-tray a { min-height: 38px; margin-inline: 4px; }
+  .rail-tray a app-icon { width: 19px; height: 19px; }
+}

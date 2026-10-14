@@ -22,10 +22,10 @@
 
   @if (data(); as d) {
     <section class="dash-stats" aria-label="ملخصي">
-      @if (canMyTasks()) { <app-stat-tile label="مهامي" [value]="tasks().length" icon="📋" tone="green" hint="المهام الموكلة إليك" /> }
-      <app-stat-tile label="فريقي" [value]="d.team.length" icon="👥" tone="blue" [hint]="d.teamName ? 'زملاء ' + d.teamName : ''" />
-      @if (canNotifications()) { <app-stat-tile label="إشعارات غير مقروءة" [value]="unread()" icon="🔔" tone="purple" /> }
-      <app-stat-tile label="أيام إجازة مدفوعة متبقية" [value]="d.paidDaysLeftThisMonth + ' من ' + d.paidDaysLimitPerMonth" icon="🌴" tone="orange" hint="هذا الشهر" />
+      @if (canMyTasks()) { <app-stat-tile label="مهامي" [value]="tasks().length" icon="clipboard" tone="green" hint="المهام الموكلة إليك" /> }
+      <app-stat-tile label="فريقي" [value]="d.team.length" icon="users" tone="blue" [hint]="d.teamName ? 'زملاء ' + d.teamName : ''" />
+      @if (canNotifications()) { <app-stat-tile label="إشعارات غير مقروءة" [value]="unread()" icon="bell" tone="purple" /> }
+      <app-stat-tile label="أيام إجازة مدفوعة متبقية" [value]="d.paidDaysLeftThisMonth + ' من ' + d.paidDaysLimitPerMonth" icon="beach" tone="orange" hint="هذا الشهر" />
     </section>
 
     @if (canMyTasks()) {

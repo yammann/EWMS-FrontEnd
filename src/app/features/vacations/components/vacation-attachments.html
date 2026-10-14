@@ -4,7 +4,7 @@
     <div class="chips">
       @for (a of attachments(); track a.id) {
         <button type="button" class="chip" (click)="open(a)" [title]="'عرض ' + a.fileName">
-          <span aria-hidden="true">{{ a.contentType === 'application/pdf' ? '📄' : '🖼' }}</span>
+          <app-icon [name]="a.contentType === 'application/pdf' ? 'docText' : 'photo'" [size]="16" />
           <span class="name">{{ a.fileName }}</span><span class="size">{{ size(a.size) }}</span>
         </button>
       }

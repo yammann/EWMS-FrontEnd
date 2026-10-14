@@ -5,16 +5,17 @@ import { Router } from '@angular/router';
 import { NotificationService, notificationRoute } from '@core/services/notification.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppNotification } from '@core/models/notification.models';
+import { Icon } from '@shared/ui/icon';
 
 // نوافذ منبثقة للإشعارات اللحظية (مثل إشعارات التطبيقات) — تختفي تلقائياً بعد ثوانٍ
 @Component({
-  selector: 'app-notification-toasts', standalone: true, imports: [CommonModule],
+  selector: 'app-notification-toasts', standalone: true, imports: [Icon, CommonModule],
   template: `
     <section class="toast-stack" aria-live="polite" aria-label="الإشعارات الجديدة">
       @for (t of service.toasts(); track t.notification.id) {
         <article class="toast" role="status">
           <button type="button" class="toast-body" (click)="open(t.notification)">
-            <span class="toast-icon" aria-hidden="true">🔔</span>
+            <span class="toast-icon" aria-hidden="true"><app-icon name="bell" /></span>
             <span class="toast-text">
               <strong>{{ t.notification.title }}</strong>
               <span>{{ t.notification.message }}</span>

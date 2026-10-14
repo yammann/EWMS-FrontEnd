@@ -15,10 +15,11 @@ import { AddToTodoDialog } from '@features/todo';
 import { TaskNoteDialog } from './task-note-dialog';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
+import { Icon, IconName } from '@shared/ui/icon';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
-  selector: 'app-task-detail-drawer', standalone: true, imports: [Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
+  selector: 'app-task-detail-drawer', standalone: true, imports: [Icon, Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
   templateUrl: './task-detail-drawer.html',
   styleUrl: './task-detail-drawer.scss'
 })
@@ -130,7 +131,7 @@ export class TaskDetailDrawer {
     });
   }
 
-  icon(type: string) {
-    return ({ Created: '✚', StatusChanged: '⇄', Comment: '💬', Delegated: '↳', Edited: '✎', Attached: '📎', AttachmentRemoved: '🗑', Claimed: '✋', Released: '↩' } as Record<string, string>)[type] ?? '•';
+  icon(type: string): IconName {
+    return ({ Created: 'plus', StatusChanged: 'arrows', Comment: 'bubble', Delegated: 'forward', Edited: 'pencil', Attached: 'paperclip', AttachmentRemoved: 'trash', Claimed: 'hand', Released: 'undo' } as Record<string, IconName>)[type] ?? 'info';
   }
 }

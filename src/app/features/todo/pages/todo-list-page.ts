@@ -8,19 +8,21 @@ import { Observable } from 'rxjs';
 import { ToDoService } from '../data-access/todo.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
-import { TODO_LIMITS, ToDoItem, ToDoList } from '../data-access/todo.models';
+import { TODO_COLORS, TODO_LIMITS, TODO_PAGE_SIZE, ToDoItem, ToDoList, importantFirst, todoColor } from '../data-access/todo.models';
+import { Pagination } from '@core/utils/pagination';
+import { Pager } from '@shared/ui/pager';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { ToastService } from '@shared/ui/toast.service';
-import { Icon } from '@shared/ui/icon';
 import { StatTile } from '@shared/ui/stat-tile';
 import { TodoListDialog } from '../components/todo-list-dialog';
 import { TodoItemDialog } from '../components/todo-item-dialog';
 import { TodoBulkDialog } from '../components/todo-bulk-dialog';
 import { Alert } from '@shared/ui/alert';
 import { SelectValue } from '@shared/ui/select-value';
+import { Icon, iconFor } from '@shared/ui/icon';
 
 type Filter = 'all' | 'today' | 'tomorrow' | 'late' | 'done' | 'important';
-type Sort = 'manual' | 'due' | 'important';
+type Sort = 'manual' | 'due';
 interface DueLabel { text: string; kind: 'late' | 'today' | 'soon' | ''; }
 
 const DAY = 86_400_000;
@@ -29,20 +31,29 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
 
 /**
  * قائمة واحدة بتصميم «لوحة المهام اليومية»: رأس بأيقونة وتاريخ ونسبة الإنجاز، شريط أرقام، حبّات فلاتر بأعدادها،
- * وشبكة بطاقات (3 أعمدة) ببطاقة إضافة منقّطة في آخرها. البحث والترتيب يعملان على ما حمّله الخادم، والسحب مع الترتيب اليدوي دون تصفية.
+ * وشبكة بطاقات (3 أعمدة) ببطاقة إضافة منقّطة في أولها (قرار المستخدم 2026-10-13)، 15 بنداً في الصفحة، والهامة أولاً دائماً.
+ * البحث والترتيب يعملان على ما حمّله الخادم، والسحب مع الترتيب اليدوي دون تصفية (داخل مجموعة الهامة أو البقية).
  * كل عملية تُرجع القائمة كاملة فتحلّ محل الحالة المحلية؛ والتعليم والترتيب متفائلان.
  */
 @Component({
   selector: 'app-todo-list-page', standalone: true,
-  imports: [SelectValue, Alert, FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, TodoListDialog, TodoItemDialog, TodoBulkDialog],
+  imports: [SelectValue, Alert, FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, Pager, TodoListDialog, TodoItemDialog, TodoBulkDialog],
   styleUrls: ['../../../shared/styles/page-base.scss', '../styles/todo.scss', '../styles/todo-cards.scss'],
   templateUrl: './todo-list-page.html',
   styles: [`
     .page { gap: 20px; }
     .empty-state { text-align: center; }
+    /* لون البند: شريط جانبي بلونه وصبغة خفيفة (يتقدّم على شريط «مهم»؛ النجمة تبقى علامة الأهمية) */
+    .t-card.colored { border-inline-start: 4px solid var(--item-color); background: color-mix(in srgb, var(--item-color) 7%, var(--surface)); }
+    .t-card.colored.done { background: var(--ink-50); }
+    .t-colors { gap: 6px; }
+    .t-swatch { width: 22px; height: 22px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--surface); box-shadow: none; }
+    .t-swatch.on { outline: 2px solid var(--ink-900); outline-offset: 1px; }
+    .t-swatch:hover:not(:disabled) { transform: none; box-shadow: none; filter: brightness(.95); }
   `]
 })
 export class TodoListPage {
+  iconFor = iconFor;
   private service = inject(ToDoService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
@@ -50,6 +61,8 @@ export class TodoListPage {
   private toast = inject(ToastService);
 
   limits = TODO_LIMITS;
+  colors = TODO_COLORS;
+  colorOf = todoColor;
   /** التاريخ بالعربية وأرقام لاتينية (كبقية الواجهة) */
   dateText = new Date().toLocaleDateString('ar-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   list = signal<ToDoList | null>(null);
@@ -67,6 +80,7 @@ export class TodoListPage {
   newTitle = '';
   newDue = '';
   newImportant = false;
+  newColor = '';
 
   /** صلاحية التعديل، والقائمة غير مؤرشفة */
   editable = computed(() => this.auth.hasPermission(AppPermission.EditToDoList) && !this.list()?.isArchived);
@@ -95,9 +109,10 @@ export class TodoListPage {
     let items = (this.list()?.items ?? []).filter(i => this.matches(i, this.filter())
       && (!q || i.title.toLowerCase().includes(q) || i.note.toLowerCase().includes(q)));
     if (this.sort() === 'due') items = [...items].sort((a, b) => (a.dueDate ? dayOf(a.dueDate) : Infinity) - (b.dueDate ? dayOf(b.dueDate) : Infinity));
-    else if (this.sort() === 'important') items = [...items].sort((a, b) => Number(b.isImportant) - Number(a.isImportant));
-    return items;
+    return importantFirst(items);
   });
+  /** 15 بنداً في الصفحة؛ بطاقة الإضافة أول كل صفحة */
+  pager = new Pagination(() => this.visible(), { size: TODO_PAGE_SIZE, sizes: [TODO_PAGE_SIZE] });
   percent = computed(() => { const l = this.list(); return l?.itemsTotal ? Math.round(100 * l.itemsDone / l.itemsTotal) : 0; });
 
   constructor() {
@@ -142,14 +157,18 @@ export class TodoListPage {
     });
   }
 
-  cancelAdd() { this.adding.set(false); this.newTitle = ''; this.newDue = ''; this.newImportant = false; }
+  cancelAdd() { this.adding.set(false); this.newTitle = ''; this.newDue = ''; this.newImportant = false; this.newColor = ''; }
 
   add() {
     const l = this.list(), title = this.newTitle.trim();
     if (!l || !title || this.busy()) return;
     // تبقى بطاقة الإضافة مفتوحة لإدخال بند تلو آخر
-    this.run(this.service.addItem(l.id, { title, dueDate: this.newDue || null, isImportant: this.newImportant }),
-      () => { this.newTitle = ''; this.newDue = ''; this.newImportant = false; setTimeout(() => document.getElementById('todo-new')?.focus()); });
+    // البند الجديد يُضاف أولاً (بجانب بطاقة الإضافة)، فنعود إلى الصفحة الأولى لرؤيته
+    this.run(this.service.addItem(l.id, { title, dueDate: this.newDue || null, isImportant: this.newImportant, color: this.newColor }),
+      () => {
+        this.newTitle = ''; this.newDue = ''; this.newImportant = false; this.newColor = ''; this.pager.go(1);
+        setTimeout(() => document.getElementById('todo-new')?.focus());
+      });
   }
 
   /** لصق نص متعدد الأسطر في خانة الإضافة يفتح نافذة الإضافة الجماعية بدل لصقه بند واحد */
@@ -159,7 +178,7 @@ export class TodoListPage {
   }
 
   openBulk(text: string) { this.bulkText.set(text); this.bulkOpen.set(true); }
-  bulkSaved(l: ToDoList) { this.bulkOpen.set(false); this.list.set(l); this.toast.success('أُضيفت البنود'); }
+  bulkSaved(l: ToDoList) { this.bulkOpen.set(false); this.list.set(l); this.pager.go(1); this.toast.success('أُضيفت البنود'); }
 
   open(item: ToDoItem) { if (this.editable()) this.editingItem.set(item); }
 
@@ -188,11 +207,23 @@ export class TodoListPage {
     this.run(this.service.clearDone(l.id), () => this.toast.success('تم مسح البنود المنجزة'));
   }
 
+  /**
+   * السحب داخل الصفحة: الفهرسان نسبة إلى بنود الصفحة، فيُحوَّلان إلى الترتيب الكامل (الهامة أولاً) ويُحصر البند في مجموعته
+   * (لا تُسحب هامة بين غير الهامة ولا العكس — العرض يعيدها لمجموعتها دائماً). يُرسل الترتيب الكامل كما يتوقعه الخادم.
+   */
   drop(event: CdkDragDrop<ToDoItem[]>) {
     const l = this.list();
     if (!l || event.previousIndex === event.currentIndex || !this.canDrag()) return;
-    const items = [...l.items];
-    moveItemInArray(items, event.previousIndex, event.currentIndex);
+    const items = importantFirst(l.items);
+    const offset = (this.pager.page() - 1) * this.pager.size();
+    const from = offset + event.previousIndex;
+    const important = items.filter(i => i.isImportant && !i.isDone).length;
+    const moving = items[from];
+    if (!moving) return;
+    const first = moving.isImportant && !moving.isDone;
+    const to = Math.min(first ? important - 1 : items.length - 1, Math.max(first ? 0 : important, offset + event.currentIndex));
+    if (to === from) return;
+    moveItemInArray(items, from, to);
     this.list.set({ ...l, items });                                    // متفائل
     this.run(this.service.reorder(l.id, items.map(i => i.id)), undefined, () => this.load(l.id));
   }

@@ -55,7 +55,7 @@
   cursor: pointer;
 }
 .modal-close:hover:not(:disabled) { background: var(--fill-strong); color: var(--ink-900); filter: none; }
-.modal-close svg { width: 14px; height: 14px; }
+.modal-close svg, .modal-close app-icon { width: 14px; height: 14px; }
 
 /* عندما يلفّ <form> جسم النافذة يجب أن يكون هو أيضاً flex حتى يعمل السكرول داخل .modal-body */
 .modal > form {
@@ -118,7 +118,7 @@
   background: var(--danger-100);
   color: var(--danger-600);
 }
-.confirm-icon svg { width: 24px; height: 24px; }
+.confirm-icon svg, .confirm-icon app-icon { width: 24px; height: 24px; }
 
 .confirm-dialog h3 { margin: 0 0 6px; color: var(--ink-900); font-size: 17px; font-weight: 700; }
 
@@ -169,7 +169,7 @@
   height: 30px;
   border-radius: 50%;
 }
-.toast-icon svg { width: 16px; height: 16px; }
+.toast-icon svg, .toast-icon app-icon { width: 16px; height: 16px; }
 
 .toast-message {
   flex: 1;
@@ -193,7 +193,7 @@
   cursor: pointer;
 }
 .toast-close:hover:not(:disabled) { background: var(--fill); color: var(--ink-700); filter: none; }
-.toast-close svg { width: 12px; height: 12px; }
+.toast-close svg, .toast-close app-icon { width: 12px; height: 12px; }
 
 .toast-success .toast-icon { background: var(--brand-100); color: var(--brand-600); }
 .toast-error .toast-icon { background: var(--danger-100); color: var(--danger-600); }

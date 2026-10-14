@@ -4,36 +4,19 @@
   <app-admin-header eyebrow="الأدوار والصلاحيات" heading="الأدوار" subtitle="إدارة الأدوار وتوزيع الصلاحيات على كل دور في النظام." [loading]="crud.busy()"
     [createLabel]="canCreate() ? 'دور جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا بيانات -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Stats -->
   <section class="stats-grid">
 
-    <app-stat-tile tone="green" icon="" label="إجمالي الأدوار" [value]="stats().totalRoles" hint="الأدوار المسجلة في النظام">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
-                  <path d="m9 12 2 2 4-4"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="green" icon="shield" label="إجمالي الأدوار" [value]="stats().totalRoles" hint="الأدوار المسجلة في النظام" />
 
-    <app-stat-tile tone="blue" icon="" label="إجمالي الصلاحيات" [value]="stats().totalPermissions" hint="متاحة للتعيين على الأدوار">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="blue" icon="lock" label="إجمالي الصلاحيات" [value]="stats().totalPermissions" hint="متاحة للتعيين على الأدوار" />
 
-    <app-stat-tile tone="orange" icon="" label="متوسط الصلاحيات" [value]="stats().avgPermissions" hint="صلاحية لكل دور">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 3v18h18"></path>
-                  <path d="m7 16 4-5 3 3 5-7"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="orange" icon="trend" label="متوسط الصلاحيات" [value]="stats().avgPermissions" hint="صلاحية لكل دور" />
 
-    <app-stat-tile tone="purple" icon="" label="أدوار بصلاحيات كاملة" [value]="stats().fullRoles" hint="تملك كل الصلاحيات" live>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22a10 10 0 1 0-10-10"></path>
-                  <path d="m9 12 2 2 4-4"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="purple" icon="check" label="أدوار بصلاحيات كاملة" [value]="stats().fullRoles" hint="تملك كل الصلاحيات" live />
   </section>
 
   <!-- Roles List -->
@@ -110,10 +93,7 @@
                 <td>
                   <div class="permissions-cell">
                     <span class="permission-count">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                      </svg>
+                      <app-icon name="lock" [size]="12" />
                       {{ role.permissions?.length ?? 0 }} / {{ permissions().length }}
                     </span>
 
@@ -155,10 +135,7 @@
                   <app-row-actions [canEdit]="canEdit()" [canDelete]="canDelete()" [deleting]="crud.deletingId() === role.id" (edit)="crud.openEdit(role)" (remove)="crud.remove(role)">
                     @if (canCreate()) {
                       <button type="button" class="icon-btn" title="نسخ الدور" [attr.aria-label]="'نسخ الدور ' + role.name" (click)="openClone(role)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="9" y="9" width="12" height="12" rx="2"></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
+                        <app-icon name="copy" />
                       </button>
                     }
                   </app-row-actions>
@@ -169,12 +146,10 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
-          </svg>
+          <app-icon name="shield" />
         </div>
         <h3>لا توجد أدوار</h3>
         <p>ابدأ بالضغط على زر "دور جديد" في الأعلى.</p>
@@ -196,12 +171,11 @@
             @case ('create') {
               <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (permissionsMissing()) { <p class="alert alert-warning" role="status">تعذّر تحميل قائمة الصلاحيات — أعد تحميل الصفحة قبل تعديل صلاحيات الدور.</p> }
                 <div class="form-field">
                   <label class="form-label" for="create-name">اسم الدور</label>
                   <div class="input-wrapper">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
-                    </svg>
+                    <app-icon name="shield" />
                     <input id="create-name" type="text" formControlName="name"
                            placeholder="مثال: مدير فرع" autocomplete="off" />
                   </div>
@@ -220,9 +194,7 @@
                       <span class="button-spinner"></span>
                       <span>جاري الإنشاء...</span>
                     } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M12 5v14M5 12h14"></path>
-                      </svg>
+                      <app-icon name="plus" [size]="16" />
                       <span>إنشاء الدور</span>
                     }
                   </button>
@@ -234,6 +206,7 @@
             @case ('edit') {
               <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (permissionsMissing()) { <p class="alert alert-warning" role="status">تعذّر تحميل قائمة الصلاحيات — أعد تحميل الصفحة قبل تعديل صلاحيات الدور.</p> }
                 <div class="form-field">
                   <label class="form-label" for="edit-name">اسم الدور</label>
                   <input id="edit-name" type="text" formControlName="name" />
@@ -252,9 +225,7 @@
                       <span class="button-spinner"></span>
                       <span>جاري الحفظ...</span>
                     } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M20 6 9 17l-5-5"></path>
-                      </svg>
+                      <app-icon name="checkmark" [size]="16" />
                       <span>حفظ التعديل</span>
                     }
                   </button>
@@ -323,7 +294,7 @@
           <header class="perm-group-head">
             <button type="button" class="perm-group-toggle" (click)="toggleGroupOpen(group.key)"
                     [attr.aria-expanded]="isGroupOpen(group.key)" [attr.aria-controls]="'perm-' + modal + '-' + group.key">
-              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              <app-icon class="chevron" name="chevron" />
               <span class="perm-group-title">{{ group.title }}</span>
               <span class="perm-group-count" [class.has]="groupSelectedCount(modal, group) > 0">
                 {{ groupSelectedCount(modal, group) }} من {{ group.items.length }}
@@ -351,9 +322,7 @@
                     <small>{{ permission.name }}</small>
                   </div>
                   <span class="permission-check">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
+                    <app-icon name="checkmark" [weight]="2.4" />
                   </span>
                 </label>
               }

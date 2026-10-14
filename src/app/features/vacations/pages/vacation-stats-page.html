@@ -20,10 +20,10 @@
 
   @if (data(); as d) {
     <section class="dash-stats" aria-label="ملخص الإجازات">
-      <app-stat-tile label="في إجازة اليوم" [value]="d.onLeaveToday" icon="🌴" tone="green" />
-      <app-stat-tile label="تبدأ خلال 7 أيام" [value]="d.upcomingLeavesCount" icon="📆" tone="blue" />
-      <app-stat-tile label="طلبات قيد الموافقة" [value]="d.pendingRequests" icon="⏳" tone="orange" [alert]="d.pendingRequests > 0" />
-      <app-stat-tile label="أيام إجازة معتمدة" [value]="d.approvedDaysThisMonth" icon="📅" tone="purple" hint="خلال هذا الشهر" />
+      <app-stat-tile label="في إجازة اليوم" [value]="d.onLeaveToday" icon="beach" tone="green" />
+      <app-stat-tile label="تبدأ خلال 7 أيام" [value]="d.upcomingLeavesCount" icon="clock" tone="blue" />
+      <app-stat-tile label="طلبات قيد الموافقة" [value]="d.pendingRequests" icon="hourglass" tone="orange" [alert]="d.pendingRequests > 0" />
+      <app-stat-tile label="أيام إجازة معتمدة" [value]="d.approvedDaysThisMonth" icon="calendar" tone="purple" hint="خلال هذا الشهر" />
     </section>
 
     <section class="panel">

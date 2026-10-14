@@ -1,0 +1,64 @@
+<div class="page">
+  <app-page-header eyebrow="الإجازات" heading="إجازاتي" subtitle="طلبات إجازاتك ومراحل الموافقة عليها، والمدفوع منها هذا الشهر">
+    @if (canRequest()) {
+      <button class="btn" type="button" (click)="requestOpen.set(true)"><app-icon name="plus" [size]="16" /> تقديم طلب إجازة</button>
+    }
+    @if (canView()) { <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button> }
+  </app-page-header>
+
+  @if (canView()) {
+    <section class="stats-4" aria-label="ملخص إجازاتي">
+      <app-stat-tile label="المدفوع هذا الشهر" [value]="loading() ? '—' : paidThisMonth() + ' من ' + paidPerMonth" icon="checkmark" tone="green"
+                     [hint]="paidHint()" />
+      <app-stat-tile label="إجازاتي هذه السنة" [value]="loading() ? '—' : yearDays()" icon="calendar" tone="blue" hint="أيام عمل معتمدة" />
+      <app-stat-tile label="بانتظار الموافقة" [value]="loading() ? '—' : pending()" icon="hourglass" tone="orange" [hint]="pending() ? 'يمكن إلغاؤها قبل القرار' : 'لا طلبات معلّقة'" />
+      @if (current(); as c) {
+        <app-stat-tile label="أنا في إجازة الآن" [value]="'حتى ' + formatDay(c.endVac)" icon="beach" tone="purple" [hint]="c.vacationTypeName" />
+      } @else if (next(); as n) {
+        <app-stat-tile label="إجازتي القادمة" [value]="formatDay(n.startVac)" icon="beach" tone="purple"
+                       [hint]="n.vacationTypeName + ' · ' + days(n.vacDayCount) + (n.status === 'Approved' ? '' : ' · بانتظار الموافقة')" />
+      } @else {
+        <app-stat-tile label="إجازتي القادمة" value="—" icon="beach" tone="purple" hint="لا إجازة قادمة" />
+      }
+    </section>
+
+    <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>سجل إجازاتي</h2></div></div>
+      @if (loading() && !vacations().length) { <app-empty-state>جارٍ تحميل الإجازات…</app-empty-state> }
+      @else if (!vacations().length && !error()) {
+        <app-empty-state>لم تقدّم أي طلب إجازة بعد — ستظهر طلباتك ومراحل الموافقة عليها هنا.</app-empty-state>
+      } @else if (vacations().length) {
+        <div class="table-wrap"><table>
+          <thead><tr><th>النوع</th><th>الفترة</th><th>أيام العمل</th><th>الحالة</th><th>الدفع</th><th>التفاصيل</th><th></th></tr></thead>
+          <tbody>
+            @for (v of pager.items(); track v.id) {
+              <tr>
+                <td>{{ v.vacationTypeName }}<small class="muted block" dir="ltr">{{ v.requestNumber }}</small></td>
+                <td class="period">{{ v.startVac | date:'yyyy/MM/dd' }} — {{ v.endVac | date:'yyyy/MM/dd' }}</td>
+                <td>{{ v.vacDayCount }}</td>
+                <td><span class="status-badge" [class.status-active]="v.status === 'Approved'" [class.status-pending]="v.status.startsWith('Pending')">{{ v.statusAr }}</span></td>
+                <td>{{ v.paymentStatusAr }}</td>
+                <td class="wrap">{{ v.vacReason || '—' }} <app-vacation-attachments [attachments]="v.attachments" />
+                  @if (v.rejectionReason) { <p class="form-error">{{ v.rejectionReason }} {{ v.rejectedByName ? '— ' + v.rejectedByName : '' }}</p> }
+                </td>
+                <td><div class="actions">
+                  @if (canPrint()) { <a class="btn btn-ghost btn-sm" [routerLink]="['/vacations/print', v.id]">طباعة</a> }
+                  @if (canCancel(v)) {
+                    <button class="btn btn-danger btn-sm" type="button" (click)="cancel(v)" [disabled]="cancellingId() !== null">{{ cancellingId() === v.id ? 'جارٍ الإلغاء…' : 'إلغاء الطلب' }}</button>
+                  }
+                </div></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+        <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+      }
+    </section>
+  } @else {
+    <section class="panel"><app-empty-state>قدّم طلب إجازتك من الزر أعلاه. عرض سجل طلباتك يحتاج صلاحية «عرض إجازاتي».</app-empty-state></section>
+  }
+</div>
+
+@if (requestOpen()) { <app-vacation-request-dialog (submitted)="submitted($event)" (closed)="requestOpen.set(false)" /> }

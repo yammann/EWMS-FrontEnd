@@ -1,5 +1,5 @@
 .sig { display: grid; gap: 12px; }
-svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+app-icon { width: 15px; height: 15px; }
 
 /* التبويبان: مؤشر ينزلق بينهما */
 .tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--fill); }
@@ -37,8 +37,8 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: 
 .drop { position: absolute; inset: 20px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
   border: 1px dashed var(--border-strong); border-radius: 14px; background: transparent; color: var(--ink-700); box-shadow: none; min-height: 0; }
 .drop:hover, .drop.over { background: color-mix(in srgb, var(--ink-900) 4%, transparent); transform: none; box-shadow: none; }
-.drop svg { width: 22px; height: 22px; color: var(--ink-400); transition: transform .2s; }
-.drop.over svg { transform: translateY(-2px); }
+.drop app-icon { width: 22px; height: 22px; color: var(--ink-400); transition: transform .2s; }
+.drop.over app-icon { transform: translateY(-2px); }
 .drop strong { font-size: 13px; font-weight: 600; }
 .drop small { font-size: 11.5px; color: var(--ink-400); }
 
@@ -49,4 +49,4 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: 
 .consent { margin: 0; font-size: 11.5px; line-height: 1.7; color: var(--ink-500); }
 .password { max-width: 320px; }
 
-@media (prefers-reduced-motion: reduce) { .pill, .rule-hint, .inks span, .drop svg { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pill, .rule-hint, .inks span, .drop app-icon { transition: none; } }

@@ -34,8 +34,17 @@ export const AppPermission = {
   // قوائم المهام الشخصية: كل صلاحية على قوائمه هو فقط
   ViewToDoLists: 'ViewToDoLists', CreateToDoList: 'CreateToDoList', EditToDoList: 'EditToDoList', DeleteToDoList: 'DeleteToDoList',
 
-  // توثيق الأجهزة (Devices/MyAccess يعيد نفس النتيجة من صلاحيات الدور)
-  ViewDevices: 'ViewDevices', CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
+  // سجل المواقع المشترك بين الفروع (أساس خرائط الفروع) — الحد: كل المواقع
+  ViewSites: 'ViewSites', CreateSite: 'CreateSite', EditSite: 'EditSite', DeleteSite: 'DeleteSite',
+
+  // طبقات خرائط الفروع: الطبقة ملك الفرع (طبقات فرعي)، والسجل يحمل قسم من أدخله (قسمي / فرعي مع ViewBranchMapEntries)
+  ViewMapLayers: 'ViewMapLayers', CreateMapLayer: 'CreateMapLayer', EditMapLayer: 'EditMapLayer', DeleteMapLayer: 'DeleteMapLayer',
+  ViewDepartmentMapEntries: 'ViewDepartmentMapEntries', ViewBranchMapEntries: 'ViewBranchMapEntries',
+  CreateMapEntry: 'CreateMapEntry', EditMapEntry: 'EditMapEntry', DeleteMapEntry: 'DeleteMapEntry',
+
+  // توثيق الأجهزة: التركيب ملك قسم من أضافه وفرعه — ViewDevices = تركيبات قسمي، ViewBranchDevices = فرعي كله
+  ViewDevices: 'ViewDevices', ViewBranchDevices: 'ViewBranchDevices',
+  CreateDevice: 'CreateDevice', EditDevice: 'EditDevice', DeleteDevice: 'DeleteDevice',
   // إظهار كلمات سر الأجهزة ونسخها (يُسجَّل كل إظهار) — مستقلة عن العرض
   RevealDevicePasswords: 'RevealDevicePasswords',
 
@@ -61,7 +70,16 @@ export const AppPermission = {
   // مخزون قطع الغيار: مخزون لكل قسم، والصرف على طلبات الصيانة
   ViewSpareParts: 'ViewSpareParts', CreateSparePart: 'CreateSparePart', EditSparePart: 'EditSparePart', DeleteSparePart: 'DeleteSparePart',
   ReceiveSpareParts: 'ReceiveSpareParts', AdjustSparePartStock: 'AdjustSparePartStock',
-  IssueSparePart: 'IssueSparePart', ViewSparePartReports: 'ViewSparePartReports'
+  IssueSparePart: 'IssueSparePart', ViewSparePartReports: 'ViewSparePartReports',
+
+  // مركز التقارير: صلاحية سحب لكل تقرير (معاينة + Excel + طباعة) بحدود صفحة بياناته، وكل سحب يُسجَّل
+  ExportVacationsReport: 'ExportVacationsReport', ExportVacationUsageReport: 'ExportVacationUsageReport',
+  ExportUsersReport: 'ExportUsersReport', ExportStructureReport: 'ExportStructureReport',
+  ExportMaintenanceRequestsReport: 'ExportMaintenanceRequestsReport', ExportTechniciansReport: 'ExportTechniciansReport',
+  ExportSparePartMovementsReport: 'ExportSparePartMovementsReport', ExportSparePartStockReport: 'ExportSparePartStockReport',
+  ExportInstallationsReport: 'ExportInstallationsReport', ExportSitesReport: 'ExportSitesReport', ExportMapEntriesReport: 'ExportMapEntriesReport',
+  // تصدير لوحة المهام (من صفحتها) وسجل السحب
+  ExportTasksReport: 'ExportTasksReport', ViewReportLog: 'ViewReportLog'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -76,6 +94,8 @@ export const MANAGE_MAINTENANCE_LOOKUPS: readonly AppPermissionName[] = [AppPerm
 
 /** أي صلاحية موافقة على الإجازات (الأولى أو النهائية) */
 export const APPROVE_VACATIONS: readonly AppPermissionName[] = [AppPermission.ApproveVacationFirst, AppPermission.ApproveVacationFinal];
+/** صفحة «إجازاتي»: سجل طلباتي (ViewVacations) أو تقديم طلب (CreateVacation) */
+export const MY_VACATIONS_ACCESS: readonly AppPermissionName[] = [AppPermission.ViewVacations, AppPermission.CreateVacation];
 /** إحصائيات الإجازات: لمن يرى إجازات قسمه أو فرعه */
 export const VACATION_STATS: readonly AppPermissionName[] = [AppPermission.ViewDepartmentVacations, AppPermission.ViewBranchVacations];
 /** يتابع مهام وحدة (يُظهر تبويب "كل مهام نطاقي") */
@@ -89,7 +109,26 @@ export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
 ];
 /** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس سياسة AnyDeviceView في الباكاند) */
 export const DEVICE_ACCESS: readonly AppPermissionName[] = [
-  AppPermission.ViewDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
+  AppPermission.ViewDevices, AppPermission.ViewBranchDevices, AppPermission.CreateDevice, AppPermission.EditDevice, AppPermission.DeleteDevice
+];
+/** سجلات طبقات الخرائط: أي صلاحية سجلات (سياسة AnyMapEntryView) */
+export const MAP_ENTRY_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewDepartmentMapEntries, AppPermission.ViewBranchMapEntries,
+  AppPermission.CreateMapEntry, AppPermission.EditMapEntry, AppPermission.DeleteMapEntry
+];
+/** صفحة «طبقات الفروع»: من يدير الطبقات أو يعمل على سجلاتها (سياسة AnyMapLayerRead) */
+export const MAP_LAYER_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewMapLayers, AppPermission.CreateMapLayer, AppPermission.EditMapLayer, AppPermission.DeleteMapLayer, ...MAP_ENTRY_ACCESS
+];
+/** سجل المواقع: لمن يدير المواقع، ولمن يوثّق الأجهزة أو يسجّل معلومات الطبقات (يختار الموقع) — سياسة AnySiteView */
+export const SITE_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewSites, AppPermission.CreateSite, AppPermission.EditSite, AppPermission.DeleteSite, ...DEVICE_ACCESS, ...MAP_ENTRY_ACCESS
+];
+/** مركز التقارير: صلاحية سحب أي تقرير (نفس سياسة AnyReportExport في الباكاند) */
+export const REPORT_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ExportVacationsReport, AppPermission.ExportVacationUsageReport, AppPermission.ExportUsersReport, AppPermission.ExportStructureReport,
+  AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
+  AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
@@ -15,18 +14,22 @@ import { RowActions } from '@shared/ui/row-actions';
 import { VacationService } from '../data-access/vacation.service';
 import { PublicHoliday } from '../data-access/vacation.models';
 import { vacationDateRange } from '../utils/vacation-validators';
+import { daysAr, fridaysAr } from '@core/utils/arabic-count';
 
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
-type HolidayBody = { name: string; date: string; endDate: string | null };
+type HolidayBody = { name: string; startDate: string; endDate: string | null };
 
-/** العطل الرسمية: أيام لا تُحسب من مدة الإجازة، إضافة إلى الجمعة (العطلة الأسبوعية) — النمط الموحّد (CrudPage) */
+/**
+ * العطل الرسمية: أيام لا تُحسب من مدة الإجازة، إضافة إلى الجمعة (العطلة الأسبوعية) — النمط الموحّد (CrudPage).
+ * كل عطلة بند واحد بفترة من–إلى (قرار المستخدم 2026-10-13): العيد من عدة أيام يُعدَّل ويُحذف كاملاً.
+ */
 @Component({
   selector: 'app-holidays-page', standalone: true,
-  imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, DatePipe, Pager, Modal, FormActions, RowActions],
+  imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
   styleUrl: '../../../shared/styles/page-base.scss',
   templateUrl: './holidays-page.html',
-  styles: [`.year-select { width: auto; min-width: 110px; }`]
+  styles: [`.year-select { width: auto; min-width: 110px; } .nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }`]
 })
 export class HolidaysPage {
   private auth = inject(AuthService);
@@ -47,25 +50,34 @@ export class HolidaysPage {
     startVac: ['', Validators.required], endVac: ['']
   }, { validators: vacationDateRange });
 
-  crud = new CrudPage<PublicHoliday, HolidayBody, PublicHoliday[] | PublicHoliday>({
+  crud = new CrudPage<PublicHoliday, HolidayBody, PublicHoliday>({
     load: () => this.service.holidays(this.year()),
     create: b => this.service.createHoliday(b),
-    update: (id, b) => this.service.updateHoliday(id, { date: b.date, name: b.name }),
+    update: (id, b) => this.service.updateHoliday(id, b),
     remove: h => this.service.deleteHoliday(h.id),
     can: { create: () => this.can().create, edit: () => this.can().edit, delete: () => this.can().delete },
-    onOpen: h => this.form.reset({ name: h?.name ?? '', startVac: h?.date.slice(0, 10) ?? '', endVac: '' }),
+    onOpen: h => this.form.reset({
+      name: h?.name ?? '', startVac: h?.startDate.slice(0, 10) ?? '',
+      endVac: h && h.endDate.slice(0, 10) !== h.startDate.slice(0, 10) ? h.endDate.slice(0, 10) : ''
+    }),
     messages: {
-      // عطلة من عدة أيام تُضاف يوماً لكل تاريخ
-      saved: (result, mode) => mode === 'edit' ? 'تم حفظ العطلة'
-        : Array.isArray(result) && result.length > 1 ? `تمت إضافة ${result.length} أيام عطلة` : 'تمت إضافة العطلة',
+      saved: (_, mode) => mode === 'edit' ? 'تم حفظ العطلة' : 'تمت إضافة العطلة',
       deleted: 'تم حذف العطلة', plural: 'العطل',
-      confirmDelete: h => `حذف عطلة «${h.name}» (${h.date.slice(0, 10).replaceAll('-', '/')})؟`
+      confirmDelete: h => `حذف عطلة «${h.name}» (${this.period(h)}) كاملة؟`
     }
   });
 
   pager = new Pagination(() => this.crud.items());
+  days = daysAr;
+  fridays = fridaysAr;
 
   dayName(date: string) { return DAY_NAMES[new Date(date.slice(0, 10) + 'T00:00:00').getDay()]; }
+  isRange(h: PublicHoliday) { return h.startDate.slice(0, 10) !== h.endDate.slice(0, 10); }
+  /** «2026/10/20» أو «2026/10/20 – 2026/10/25» */
+  period(h: PublicHoliday) {
+    const day = (d: string) => d.slice(0, 10).replaceAll('-', '/');
+    return this.isRange(h) ? `${day(h.startDate)} – ${day(h.endDate)}` : day(h.startDate);
+  }
   setYear(y: number) { this.year.set(y); this.crud.reload(); }
 
   save() {
@@ -73,6 +85,6 @@ export class HolidaysPage {
     const v = this.form.getRawValue();
     const name = v.name.trim();
     if (!name) return this.crud.fail('أدخل اسم العطلة');
-    this.crud.save({ name, date: v.startVac, endDate: v.endVac || null });
+    this.crud.save({ name, startDate: v.startVac, endDate: v.endVac || null });
   }
 }

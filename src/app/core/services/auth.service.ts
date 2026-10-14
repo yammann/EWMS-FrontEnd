@@ -84,13 +84,14 @@ export class AuthService {
     });
   }
 
-  clearSession() {
+  /** notice: رسالة تعرضها صفحة الدخول (password-changed بعد تغيير كلمة المرور) */
+  clearSession(notice?: 'password-changed') {
     this.notifications.stop();
     this.token.set(null);
     storage.remove(TOKEN_KEY);
     storage.remove(USER_KEY);
     this.currentUser.set(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], notice ? { queryParams: { notice } } : {});
   }
 
   getToken(): string | null {

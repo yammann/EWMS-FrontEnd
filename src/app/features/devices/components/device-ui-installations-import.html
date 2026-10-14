@@ -6,6 +6,13 @@
       <li>المواقع يجب أن تكون مضافة مسبقاً بنفس الاسم؛ الأجهزة الجديدة تُضاف إلى الكتالوج تلقائياً.</li>
       <li>ارفع الملف للمعاينة، ثم استورد الأسطر الصالحة.</li>
     </ol>
+    @if (departments().length) {
+      <label class="form-field"><span class="form-label">تُسجَّل التركيبات باسم القسم</span>
+        <select #dep (change)="setDepartment(+dep.value)" [disabled]="busy()">
+          <option value="0">قسمي (الافتراضي)</option>
+          @for (d of departments(); track d.id) { <option [value]="d.id">{{ d.branchName }} — {{ d.name }}</option> }
+        </select></label>
+    }
     <label class="form-field"><span class="form-label">ملف Excel (‎.xlsx، حتى 2000 سطر)</span>
       <input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="picked($event)" [disabled]="busy()"></label>
 
@@ -15,14 +22,14 @@
         <span class="ok"><strong>{{ r.valid }}</strong> صالح</span>
         <span class="bad"><strong>{{ r.total - r.valid }}</strong> مرفوض</span>
         @if (r.newDevices.length) { <span>أجهزة جديدة للكتالوج: {{ r.newDevices.join('، ') }}</span> }
-        @if (!r.dryRun) { <span class="ok">✓ استُورد {{ r.imported }} تركيباً</span> }
+        @if (!r.dryRun) { <span class="ok"><app-icon name="checkmark" [size]="14" /> استُورد {{ r.imported }} تركيباً</span> }
       </div>
       <div class="table-wrap"><table>
         <thead><tr><th>السطر</th><th>النتيجة</th><th>الموقع</th><th>الجهاز</th><th>IP</th><th>ملاحظة</th></tr></thead>
         <tbody>
           @for (row of r.rows; track row.row) {
             <tr [class.rejected]="!row.ok">
-              <td>{{ row.row }}</td><td>{{ row.ok ? '✓ صالح' : '✕ مرفوض' }}</td>
+              <td>{{ row.row }}</td><td>@if (row.ok) { <app-icon name="checkmark" [size]="14" /> صالح } @else { <app-icon name="xmark" [size]="14" /> مرفوض }</td>
               <td>{{ row.site || '—' }}</td><td>{{ row.device || '—' }}</td><td class="mono">{{ row.ip || '—' }}</td>
               <td class="wrap">{{ row.message || '—' }}</td>
             </tr>

@@ -18,8 +18,9 @@ import { RequestPartsPanel } from '../components/request-parts-panel';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { Icon, IconName } from '@shared/ui/icon';
 
-const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4: '✎', 5: '⇢', 6: '✕', 7: '⚙', 8: '↩' };
+const ACTIVITY_ICON: Record<number, IconName> = { 1: 'plus', 2: 'arrows', 3: 'user', 4: 'pencil', 5: 'forward', 6: 'xmark', 7: 'gear', 8: 'undo' };
 
 /**
  * صفحة طلب الصيانة: بيانات العميل والجهاز والعطل، تغيير الحالة بنقرة، نقل الطلب لفني آخر،
@@ -27,7 +28,7 @@ const ACTIVITY_ICON: Record<number, string> = { 1: '＋', 2: '⇄', 3: '👤', 4
  */
 @Component({
   selector: 'app-maintenance-request-details', standalone: true,
-  imports: [EmptyState, Alert, UtcPipe, DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
+  imports: [Icon, EmptyState, Alert, UtcPipe, DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss', './request-details-page.scss'],
   templateUrl: './request-details-page.html',
   
@@ -87,7 +88,7 @@ export class MaintenanceRequestDetailsPage {
     });
   }
 
-  icon(a: MaintenanceActivity) { return ACTIVITY_ICON[a.type] ?? '•'; }
+  icon(a: MaintenanceActivity): IconName { return ACTIVITY_ICON[a.type] ?? 'info'; }
 
 
   async setStatus(status: MaintenanceStatus) {

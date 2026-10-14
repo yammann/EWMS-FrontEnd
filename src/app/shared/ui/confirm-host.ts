@@ -1,15 +1,16 @@
 import { Component, inject } from '@angular/core';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { Modal } from '@shared/ui/modal';
+import { Icon } from './icon';
 
 /** نافذة التأكيد الموحّدة — مرة واحدة في MainLayout (تفتحها ConfirmService.ask) */
 @Component({
-  selector: 'app-confirm-host', standalone: true, imports: [Modal],
+  selector: 'app-confirm-host', standalone: true, imports: [Modal, Icon],
   template: `
     @if (confirm.current(); as request) {
       <app-modal role="alertdialog" panelClass="confirm-dialog" (closed)="confirm.answer(false)">
         <div class="confirm-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.6 2.4 17a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/></svg>
+          <app-icon name="warning" [weight]="2" />
         </div>
         <h3>{{ request.title }}</h3>
         <p>{{ request.message }}</p>

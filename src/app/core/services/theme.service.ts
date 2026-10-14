@@ -25,7 +25,7 @@ export const MODES: readonly { id: AppearanceMode; label: string }[] = [
   { id: 'dark', label: 'داكن' }
 ];
 
-/** نفس المفتاح والمنطق في السكربت داخل index.html (يطبّق المظهر قبل تحميل Angular فلا يومض اللون) */
+/** نفس المفتاح والمنطق في public/theme-init.js (يطبّق المظهر قبل تحميل Angular فلا يومض اللون) */
 const STORAGE_KEY = 'ewms_appearance';
 const DEFAULT = { palette: 'forest' as Palette, mode: 'system' as AppearanceMode };
 

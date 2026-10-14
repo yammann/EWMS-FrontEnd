@@ -20,6 +20,7 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { TaskFormDialog, TaskFormMode } from '../components/task-form-dialog';
 import { ToastService } from '@shared/ui/toast.service';
 import { SelectValue } from '@shared/ui/select-value';
+import { Icon } from '@shared/ui/icon';
 
 interface Column { status: TaskStatus; label: string; hint: string; }
 
@@ -30,7 +31,7 @@ interface Column { status: TaskStatus; label: string; hint: string; }
  */
 @Component({
   selector: 'app-task-board', standalone: true,
-  imports: [SelectValue, CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog, TaskNoteDialog, TaskCalendar, RouterLink],
+  imports: [Icon, SelectValue, CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog, TaskNoteDialog, TaskCalendar, RouterLink],
   templateUrl: './task-board-page.html',
   styleUrl: './task-board-page.scss'
 })
@@ -73,6 +74,8 @@ export class TaskBoardPage {
   exporting = signal(false);
   canRecurring = computed(() => this.auth.hasAnyPermission(TASK_ASSIGN));
   canStats = computed(() => this.auth.hasPermission(AppPermission.ViewTaskStats));
+  /** تصدير اللوحة بصلاحية ExportTasksReport (ويُسجَّل في سجل التقارير) */
+  canExport = computed(() => this.auth.hasPermission(AppPermission.ExportTasksReport));
   filtersActive = computed(() => !!(this.creatorFilter() || this.targetFilter() || this.dueFrom() || this.dueTo() || this.doneDays() !== 30));
 
   /** خيارات الفلاتر المشتقة من المهام المحمّلة */

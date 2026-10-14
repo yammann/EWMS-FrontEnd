@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, map } from 'rxjs';
+import { Alert } from '@shared/ui/alert';
+import { orEmpty } from '@core/http/or-empty';
 import { AppPermission } from '@core/constants/access';
 import { Department, Office } from '@core/models/ewms.models';
 import { AuthService } from '@core/services/auth.service';
@@ -14,12 +16,13 @@ import { Modal } from '@shared/ui/modal';
 import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { OfficeService } from '../data-access/office.service';
+import { Icon } from '@shared/ui/icon';
 
 /** المكاتب — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-offices-page',
   standalone: true,
-  imports: [EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './offices-page.html',
   styleUrl: './offices-page.scss'
 })
@@ -36,6 +39,13 @@ export class OfficesPage {
   }));
 
   departments = signal<Department[]>([]);
+  /** قائمة الأقسام لم تُحمَّل (نقص «عرض الأقسام»): الجدول يبقى، والنموذج يقول ذلك ويُبقي قسم المكتب الحالي عند التعديل */
+  departmentsMissing = signal(false);
+  departmentList = computed<Department[]>(() => {
+    const d = this.crud.dialog();
+    return this.departments().length || d?.mode !== 'edit' || !d.item ? this.departments()
+      : [{ id: d.item.departmentId, name: d.item.departmentName, branchId: d.item.branchId, branchName: d.item.branchName, description: '' }];
+  });
 
   form = inject(FormBuilder).group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -44,8 +54,11 @@ export class OfficesPage {
   });
 
   crud = new CrudPage<Office, FormData>({
-    load: () => forkJoin({ offices: this.service.getAll(), departments: this.lookups.departments() })
-      .pipe(map(r => { this.departments.set(r.departments); return r.offices; })),
+    load: () => {
+      this.departmentsMissing.set(false);
+      return forkJoin({ offices: this.service.getAll(), departments: this.lookups.departments().pipe(orEmpty(() => this.departmentsMissing.set(true))) })
+        .pipe(map(r => { this.departments.set(r.departments); return r.offices; }));
+    },
     create: body => this.service.create(body),
     update: (id, body) => this.service.update(id, body),
     remove: o => this.service.delete(o.id),

@@ -2,10 +2,10 @@ import { Injectable, computed, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
-import { AppPermission, AppPermissionName } from '@core/constants/access';
+import { AppPermission, AppPermissionName, MAP_ENTRY_ACCESS } from '@core/constants/access';
 import {
   BranchMap, Device, DeviceAccess, DeviceInventoryLog, DeviceSite, ImportReport, InstallationFilter, InstallationStatus, IpInUse,
-  MapBranchOption, Site
+  MapBranchOption, NearbySite, Site, SiteAccess
 } from './device.models';
 import { PagedResult } from '@core/models/paged-result.model';
 
@@ -17,14 +17,7 @@ function query(params: object): string {
   return q.size ? '?' + q : '';
 }
 
-/** يحفظ ملفاً نزّلته الواجهة (Blob) باسم معيّن */
-export function saveBlob(blob: Blob, fileName: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = fileName;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+export { saveBlob } from '@core/utils/download';
 
 @Injectable({ providedIn: 'root' })
 export class DeviceService {
@@ -41,10 +34,25 @@ export class DeviceService {
     const canEdit = has(AppPermission.EditDevice);
     const canDelete = has(AppPermission.DeleteDevice);
     return {
-      canView: has(AppPermission.ViewDevices) || canCreate || canEdit || canDelete,
+      canView: has(AppPermission.ViewDevices) || has(AppPermission.ViewBranchDevices) || canCreate || canEdit || canDelete,
       canCreate, canEdit, canDelete,
       canManage: canCreate || canEdit || canDelete,
-      canRevealPasswords: has(AppPermission.RevealDevicePasswords)
+      canRevealPasswords: has(AppPermission.RevealDevicePasswords),
+      canChooseUnit: has(AppPermission.ViewOrganizationDashboard) || has(AppPermission.ViewBranchDevices)
+    };
+  });
+
+  /** صلاحياتي على سجل المواقع المشترك (ViewSites…)؛ من يوثّق الأجهزة يقرأ السجل أيضاً (سياسة AnySiteView) */
+  siteAccess = computed<SiteAccess>(() => {
+    const has = (p: AppPermissionName) => this.auth.hasPermission(p);
+    const canCreate = has(AppPermission.CreateSite);
+    const canEdit = has(AppPermission.EditSite);
+    const canDelete = has(AppPermission.DeleteSite);
+    return {
+      // من يوثّق الأجهزة أو يسجّل معلومات طبقات الفروع يرى المواقع أيضاً (سياسة AnySiteView)
+      canView: has(AppPermission.ViewSites) || canCreate || canEdit || canDelete || this.access().canView || MAP_ENTRY_ACCESS.some(has),
+      canCreate, canEdit, canDelete,
+      canManage: canCreate || canEdit || canDelete
     };
   });
 
@@ -54,6 +62,10 @@ export class DeviceService {
   createSite(v: SiteInput) { return this.api.post<Site>('/Sites/Create', v); }
   updateSite(id: number, v: SiteInput) { return this.api.put<Site>(`/Sites/Update/${id}`, v); }
   deleteSite(id: number) { return this.api.delete<{ message: string }>(`/Sites/Delete/${id}`); }
+  /** مواقع على بُعد 200 متر من النقطة — تنبيه قبل إضافة موقع مكرر في السجل المشترك */
+  nearbySites(latitude: number, longitude: number, excludeId: number | null) {
+    return this.api.get<NearbySite[]>('/Sites/Nearby' + query({ latitude, longitude, excludeId }));
+  }
 
   // ─────────── كتالوج الأجهزة ───────────
   devices() { return this.api.get<Device[]>('/Devices/GetAll'); }
@@ -90,10 +102,11 @@ export class DeviceService {
     return this.api.getBlob('/DeviceSites/Export' + query({ ...filter, page: undefined, pageSize: undefined }));
   }
   importTemplate() { return this.api.getBlob('/DeviceSites/ImportTemplate'); }
-  importInstallations(file: File, dryRun: boolean) {
+  /** departmentId: القسم الذي تُسجَّل باسمه الأسطر (لمن يختار القسم) — فارغ = قسم المستورد */
+  importInstallations(file: File, dryRun: boolean, departmentId: number | null = null) {
     const body = new FormData();
     body.append('file', file);
-    return this.api.post<ImportReport>(`/DeviceSites/Import?dryRun=${dryRun}`, body);
+    return this.api.post<ImportReport>('/DeviceSites/Import' + query({ dryRun, departmentId }), body);
   }
 
   /** خريطة الفرع */
@@ -111,7 +124,10 @@ export interface InstallationInput {
   /** عند التعديل: فارغة = تبقى كلمة السر الحالية */
   pass: string;
   note: string; installLocation: string; sn: string; macAddress: string; port: string; vlan: number | null; firmware: string;
-  installDate: string | null; status: InstallationStatus; rowVersion?: string | null;
+  installDate: string | null; status: InstallationStatus;
+  /** القسم المالك (لمن يملك canChooseUnit) — null = قسم من يضيف */
+  departmentId?: number | null;
+  rowVersion?: string | null;
 }
 
 /** تنسيق الإحداثيات للعرض */

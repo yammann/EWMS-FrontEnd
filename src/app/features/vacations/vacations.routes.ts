@@ -1,16 +1,20 @@
 import { Routes } from '@angular/router';
 import { permissionGuard } from '@core/guards/permission.guard';
-import { APPROVE_VACATIONS, AppPermission, MANAGE_VACATION_TYPES, VACATION_STATS } from '@core/constants/access';
+import { APPROVE_VACATIONS, AppPermission, MANAGE_VACATION_TYPES, MY_VACATIONS_ACCESS, VACATION_STATS } from '@core/constants/access';
 
 /** نموذج طلب الإجازة الورقي — خارج الإطار العام */
 export const VACATION_PRINT_ROUTES: Routes = [
   {
-    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation, back: '/profile', noPreload: true },
+    path: 'vacations/print/:id', canActivate: [permissionGuard], data: { permission: AppPermission.PrintVacation, back: '/vacations/my', noPreload: true },
     loadComponent: () => import('./pages/vacation-print-page').then(m => m.VacationPrintPage)
   }
 ];
 
 export const VACATIONS_ROUTES: Routes = [
+  {
+    path: 'vacations/my', canActivate: [permissionGuard], data: { anyPermission: MY_VACATIONS_ACCESS },
+    loadComponent: () => import('./pages/my-vacations-page').then(m => m.MyVacationsPage)
+  },
   {
     path: 'vacations/review', canActivate: [permissionGuard], data: { anyPermission: APPROVE_VACATIONS },
     loadComponent: () => import('./pages/vacation-review-page').then(m => m.VacationReviewPage)

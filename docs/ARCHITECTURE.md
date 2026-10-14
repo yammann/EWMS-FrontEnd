@@ -35,7 +35,8 @@ src/app/
 | رأس الصفحة (عنوان صغير/رئيسي/وصف + أزرار) | `<app-page-header eyebrow heading subtitle>` + الأزرار كمحتوى |
 | زر الرجوع | **موحّد في الشريط العلوي** (`app-back-button` في `MainLayout`): يظهر للمسار الذي يعلن `data: { back: '/المسار' }` |
 | رسالة خطأ / حالة فارغة | `<app-alert [message]>` / `<app-empty-state [panel]>` |
-| بطاقة رقم | `<app-stat-tile>` |
+| بطاقة رقم | `<app-stat-tile icon="users" …>` (اسم أيقونة إلزامي) |
+| أيقونة | **`<app-icon name="lock" [size] [weight]>`** (`shared/ui/icon.ts`): مجموعة موحّدة خطية 24×24 بأسلوب SF Symbols مرسومة للمشروع، تأخذ لون النص. **لا Emoji ولا SVG مضمّنة في القوالب** — رمز جديد = أيقونة تُضاف في `scripts/icons/icon-paths.mjs` ثم `npm run icons` (يولّد `public/icons.svg` و`shared/ui/icon-names.ts` برقم نسخة). الرسومات في ملف واحد خارج حزمة JavaScript، وكل أيقونة `<use>` لرمز منه. القيم المخزّنة كـ Emoji (أيقونة مهمة العمل، قائمة «مفكرتي»، «آخر الإجراءات») تُعرض بـ `iconFor(قيمة)`. (أيقونات Apple الأصلية لا يجيز ترخيصها الاستعمال في تطبيق ويب.) |
 | أزرار نافذة النموذج | `<app-form-actions [busy] [disabled] label busyLabel (dismissed)>` |
 | نافذة / تأكيد / تنبيه | `app-modal` / `ConfirmService` / `ToastService` |
 | تقسيم الصفحات | `Pagination<T>` + `<app-pager>` |
@@ -47,6 +48,9 @@ src/app/
 | قيمة `<select>` مربوطة بإشارة | `[appSelectValue]` (لا `[value]` على select: يُطبَّق قبل وصول الخيارات فيظهر خيار خاطئ) |
 | قوائم الهيكل (فروع/أقسام/مكاتب/أدوار) | `LookupsService` (تخزين 60 ث، يُبطَل بعد أي تعديل؛ `branchOptions()` لمن لا يملك ViewBranches) |
 | تنسيق تاريخ UTC / مبلغ / كمية | أنابيب `utc` `money` `qty` (`shared/pipes/format.pipes.ts`) أو `core/utils/format.ts` |
+| تنزيل ملف من الخادم | `api.getBlob` / `api.postBlob` ثم `saveBlob(blob, اسم)` (`core/utils/download.ts`)؛ رسالة الخطأ العربية تُقرأ من Blob في `apiErrorInterceptor` |
+| ترويسة المطبوعات (اسم الدولة) | `PRINT_HEADER` (`core/constants/print.ts`) — نموذج الإجازة وطباعة التقارير |
+| تقرير جديد في «مركز التقارير» | صنف في الباكاند فقط (`Infrastructure/Reports`) + صلاحيته في `access.ts` (`REPORT_ACCESS`) وصفحة الأدوار: الواجهة تبني الفلاتر والمعاينة والطباعة من تعريفه |
 
 ### النمط الموحّد لصفحات الإدارة (CrudPage)
 ```ts
@@ -62,7 +66,8 @@ crud = new CrudPage<Item, Body>({
 - **الإضافة والتعديل في نافذة** (`crud.dialog()` = `{mode, item}`)، و**خطأ الخادم داخل النافذة** (`crud.formError()` عبر `app-alert` أو `app-entity-form [error]`) فلا يضيع ما كتبه المستخدم؛ لا تُغلق النافذة أثناء الحفظ.
 - النجاح: تُغلق النافذة + تنبيه + **إعادة قراءة صامتة** للقائمة وحدها (الجدول لا يختفي؛ القوائم المساعدة من `LookupsService` لا تُعاد).
 - الحذف: `ConfirmService` ثم إزالة الصف محلياً **بلا إعادة قراءة**، ومؤشر على الصف (`crud.deletingId()`).
-- فشل التحميل: `app-alert` مع «إعادة المحاولة» (`(retry)="crud.refresh()"`) والقائمة السابقة تبقى ظاهرة.
+- فشل التحميل: `app-alert` مع «إعادة المحاولة» (`(retry)="crud.refresh()"`) والقائمة السابقة تبقى ظاهرة — **إلزامي في كل صفحة**، والحالة الفارغة لا تظهر مع الخطأ (`@else if (!crud.loadError())`)؛ وإلا بدت الصفحة بلا بيانات.
+- القوائم المساعدة للنموذج (أقسام، مكاتب، أدوار…) مع القائمة الأساسية في `forkJoin`: كل واحدة عبر `orEmpty(…)` (`core/http/or-empty.ts`)، فرفضها (نقص صلاحية عرضها) لا يُفشل الصفحة؛ النموذج يقول ما ينقص، والتعديل يُبقي قيمة السجل الحالية خياراً.
 - الصفحات ذات الترقيم من الخادم (أجهزة الصيانة، قطع الغيار، مهام الصيانة، التركيبات) تبقى بمنطقها، وتستعمل `app-row-actions` و`deletingId` فقط.
 - أُزيلت: `ModalCrud`، `PageActions`، `loader()`.
 
@@ -70,11 +75,19 @@ crud = new CrudPage<Item, Body>({
 `apiErrorInterceptor` يحوّل كل خطأ لـ `/api/*` إلى `{ status, message }` (الرسالة عربية جاهزة للعرض). لا تفكّ `HttpErrorResponse` في الصفحات.
 `jwtInterceptor` يسجّل الخروج عند 401. ترتيبهما في `app.config.ts`: `[jwt, apiError]`.
 
+### الأمان (CSP، 2026-10-13)
+الخادم وNginx يرسلان `Content-Security-Policy` (`API/Middlewares/SecurityHeadersMiddleware.cs` في الباكاند): `script-src 'self'`
+(**لا سكربت مضمّن**: تهيئة المظهر في `public/theme-init.js`، والبناء الإنتاجي بـ `inlineCritical: false` لأن تضمين CSS الحرج
+يضيف `onload` مضمّناً)، الأنماط المضمّنة مسموحة، الصور `data:`/`blob:`، معاينة PDF من `blob:`، والاتصال بالأصل نفسه فقط
+(فلا `fetch` لروابط `data:` ولا أي مكتبة أو خط من CDN). بعد أي تغيير من هذا النوع: ابنِ واعرض النسخة الإنتاجية مع الترويسة
+وتأكد أن الكونسول بلا «Refused to …».
+سياسة كلمة المرور في `core/utils/password.ts` (مطابقة لـ `PasswordRules` في الباكاند): `passwordValidator` لحقول النماذج، و`passwordChecks` لقائمة الشروط.
+
 ### الأداء
 - كل صفحة `loadComponent`؛ التحميل المسبق في الخلفية للصفحات المسموحة فقط (`PermissionPreloadStrategy`، بعد 1.5 ث من التنقل؛ `data.noPreload` لصفحات الطباعة).
 - `@defer` للمكوّنات الثقيلة التي تُفتح عند الطلب (الدرج، نوافذ المهام، التقويم، لوحة التوقيع).
 - SignalR يُحمَّل بـ `import()` عند بدء الاتصال (خارج الحزمة الأولى).
-- ميزانية الحزمة الأولى: تحذير 430 kB / خطأ 480 kB.
+- ميزانية الحزمة الأولى: تحذير 430 kB / خطأ 480 kB. **2026-10-14: 412 kB** بعد نقل الأيقونات إلى `public/icons.svg`، والشعار إلى قناع CSS من `public/brand/logo.svg` (`shared/ui/logo.ts`)، وتأجيل قائمة المظهر ونوافذ الإشعارات المنبثقة بـ `@defer (on idle)` في `main-layout.html`. إطار Angular نفسه ≈ 355 kB منها. قِس قبل أي إضافة كبيرة: `ng build --stats-json` ثم حلّل `dist/EWMS.Client/stats.json`.
 - الخطوط WOFF2 (`npm run fonts:woff2` يولّدها من OTF، تحقق جدولاً بجدول؛ OTF يبقى احتياطاً في `@font-face`): 168 → 85 kB.
 - **OnPush**: هو الافتراضي في Angular 22 لكل المكوّنات (لا يوجد `Eager` في المشروع). أي حالة تُعرض في القالب وتتغيّر بعد طلب/مؤقّت يجب أن تكون إشارة.
 - أنماط `shared/styles/*.scss` تبقى في المكوّنات (تُضمَّن في كل قطعة كسولة ~2 kB) عمداً: نقلها عاماً لا يسرّع أي صفحة ويجعل محدّدات مثل `dl` و`.panel` و`.actions` تسري على التطبيق كله.

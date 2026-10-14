@@ -47,16 +47,46 @@ describe('Device inventory', () => {
     });
 
     login([]);
-    expect(service.access()).toEqual({ canView: false, canCreate: false, canEdit: false, canDelete: false, canManage: false, canRevealPasswords: false });
+    expect(service.access()).toEqual({ canView: false, canCreate: false, canEdit: false, canDelete: false, canManage: false, canRevealPasswords: false, canChooseUnit: false });
 
     login(['ViewDevices']);
-    expect(service.access()).toMatchObject({ canView: true, canManage: false, canRevealPasswords: false });
+    expect(service.access()).toMatchObject({ canView: true, canManage: false, canRevealPasswords: false, canChooseUnit: false });
 
     login(['EditDevice']);   // من يعدّل يرى ما يعدّله
     expect(service.access()).toMatchObject({ canView: true, canEdit: true, canCreate: false, canManage: true });
 
     login(['ViewDevices', 'RevealDevicePasswords']);
     expect(service.access()).toMatchObject({ canRevealPasswords: true });
+
+    // تركيبات الفرع كله: يرى ويختار القسم المالك ضمن فرعه
+    login(['ViewBranchDevices']);
+    expect(service.access()).toMatchObject({ canView: true, canChooseUnit: true });
+  });
+
+  it('derives site access separately; device users can still read the shared registry', () => {
+    const auth = TestBed.inject(AuthService);
+    const login = (permissions: string[]) => auth.currentUser.set({
+      role: 'x', permissions, fullName: 't', email: 't@e.test', branchId: null, departmentId: null, officeId: null,
+      expiresAt: new Date(Date.now() + 60000).toISOString()
+    });
+
+    login(['ViewDevices']);   // يوثّق الأجهزة: يقرأ المواقع ولا يديرها
+    expect(service.siteAccess()).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canManage: false });
+
+    login(['EditSite']);
+    expect(service.siteAccess()).toMatchObject({ canView: true, canEdit: true, canManage: true });
+    expect(service.access().canView).toBe(false);
+  });
+
+  it('asks for nearby sites and imports under a chosen department', () => {
+    service.nearbySites(33.5, 36.3, 7).subscribe();
+    http.expectOne('/api/Sites/Nearby?latitude=33.5&longitude=36.3&excludeId=7').flush([]);
+
+    const file = new File(['x'], 'a.xlsx');
+    service.importInstallations(file, true, 12).subscribe();
+    http.expectOne('/api/DeviceSites/Import?dryRun=true&departmentId=12').flush({});
+    service.importInstallations(file, false).subscribe();
+    http.expectOne('/api/DeviceSites/Import?dryRun=false').flush({});
   });
 
   it('sends site coordinates and contact fields as JSON', () => {

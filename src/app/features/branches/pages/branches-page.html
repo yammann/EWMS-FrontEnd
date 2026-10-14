@@ -4,36 +4,19 @@
   <app-admin-header eyebrow="إدارة الفروع" heading="الفروع" subtitle="إدارة فروع النظام التي تتبعها الأقسام والمستخدمون." [loading]="crud.busy()"
     [createLabel]="canCreate() ? 'فرع جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا بيانات -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Stats -->
   <section class="stats-grid">
 
-    <app-stat-tile tone="green" icon="" label="إجمالي الفروع" [value]="stats().total" hint="جميع الفروع المسجلة">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 21h18"></path>
-                  <path d="M5 21V5l7-3 7 3v16"></path>
-                  <path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="green" icon="landmark" label="إجمالي الفروع" [value]="stats().total" hint="جميع الفروع المسجلة" />
 
-    <app-stat-tile tone="blue" icon="" label="فروع بوصف" [value]="stats().withDescription" hint="لها وصف موثق">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 7h16M4 12h16M4 17h10"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="blue" icon="textLines" label="فروع بوصف" [value]="stats().withDescription" hint="لها وصف موثق" />
 
-    <app-stat-tile tone="orange" icon="" label="بدون وصف" [value]="stats().withoutDescription" hint="تحتاج إلى استكمال البيانات">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="9"></circle>
-                  <path d="M12 8v4M12 16h.01"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="orange" icon="alert" label="بدون وصف" [value]="stats().withoutDescription" hint="تحتاج إلى استكمال البيانات" />
 
-    <app-stat-tile tone="purple" icon="" label="الحالة" [value]="stats().total === 0 ? '—' : 'نشط'" hint="الفرع متاح للاستخدام" [live]="!(stats().total === 0)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 21h18"></path>
-                  <path d="M5 21V5l7-3 7 3v16"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="purple" icon="check" label="الحالة" [value]="stats().total === 0 ? '—' : 'نشط'" hint="الفرع متاح للاستخدام" [live]="!(stats().total === 0)" />
   </section>
 
   <!-- Branches List -->
@@ -93,13 +76,10 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M3 21h18"></path>
-            <path d="M5 21V5l7-3 7 3v16"></path>
-          </svg>
+          <app-icon name="landmark" />
         </div>
         <h3>لا توجد فروع</h3>
         <p>ابدأ بالضغط على زر "فرع جديد" في الأعلى.</p>
@@ -117,10 +97,7 @@
           <app-entity-form [mode]="dlg.mode" [form]="form" [error]="crud.formError()" nameLabel="اسم الفرع"
                            namePlaceholder="مثال: فرع دمشق" descPlaceholder="وصف مختصر عن الفرع..." createLabel="إنشاء الفرع"
                            [saving]="crud.saving() ? dlg.mode : null" (submitted)="save()" (dismissed)="crud.close()">
-            <svg nameIcon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 21h18"></path>
-            <path d="M5 21V5l7-3 7 3v16"></path>
-            </svg>
+            <app-icon nameIcon name="landmark" />
           </app-entity-form>
         </div>
     </app-modal>

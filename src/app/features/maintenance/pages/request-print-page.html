@@ -4,7 +4,7 @@
     <button type="button" role="tab" [class.on]="kind() === 'receipt'" (click)="setKind('receipt')">إيصال الاستلام</button>
     <button type="button" role="tab" [class.on]="kind() === 'delivery'" (click)="setKind('delivery')">ورقة التسليم</button>
   </div>
-  <button type="button" class="btn" (click)="print()" [disabled]="!data()">🖨 طباعة</button>
+  <button type="button" class="btn" (click)="print()" [disabled]="!data()"><app-icon name="printer" [size]="16" /> طباعة</button>
 </div>
 
 @if (error()) { <p class="alert alert-error no-print" role="alert">{{ error() }}</p> }

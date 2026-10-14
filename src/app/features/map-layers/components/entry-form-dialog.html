@@ -1,0 +1,89 @@
+<app-modal [heading]="isEdit ? 'تعديل السجل' : 'إضافة معلومات للموقع'" [subheading]="siteName()" [busy]="saving()" (closed)="cancel()">
+  <form (submit)="$event.preventDefault(); save()">
+    <div class="modal-body">
+      <app-alert [message]="error()" />
+      <div class="form-grid-2">
+        @if (!isEdit && layers().length > 1) {
+          <label class="form-field full"><span class="form-label">الطبقة</span>
+            <select #lay [appSelectValue]="layerId()" (change)="layerId.set(+lay.value)">
+              @for (l of layers(); track l.id) { <option [value]="l.id">{{ l.name }}{{ l.branchName ? ' — ' + l.branchName : '' }}</option> }
+            </select>
+          </label>
+        } @else if (layer(); as l) {
+          <p class="layer-line full"><i class="dot" [style.background]="l.color" aria-hidden="true"></i> طبقة <strong>{{ l.name }}</strong>@if (l.branchName) { <span class="hint"> — {{ l.branchName }}</span> }</p>
+        }
+
+        @for (f of fields(); track f.id) {
+          @switch (f.type) {
+            @case (2) {
+              <label class="form-field full"><span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}</span>
+                <textarea #ta rows="3" maxlength="4000" [value]="text(f)" (input)="set(f, ta.value)"></textarea></label>
+            }
+            @case (3) {
+              <label class="form-field"><span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}</span>
+                <input #num type="number" step="any" dir="ltr" [value]="text(f)" (input)="setNumber(f, num.value)"></label>
+            }
+            @case (4) {
+              <label class="form-field"><span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}</span>
+                <input #dt type="date" [value]="text(f)" (input)="set(f, dt.value || null)"></label>
+            }
+            @case (5) {
+              <label class="form-field"><span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}</span>
+                <select #sel [appSelectValue]="text(f)" (change)="set(f, sel.value || null)">
+                  <option value="">—</option>
+                  @if (staleOption(f); as old) { <option [value]="old" disabled>{{ old }} (لم يعد في القائمة)</option> }
+                  @for (o of f.options; track o) { <option [value]="o">{{ o }}</option> }
+                </select></label>
+            }
+            @case (7) {
+              <div class="form-field full files-field" [class.over]="dragOver() === f.id"
+                   (dragover)="$event.preventDefault(); dragOver.set(f.id)" (dragleave)="dragOver.set(null)" (drop)="dropped(f, $event)">
+                <span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}
+                  <small class="hint">— حتى {{ f.maxFiles }} ملفات، {{ maxMb(f) }}MB للملف</small></span>
+                @if ((files()[f.id] ?? []).length || uploadsOf(f.id).length) {
+                  <ul class="picked">
+                    @for (x of files()[f.id] ?? []; track x.id) {
+                      <li><span class="ico" aria-hidden="true"><app-icon [name]="icon(x.kind)" [size]="16" /></span><span class="name">{{ x.fileName }}</span><small>{{ size(x.size) }}</small>
+                        <button type="button" class="del" (click)="removeFile(f, x)" [attr.aria-label]="'إزالة ' + x.fileName" title="إزالة"><app-icon name="xmark" [size]="14" [weight]="2.2" /></button></li>
+                    }
+                    @for (u of uploadsOf(f.id); track u.key) {
+                      <li class="uploading"><span class="name">{{ u.name }}</span><progress max="100" [value]="u.percent"></progress><small>{{ u.percent }}%</small></li>
+                    }
+                  </ul>
+                }
+                <div class="pick">
+                  <input #pk type="file" multiple hidden [accept]="accept(f)" (change)="picked(f, pk)">
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="pk.click()" [disabled]="remaining(f) <= 0">+ إرفاق ملفات</button>
+                  <small class="hint">{{ remaining(f) > 0 ? 'أو اسحبها إلى هنا — ' + formats(f) : 'بلغت الحد الأقصى ' + f.maxFiles + ' ملفات' }}</small>
+                </div>
+                @if (fileErrors()[f.id]; as m) { <p class="form-error" role="alert">{{ m }}</p> }
+              </div>
+            }
+            @case (6) {
+              <label class="form-field"><span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}</span>
+                <select #yn [appSelectValue]="yesNo(f)" (change)="setYesNo(f, yn.value)">
+                  <option value="">—</option><option value="true">نعم</option><option value="false">لا</option>
+                </select></label>
+            }
+            @default {
+              <label class="form-field"><span class="form-label">{{ f.label }}@if (f.isRequired) {<b class="req">*</b>}</span>
+                <input #tx maxlength="500" [value]="text(f)" (input)="set(f, tx.value)"></label>
+            }
+          }
+        } @empty {
+          @if (layer()) { <p class="hint full">لا حقول في هذه الطبقة — يُسجَّل الموقع عليها فقط.</p> }
+        }
+
+        @if (unitOptions().length) {
+          <label class="form-field full"><span class="form-label">القسم المالك للسجل <small class="hint">(يحدد من يراه: قسمه، وفرعه لمن يملك سجلات الفرع)</small></span>
+            <select #dep [appSelectValue]="departmentId()" (change)="departmentId.set(dep.value)">
+              <option value="">{{ isEdit ? (entry()!.departmentName || 'على مستوى الفرع') + ' (دون تغيير)' : 'قسمي (تلقائياً)' }}</option>
+              @for (d of unitOptions(); track d.id) { <option [value]="d.id">{{ d.name }}</option> }
+            </select></label>
+        }
+      </div>
+      @if (problem() && layer()) { <p class="hint warn">{{ problem() }}</p> }
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="!!problem()" (dismissed)="cancel()" />
+  </form>
+</app-modal>

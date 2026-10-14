@@ -156,7 +156,7 @@ nav a.active app-icon { color: var(--on-brand); }
   nav a .label { display: none; }
   nav a app-icon { width: 21px; height: 21px; }
 
-  nav a::after {
+  nav a::after, .rail-section::after {
     content: attr(data-label);
     position: absolute;
     inset-inline-start: calc(100% + 12px);
@@ -176,7 +176,8 @@ nav a.active app-icon { color: var(--on-brand); }
     transform: translate(-4px, -50%);
     transition: opacity .15s var(--ease), transform .2s var(--ease-spring);
   }
-  nav a:hover::after, nav a:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+  nav a:hover::after, nav a:focus-visible::after,
+  .rail-section:hover::after, .rail-section:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
 }
 
 .sidebar-foot {
@@ -286,45 +287,3 @@ nav a.active app-icon { color: var(--on-brand); }
 .me-text { display: grid; min-width: 0; max-width: 200px; line-height: 1.3; }
 .me-text strong { font-size: 13px; font-weight: 700; color: var(--ink-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .me-text small { font-size: 11px; color: var(--ink-500); }
-
-/* =========================================================
-   الشاشات الصغيرة: السايدبار شريط أفقي أعلى الصفحة
-   ========================================================= */
-@media (max-width: 860px) {
-  .shell, .shell.collapsed { grid-template-columns: 1fr; }
-  .sidebar-toggle { display: none; }
-  .nav-group, .nav-group.closed { grid-template-rows: 1fr; opacity: 1; }
-  .nav-group-inner { flex-direction: row; flex-wrap: wrap; gap: 6px; overflow: visible; }
-
-  .sidebar {
-    position: static;
-    height: auto;
-    gap: 10px;
-    padding: 12px;
-    border-inline-end: 0;
-    border-bottom: 1px solid var(--separator);
-  }
-
-  .brand { padding-bottom: 10px; }
-  .sidebar-foot, .nav-section { display: none; }
-  .shell.collapsed .brand-text { display: grid; }
-  .shell.collapsed nav a .label { display: inline; }
-  .shell.collapsed nav a::after { display: none; }
-  .shell.collapsed .sidebar { padding-inline: 12px; }
-  .shell.collapsed .sidebar-head { flex-direction: row; }
-  .shell.collapsed .brand { justify-content: flex-start; flex: 1; }
-  .shell.collapsed nav a { padding: 0 10px; min-height: 36px; }
-
-  nav { flex-direction: row; flex-wrap: wrap; gap: 6px; }
-  nav a { flex: 1 1 auto; justify-content: center; font-size: 13px; background: var(--fill); }
-
-  .topbar { padding: 0 16px; }
-  .greeting { display: none; }
-  .topbar-actions { margin-inline-start: auto; justify-content: flex-end; }
-}
-
-@media (max-width: 560px) {
-  .me-text { display: none; }
-  .me { padding: 2px; }
-  nav a { flex: 1 1 calc(50% - 3px); }
-}

@@ -1,4 +1,5 @@
-<main class="shell" [class.collapsed]="collapsed()">
+<main class="shell" [class.collapsed]="collapsed()" [class.menu-open]="menuOpen()"
+      [class.collapsing]="motion() === 'collapsing'" [class.expanding]="motion() === 'expanding'" [class.settling]="motion() === 'settling'">
   <!-- السايدبار بأسلوب macOS: مادة شفافة، أقسام قابلة للطي، ووضع الأيقونات فقط -->
   <aside class="sidebar" aria-label="القائمة الرئيسية">
     <div class="sidebar-head">
@@ -13,24 +14,40 @@
               [attr.aria-label]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'" [attr.title]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'">
         <app-icon name="sidebar" />
       </button>
+      <!-- الشاشات الصغيرة: الروابط مغلقة حتى يُضغط «القائمة» -->
+      <button type="button" class="menu-toggle" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-controls="main-nav">
+        <app-icon [name]="menuOpen() ? 'xmark' : 'menu'" [weight]="2" /><span>{{ menuOpen() ? 'إغلاق' : 'القائمة' }}</span>
+      </button>
     </div>
 
-    <nav aria-label="التنقل الرئيسي">
+    <nav id="main-nav" aria-label="التنقل الرئيسي" #navEl>
+      <span class="nav-indicator" #indicator aria-hidden="true"></span>
       @for (section of sections(); track section.id) {
-        @if (section.title) {
+        @if (section.title && compact()) {
+          <h3 class="nav-heading">{{ section.title }}</h3>
+        } @else if (section.title) {
           <button type="button" class="nav-section" [class.has-active]="!isOpen(section) && hasActive(section)"
                   (click)="toggleSection(section)" [attr.aria-expanded]="isOpen(section)" [attr.aria-controls]="'nav-' + section.id">
             <span>{{ section.title }}</span>
             <app-icon name="chevron" class="chevron" />
           </button>
         }
-        <!-- في وضع الأيقونات تظهر كل الروابط (الأقسام بلا عناوين) -->
-        <div class="nav-group" [id]="'nav-' + section.id" [class.closed]="!collapsed() && !isOpen(section)">
+        <!-- وضع الأيقونات: أيقونة القسم (اسمه عند المرور)، والضغط عليها يُنزل أيقونات صفحاته تحتها -->
+        @if (section.title && collapsed() && !compact()) {
+          <button type="button" class="rail-section" [class.open]="railOpen() === section.id"
+                  [class.has-active]="railOpen() !== section.id && hasActive(section)" (click)="toggleRail(section)"
+                  [attr.data-label]="section.title" [attr.aria-label]="section.title"
+                  [attr.aria-expanded]="railOpen() === section.id" [attr.aria-controls]="'nav-' + section.id">
+            <app-icon [name]="section.icon" class="rail-icon" /><app-icon name="chevron" class="rail-chevron" [weight]="2.4" />
+          </button>
+        }
+        <div class="nav-group" [id]="'nav-' + section.id" [class.nav-main]="!section.title"
+             [class.rail-tray]="!!section.title && collapsed() && !compact()" [class.closed]="groupClosed(section)">
           <div class="nav-group-inner">
             @for (item of section.items; track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ paths: item.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
-                 [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null"
-                 [attr.tabindex]="!collapsed() && !isOpen(section) ? -1 : null">
+                 [attr.data-label]="item.label" [attr.aria-label]="collapsed() ? item.label : null" [style.--i]="$index"
+                 [attr.tabindex]="groupClosed(section) ? -1 : null">
                 <app-icon [name]="item.icon" /><span class="label">{{ item.label }}</span>
               </a>
             }
@@ -50,7 +67,8 @@
         <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
       </div>
       <div class="topbar-actions">
-        <app-appearance-menu />
+        <!-- قائمة المظهر تُحمَّل بعد أن تهدأ الصفحة (خارج الحزمة الأولى)؛ حتى ذلك زر بنفس الشكل -->
+        @defer (on idle) { <app-appearance-menu /> } @placeholder { <button type="button" class="top-btn" aria-label="المظهر" disabled><app-icon name="palette" /></button> }
         @if (canNotify()) {
         <a class="top-btn bell" routerLink="/notifications" routerLinkActive="active"
            [attr.aria-label]="unreadCount() ? 'الإشعارات — ' + unreadCount() + ' غير مقروء' : 'الإشعارات'" title="الإشعارات">
@@ -59,7 +77,7 @@
         </a>
         }
         @if (user()) {
-          <a class="me" routerLink="/profile" routerLinkActive="active" title="ملفي وإجازاتي">
+          <a class="me" routerLink="/profile" routerLinkActive="active" title="ملفي الشخصي">
             <span class="avatar" aria-hidden="true">{{ initial() }}</span>
             <span class="me-text"><strong>{{ user()?.fullName || user()?.email }}</strong><small>{{ roleLabel(user()?.role) }}</small></span>
           </a>
@@ -74,6 +92,7 @@
 </main>
 
 <!-- خارج .shell: الـ shell عبارة عن grid بعمودين، وأي عنصر إضافي داخله يأخذ خلية ويكسر التخطيط -->
-<app-notification-toasts />
+<!-- نوافذ الإشعارات المنبثقة تُحمَّل بعد أن تهدأ الصفحة (خارج الحزمة الأولى) -->
+@defer (on idle) { <app-notification-toasts /> }
 <app-toasts />
 <app-confirm-host />

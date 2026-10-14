@@ -3,7 +3,8 @@ import { Pager } from '@shared/ui/pager';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { PagedResult } from '@core/models/paged-result.model';
 import { DeviceService, formatCoords } from '../data-access/device.service';
 import { DeviceSite, Site } from '../data-access/device.models';
 import { StatTile } from '@shared/ui/stat-tile';
@@ -13,15 +14,17 @@ import { formatPhone } from '@core/utils/phone';
 import { deviceUrl } from '@core/utils/network';
 import { DeviceHistory, DevicePassword, InstallStatus } from '../components/device-ui';
 import { LinkedTasks } from '@features/task-board';
+import { MapLayersService, SiteEntriesPanel } from '@features/map-layers';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
+import { Icon } from '@shared/ui/icon';
 
 /**
  * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):
  * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, Pager],
+  selector: 'app-site-details-page', standalone: true, imports: [Icon, EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, Pager],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './site-details-page.scss'],
   templateUrl: './site-details-page.html',
   
@@ -33,6 +36,9 @@ export class SiteDetailsPage {
   private router = inject(Router);
 
   access = this.service.access;
+  /** معلومات الفروع (طبقاتها) على الموقع — لمن يملك أي صلاحية سجلات */
+  private layersAccess = inject(MapLayersService).access;
+  canViewEntries = computed(() => this.layersAccess().canViewEntries);
   site = signal<Site | null>(null);
   installations = signal<DeviceSite[]>([]);
   allSites = signal<Site[]>([]);
@@ -79,7 +85,11 @@ export class SiteDetailsPage {
   }
 
   private load(id: number) {
-    this.loading.set(true); this.error.set(''); forkJoin({ site: this.service.site(id), installations: this.service.installations({ siteId: id, pageSize: 200 }), sites: this.service.sites() }).subscribe({
+    // التركيبات لمن يرى الأجهزة فقط (وضمن قسمه/فرعه)؛ من يملك صلاحيات المواقع وحدها يرى بيانات الموقع
+    const installations = this.access().canView
+      ? this.service.installations({ siteId: id, pageSize: 200 })
+      : of<PagedResult<DeviceSite>>({ items: [], totalCount: 0, page: 1, pageSize: 200, totalPages: 0 });
+    this.loading.set(true); this.error.set(''); forkJoin({ site: this.service.site(id), installations, sites: this.service.sites() }).subscribe({
       next: r => { this.site.set(r.site); this.installations.set(r.installations.items); this.total.set(r.installations.totalCount); this.allSites.set(r.sites); this.loading.set(false); },
       error: e => { this.site.set(null); this.loading.set(false); this.error.set(e.message); }
     });

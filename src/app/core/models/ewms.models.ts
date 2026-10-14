@@ -51,5 +51,7 @@ export interface User {
   departmentId: number | null;
   departmentName: string;
   isActive: boolean;
+  /** الدخول موقوف مؤقتاً حتى (UTC) بعد محاولات خاطئة متكررة — null إن لم يكن مقفلاً الآن */
+  lockedUntil?: string | null;
   createdAt: string;
 }

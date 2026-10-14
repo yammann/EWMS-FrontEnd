@@ -1,17 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { VacationService } from '../data-access/vacation.service';
 import { VacationPrint } from '../data-access/vacation.models';
 import { Logo } from '@shared/ui/logo';
 import { daysAr } from '@core/utils/arabic-count';
 import { BackButton } from '@shared/ui/back-button';
-
-/** ترويسة نموذج طلب الإجازة: الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
-export const VACATION_PRINT_HEADER = {
-  countryAr: 'الجمهورية العربية السورية',
-  countryEn: 'Syrian Arab Republic'
-};
+import { Icon } from '@shared/ui/icon';
+import { PRINT_HEADER } from '@core/constants/print';
 
 
 /**
@@ -20,15 +16,15 @@ export const VACATION_PRINT_HEADER = {
  * صفحة خارج الإطار العام، والورقة بألوان ثابتة (ورق أبيض) بصرف النظر عن مظهر التطبيق.
  */
 @Component({
-  selector: 'app-vacation-print', standalone: true, imports: [BackButton, DatePipe, Logo],
+  selector: 'app-vacation-print', standalone: true, imports: [Icon, BackButton, DatePipe, Logo],
   templateUrl: './vacation-print-page.html',
   styleUrl: './vacation-print-page.scss'
 })
 export class VacationPrintPage {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
 
-  header = VACATION_PRINT_HEADER;
+  /** الدولة، ثم اسم فرع الطلب (يُملأ تلقائياً من فرع مقدّم الطلب لحظة التقديم) */
+  header = PRINT_HEADER;
   days = daysAr;
   data = signal<VacationPrint | null>(null);
   error = signal('');

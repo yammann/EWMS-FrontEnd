@@ -8,7 +8,7 @@
   <div class="card">
     <div class="card-head">
       @if (loading()) { <span class="state">جارٍ التحميل…</span> }
-      @else if (current()) { <span class="badge">✓</span><span class="state on">توقيعك محفوظ ومعتمد</span> }
+      @else if (current()) { <span class="badge"><app-icon name="checkmark" [size]="12" [weight]="2.6" /></span><span class="state on">توقيعك محفوظ ومعتمد</span> }
       @else { <span class="state">لا يوجد توقيع محفوظ</span> }
     </div>
     <div class="paper" [class.empty]="!current()">

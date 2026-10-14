@@ -29,7 +29,7 @@
 
   @if (loading() && !items().length) { <div class="panel empty-state" role="status">جارٍ تحميل الإشعارات…</div> }
   @else if (!items().length && !error()) {
-    <div class="panel empty-state"><div class="n-empty" aria-hidden="true">🔔</div><h3>{{ unreadOnly() ? 'كل شيء مقروء' : 'لا توجد إشعارات' }}</h3>
+    <div class="panel empty-state"><div class="n-empty" aria-hidden="true"><app-icon name="bell" /></div><h3>{{ unreadOnly() ? 'كل شيء مقروء' : 'لا توجد إشعارات' }}</h3>
       <p class="muted">{{ unreadOnly() ? 'لا إشعارات جديدة بانتظارك.' : 'ستظهر هنا تحديثات طلباتك ومهامك عند حدوثها.' }}</p></div>
   } @else {
     @for (g of groups(); track g.title) {
@@ -39,7 +39,7 @@
           @for (n of g.items; track n.id) {
             <li class="n-card" [class.unread]="!n.isRead">
               <button type="button" class="n-main" (click)="open(n)">
-                <span class="n-ico {{ kind(n).tone }}" aria-hidden="true">{{ kind(n).icon }}</span>
+                <span class="n-ico {{ kind(n).tone }}" aria-hidden="true"><app-icon [name]="kind(n).icon" /></span>
                 <span class="n-text">
                   <strong>{{ n.title }}</strong>
                   <span class="msg">{{ n.message }}</span>
@@ -47,7 +47,7 @@
                 </span>
                 @if (!n.isRead) { <span class="n-unread" aria-label="غير مقروء"></span> }
               </button>
-              @if (!n.isRead) { <button class="n-read" type="button" (click)="markRead(n)" [disabled]="saving()" title="تعليم كمقروء" aria-label="تعليم كمقروء">✓</button> }
+              @if (!n.isRead) { <button class="n-read" type="button" (click)="markRead(n)" [disabled]="saving()" title="تعليم كمقروء" aria-label="تعليم كمقروء"><app-icon name="checkmark" [weight]="2.2" /></button> }
             </li>
           }
         </ul>

@@ -13,7 +13,7 @@
       @if (canCreate()) { <button class="btn" type="button" (click)="newTask()">+ مهمة جديدة</button> }
       @if (canRecurring()) { <a class="btn btn-ghost" routerLink="/task-board/recurring">المهام الدورية والقوالب</a> }
       @if (canStats()) { <a class="btn btn-ghost" routerLink="/task-board/stats">الإحصائيات</a> }
-      <button class="btn btn-ghost" type="button" (click)="exportExcel()" [disabled]="exporting() || !tasks().length">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button>
+      @if (canExport()) { <button class="btn btn-ghost" type="button" (click)="exportExcel()" [disabled]="exporting() || !tasks().length">{{ exporting() ? 'جارٍ التصدير…' : 'تصدير Excel' }}</button> }
       <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
     </div>
   </header>
@@ -29,10 +29,10 @@
   </nav>
 
   <section class="dash-stats" aria-label="ملخص المهام">
-    <app-stat-tile label="لم تُنفَّذ" [value]="counts().todo" icon="🗂️" tone="blue" />
-    <app-stat-tile label="قيد التنفيذ" [value]="counts().inProgress" icon="⚙️" tone="purple" />
-    <app-stat-tile label="بانتظار المراجعة" [value]="counts().inReview" icon="🔎" tone="orange" hint="بانتظار اعتماد المُسنِد" />
-    <app-stat-tile label="متأخرة" [value]="counts().overdue" icon="⏰" tone="red" [alert]="counts().overdue > 0" hint="تجاوزت تاريخ التسليم" />
+    <app-stat-tile label="لم تُنفَّذ" [value]="counts().todo" icon="stack" tone="blue" />
+    <app-stat-tile label="قيد التنفيذ" [value]="counts().inProgress" icon="gear" tone="purple" />
+    <app-stat-tile label="بانتظار المراجعة" [value]="counts().inReview" icon="search" tone="orange" hint="بانتظار اعتماد المُسنِد" />
+    <app-stat-tile label="متأخرة" [value]="counts().overdue" icon="alarm" tone="red" [alert]="counts().overdue > 0" hint="تجاوزت تاريخ التسليم" />
   </section>
 
   <div class="toolbar">
@@ -104,12 +104,12 @@
                   }
                 </div>
                 <h3>{{ t.title }}</h3>
-                @if (t.parentTitle) { <p class="parent">↰ {{ t.parentTitle }}</p> }
+                @if (t.parentTitle) { <p class="parent"><app-icon name="turnUp" [size]="13" /> {{ t.parentTitle }}</p> }
                 <p class="target">
                   @if (mode() === 'incoming') { من: {{ t.createdByName }} }
                   @else { إلى: {{ t.targetName }} }
                 </p>
-                @if (t.claimedByName) { <p class="claimed">✋ يعمل عليها: {{ t.claimedByName }}</p> }
+                @if (t.claimedByName) { <p class="claimed"><app-icon name="hand" [size]="13" /> يعمل عليها: {{ t.claimedByName }}</p> }
                 @if (t.subTasksTotal) {
                   <div class="sub" [attr.title]="t.subTasksDone + ' من ' + t.subTasksTotal + ' مهام فرعية منجزة'">
                     <span class="bar"><span [style.width.%]="100 * t.subTasksDone / t.subTasksTotal"></span></span>
@@ -119,9 +119,9 @@
                 <footer class="card-foot">
                   <small>{{ t.targetPath }}</small>
                   <span class="badges">
-                    @if (t.checklistTotal) { <small [attr.title]="'قائمة التحقق: ' + t.checklistDone + ' من ' + t.checklistTotal" [class.all]="t.checklistDone === t.checklistTotal">☑ {{ t.checklistDone }}/{{ t.checklistTotal }}</small> }
-                    @if (t.attachmentsCount) { <small title="مرفقات">📎 {{ t.attachmentsCount }}</small> }
-                    @if (t.commentsCount) { <small class="comments">💬 {{ t.commentsCount }}</small> }
+                    @if (t.checklistTotal) { <small [attr.title]="'قائمة التحقق: ' + t.checklistDone + ' من ' + t.checklistTotal" [class.all]="t.checklistDone === t.checklistTotal"><app-icon name="checklist" [size]="13" /> {{ t.checklistDone }}/{{ t.checklistTotal }}</small> }
+                    @if (t.attachmentsCount) { <small title="مرفقات"><app-icon name="paperclip" [size]="13" /> {{ t.attachmentsCount }}</small> }
+                    @if (t.commentsCount) { <small class="comments"><app-icon name="bubble" [size]="13" /> {{ t.commentsCount }}</small> }
                   </span>
                 </footer>
                 <div class="drop-ghost" *cdkDragPlaceholder></div>

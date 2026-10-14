@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnDestroy, afterNextRender, input, output, viewChild } from '@angular/core';
+import { Icon } from './icon';
 
 /** النوافذ المفتوحة حالياً (الأعلى في آخر المصفوفة) — Esc يغلق الأعلى فقط */
 const openStack: Modal[] = [];
@@ -22,7 +23,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([t
  * }
  */
 @Component({
-  selector: 'app-modal', standalone: true,
+  selector: 'app-modal', standalone: true, imports: [Icon],
   template: `
     <div class="modal-backdrop" [class.confirm-backdrop]="panelClass() === 'confirm-dialog'" (click)="requestClose()">
       <div #panel [class]="panelClass()" [class.modal-lg]="size() === 'lg'" [attr.role]="role()" aria-modal="true"
@@ -36,7 +37,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([t
               @if (subheading()) { <p class="modal-sub">{{ subheading() }}</p> }
             </div>
             <button type="button" class="modal-close" aria-label="إغلاق" (click)="requestClose()" [disabled]="busy()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              <app-icon name="xmark" [weight]="2.2" />
             </button>
           </header>
         }

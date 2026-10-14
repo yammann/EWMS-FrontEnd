@@ -14,7 +14,7 @@
 .t-body { flex: 1; min-width: 0; }
 .t-tick { flex: none; width: 26px; height: 26px; min-height: 0; padding: 0; display: grid; place-items: center; margin-top: 1px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border-strong); color: transparent; box-shadow: none;
   transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s cubic-bezier(.34, 1.56, .64, 1); }
-.t-tick svg { width: 14px; height: 14px; }
+.t-tick app-icon { width: 14px; height: 14px; }
 .t-tick:hover:not(:disabled) { border-color: var(--ink-500); transform: none; box-shadow: none; background: var(--surface); color: transparent; }
 .t-tick[aria-checked="true"]:hover:not(:disabled) { border-color: var(--brand-600); background: var(--brand-600); color: var(--on-brand); }
 .t-tick[aria-checked="true"] { background: var(--brand-600); border-color: var(--brand-600); color: var(--on-brand); box-shadow: var(--shadow-sm); }
@@ -23,8 +23,10 @@
 .t-card:hover .t-name { color: var(--brand-700); }
 .t-card.done .t-name { color: var(--ink-400); text-decoration: line-through; }
 .t-star { color: var(--warning-500); margin-inline-end: 4px; }
+.t-star-toggle app-icon { width: 18px; height: 18px; }
 .t-note { margin: 4px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--ink-500); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .t-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--ink-500); }
+.t-chip app-icon { width: 13px; height: 13px; }
 .t-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: var(--radius-md); background: var(--ink-100); color: var(--ink-600); font-size: 11.5px; font-weight: 700; }
 .t-chip.late { background: var(--danger-50); color: var(--danger-700); }
 .t-chip.today { background: var(--warning-50); color: var(--warning-700); }
@@ -43,7 +45,7 @@ a.t-chip:hover { text-decoration: underline; }
 .t-menu button.danger:hover:not(:disabled) { background: var(--danger-50); }
 .t-acts { flex: none; display: inline-flex; gap: 2px; }
 .t-act { width: 32px; min-height: 32px; padding: 0; display: grid; place-items: center; border-radius: var(--radius-md); background: transparent; color: var(--ink-500); box-shadow: none; }
-.t-act svg { width: 17px; height: 17px; }
+.t-act app-icon { width: 17px; height: 17px; }
 .t-act:hover:not(:disabled) { background: var(--fill); color: var(--ink-900); transform: none; box-shadow: none; }
 .t-act.del:hover:not(:disabled) { background: var(--danger-50); color: var(--danger-700); }
 .t-add { justify-content: center; min-height: 112px; border: 2px dashed var(--border-strong); background: transparent; box-shadow: none; }
@@ -53,7 +55,7 @@ a.t-chip:hover { text-decoration: underline; }
 .t-add-text strong { font-size: 14px; color: var(--ink-700); }
 .t-add-text small { font-size: 11.5px; color: var(--ink-400); }
 .t-add-btn { width: 48px; min-height: 48px; padding: 0; display: grid; place-items: center; border-radius: 50%; background: var(--fill); color: var(--ink-600); box-shadow: none; transition: background .15s ease, color .15s ease, transform .15s ease; }
-.t-add-btn svg { width: 22px; height: 22px; }
+.t-add-btn app-icon { width: 22px; height: 22px; }
 .t-add-btn:hover:not(:disabled) { background: var(--brand-50); color: var(--brand-700); transform: scale(1.06); box-shadow: none; }
 .t-tip { position: relative; }
 .t-tip::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); padding: 6px 10px; border-radius: var(--radius-md); background: var(--ink-900); color: var(--surface); font-size: 12px; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s ease; z-index: 30; }
@@ -63,7 +65,7 @@ a.t-chip:hover { text-decoration: underline; }
 .t-add form { display: grid; gap: 10px; }
 .t-add .f-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .t-add .f-row input[type=date] { flex: 1; min-width: 130px; }
-.t-star-toggle { min-height: 40px; width: 40px; padding: 0; background: var(--fill); color: var(--ink-400); font-size: 18px; box-shadow: none; }
+.t-star-toggle { display: grid; place-items: center; min-height: 40px; width: 40px; padding: 0; background: var(--fill); color: var(--ink-400); box-shadow: none; }
 .t-star-toggle.on { color: var(--warning-500); background: var(--warning-50); }
 .t-star-toggle:hover:not(:disabled) { transform: none; box-shadow: none; }
 .t-link { min-height: 0; padding: 0; background: none; color: var(--brand-700); font-weight: 700; font-size: 12px; box-shadow: none; }

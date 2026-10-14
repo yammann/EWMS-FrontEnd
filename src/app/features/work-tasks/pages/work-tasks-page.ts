@@ -18,17 +18,20 @@ import { RowActions } from '@shared/ui/row-actions';
 import { WorkTaskService } from '../data-access/work-task.service';
 import { WorkTask, WorkTaskRequest } from '../data-access/work-task.models';
 import { SelectValue } from '@shared/ui/select-value';
+import { Icon, iconFor } from '@shared/ui/icon';
 
+/** مفاتيح أيقونة مهمة العمل كما تُحفظ في القاعدة — تُعرض بالأيقونة المقابلة عبر iconFor */
 const ICONS = ['📋', '📦', '🧾', '📊', '🛠️', '💻', '🚚', '🔧', '📁', '🧮', '🗂️', '📞'];
 
 /** إدارة مهام العمل لكل فرع وإسنادها لموظفيه — النمط الموحّد (CrudPage) بنافذة كبيرة */
 @Component({
   selector: 'app-work-tasks-page', standalone: true,
-  imports: [SelectValue, PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
+  imports: [Icon, SelectValue, PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
   styleUrls: ['../../../shared/styles/page-base.scss', './work-tasks-page.scss'],
   templateUrl: './work-tasks-page.html'
 })
 export class WorkTasksPage {
+  iconFor = iconFor;
   private auth = inject(AuthService);
   private service = inject(WorkTaskService);
   private lookups = inject(LookupsService);

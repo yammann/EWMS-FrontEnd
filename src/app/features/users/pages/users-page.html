@@ -4,38 +4,19 @@
   <app-admin-header eyebrow="إدارة المستخدمين" heading="المستخدمون" subtitle="إدارة حسابات المستخدمين وتوزيعهم على الأقسام والفروع." [loading]="crud.busy()"
     [createLabel]="canCreate() ? 'مستخدم جديد' : ''" (refresh)="crud.refresh()" (create)="crud.openCreate()" />
 
+  <!-- خطأ التحميل (صلاحية أو اتصال) يظهر بدل صفحة فارغة توحي بأن لا موظفين -->
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
   <!-- Stats -->
   <section class="stats-grid">
 
-    <app-stat-tile tone="green" icon="" label="إجمالي المستخدمين" [value]="stats().total" hint="جميع الحسابات المسجلة">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="green" icon="users" label="إجمالي المستخدمين" [value]="stats().total" hint="جميع الحسابات المسجلة" />
 
-    <app-stat-tile tone="blue" icon="" label="الحسابات النشطة" [value]="stats().active" hint="قادرة على تسجيل الدخول" live>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <path d="m9 11 3 3L22 4"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="blue" icon="check" label="الحسابات النشطة" [value]="stats().active" hint="قادرة على تسجيل الدخول" live />
 
-    <app-stat-tile tone="orange" icon="" label="الحسابات المعطّلة" [value]="stats().inactive" hint="موقوفة مؤقتاً">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 8v4M12 16h.01"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="orange" icon="alert" label="الحسابات المعطّلة" [value]="stats().inactive" hint="موقوفة مؤقتاً" />
 
-    <app-stat-tile tone="purple" icon="" label="الأدوار" [value]="stats().roles" hint="متاحة للتعيين">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
-                  <path d="m9 12 2 2 4-4"></path>
-                </svg>
-    </app-stat-tile>
+    <app-stat-tile tone="purple" icon="shield" label="الأدوار" [value]="stats().roles" hint="متاحة للتعيين" />
   </section>
 
   <!-- Users List -->
@@ -91,9 +72,7 @@
                 </td>
                 <td>
                   <span class="role-chip">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
-                      <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"></path>
-                    </svg>
+                    <app-icon name="shield" [size]="11" />
                     {{ user.roleName || '—' }}
                   </span>
                 </td>
@@ -103,10 +82,7 @@
                 </td>
                 <td>
                   <span class="branch-chip">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
-                      <path d="M3 21h18"></path>
-                      <path d="M5 21V5l7-3 7 3v16"></path>
-                    </svg>
+                    <app-icon name="landmark" [size]="11" />
                     {{ user.branchName || '—' }}
                   </span>
                 </td>
@@ -122,6 +98,12 @@
                       معطّل
                     </span>
                   }
+                  @if (user.lockedUntil) {
+                    <span class="status-badge status-pending" style="margin-inline-start: 6px" [title]="'محاولات دخول خاطئة متكررة — الدخول موقوف حتى ' + (utc(user.lockedUntil) | date:'HH:mm')">
+                      <app-icon name="lock" [size]="11" [weight]="2.2" />
+                      مقفل مؤقتاً
+                    </span>
+                  }
                 </td>
                 <td class="nowrap">{{ utc(user.createdAt) | date:'yyyy/MM/dd' }}</td>
                 <td>
@@ -133,13 +115,10 @@
         </table>
       </div>
       <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
-    } @else {
+    } @else if (!crud.loadError()) {
       <div class="empty-state">
         <div class="empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-          </svg>
+          <app-icon name="users" />
         </div>
         <h3>لا يوجد مستخدمون</h3>
         <p>ابدأ بالضغط على زر "مستخدم جديد" في الأعلى.</p>
@@ -161,15 +140,15 @@
             @case ('create') {
               <form [formGroup]="createForm" (ngSubmit)="create()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (missing().length) {
+                  <p class="alert alert-warning" role="status">لا تملك صلاحية عرض {{ missingText() }}، فلا تظهر خياراتها هنا. اطلب صلاحية العرض المقابلة من مسؤول الأدوار.</p>
+                }
                 <div class="form-grid">
 
                   <div class="form-field">
                     <label class="form-label" for="create-fullname">الاسم الكامل</label>
                     <div class="input-wrapper">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
+                      <app-icon name="user" />
                       <input id="create-fullname" type="text" formControlName="fullName"
                              placeholder="مثال: محمد الأحمد" autocomplete="off" />
                     </div>
@@ -181,10 +160,7 @@
                   <div class="form-field">
                     <label class="form-label" for="create-email">البريد الإلكتروني</label>
                     <div class="input-wrapper">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                        <path d="m22 6-10 7L2 6"></path>
-                      </svg>
+                      <app-icon name="mail" />
                       <input id="create-email" type="email" formControlName="email"
                              placeholder="user@example.com" autocomplete="off" dir="ltr" />
                     </div>
@@ -196,10 +172,7 @@
                   <div class="form-field">
                     <label class="form-label" for="create-personal-id">الرقم الذاتي</label>
                     <div class="input-wrapper">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                        <path d="M7 9h4M7 13h6M15 9h2"></path>
-                      </svg>
+                      <app-icon name="idCard" />
                       <input id="create-personal-id" type="text" formControlName="personalIdNumber"
                              placeholder="مثال: M201160" autocomplete="off" dir="ltr" maxlength="20" />
                     </div>
@@ -211,10 +184,7 @@
                   <div class="form-field">
                     <label class="form-label" for="create-phone">رقم التواصل</label>
                     <div class="input-wrapper">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="6" y="2" width="12" height="20" rx="2.5"></rect>
-                        <path d="M11 18h2"></path>
-                      </svg>
+                      <app-icon name="smartphone" />
                       <input id="create-phone" type="tel" formControlName="phoneNumber"
                              placeholder="09XXXXXXXX" autocomplete="off" dir="ltr" maxlength="20" />
                     </div>
@@ -226,15 +196,12 @@
                   <div class="form-field">
                     <label class="form-label" for="create-password">كلمة المرور</label>
                     <div class="input-wrapper">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                      </svg>
+                      <app-icon name="lock" />
                       <input id="create-password" type="password" formControlName="password"
-                             placeholder="6 أحرف على الأقل" autocomplete="new-password" />
+                             [placeholder]="passwordHint" autocomplete="new-password" />
                     </div>
-                    @if (createForm.controls.password.touched && createForm.controls.password.invalid) {
-                      <small class="form-error">كلمة المرور مطلوبة (6 أحرف على الأقل).</small>
+                    @if (createForm.controls.password.touched && createForm.controls.password.errors?.['password']; as problem) {
+                      <small class="form-error">{{ problem }}.</small>
                     }
                   </div>
 
@@ -242,7 +209,7 @@
                     <label class="form-label" for="create-role">الدور</label>
                     <select id="create-role" formControlName="roleId">
                       <option value="">اختر الدور</option>
-                      @for (role of roles(); track role.id) {
+                      @for (role of roleList(); track role.id) {
                         <option [value]="role.id">{{ role.name }}</option>
                       }
                     </select>
@@ -253,7 +220,7 @@
                     <label class="form-label" for="create-branch">الفرع <small class="muted">(اختياري)</small></label>
                     <select id="create-branch" formControlName="branchId" (change)="branchChanged()">
                       <option value="">بدون فرع</option>
-                      @for (branch of branches(); track branch.id) {
+                      @for (branch of branchList(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
                     </select>
@@ -292,9 +259,7 @@
                       <span class="button-spinner"></span>
                       <span>جاري الإنشاء...</span>
                     } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M12 5v14M5 12h14"></path>
-                      </svg>
+                      <app-icon name="plus" [size]="16" />
                       <span>إنشاء المستخدم</span>
                     }
                   </button>
@@ -306,6 +271,9 @@
             @case ('edit') {
               <form [formGroup]="editForm" (ngSubmit)="update()" class="form-stack">
                 <app-alert [message]="crud.formError()" />
+                @if (missing().length) {
+                  <p class="alert alert-warning" role="status">لا تملك صلاحية عرض {{ missingText() }}، فلا تظهر خياراتها هنا وتبقى القيم الحالية كما هي. اطلب صلاحية العرض المقابلة من مسؤول الأدوار.</p>
+                }
                 <div class="form-grid">
 
                   <div class="form-field">
@@ -344,14 +312,21 @@
                     <label class="form-label" for="edit-password">كلمة المرور الجديدة</label>
                     <input id="edit-password" type="password" formControlName="password"
                            placeholder="اتركها فارغة لعدم التغيير" autocomplete="new-password" />
-                    <small class="form-hint">اترك الحقل فارغاً إن لم ترغب بتغيير كلمة المرور.</small>
+                    @if (editForm.controls.password.errors?.['password']; as problem) {
+                      <small class="form-error">{{ problem }}.</small>
+                    } @else {
+                      <small class="form-hint">اترك الحقل فارغاً إن لم ترغب بتغيير كلمة المرور ({{ passwordHint }}).</small>
+                    }
+                    @if (editingLockedUntil(); as until) {
+                      <small class="form-hint"><app-icon name="lock" [size]="11" /> الحساب مقفل مؤقتاً بسبب محاولات دخول خاطئة حتى {{ utc(until) | date:'HH:mm' }} — تعيين كلمة مرور جديدة يفك القفل.</small>
+                    }
                   </div>
 
                   <div class="form-field">
                     <label class="form-label" for="edit-role">الدور</label>
                     <select id="edit-role" formControlName="roleId">
                       <option value="">اختر الدور</option>
-                      @for (role of roles(); track role.id) {
+                      @for (role of roleList(); track role.id) {
                         <option [value]="role.id">{{ role.name }}</option>
                       }
                     </select>
@@ -362,7 +337,7 @@
                     <label class="form-label" for="edit-branch">الفرع <small class="muted">(اختياري)</small></label>
                     <select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
                       <option value="">بدون فرع</option>
-                      @for (branch of branches(); track branch.id) {
+                      @for (branch of branchList(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
                     </select>
@@ -409,9 +384,7 @@
                       <span class="button-spinner"></span>
                       <span>جاري الحفظ...</span>
                     } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M20 6 9 17l-5-5"></path>
-                      </svg>
+                      <app-icon name="checkmark" [size]="16" />
                       <span>حفظ التعديل</span>
                     }
                   </button>

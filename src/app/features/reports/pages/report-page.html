@@ -1,0 +1,100 @@
+<div class="page">
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="loadDefinition()" />
+  @if (loading() && !definition()) { <p class="muted" role="status">جارٍ تحميل التقرير…</p> }
+
+  @if (definition(); as d) {
+    <app-page-header [eyebrow]="'التقارير · ' + d.group" [heading]="d.title" [subtitle]="d.description">
+      <button class="btn btn-ghost" type="button" (click)="openPrint()" [disabled]="!ready() || tooManyForPrint()"
+              [title]="tooManyForPrint() ? 'الطباعة حتى ' + d.maxPrintRows.toLocaleString('en-US') + ' صف — ضيّق الفلاتر' : 'نسخة A4 للطباعة أو الحفظ PDF'">
+        <app-icon name="printer" [size]="16" /> طباعة
+      </button>
+      <button class="btn" type="button" (click)="exportExcel()" [disabled]="!ready() || tooManyForExcel() || exporting()">
+        <app-icon name="table" [size]="16" /> {{ exporting() ? 'جارٍ التنزيل…' : 'تنزيل Excel' }}
+      </button>
+    </app-page-header>
+
+    <section class="panel filters-panel" aria-label="فلاتر التقرير">
+      @if (d.filters.length) {
+        <div class="report-filters">
+          @for (f of d.filters; track f.key) {
+            <label class="field">
+              <span class="field-label">{{ f.label }}@if (f.required) { <b class="req" aria-hidden="true">*</b> }</span>
+              @switch (f.type) {
+                @case ('date') {
+                  <input #i type="date" [value]="values()[f.key] ?? ''" [required]="f.required" (change)="set(f.key, i.value)">
+                }
+                @case ('number') {
+                  <input #i type="number" min="0" inputmode="numeric" [value]="values()[f.key] ?? ''" [placeholder]="f.hint ?? ''"
+                         (change)="set(f.key, i.value)" (keydown.enter)="set(f.key, i.value)">
+                }
+                @case ('text') {
+                  <input #i type="search" [value]="values()[f.key] ?? ''" [placeholder]="f.hint ?? ''"
+                         (change)="set(f.key, i.value)" (keydown.enter)="set(f.key, i.value)">
+                }
+                @default {
+                  <select #s [appSelectValue]="values()[f.key] ?? ''" [required]="f.required" (change)="set(f.key, s.value)">
+                    @if (f.required) { <option value="" disabled>اختر…</option> } @else { <option value="">الكل</option> }
+                    @for (o of options(f); track o.value) { <option [value]="o.value">{{ o.label }}</option> }
+                  </select>
+                }
+              }
+              @if (f.hint && f.type === 'number') { <small class="hint">{{ f.hint }}</small> }
+            </label>
+          }
+        </div>
+        <div class="filters-foot">
+          <span class="hint">النتيجة تتحدّث مع كل تغيير — ونص البحث بعد Enter أو مغادرة الحقل</span>
+          <button class="btn btn-ghost btn-sm" type="button" (click)="reset()">الفلاتر الافتراضية</button>
+        </div>
+      } @else {
+        <p class="muted no-filters">لا فلاتر لهذا التقرير: يشمل كل ما تسمح به صلاحيتك.</p>
+      }
+    </section>
+
+    @if (missing().length) {
+      <p class="alert alert-warning" role="status">اختر {{ missingText() }} لعرض التقرير</p>
+    }
+    <app-alert [message]="previewError()" retryLabel="إعادة المحاولة" (retry)="run()" />
+
+    @if (preview(); as p) {
+      <section class="panel preview" [class.stale]="previewing()" [attr.aria-busy]="previewing()">
+        <div class="preview-head">
+          <div>
+            <h2>معاينة</h2>
+            <p class="muted">{{ p.filtersText }}</p>
+          </div>
+          <span class="count-badge">
+            {{ p.table.total.toLocaleString('en-US') }} صفاً
+            @if (p.table.total > p.table.rows.length) { <small>— تُعرض أول {{ p.table.rows.length }}</small> }
+          </span>
+        </div>
+
+        @if (tooManyForExcel()) {
+          <p class="alert alert-warning">النتيجة أكبر من حد Excel ({{ d.maxExcelRows.toLocaleString('en-US') }} صف) — ضيّق الفلاتر (الفترة أو القسم) لتنزيلها.</p>
+        } @else if (tooManyForPrint()) {
+          <p class="alert alert-warning">الطباعة حتى {{ d.maxPrintRows.toLocaleString('en-US') }} صف — نزّل Excel أو ضيّق الفلاتر للطباعة.</p>
+        }
+
+        @if (!p.table.total) {
+          <app-empty-state>لا توجد بيانات مطابقة للفلاتر</app-empty-state>
+        } @else {
+          <div class="table-wrap">
+            <table>
+              <thead><tr>@for (c of p.table.columns; track c.key) { <th [class.num]="numeric(c.type)">{{ c.header }}</th> }</tr></thead>
+              <tbody>
+                @for (row of p.table.rows; track $index) {
+                  <tr>@for (c of p.table.columns; track c.key; let i = $index) {
+                    <td [class.num]="numeric(c.type)" [class.date]="c.type === 'date' || c.type === 'datetime'" [class.wrap]="c.type === 'text'">{{ format(row[i], c.type) }}</td>
+                  }</tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="hint foot-note">الأعمدة كلها في Excel؛ الطباعة تقتصر على الأعمدة الأساسية كي يتّسع الجدول للورقة، ومعها سطر «المجموع».</p>
+        }
+      </section>
+    } @else if (previewing()) {
+      <p class="muted" role="status">جارٍ إعداد المعاينة…</p>
+    }
+  }
+</div>

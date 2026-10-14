@@ -1,0 +1,170 @@
+<app-modal [heading]="isEdit ? 'تعديل الطبقة' : 'طبقة جديدة'" size="lg" [busy]="busy()"
+           [subheading]="isEdit ? 'فرع ' + layer()!.branchName : 'الطبقة ملك الفرع ويستعملها كل أقسامه'" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body">
+      <app-alert [message]="error()" />
+
+      <div class="form-grid-2">
+        @if (branches().length && !isEdit) {
+          <label class="form-field full"><span class="form-label">الفرع</span>
+            <select formControlName="branchId">
+              <option value="">— اختر الفرع —</option>
+              @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
+            </select>
+          </label>
+        }
+        <label class="form-field"><span class="form-label">اسم الطبقة</span>
+          <input formControlName="name" maxlength="100" placeholder="مثال: المشاريع، القطع، نقاط التحصيل"></label>
+        <div class="form-field"><span class="form-label">لون النقاط على الخريطة</span>
+          <div class="colors" role="radiogroup" aria-label="لون الطبقة">
+            @for (c of colors; track c) {
+              <button type="button" class="swatch" role="radio" [style.background]="c" [attr.aria-checked]="form.controls.color.value.toUpperCase() === c"
+                      [class.on]="form.controls.color.value.toUpperCase() === c" [attr.aria-label]="c" (click)="form.controls.color.setValue(c)"></button>
+            }
+            <input type="color" formControlName="color" aria-label="لون آخر" title="لون آخر">
+          </div>
+        </div>
+        <label class="form-field full"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span>
+          <textarea formControlName="description" rows="2" maxlength="500" placeholder="ما الذي تسجّله هذه الطبقة على المواقع؟"></textarea></label>
+
+        <div class="form-field full">
+          <span class="form-label">مصدر النقاط</span>
+          @if (isEdit) {
+            <p class="source-fixed">{{ isSystem() ? 'من بيانات النظام: ' + (layer()!.sourceTitle || source()) : 'إدخال يدوي' }}
+              <small class="hint">— لا يتغير بعد الإنشاء</small></p>
+          } @else {
+            <div class="sources" role="radiogroup" aria-label="مصدر النقاط">
+              <label class="source" [class.on]="!isSystem()">
+                <input type="radio" name="layer-source" [checked]="!isSystem()" (change)="chooseSource('')">
+                <span><strong>إدخال يدوي</strong><small>حقول تصممها، ويُدخل موظفو الفرع معلوماتها على المواقع</small></span>
+              </label>
+              @for (s of sources(); track s.key) {
+                <label class="source" [class.on]="source() === s.key">
+                  <input type="radio" name="layer-source" [checked]="source() === s.key" (change)="chooseSource(s.key)">
+                  <span><strong>من بيانات النظام: {{ s.title }}</strong><small>تُقرأ النقاط من جداوله تلقائياً بلا إدخال، ويمكن تصفيتها</small></span>
+                </label>
+              }
+            </div>
+            @if (sourcesLoading()) { <small class="hint">جارٍ تحميل مصادر البيانات…</small> }
+            @else if (branches().length && !form.controls.branchId.value) { <small class="hint">اختر الفرع لعرض مصادر بياناته</small> }
+          }
+        </div>
+
+        @if (!isSystem()) {
+        <label class="check full"><input type="checkbox" formControlName="allowMultiple">
+          <span><strong>عدة سجلات للموقع الواحد</strong><small class="hint">مثل المشاريع (عدة مشاريع في موقع). أوقفه لمعلومات وحيدة لكل موقع.</small></span></label>
+        }
+        <label class="check full"><input type="checkbox" formControlName="isActive">
+          <span><strong>فعّالة</strong><small class="hint">المعطّلة تختفي من الخريطة ومن نماذج الإضافة، وتبقى سجلاتها للقراءة.</small></span></label>
+      </div>
+
+      @if (isSystem()) {
+        <section class="builder" aria-labelledby="filter-title">
+          <header><h3 id="filter-title">تصفية {{ selectedSource()?.title || 'البيانات' }}</h3></header>
+          <p class="hint">بلا اختيار في مجموعة = كل القيم. مثال: اختر «كاميرا» من فئة الجهاز لطبقة «الكاميرات».</p>
+          @if (selectedSource(); as s) {
+            <div class="filters">
+              @for (f of s.filters; track f.key) {
+                <fieldset class="filter">
+                  <legend>{{ f.label }} <small class="hint">{{ (filter()[f.key] ?? []).length ? (filter()[f.key] ?? []).length + ' مختار' : 'الكل' }}</small></legend>
+                  <div class="options">
+                    @for (o of f.options; track o.value) {
+                      <label><input #fo type="checkbox" [checked]="isPicked(f.key, o.value)" (change)="togglePick(f.key, o.value, fo.checked)"> {{ o.label }}</label>
+                    } @empty { <span class="hint">لا توجد قيم في بيانات الفرع بعد</span> }
+                  </div>
+                </fieldset>
+              }
+            </div>
+          } @else if (!sourcesLoading()) { <p class="hint">المصدر غير متاح لهذا الفرع.</p> }
+        </section>
+      } @else {
+      <section class="builder" aria-labelledby="fields-title">
+        <header>
+          <h3 id="fields-title">الحقول <span class="count">({{ visibleRows().length }})</span></h3>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addField()">+ حقل</button>
+        </header>
+        @if (!visibleRows().length) { <p class="hint">لا حقول بعد — الطبقة بلا حقول تسجّل وجود الموقع عليها فقط.</p> }
+        <ol class="fields">
+          @for (r of visibleRows(); track r.key; let i = $index, first = $first, last = $last) {
+            <li class="field" [class.saved]="r.id != null">
+              <div class="order">
+                <button type="button" class="icon-btn icon-btn-sm" title="للأعلى" aria-label="نقل للأعلى" [disabled]="first" (click)="move(r.key, -1)"><app-icon name="chevronUp" [size]="14" [weight]="2.2" /></button>
+                <button type="button" class="icon-btn icon-btn-sm" title="للأسفل" aria-label="نقل للأسفل" [disabled]="last" (click)="move(r.key, 1)"><app-icon name="chevron" [size]="14" [weight]="2.2" /></button>
+              </div>
+              <div class="inputs">
+                <input #lbl class="label-input" [value]="r.label" (input)="patch(r.key, { label: lbl.value })" maxlength="100"
+                       [attr.aria-label]="'عنوان الحقل ' + (i + 1)" placeholder="عنوان الحقل، مثل: اسم المشروع">
+                <select #typ [appSelectValue]="r.type" (change)="setType(r.key, typ.value)" [attr.aria-label]="'نوع الحقل ' + (i + 1)">
+                  @for (t of types; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                </select>
+                <label class="req"><input #req type="checkbox" [checked]="r.isRequired" (change)="patch(r.key, { isRequired: req.checked })"> مطلوب</label>
+                @if (r.type === 5) {
+                  <textarea #opt class="options" rows="3" [value]="r.options" (input)="patch(r.key, { options: opt.value })"
+                            [attr.aria-label]="'خيارات الحقل ' + (i + 1)" placeholder="خيار في كل سطر"></textarea>
+                }
+                @if (r.type === 7) {
+                  <div class="file-settings">
+                    <fieldset class="kinds">
+                      <legend>الصيغ المسموحة</legend>
+                      @for (k of fileOptions()?.kinds ?? []; track k.key) {
+                        <label class="kind" [title]="k.formats">
+                          <input #kk type="checkbox" [checked]="r.fileKinds.includes(k.key)" (change)="toggleKind(r.key, k.key, kk.checked)">
+                          <span><strong>{{ k.label }}</strong><small>{{ k.formats }}</small></span>
+                        </label>
+                      } @empty { <p class="hint">جارٍ تحميل الصيغ…</p> }
+                    </fieldset>
+                    <div class="limits">
+                      <label class="form-field"><span class="form-label">أقصى عدد ملفات</span>
+                        <input #mf type="number" min="1" [max]="fileOptions()?.maxFilesPerField ?? 20" step="1" dir="ltr" [value]="r.maxFiles"
+                               (input)="patch(r.key, { maxFiles: +mf.value })"></label>
+                      <label class="form-field"><span class="form-label">أقصى حجم للملف (MB)</span>
+                        <input #mb type="number" min="1" [max]="fileOptions()?.maxFileMegabytes ?? null" step="1" dir="ltr" [value]="r.maxFileMegabytes"
+                               (input)="patch(r.key, { maxFileMegabytes: +mb.value })"></label>
+                      @if (fileOptions(); as o) { <p class="hint">سقف النظام {{ o.maxFileMegabytes }}MB للملف. البرامج والسكربتات وHTML/SVG والمستندات ذات الماكرو ممنوعة دائماً.</p> }
+                    </div>
+                  </div>
+                }
+              </div>
+              <button type="button" class="icon-btn danger" [title]="r.id != null ? 'حذف الحقل (يُسأل عن قيمه)' : 'إزالة'" aria-label="حذف الحقل"
+                      [disabled]="workingKey() === r.key" (click)="removeField(r)">
+                @if (workingKey() === r.key) { <span class="button-spinner dark"></span> } @else { <app-icon name="xmark" [weight]="2.2" /> }
+              </button>
+            </li>
+          }
+        </ol>
+        @if (fieldsError()) { <p class="form-error" role="alert">{{ fieldsError() }}</p> }
+
+        @if (hiddenRows().length) {
+          <div class="hidden-fields">
+            <h4>حقول مخفية <small class="hint">— لا تظهر في النماذج والعرض، وقيمها محفوظة</small></h4>
+            <ul>
+              @for (r of hiddenRows(); track r.key) {
+                <li><span>{{ r.label }}</span>
+                  <button type="button" class="btn btn-ghost btn-sm" [disabled]="workingKey() === r.key" (click)="restore(r)">إعادة</button></li>
+              }
+            </ul>
+          </div>
+        }
+        @if (isEdit) { <p class="hint">حذف حقل محفوظ أو إعادته يُنفَّذ فوراً؛ تعديل العناوين والترتيب يُحفظ بزر «حفظ».</p> }
+      </section>
+      }
+    </div>
+    <app-form-actions [busy]="busy()" [disabled]="form.invalid || !!fieldsError()" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>
+
+@if (choice(); as c) {
+  <app-modal heading="للحقل قيم مسجّلة" [subheading]="'«' + c.row.label + '» له قيم في ' + c.count + ' سجل'" [busy]="deciding()" (closed)="cancelChoice()">
+    <div class="modal-body choice">
+      <button type="button" class="option" [disabled]="deciding()" (click)="decide(false)">
+        <strong>إخفاء الحقل</strong>
+        <span>يختفي من النماذج والعرض، وتبقى قيمه محفوظة. يمكن إعادته لاحقاً من «حقول مخفية».</span>
+      </button>
+      <button type="button" class="option danger" [disabled]="deciding()" (click)="decide(true)">
+        <strong>حذف نهائي</strong>
+        <span>يُحذف الحقل وتُمحى قيمه من {{ c.count }} سجل. لا يمكن التراجع.</span>
+      </button>
+    </div>
+    <footer class="modal-actions"><button type="button" class="ghost" [disabled]="deciding()" (click)="cancelChoice()">إلغاء</button></footer>
+  </app-modal>
+}

@@ -13,10 +13,10 @@
 
   @if (data(); as d) {
     <section class="dash-stats" aria-label="إحصائيات المؤسسة">
-      <app-stat-tile label="الفروع" [value]="d.branchesCount" icon="🏛️" tone="green" [hint]="d.workTasksCount + ' مهمة عمل فعّالة'" />
-      <app-stat-tile label="الأقسام" [value]="d.departmentsCount" icon="🏢" tone="blue" />
-      <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="🚪" tone="purple" />
-      <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="👥" tone="orange" [hint]="d.employeesWithTasks + ' منهم مسؤولون عن مهام عمل'" />
+      <app-stat-tile label="الفروع" [value]="d.branchesCount" icon="landmark" tone="green" [hint]="d.workTasksCount + ' مهمة عمل فعّالة'" />
+      <app-stat-tile label="الأقسام" [value]="d.departmentsCount" icon="building" tone="blue" />
+      <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="door" tone="purple" />
+      <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="users" tone="orange" [hint]="d.employeesWithTasks + ' منهم مسؤولون عن مهام عمل'" />
     </section>
 
     <section class="panel">

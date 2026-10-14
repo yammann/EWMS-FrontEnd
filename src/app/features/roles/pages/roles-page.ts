@@ -9,12 +9,14 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, map } from 'rxjs';
+import { orEmpty } from '@core/http/or-empty';
 import { Permission, Role } from '@core/models/ewms.models';
 import { RoleService } from '../data-access/role.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
 import { normalizePlaceText } from '@core/utils/places';
+import { Icon } from '@shared/ui/icon';
 
 type ModalType = 'create' | 'edit';
 
@@ -51,11 +53,24 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
     { key: 'notifications', title: 'الإشعارات', names: ['ViewNotifications'] },
     { key: 'signature', title: 'التوقيع الإلكتروني', names: ['ManageMySignature'] }
   ] },
+  { key: 'sites', title: 'الخريطة والمواقع', groups: [
+    { key: 'sites', title: 'سجل المواقع المشترك بين الفروع', names: ['ViewSites', 'CreateSite', 'EditSite', 'DeleteSite'] },
+    { key: 'branch-map', title: 'خريطة الفرع', names: ['ViewBranchMap'] },
+    { key: 'map-layers', title: 'طبقات الفرع وحقولها (الطبقة ملك الفرع)', names: ['ViewMapLayers', 'CreateMapLayer', 'EditMapLayer', 'DeleteMapLayer'] },
+    { key: 'map-entries', title: 'سجلات الطبقات على المواقع (السجل ملك قسم من أضافه)', names: ['ViewDepartmentMapEntries', 'ViewBranchMapEntries', 'CreateMapEntry', 'EditMapEntry', 'DeleteMapEntry'] }
+  ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
-    { key: 'devices', title: 'المواقع والأجهزة والتركيبات', names: ['ViewDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
+    { key: 'devices', title: 'كتالوج الأجهزة والتركيبات (التركيب ملك قسم من أضافه)', names: ['ViewDevices', 'ViewBranchDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
   ] },
   { key: 'dashboards', title: 'لوحات المتابعة', groups: [
-    { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard', 'ViewBranchMap'] }
+    { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard'] }
+  ] },
+  { key: 'reports', title: 'التقارير', groups: [
+    { key: 'reports-vac', title: 'تقارير الإجازات', names: ['ExportVacationsReport', 'ExportVacationUsageReport'] },
+    { key: 'reports-staff', title: 'تقارير الموظفين والهيكل', names: ['ExportUsersReport', 'ExportStructureReport'] },
+    { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
+    { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
+    { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
   ] },
   { key: 'admin', title: 'الإدارة والهيكل', groups: [
     { key: 'users', title: 'الموظفون', names: ['ViewUsers', 'CreateUser', 'EditUser', 'ToggleUserActive', 'DeleteUser'] },
@@ -69,7 +84,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
 @Component({
   selector: 'app-roles-page',
   standalone: true,
-  imports: [Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss'
 })
@@ -131,6 +146,8 @@ export class RolesPage {
     else if (event.key === 'Enter' && this.activeSuggestion() >= 0) { event.preventDefault(); this.pickSuggestion(list[this.activeSuggestion()].role); }
   }
   permissions = signal<Permission[]>([]);
+  /** قائمة الصلاحيات لم تُحمَّل: الأدوار تظهر، ونافذة الدور تقول إن الصلاحيات غير متاحة الآن */
+  permissionsMissing = signal(false);
 
 
   createForm = this.fb.group({
@@ -148,8 +165,11 @@ export class RolesPage {
   canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteRole));
 
   crud = new CrudPage<Role, FormData>({
-    load: () => forkJoin({ roles: this.roleService.getAll(), permissions: this.roleService.getPermissions() })
-      .pipe(map(r => { this.permissions.set(r.permissions); return r.roles; })),
+    load: () => {
+      this.permissionsMissing.set(false);
+      return forkJoin({ roles: this.roleService.getAll(), permissions: this.roleService.getPermissions().pipe(orEmpty(() => this.permissionsMissing.set(true))) })
+        .pipe(map(r => { this.permissions.set(r.permissions); return r.roles; }));
+    },
     create: body => this.roleService.create(body),
     update: (id, body) => this.roleService.update(id, body),
     remove: role => this.roleService.delete(role.id),

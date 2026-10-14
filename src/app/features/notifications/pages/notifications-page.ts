@@ -7,23 +7,24 @@ import { AuthService } from '@core/services/auth.service';
 import { AppNotification } from '@core/models/notification.models';
 import { storePageSize, storedPageSize } from '@core/utils/pagination';
 import { Pager } from '@shared/ui/pager';
-import { Icon } from '@shared/ui/icon';
+import { Icon, IconName } from '@shared/ui/icon';
 import { Alert } from '@shared/ui/alert';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
 
 type Tone = 'green' | 'blue' | 'orange' | 'purple' | 'red';
-interface Kind { icon: string; tone: Tone; }
+interface Kind { icon: IconName; tone: Tone; }
 
-/** رمز ولون الإشعار حسب نوعه */
+/** أيقونة ولون الإشعار حسب نوعه */
 function kindOf(type: string): Kind {
-  if (type.startsWith('Vacation')) return { icon: '🌴', tone: type.includes('Rejected') || type === 'VacationCancelled' ? 'red' : 'green' };
-  if (type.startsWith('ToDo')) return { icon: '📝', tone: type.includes('Overdue') ? 'red' : 'purple' };
-  if (type === 'TaskOverdue') return { icon: '⏰', tone: 'red' };
-  if (type === 'TaskDueSoon') return { icon: '⏳', tone: 'orange' };
-  if (type.startsWith('Task') || type === 'WorkTaskAssigned') return { icon: '📋', tone: 'blue' };
-  if (type === 'SparePartLowStock') return { icon: '📦', tone: 'orange' };
-  if (type.startsWith('Maintenance')) return { icon: '🔧', tone: 'orange' };
-  return { icon: '🔔', tone: 'blue' };
+  if (type.startsWith('Vacation')) return { icon: 'beach', tone: type.includes('Rejected') || type === 'VacationCancelled' ? 'red' : 'green' };
+  if (type.startsWith('ToDo')) return { icon: 'note', tone: type.includes('Overdue') ? 'red' : 'purple' };
+  if (type === 'TaskOverdue') return { icon: 'alarm', tone: 'red' };
+  if (type === 'TaskDueSoon') return { icon: 'hourglass', tone: 'orange' };
+  if (type.startsWith('Task') || type === 'WorkTaskAssigned') return { icon: 'clipboard', tone: 'blue' };
+  if (type === 'LoginLocked') return { icon: 'lock', tone: 'red' };
+  if (type === 'SparePartLowStock') return { icon: 'box', tone: 'orange' };
+  if (type.startsWith('Maintenance')) return { icon: 'wrench', tone: 'orange' };
+  return { icon: 'bell', tone: 'blue' };
 }
 
 const DAY = 86_400_000;

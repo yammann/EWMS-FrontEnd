@@ -1,0 +1,68 @@
+<div class="page">
+  <app-page-header eyebrow="الخريطة والمواقع" heading="طبقات الفروع"
+                   subtitle="كل فرع يعرّف طبقاته وحقولها، وتُسجَّل معلوماته على المواقع من صفحة كل موقع، وتظهر نقاطها على خريطته بلون الطبقة">
+    @if (access().canCreateLayer) { <button class="btn" type="button" (click)="crud.openCreate()">+ طبقة جديدة</button> }
+    <button class="btn btn-ghost" type="button" (click)="crud.refresh()" [disabled]="crud.busy()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="crud.loadError()" retryLabel="إعادة المحاولة" (retry)="crud.refresh()" />
+
+  <section class="panel">
+    <div class="panel-heading"><h2>الطبقات <span class="count">({{ filtered().length }})</span></h2>
+      <div class="tools">
+        @if (access().canChooseBranch && branches().length) {
+          <select #b [appSelectValue]="branchId() ?? ''" (change)="selectBranch(b.value)" aria-label="الفرع">
+            <option value="">كل الفروع</option>
+            @for (br of branches(); track br.id) { <option [value]="br.id">{{ br.name }}</option> }
+          </select>
+        }
+        <input #t1 class="search" type="search" placeholder="بحث بالاسم أو الحقل…" [value]="search()" (input)="search.set(t1.value)" aria-label="بحث">
+      </div>
+    </div>
+    @if (crud.loading()) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!filtered().length) {
+      <app-empty-state>{{ search() ? 'لا توجد نتائج' : (access().canCreateLayer ? 'لا توجد طبقات بعد — أنشئ أول طبقة لفرعك وحدّد حقولها' : 'لا توجد طبقات لفرعك بعد') }}</app-empty-state>
+    }
+    @else {
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>الطبقة</th>
+          @if (access().canChooseBranch) { <th>الفرع</th> }
+          <th>الحقول</th><th>السجلات</th><th>لكل موقع</th><th>الحالة</th><th class="actions-th"></th>
+        </tr></thead>
+        <tbody>
+          @for (l of pager.items(); track l.id) {
+            <tr [class.inactive]="!l.isActive">
+              <td><span class="layer-name"><i class="dot" [style.background]="l.color" aria-hidden="true"></i><span class="cell-strong">{{ l.name }}</span></span>
+                @if (l.description) { <small>{{ l.description }}</small> }</td>
+              @if (access().canChooseBranch) { <td>{{ l.branchName }}</td> }
+              <td class="wrap">
+                @if (l.source) {
+                  <span class="source-chip">من بيانات النظام: {{ l.sourceTitle || l.source }}</span>
+                  <small>{{ filterSummary(l) }}</small>
+                } @else {
+                @for (f of visibleFields(l); track f.id) {
+                  <span class="field-chip" [title]="typeLabel(f.type) + (f.isRequired ? ' · مطلوب' : '')">{{ f.label }}@if (f.isRequired) {<b aria-label="مطلوب">*</b>}</span>
+                } @empty { <span class="muted-cell">بلا حقول</span> }
+                @if (hiddenCount(l)) { <span class="muted-cell">+{{ hiddenCount(l) }} مخفي</span> }
+                }
+              </td>
+              <td class="num">{{ l.source ? '—' : l.entriesCount }}</td>
+              <td>{{ l.source ? '—' : (l.allowMultiple ? 'عدة سجلات' : 'سجل واحد') }}</td>
+              <td>@if (l.isActive) { <span class="pill">فعّالة</span> } @else { <span class="pill muted">معطّلة</span> }</td>
+              <td><app-row-actions [canEdit]="access().canEditLayer" [canDelete]="access().canDeleteLayer" [deleting]="crud.deletingId() === l.id"
+                                   (edit)="crud.openEdit(l)" (remove)="crud.remove(l)" /></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="pager.sizes" [page]="pager.page()" [pageSize]="pager.size()" [total]="pager.total()" (pageChange)="pager.go($event)" (sizeChange)="pager.setSize($event)" />
+    }
+  </section>
+</div>
+
+@if (crud.dialog(); as dlg) {
+  <app-layer-form-dialog [layer]="dlg.item" [branches]="access().canChooseBranch ? branches() : []" [defaultBranchId]="branchId()"
+                         [busy]="crud.saving()" [error]="crud.formError()"
+                         (submitted)="crud.save($event)" (closed)="crud.close()" (changed)="fieldChanged($event)" />
+}

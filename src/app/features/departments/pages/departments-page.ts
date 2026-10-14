@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, map } from 'rxjs';
+import { Alert } from '@shared/ui/alert';
+import { orEmpty } from '@core/http/or-empty';
 import { AppPermission } from '@core/constants/access';
 import { Branch, Department } from '@core/models/ewms.models';
 import { AuthService } from '@core/services/auth.service';
@@ -15,12 +17,13 @@ import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { StatTile } from '@shared/ui/stat-tile';
 import { DepartmentService } from '../data-access/department.service';
+import { Icon } from '@shared/ui/icon';
 
 /** الأقسام — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-departments-page',
   standalone: true,
-  imports: [EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './departments-page.html',
   styleUrl: './departments-page.scss'
 })
@@ -34,6 +37,12 @@ export class DepartmentsPage {
   canDelete = computed(() => this.auth.hasPermission(AppPermission.DeleteDepartment));
 
   branches = signal<Branch[]>([]);
+  /** قائمة الفروع لم تُحمَّل (نقص صلاحية عرضها): الجدول يبقى، والنموذج يقول ذلك ويُبقي فرع القسم الحالي عند التعديل */
+  branchesMissing = signal(false);
+  branchList = computed<Branch[]>(() => {
+    const d = this.crud.dialog();
+    return this.branches().length || d?.mode !== 'edit' || !d.item ? this.branches() : [{ id: d.item.branchId, name: d.item.branchName, description: '' }];
+  });
 
   form = inject(FormBuilder).group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -43,8 +52,11 @@ export class DepartmentsPage {
 
   crud = new CrudPage<Department, FormData>({
     // الأقسام + قائمة الفروع للنموذج (الفروع من التخزين المشترك إن كانت حديثة)
-    load: () => forkJoin({ departments: this.departmentService.getAll(), branches: this.lookups.branchOptions() })
-      .pipe(map(r => { this.branches.set(r.branches); return r.departments; })),
+    load: () => {
+      this.branchesMissing.set(false);
+      return forkJoin({ departments: this.departmentService.getAll(), branches: this.lookups.branchOptions().pipe(orEmpty(() => this.branchesMissing.set(true))) })
+        .pipe(map(r => { this.branches.set(r.branches); return r.departments; }));
+    },
     create: body => this.departmentService.create(body),
     update: (id, body) => this.departmentService.update(id, body),
     remove: d => this.departmentService.delete(d.id),
