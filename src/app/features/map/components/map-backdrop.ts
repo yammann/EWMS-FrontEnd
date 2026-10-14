@@ -29,7 +29,7 @@ const STAMPS = [
 
 /**
  * خلفية الخريطة ثلاثية الأبعاد (2026-10-13، اقتراح للمستخدم): هالة بلون الهوية، شبكة نقطية تتلاشى نحو الأطراف،
- * خطوط كنتورية تدور ببطء شديد، نبضة رادار من مركز الخريطة، وطوابع المحافظات باهتة تطفو عند الأطراف
+ * خطوط كنتورية تدور ببطء شديد، وطوابع المحافظات باهتة تطفو عند الأطراف
  * (تختفي عند فتح محافظة ليبقى طابعها وحده). CSS فقط — ألوان الثيم، والحركة تتوقف مع «تقليل الحركة».
  */
 @Component({
@@ -41,8 +41,6 @@ const STAMPS = [
       <g class="spin">
         @for (ring of rings; track $index) { <path [attr.d]="ring.d" [attr.stroke-width]="ring.w" /> }
       </g>
-      <ellipse class="ping" cx="500" cy="330" rx="145" ry="100" />
-      <ellipse class="ping late" cx="500" cy="330" rx="145" ry="100" />
     </svg>
     <div class="stamps" [class.away]="focused()">
       @for (s of stamps; track s.code) {

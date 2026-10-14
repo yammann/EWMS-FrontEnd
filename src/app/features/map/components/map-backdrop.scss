@@ -19,18 +19,6 @@
 .spin { transform-origin: 500px 330px; animation: spin 240s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* نبضة رادار تخرج من مركز الخريطة وتتلاشى */
-.ping {
-  fill: none; stroke: var(--brand-500); stroke-width: 1.6;
-  transform-origin: 500px 330px; transform-box: view-box;
-  opacity: 0; animation: ping 9s cubic-bezier(.2, .6, .3, 1) infinite;
-}
-.ping.late { animation-delay: 4.5s; }
-@keyframes ping {
-  0% { transform: scale(.4); opacity: 0; }
-  12% { opacity: .35; }
-  100% { transform: scale(3.1); opacity: 0; }
-}
 
 /* طوابع المحافظات باهتة تطفو عند الأطراف */
 .stamps { position: absolute; inset: 0; color: var(--brand-600); transition: opacity .6s var(--ease); }
@@ -51,5 +39,4 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spin, .float { animation: none; }
-  .ping { display: none; }
 }
