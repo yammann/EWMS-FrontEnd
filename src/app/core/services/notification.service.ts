@@ -165,6 +165,7 @@ export class NotificationService {
 /** الوجهة عند فتح الإشعار: طلبات تنتظر قرار المدير → المراجعة، وبقية إشعارات الإجازات → «إجازاتي»، وغيرها → الملف الشخصي */
 export function notificationRoute(n: AppNotification, canReview: boolean): string {
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
+  if (n.relatedEntityType === 'Project' && n.relatedEntityId) return `/projects/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
   if (n.relatedEntityType === 'ToDoList' && n.relatedEntityId) return `/todo-lists/${n.relatedEntityId}`;

@@ -1,0 +1,62 @@
+<app-modal [heading]="project() ? 'تعديل المشروع' : 'مشروع جديد'" [subheading]="project()?.number ?? 'يُنشأ في مرحلة الدراسة وتضيف إليه الوثائق والمشاركين'"
+           size="lg" [busy]="busy()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body form-stack">
+      <app-alert [message]="error()" />
+      @if (missing().length) {
+        <p class="alert alert-warning" role="status">لا تملك صلاحية عرض: {{ missing().join('، ') }} — اختر منها ما تحتاجه من صاحب الصلاحية، أو اتركها فارغة.</p>
+      }
+
+      <label class="form-field"><span class="form-label">اسم المشروع</span>
+        <input formControlName="name" maxlength="200" autocomplete="off">
+        @if (form.controls.name.touched && form.controls.name.invalid) { <small class="form-error">اسم المشروع مطلوب</small> }
+      </label>
+
+      <div class="form-grid-2">
+        <label class="form-field"><span class="form-label">الرقم المرجعي <small class="hint">(من المركزية، اختياري)</small></span>
+          <input formControlName="referenceNumber" dir="ltr" maxlength="50" autocomplete="off"></label>
+        <label class="form-field"><span class="form-label">الجهة المستفيدة <small class="hint">(اختياري)</small></span>
+          <input formControlName="beneficiary" maxlength="200" autocomplete="off"></label>
+
+        @if (!project() && access().canChooseBranch) {
+          <label class="form-field"><span class="form-label">الفرع</span>
+            <select #b [appSelectValue]="form.controls.branchId.value" (change)="form.controls.branchId.setValue(+b.value); form.controls.departmentId.setValue(0)">
+              <option value="0">اختر الفرع</option>
+              @for (br of branches(); track br.id) { <option [value]="br.id">{{ br.name }}</option> }
+            </select></label>
+        } @else if (project(); as p) {
+          <div class="form-field"><span class="form-label">الفرع</span><p class="static-value">{{ p.branchName }}</p></div>
+        }
+
+        <label class="form-field"><span class="form-label">قسم المعالجة</span>
+          <select #d [appSelectValue]="form.controls.departmentId.value" (change)="form.controls.departmentId.setValue(+d.value)">
+            <option value="0">{{ project() ? 'بلا قسم' : 'قسمي (الافتراضي)' }}</option>
+            @for (dep of departmentOptions(); track dep.id) { <option [value]="dep.id">{{ dep.name }}</option> }
+          </select></label>
+
+        <label class="form-field"><span class="form-label">الموقع <small class="hint">(من السجل المشترك، اختياري)</small></span>
+          <select #s [appSelectValue]="form.controls.siteId.value" (change)="form.controls.siteId.setValue(+s.value)">
+            <option value="0">بلا موقع بعد</option>
+            @for (site of sites(); track site.id) { <option [value]="site.id">{{ site.name }}{{ site.governorateName ? ' — ' + site.governorateName : '' }}</option> }
+          </select></label>
+
+        @if (project()) {
+          <label class="form-field"><span class="form-label">المرحلة</span>
+            <select #st [appSelectValue]="form.controls.stage.value" (change)="form.controls.stage.setValue(+st.value)">
+              @for (x of stages; track x.value) { <option [value]="x.value">{{ x.label }}</option> }
+            </select></label>
+        }
+      </div>
+      @if (project()?.isFinished) {
+        <p class="hint-line">المشروع {{ project()?.stageName }}: غيّر مرحلته إلى غير ذلك لإعادة فتحه وتعديل بياناته.</p>
+      }
+
+      <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span>
+        <textarea formControlName="description" rows="3" maxlength="4000"></textarea></label>
+    </div>
+    <footer class="modal-actions">
+      <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">إلغاء</button>
+      <button type="submit" [disabled]="form.invalid || busy()">{{ busy() ? 'جارٍ الحفظ…' : (project() ? 'حفظ التعديلات' : 'إنشاء المشروع') }}</button>
+    </footer>
+  </form>
+</app-modal>

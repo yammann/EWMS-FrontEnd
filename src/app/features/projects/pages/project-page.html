@@ -1,0 +1,70 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">المشاريع · {{ project()?.number ?? '…' }}</span>
+      <h1>{{ project()?.name || (loading() ? 'جارٍ التحميل…' : 'المشروع') }}</h1>
+      @if (project(); as p) {
+        <p class="muted"><span [class]="stageClass(p.stage)">{{ p.stageName }}</span>
+          @if (p.departmentName) { · {{ p.departmentName }} } · {{ p.branchName }}</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (project() && canEdit()) { <button class="btn" type="button" (click)="openEdit()">تعديل المشروع</button> }
+      <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (project(); as p) {
+    @if (p.isFinished) {
+      <p class="notice" role="status">المشروع {{ p.stageName }}: بياناته ومشاركوه ووثائقه للقراءة. لإعادة فتحه غيّر مرحلته من «تعديل المشروع».</p>
+    }
+
+    <nav class="tabs" role="tablist" aria-label="أقسام المشروع">
+      @for (t of tabs(); track t.key) {
+        <button type="button" role="tab" class="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="select(t.key)">{{ t.label }}</button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('overview') {
+        <section class="panel">
+          <div class="panel-heading"><h2>بيانات المشروع</h2></div>
+          <dl class="facts">
+            <div><dt>الرقم</dt><dd dir="ltr">{{ p.number }}</dd></div>
+            <div><dt>الرقم المرجعي (المركزية)</dt><dd dir="ltr">{{ p.referenceNumber || '—' }}</dd></div>
+            <div><dt>المرحلة</dt><dd><span [class]="stageClass(p.stage)">{{ p.stageName }}</span></dd></div>
+            <div><dt>الجهة المستفيدة</dt><dd>{{ p.beneficiary || '—' }}</dd></div>
+            <div><dt>الفرع</dt><dd>{{ p.branchName }}</dd></div>
+            <div><dt>قسم المعالجة</dt><dd>{{ p.departmentName || '—' }}</dd></div>
+            <div><dt>الموقع</dt><dd>{{ p.siteName || '—' }}</dd></div>
+            <div><dt>المشاركون</dt><dd>{{ p.membersCount }}</dd></div>
+            <div><dt>أنشأه</dt><dd>{{ p.createdByName }} · {{ p.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }}</dd></div>
+            <div><dt>آخر تعديل</dt><dd>{{ p.updatedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</dd></div>
+            <div class="wide"><dt>الوصف</dt><dd>{{ p.description || '—' }}</dd></div>
+          </dl>
+        </section>
+      }
+      @case ('documents') {
+        <app-project-documents-panel [projectId]="p.id" [open]="isOpen()" (changed)="documentsChanged()" />
+      }
+      @case ('tasks') {
+        <app-linked-tasks entityType="Project" [entityId]="p.id" />
+        <section class="panel"><p class="muted">تظهر هنا مهام لوحة المهام المرتبطة بهذا المشروع. اربط مهمة بمشروع من «الروابط» في نافذة المهمة بكتابة رقمه <span dir="ltr">{{ p.number }}</span>.</p></section>
+      }
+      @case ('members') {
+        <app-project-members-panel [project]="p" [canEdit]="canEdit() && isOpen()" (changed)="membersChanged($event)" />
+      }
+      @case ('audit') {
+        <app-project-audit-panel [projectId]="p.id" [refreshKey]="auditKey()" />
+      }
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (editing() && project(); as p) {
+  <app-project-form-dialog [project]="p" [busy]="saving()" [error]="formError()" (submitted)="save($event)" (closed)="editing.set(false)" />
+}

@@ -59,6 +59,11 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
     { key: 'map-layers', title: 'طبقات الفرع وحقولها (الطبقة ملك الفرع)', names: ['ViewMapLayers', 'CreateMapLayer', 'EditMapLayer', 'DeleteMapLayer'] },
     { key: 'map-entries', title: 'سجلات الطبقات على المواقع (السجل ملك قسم من أضافه)', names: ['ViewDepartmentMapEntries', 'ViewBranchMapEntries', 'CreateMapEntry', 'EditMapEntry', 'DeleteMapEntry'] }
   ] },
+  { key: 'projects', title: 'المشاريع', groups: [
+    { key: 'projects', title: 'المشاريع (مشاريعي = مشارك أو منشئ، ثم قسمي، ثم فرعي)', names: ['ViewProjects', 'ViewDepartmentProjects', 'ViewBranchProjects', 'CreateProject', 'EditProject'] },
+    { key: 'project-docs', title: 'وثائق المشاريع (بحدّ المشاريع التي يراها)', names: ['ViewProjectDocuments', 'DownloadProjectDocument', 'UploadProjectDocument', 'ApproveProjectDocument', 'DeleteProjectDocument'] },
+    { key: 'project-audit', title: 'سجل تدقيق المشاريع', names: ['ViewProjectAudit'] }
+  ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
     { key: 'devices', title: 'كتالوج الأجهزة والتركيبات (التركيب ملك قسم من أضافه)', names: ['ViewDevices', 'ViewBranchDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
   ] },
@@ -70,6 +75,7 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
     { key: 'reports-staff', title: 'تقارير الموظفين والهيكل', names: ['ExportUsersReport', 'ExportStructureReport'] },
     { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
     { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
+    { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport'] },
     { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
   ] },
   { key: 'admin', title: 'الإدارة والهيكل', groups: [

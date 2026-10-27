@@ -1,0 +1,6 @@
+.toolbar { margin-bottom: 16px; }
+.row-link { cursor: pointer; }
+.row-link:hover td, .row-link:focus-visible td { background: var(--fill); }
+td small { display: block; color: var(--ink-500); font-size: 12px; }
+.pill-active { background: var(--brand-50); color: var(--brand-700); }
+td.num[dir=ltr] { white-space: nowrap; }

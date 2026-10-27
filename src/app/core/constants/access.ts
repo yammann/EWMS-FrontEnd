@@ -79,7 +79,14 @@ export const AppPermission = {
   ExportSparePartMovementsReport: 'ExportSparePartMovementsReport', ExportSparePartStockReport: 'ExportSparePartStockReport',
   ExportInstallationsReport: 'ExportInstallationsReport', ExportSitesReport: 'ExportSitesReport', ExportMapEntriesReport: 'ExportMapEntriesReport',
   // تصدير لوحة المهام (من صفحتها) وسجل السحب
-  ExportTasksReport: 'ExportTasksReport', ViewReportLog: 'ViewReportLog'
+  ExportTasksReport: 'ExportTasksReport', ViewReportLog: 'ViewReportLog',
+
+  // المشاريع وإضبارتها: الحد = مشاريعي (مشارك أو منشئ) ثم قسمي ثم فرعي؛ الوثائق والتدقيق والتقرير تتبع حد المشاريع المرئية
+  ViewProjects: 'ViewProjects', ViewDepartmentProjects: 'ViewDepartmentProjects', ViewBranchProjects: 'ViewBranchProjects',
+  CreateProject: 'CreateProject', EditProject: 'EditProject',
+  ViewProjectDocuments: 'ViewProjectDocuments', DownloadProjectDocument: 'DownloadProjectDocument', UploadProjectDocument: 'UploadProjectDocument',
+  ApproveProjectDocument: 'ApproveProjectDocument', DeleteProjectDocument: 'DeleteProjectDocument',
+  ViewProjectAudit: 'ViewProjectAudit', ExportProjectsReport: 'ExportProjectsReport'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -128,7 +135,8 @@ export const SITE_ACCESS: readonly AppPermissionName[] = [
 export const REPORT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ExportVacationsReport, AppPermission.ExportVacationUsageReport, AppPermission.ExportUsersReport, AppPermission.ExportStructureReport,
   AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
-  AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport
+  AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport,
+  AppPermission.ExportProjectsReport
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [
@@ -143,4 +151,10 @@ export const OFFICE_DASHBOARD_ACCESS: readonly AppPermissionName[] = [
 export const WORK_TASK_VIEW: readonly AppPermissionName[] = [
   AppPermission.ViewMyWorkTasks, AppPermission.ViewWorkTasks, AppPermission.ViewBranchDashboard,
   AppPermission.ViewDepartmentDashboard, AppPermission.ViewOfficeDashboard
+];
+
+/** المشاريع: من ينشئ أو يعدّل يدخل القائمة أيضاً (يرى ما أنشأه) — نفس سياسة AnyProjectView في الباكاند */
+export const PROJECT_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewProjects, AppPermission.ViewDepartmentProjects, AppPermission.ViewBranchProjects,
+  AppPermission.CreateProject, AppPermission.EditProject
 ];

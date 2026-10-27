@@ -11,6 +11,7 @@ import { MAP_LAYERS_ROUTES } from '@features/map-layers/map-layers.routes';
 import { NOTIFICATIONS_ROUTES } from '@features/notifications/notifications.routes';
 import { OFFICES_ROUTES } from '@features/offices/offices.routes';
 import { PROFILE_ROUTES } from '@features/profile/profile.routes';
+import { PROJECTS_ROUTES } from '@features/projects/projects.routes';
 import { REPORT_PRINT_ROUTES, REPORTS_ROUTES } from '@features/reports/reports.routes';
 import { ROLES_ROUTES } from '@features/roles/roles.routes';
 import { TASK_BOARD_ROUTES } from '@features/task-board/task-board.routes';
@@ -44,6 +45,7 @@ export const routes: Routes = [
       ...TODO_ROUTES,
       ...DEVICES_ROUTES,
       ...MAP_LAYERS_ROUTES,
+      ...PROJECTS_ROUTES,
       ...MAINTENANCE_ROUTES,
       ...VACATIONS_ROUTES,
       ...REPORTS_ROUTES,

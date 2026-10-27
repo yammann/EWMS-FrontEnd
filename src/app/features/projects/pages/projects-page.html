@@ -1,0 +1,61 @@
+<div class="page">
+  <app-page-header eyebrow="المشاريع" heading="المشاريع"
+                   subtitle="إضبارة كل مشروع: بياناته ومشاركوه ووثائقه بإصداراتها ومهامه وسجل ما جرى عليه — ضمن ما تراه صلاحياتك">
+    @if (access().canCreate) { <button class="btn" type="button" (click)="openCreate()">+ مشروع جديد</button> }
+    <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  <section class="panel">
+    <div class="panel-heading"><h2>المشاريع <span class="count">({{ total() }})</span></h2></div>
+
+    <div class="toolbar">
+      <input #q class="search" type="search" placeholder="بحث بالاسم أو الرقم أو الجهة المستفيدة أو PRJ-…" [value]="filter().search"
+             (input)="typing(q.value)" aria-label="بحث">
+      <select #st [appSelectValue]="filter().stage ?? ''" (change)="setFilter({ stage: st.value ? +st.value : null })" aria-label="المرحلة">
+        <option value="">كل المراحل</option>
+        @for (s of stages; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
+      </select>
+      @if (departments().length) {
+        <select #dp [appSelectValue]="filter().departmentId ?? ''" (change)="setFilter({ departmentId: dp.value ? +dp.value : null })" aria-label="القسم">
+          <option value="">كل الأقسام</option>
+          @for (d of departments(); track d.id) { <option [value]="d.id">{{ d.name }}</option> }
+        </select>
+      }
+      @if (hasFilters()) { <button type="button" class="btn btn-ghost" (click)="clearFilters()">مسح الفلاتر</button> }
+    </div>
+
+    @if (loading() && !items().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!items().length && !error()) {
+      <app-empty-state>{{ hasFilters() ? 'لا توجد مشاريع مطابقة' : (access().canCreate ? 'لا توجد مشاريع بعد — أنشئ أول مشروع' : 'لا توجد مشاريع ضمن صلاحياتك بعد') }}</app-empty-state>
+    }
+    @else if (items().length) {
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>الرقم</th><th>المشروع</th><th>الجهة المستفيدة</th><th>القسم</th><th>الموقع</th><th>المرحلة</th><th>المشاركون</th><th>أُنشئ</th>
+        </tr></thead>
+        <tbody>
+          @for (p of items(); track p.id) {
+            <tr class="row-link" tabindex="0" (click)="open(p)" (keydown.enter)="open(p)">
+              <td class="num" dir="ltr">{{ p.number }}</td>
+              <td><span class="cell-strong">{{ p.name }}</span>
+                @if (p.referenceNumber) { <small dir="ltr">{{ p.referenceNumber }}</small> }</td>
+              <td>{{ p.beneficiary || '—' }}</td>
+              <td>{{ p.departmentName || '—' }}<small>{{ p.branchName }}</small></td>
+              <td>{{ p.siteName || '—' }}</td>
+              <td><span [class]="stageClass(p.stage)">{{ p.stageName }}</span></td>
+              <td class="num">{{ p.membersCount }}</td>
+              <td>{{ p.createdAt | utc | date:'yyyy/MM/dd' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="filter().page" [pageSize]="filter().pageSize" [total]="total()" (pageChange)="setFilter({ page: $event })" />
+    }
+  </section>
+</div>
+
+@if (dialog()) {
+  <app-project-form-dialog [project]="null" [busy]="saving()" [error]="formError()" (submitted)="create($event)" (closed)="dialog.set(false)" />
+}

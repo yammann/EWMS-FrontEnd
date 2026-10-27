@@ -155,8 +155,8 @@ export interface SaveRecurrenceRequest {
   dayOfWeek: number | null; dayOfMonth: number | null; dueAfterDays: number | null; startDate: string; endDate: string | null;
 }
 
-export type TaskLinkType = 'MaintenanceRequest' | 'Vacation' | 'Site';
-export const LINK_TYPE_LABEL: Record<TaskLinkType, string> = { MaintenanceRequest: 'طلب صيانة', Vacation: 'إجازة', Site: 'موقع' };
+export type TaskLinkType = 'MaintenanceRequest' | 'Vacation' | 'Site' | 'Project';
+export const LINK_TYPE_LABEL: Record<TaskLinkType, string> = { MaintenanceRequest: 'طلب صيانة', Vacation: 'إجازة', Site: 'موقع', Project: 'مشروع' };
 export interface TaskLink {
   id: number; entityType: TaskLinkType; entityTypeAr: string; entityId: number;
   label: string; available: boolean; canRemove: boolean; createdByName: string;

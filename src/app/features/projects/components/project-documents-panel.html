@@ -1,0 +1,163 @@
+<section class="panel">
+  <div class="panel-heading">
+    <h2>{{ projectId() == null ? 'وثائق المشاريع' : 'الوثائق' }} <span class="count">({{ total() }})</span></h2>
+    @if (canUpload()) { <button class="btn" type="button" (click)="uploadDialog.set({ document: null })">+ رفع وثائق</button> }
+  </div>
+
+  @if (projectId() != null && !open()) {
+    <p class="notice" role="status">المشروع مغلق أو ملغى: لا رفع ولا اعتماد ولا حذف حتى تُعاد فتحه بتغيير مرحلته.</p>
+  }
+
+  <!-- عمليات الرفع الجارية (خدمة عامة: تستمر بتغيير الصفحة) -->
+  @if (jobs().length) {
+    <ul class="uploads" aria-label="عمليات الرفع">
+      @for (job of jobs(); track job.id) {
+        <li [class.failed]="job.phase() === 'failed'" [class.done]="job.phase() === 'done'">
+          <div class="u-head">
+            <app-icon [name]="job.phase() === 'done' ? 'checkmark' : job.phase() === 'failed' ? 'warning' : 'paperclip'" [size]="16" />
+            <span class="u-name" dir="ltr">{{ job.input.fileName }}</span>
+            <span class="u-size"><bdi dir="ltr">{{ size(job.input.size) }}</bdi></span>
+          </div>
+          @switch (job.phase()) {
+            @case ('queued') { <p class="u-note">في الانتظار — يبدأ حين يخلو مكان (3 عمليات رفع كحد أقصى)</p> }
+            @case ('starting') { <p class="u-note">جارٍ البدء…</p> }
+            @case ('processing') { <p class="u-note">اكتمل الإرسال — يفحص الخادم الملف ويحفظه (قد يستغرق دقائق للملفات الكبيرة)، ويمكنك مغادرة الصفحة</p> }
+            @case ('done') { <p class="u-note">اكتمل — أُضيف إلى الوثائق</p> }
+            @default {
+              <div class="bar" role="progressbar" [attr.aria-valuenow]="uploadPercent(job)" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="uploadPercent(job)"></i></div>
+              <p class="u-note">
+                {{ uploadPercent(job) }}% · <bdi dir="ltr">{{ size(job.sent()) }}</bdi> من <bdi dir="ltr">{{ size(job.input.size) }}</bdi>
+                @if (job.phase() === 'sending' && speedText(job)) { · <bdi dir="ltr">{{ speedText(job) }}</bdi> · متبقٍ {{ eta(job.eta()) }} }
+                @if (job.phase() === 'paused') { · متوقف مؤقتاً }
+              </p>
+            }
+          }
+          @if (job.error()) { <p class="u-error" role="alert">{{ job.error() }}</p> }
+          <div class="u-actions">
+            @if (job.phase() === 'sending' || job.phase() === 'starting') { <button type="button" class="btn btn-ghost" (click)="pause(job)">إيقاف مؤقت</button> }
+            @if (job.canResume()) { <button type="button" class="btn" (click)="resume(job)">استئناف</button> }
+            @if (job.phase() !== 'processing' && job.phase() !== 'done' && job.phase() !== 'failed') { <button type="button" class="btn btn-ghost" (click)="cancel(job)">إلغاء</button> }
+            @if (job.phase() === 'done' || job.phase() === 'failed') { <button type="button" class="btn btn-ghost" (click)="dismiss(job)">إخفاء</button> }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (pending().length) {
+    <div class="pending">
+      <h3>رفوعات لم تكتمل</h3>
+      <p class="muted">انقطعت هذه العمليات (إغلاق الصفحة أو انقطاع الاتصال). اختر الملف نفسه (الاسم والحجم) لتُستأنف من حيث وقفت.</p>
+      @if (resumeError()) { <p class="u-error" role="alert">{{ resumeError() }}</p> }
+      <ul>
+        @for (s of pending(); track s.id) {
+          <li>
+            <span class="u-name" dir="ltr">{{ s.fileName }}</span>
+            <span class="u-size"><bdi dir="ltr">{{ size(s.received) }}</bdi> من <bdi dir="ltr">{{ size(s.size) }}</bdi></span>
+            <label class="btn">استئناف<input #pick type="file" hidden (change)="resumePending(s, pick)"></label>
+            <button type="button" class="btn btn-ghost" (click)="discardPending(s)">تجاهل</button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (downloading(); as d) {
+    <p class="u-note" role="status">جارٍ تنزيل «{{ d.name }}» على القرص: <bdi dir="ltr">{{ size(d.loaded) }}</bdi> من <bdi dir="ltr">{{ size(d.total) }}</bdi></p>
+  }
+
+  <div class="toolbar">
+    <input #q class="search" type="search" placeholder="بحث بعنوان الوثيقة أو اسم الملف{{ projectId() == null ? ' أو المشروع أو PRJ-…' : '' }}" [value]="filter().search"
+           (input)="typing(q.value)" aria-label="بحث">
+    <select #k [appSelectValue]="filter().kind ?? ''" (change)="setFilter({ kind: k.value ? +k.value : null })" aria-label="نوع الوثيقة">
+      <option value="">كل الأنواع</option>
+      @for (x of kinds; track x.value) { <option [value]="x.value">{{ x.label }}</option> }
+    </select>
+    <label class="date-filter">من <input type="date" [value]="filter().from" (change)="setFilter({ from: $any($event.target).value })"></label>
+    <label class="date-filter">إلى <input type="date" [value]="filter().to" (change)="setFilter({ to: $any($event.target).value })"></label>
+    @if (hasFilters()) { <button type="button" class="btn btn-ghost" (click)="clearFilters()">مسح الفلاتر</button> }
+  </div>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (loading() && !items().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+  @else if (!items().length && !error()) {
+    <app-empty-state>{{ hasFilters() ? 'لا توجد وثائق مطابقة' : (canUpload() ? 'لا وثائق بعد — ارفع أول وثيقة' : 'لا توجد وثائق') }}</app-empty-state>
+  }
+  @else {
+    <ul class="docs">
+      @for (doc of items(); track doc.id) {
+        @let main = primary(doc);
+        <li class="doc">
+          <div class="doc-head">
+            <div class="doc-title">
+              <span class="cell-strong">{{ doc.title }}</span>
+              <span class="pill">{{ doc.kindName }}</span>
+              @if (doc.approved) { <span class="pill pill-ok">معتمد: الإصدار {{ doc.approved.versionNumber }}</span> }
+              @else { <span class="pill muted">بانتظار الاعتماد</span> }
+            </div>
+            @if (projectId() == null) { <a class="proj" [routerLink]="['/projects', doc.projectId]" [queryParams]="{ tab: 'documents' }">{{ doc.projectNumber }} — {{ doc.projectName }}</a> }
+            @if (doc.latest; as l) {
+              <p class="doc-meta">آخر إصدار {{ l.versionNumber }} · <span dir="ltr">{{ l.fileName }}</span> · <bdi dir="ltr">{{ size(l.size) }}</bdi> · {{ l.uploadedByName }} · {{ l.uploadedAt | utc | date:'yyyy/MM/dd — HH:mm' }}
+                @if (doc.versionsCount > 1) { · {{ doc.versionsCount }} إصدارات }</p>
+            }
+          </div>
+          <div class="doc-actions">
+            @if (main && access().canDownload) {
+              @if (canPreview(main)) { <button type="button" class="btn btn-ghost" (click)="openPreview(doc, main)">معاينة</button> }
+              <button type="button" class="btn btn-ghost" (click)="download(main)">تنزيل</button>
+            }
+            <button type="button" class="btn btn-ghost" (click)="toggle(doc)" [attr.aria-expanded]="expanded().has(doc.id)">{{ expanded().has(doc.id) ? 'إخفاء الإصدارات' : 'الإصدارات' }}</button>
+            @if (canUpload()) { <button type="button" class="btn btn-ghost" (click)="uploadDialog.set({ document: doc })">إصدار جديد</button> }
+            @if (doc.canDelete && open()) { <button type="button" class="btn btn-ghost danger" (click)="remove(doc)" [disabled]="busyId() === doc.id">حذف</button> }
+          </div>
+
+          @if (expanded().get(doc.id); as full) {
+            <div class="table-wrap versions"><table>
+              <thead><tr><th>الإصدار</th><th>الملف</th><th>الحجم</th><th>رفعه</th><th>المصدر والملاحظة</th><th>الحالة</th><th></th></tr></thead>
+              <tbody>
+                @for (v of full.versions; track v.id) {
+                  <tr>
+                    <td class="num">{{ v.versionNumber }}</td>
+                    <td dir="ltr" class="file">{{ v.fileName }}<small title="SHA-256">{{ v.sha256.slice(0, 16) }}…</small></td>
+                    <td class="num"><bdi dir="ltr">{{ size(v.size) }}</bdi></td>
+                    <td>{{ v.uploadedByName }}<small>{{ v.uploadedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</small></td>
+                    <td class="wrap">{{ v.source || '—' }}@if (v.note) { <small>{{ v.note }}</small> }</td>
+                    <td>@if (v.isApproved) { <span class="pill pill-ok">معتمد</span><small>{{ v.approvedByName }} · {{ v.approvedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</small> } @else { <span class="pill muted">بانتظار الاعتماد</span> }</td>
+                    <td class="v-actions">
+                      @if (access().canDownload) {
+                        @if (canPreview(v)) { <button type="button" class="btn btn-ghost" (click)="openPreview(full, v)">معاينة</button> }
+                        <button type="button" class="btn btn-ghost" (click)="download(v)">تنزيل</button>
+                      }
+                      @if (v.canApprove && open()) { <button type="button" class="btn" (click)="approve(full, v)" [disabled]="busyId() === v.id">اعتماد</button> }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table></div>
+          }
+        </li>
+      }
+    </ul>
+    <app-pager [sizes]="[]" [page]="filter().page" [pageSize]="filter().pageSize" [total]="total()" [disabled]="loading()" (pageChange)="setFilter({ page: $event })" />
+  }
+</section>
+
+@if (uploadDialog(); as u) {
+  <app-document-upload-dialog [projectId]="projectId()!" [document]="u.document" (closed)="uploadDialog.set(null)" />
+}
+
+@if (preview(); as p) {
+  <app-modal [heading]="p.title + ' — الإصدار ' + p.version.versionNumber" [subheading]="p.version.fileName" size="lg" (closed)="closePreview()">
+    <div class="modal-body viewer">
+      @if (previewError()) { <p class="alert alert-error" role="alert">{{ previewError() }}</p> }
+      @else if (!previewUrl()) { <p class="muted" role="status">جارٍ التحميل…</p> }
+      @else if (p.version.contentType === 'application/pdf') { <iframe [src]="previewSafe()" title="معاينة الملف"></iframe> }
+      @else { <img [src]="previewSafe()" [alt]="p.version.fileName"> }
+    </div>
+    <footer class="modal-actions">
+      <button type="button" class="ghost" (click)="closePreview()">إغلاق</button>
+      <button type="button" (click)="download(p.version)">تنزيل</button>
+    </footer>
+  </app-modal>
+}

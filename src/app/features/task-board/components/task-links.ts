@@ -14,6 +14,7 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
   switch (type) {
     case 'MaintenanceRequest': return `/maintenance/requests/${id}`;
     case 'Site': return `/devices/sites/${id}`;
+    case 'Project': return `/projects/${id}`;
     default: return canPrintVacation ? `/vacations/print/${id}` : null;
   }
 }
