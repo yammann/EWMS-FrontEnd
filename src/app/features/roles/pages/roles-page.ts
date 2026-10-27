@@ -62,7 +62,9 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
   { key: 'projects', title: 'المشاريع', groups: [
     { key: 'projects', title: 'المشاريع (مشاريعي = مشارك أو منشئ، ثم قسمي، ثم فرعي)', names: ['ViewProjects', 'ViewDepartmentProjects', 'ViewBranchProjects', 'CreateProject', 'EditProject'] },
     { key: 'project-docs', title: 'وثائق المشاريع (بحدّ المشاريع التي يراها)', names: ['ViewProjectDocuments', 'DownloadProjectDocument', 'UploadProjectDocument', 'ApproveProjectDocument', 'DeleteProjectDocument'] },
-    { key: 'project-audit', title: 'سجل تدقيق المشاريع', names: ['ViewProjectAudit'] }
+    { key: 'project-audit', title: 'سجل تدقيق المشاريع', names: ['ViewProjectAudit'] },
+    { key: 'project-schedule', title: 'الجدول الزمني (الإعداد غير الاعتماد، والاعتماد لغير من أعدّ)', names: ['ViewProjectSchedule', 'EditProjectStartOrder', 'EditProjectSchedule', 'ApproveProjectSchedule', 'UpdateScheduleProgress', 'ClassifyScheduleTask'] },
+    { key: 'project-delays', title: 'التأخير والتمديد', names: ['RecordScheduleDelay', 'ApproveDelayJustification', 'RequestScheduleExtension', 'ApproveScheduleExtension'] }
   ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
     { key: 'devices', title: 'كتالوج الأجهزة والتركيبات (التركيب ملك قسم من أضافه)', names: ['ViewDevices', 'ViewBranchDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }

@@ -75,7 +75,8 @@ export interface AuditEntry {
 /** أسماء أفعال سجل التدقيق (مفاتيح AuditActions في الباكاند) */
 export const AUDIT_ACTION_LABEL: Record<string, string> = {
   created: 'إنشاء', updated: 'تعديل', stage: 'تغيير مرحلة', 'member-added': 'إضافة مشارك', 'member-removed': 'إزالة مشارك',
-  uploaded: 'رفع', approved: 'اعتماد', downloaded: 'فتح', deleted: 'حذف'
+  uploaded: 'رفع', approved: 'اعتماد', downloaded: 'فتح', deleted: 'حذف',
+  progress: 'تحديث إنجاز', classified: 'تصنيف', reordered: 'إعادة ترتيب', justified: 'رفع تبرير', submitted: 'رفع للاعتماد', rejected: 'رفض'
 };
 
 export interface DocumentVersion {

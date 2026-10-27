@@ -86,7 +86,13 @@ export const AppPermission = {
   CreateProject: 'CreateProject', EditProject: 'EditProject',
   ViewProjectDocuments: 'ViewProjectDocuments', DownloadProjectDocument: 'DownloadProjectDocument', UploadProjectDocument: 'UploadProjectDocument',
   ApproveProjectDocument: 'ApproveProjectDocument', DeleteProjectDocument: 'DeleteProjectDocument',
-  ViewProjectAudit: 'ViewProjectAudit', ExportProjectsReport: 'ExportProjectsReport'
+  ViewProjectAudit: 'ViewProjectAudit', ExportProjectsReport: 'ExportProjectsReport',
+
+  // الجدول الزمني والتأخير والتمديد: حدّها كلها حد رؤية المشروع؛ الاعتماد لغير من أنشأ أو سجّل أو طلب
+  ViewProjectSchedule: 'ViewProjectSchedule', EditProjectStartOrder: 'EditProjectStartOrder', EditProjectSchedule: 'EditProjectSchedule',
+  ApproveProjectSchedule: 'ApproveProjectSchedule', UpdateScheduleProgress: 'UpdateScheduleProgress', ClassifyScheduleTask: 'ClassifyScheduleTask',
+  RecordScheduleDelay: 'RecordScheduleDelay', ApproveDelayJustification: 'ApproveDelayJustification',
+  RequestScheduleExtension: 'RequestScheduleExtension', ApproveScheduleExtension: 'ApproveScheduleExtension'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -157,4 +163,11 @@ export const WORK_TASK_VIEW: readonly AppPermissionName[] = [
 export const PROJECT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewProjects, AppPermission.ViewDepartmentProjects, AppPermission.ViewBranchProjects,
   AppPermission.CreateProject, AppPermission.EditProject
+];
+
+/** الجدول الزمني للمشروع: أي صلاحية منها تفتح التبويب — نفس سياسة AnyScheduleView في الباكاند */
+export const SCHEDULE_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewProjectSchedule, AppPermission.EditProjectStartOrder, AppPermission.EditProjectSchedule, AppPermission.ApproveProjectSchedule,
+  AppPermission.UpdateScheduleProgress, AppPermission.ClassifyScheduleTask, AppPermission.RecordScheduleDelay,
+  AppPermission.ApproveDelayJustification, AppPermission.RequestScheduleExtension, AppPermission.ApproveScheduleExtension
 ];

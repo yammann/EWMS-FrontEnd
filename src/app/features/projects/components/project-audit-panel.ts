@@ -25,6 +25,12 @@ const PAGE_SIZE = 20;
           <option value="Project">المشروع والمشاركون</option>
           <option value="ProjectDocument">الوثائق</option>
           <option value="ProjectDocumentVersion">الإصدارات (رفع واعتماد وفتح)</option>
+          <option value="ProjectStartOrder">أمر المباشرة</option>
+          <option value="ProjectSchedule">الجداول الزمنية</option>
+          <option value="ScheduleTask">بنود الجدول</option>
+          <option value="ScheduleDependency">التبعيات</option>
+          <option value="ScheduleDelay">التأخيرات</option>
+          <option value="ScheduleExtension">التمديدات</option>
         </select>
       </div>
       <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />

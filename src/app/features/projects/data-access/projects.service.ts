@@ -1,7 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
-import { AppPermission, AppPermissionName } from '@core/constants/access';
+import { AppPermission, AppPermissionName, SCHEDULE_ACCESS } from '@core/constants/access';
 import { PagedResult } from '@core/models/paged-result.model';
 import {
   AuditEntry, DocumentFilter, DocumentVersion, MemberCandidate, Project, ProjectDocument, ProjectFilter, ProjectInput, UploadSession, StartUploadInput
@@ -25,6 +25,8 @@ export class ProjectsService {
       canApprove: has(AppPermission.ApproveProjectDocument),
       canDeleteDocument: has(AppPermission.DeleteProjectDocument),
       canViewAudit: has(AppPermission.ViewProjectAudit),
+      /** تبويب الجدول الزمني: أي صلاحية من صلاحياته (سياسة AnyScheduleView) */
+      canViewSchedule: this.auth.hasAnyPermission(SCHEDULE_ACCESS),
       /** يختار فرع المشروع (نظرة المؤسسة) */
       canChooseBranch: has(AppPermission.ViewOrganizationDashboard),
       /** قوائم الأقسام والمواقع في النموذج */

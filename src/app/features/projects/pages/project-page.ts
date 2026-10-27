@@ -13,10 +13,11 @@ import { ProjectAuditPanel } from '../components/project-audit-panel';
 import { ProjectDocumentsPanel } from '../components/project-documents-panel';
 import { ProjectFormDialog } from '../components/project-form-dialog';
 import { ProjectMembersPanel } from '../components/project-members-panel';
+import { ProjectSchedulePanel } from '../components/project-schedule-panel';
 import { Project, ProjectInput } from '../data-access/projects.models';
 import { ProjectsService } from '../data-access/projects.service';
 
-type Tab = 'overview' | 'documents' | 'tasks' | 'members' | 'audit';
+type Tab = 'overview' | 'documents' | 'schedule' | 'tasks' | 'members' | 'audit';
 
 /**
  * صفحة المشروع (إضبارته): نظرة عامة، الوثائق بإصداراتها، المهام المرتبطة، المشاركون، وسجل التدقيق.
@@ -24,7 +25,7 @@ type Tab = 'overview' | 'documents' | 'tasks' | 'members' | 'audit';
  */
 @Component({
   selector: 'app-project-page', standalone: true,
-  imports: [DatePipe, Alert, EmptyState, UtcPipe, LinkedTasks, ProjectAuditPanel, ProjectDocumentsPanel, ProjectFormDialog, ProjectMembersPanel],
+  imports: [DatePipe, Alert, EmptyState, UtcPipe, LinkedTasks, ProjectAuditPanel, ProjectDocumentsPanel, ProjectFormDialog, ProjectMembersPanel, ProjectSchedulePanel],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './project-page.scss'],
   templateUrl: './project-page.html'
 })
@@ -47,6 +48,7 @@ export class ProjectPage {
   tabs = computed<{ key: Tab; label: string }[]>(() => [
     { key: 'overview', label: 'نظرة عامة' },
     ...(this.access().canViewDocuments ? [{ key: 'documents' as const, label: 'الوثائق' }] : []),
+    ...(this.access().canViewSchedule ? [{ key: 'schedule' as const, label: 'الجدول الزمني' }] : []),
     { key: 'tasks', label: 'المهام' },
     { key: 'members', label: 'المشاركون' },
     ...(this.access().canViewAudit ? [{ key: 'audit' as const, label: 'سجل التدقيق' }] : [])
@@ -89,6 +91,7 @@ export class ProjectPage {
   /** عضوية المشاركين تغيّرت: الصفحة تعرض المشروع المحدَّث */
   membersChanged(p: Project) { this.project.set(p); this.auditKey.update(n => n + 1); }
   documentsChanged() { this.auditKey.update(n => n + 1); }
+  scheduleChanged() { this.auditKey.update(n => n + 1); }
 
   stageClass(stage: number) { return stage === 6 || stage === 7 ? 'pill muted' : stage === 3 ? 'pill pill-active' : 'pill'; }
 }

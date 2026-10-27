@@ -49,6 +49,9 @@
       @case ('documents') {
         <app-project-documents-panel [projectId]="p.id" [open]="isOpen()" (changed)="documentsChanged()" />
       }
+      @case ('schedule') {
+        <app-project-schedule-panel [project]="p" [open]="isOpen()" (changed)="scheduleChanged()" />
+      }
       @case ('tasks') {
         <app-linked-tasks entityType="Project" [entityId]="p.id" />
         <section class="panel"><p class="muted">تظهر هنا مهام لوحة المهام المرتبطة بهذا المشروع. اربط مهمة بمشروع من «الروابط» في نافذة المهمة بكتابة رقمه <span dir="ltr">{{ p.number }}</span>.</p></section>
