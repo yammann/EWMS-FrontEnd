@@ -1,0 +1,49 @@
+name: CI
+
+# بوابة الجودة للواجهة: كل push وكل طلب دمج. اختبارات e2e (Playwright) خارجها لأنها تحتاج الـ API وبيانات حقيقية.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: فحص الواجهة وبناؤها
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: تثبيت الحزم
+        run: npm ci
+
+      - name: Lint (وفرض طبقات المعمارية)
+        run: npm run lint
+
+      - name: لا دورات اعتماد بين الملفات
+        run: npm run check:cycles
+
+      - name: اختبارات الوحدة
+        run: npx ng test --watch=false
+
+      # ميزانيات الحجم في angular.json تُفشل البناء إن كبرت الحزمة الأولية أو أنماط مكوّن
+      - name: بناء الإنتاج
+        run: npm run build
+
+      # يوم 2026-10-27 يظهر فيه ثغرتان عاليتان (@angular/router في SSR الذي لا نستعمله، وzod): إصلاحهما بترقية Angular إلى 22.2.x
+      # في تغيير مستقل يُختبر. إلى ذلك الحين لا يمنع الدمج؛ يُزال continue-on-error بعد الترقية فيصير الفحص بوابة.
+      - name: ثغرات الحزم
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
