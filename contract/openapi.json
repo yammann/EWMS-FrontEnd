@@ -8879,6 +8879,18 @@
         ]
       }
     },
+    "/api/Auth/Renew": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/api/Auth/Signature": {
       "get": {
         "responses": {
