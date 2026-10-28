@@ -5,6 +5,7 @@ import { AUTH_ROUTES } from '@features/auth/auth.routes';
 import { BRANCHES_ROUTES } from '@features/branches/branches.routes';
 import { DASHBOARD_ROUTES } from '@features/dashboard/dashboard.routes';
 import { DEPARTMENTS_ROUTES } from '@features/departments/departments.routes';
+import { DIWAN_PRINT_ROUTES, DIWAN_ROUTES } from '@features/diwan/diwan.routes';
 import { DEVICES_ROUTES } from '@features/devices/devices.routes';
 import { MAINTENANCE_PRINT_ROUTES, MAINTENANCE_ROUTES } from '@features/maintenance/maintenance.routes';
 import { MAP_LAYERS_ROUTES } from '@features/map-layers/map-layers.routes';
@@ -30,6 +31,7 @@ export const routes: Routes = [
   // صفحات الطباعة خارج الإطار العام (بلا سايدبار)
   ...MAINTENANCE_PRINT_ROUTES,
   ...VACATION_PRINT_ROUTES,
+  ...DIWAN_PRINT_ROUTES,
   ...REPORT_PRINT_ROUTES,
   {
     path: '',
@@ -46,6 +48,7 @@ export const routes: Routes = [
       ...DEVICES_ROUTES,
       ...MAP_LAYERS_ROUTES,
       ...PROJECTS_ROUTES,
+      ...DIWAN_ROUTES,
       ...MAINTENANCE_ROUTES,
       ...VACATIONS_ROUTES,
       ...REPORTS_ROUTES,

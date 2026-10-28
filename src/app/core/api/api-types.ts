@@ -215,6 +215,11 @@ export interface ChangeAssignedTaskStatusRequestDto {
   status: number;
 }
 
+export interface ChangeCorrespondenceStatusRequestDto {
+  rowVersion: string | null;
+  statusId: number;
+}
+
 export interface ChangeMaintenanceStatusDto {
   statusId: number;
 }
@@ -239,6 +244,181 @@ export interface ClassifyScheduleTaskRequestDto {
   rowVersion: string | null;
 }
 
+export interface CorrespondenceAttachmentDto {
+  contentType: string;
+  fileName: string;
+  id: number;
+  size: number;
+  uploadedAt: string;
+  uploadedByName: string;
+}
+
+export interface CorrespondenceHistoryDto {
+  action: string;
+  at: string;
+  details: string;
+  id: number;
+  title: string;
+  userName: string;
+}
+
+export interface CorrespondenceListItemDto {
+  branchId: number;
+  currentUnitName: string | null;
+  direction: number;
+  directionAr: string;
+  dueDate: string | null;
+  externalNumber: string | null;
+  id: number;
+  isClosed: boolean;
+  isOverdue: boolean;
+  number: string | null;
+  outgoingState: number | null;
+  outgoingStateAr: string | null;
+  party: string;
+  projectId: number | null;
+  projectName: string | null;
+  registeredAt: string;
+  registeredByName: string;
+  stage: number | null;
+  statusColor: string | null;
+  statusId: number | null;
+  statusName: string | null;
+  subject: string;
+  typeId: number;
+  typeName: string;
+}
+
+export interface CorrespondenceListItemDtoPagedResultDto {
+  items: CorrespondenceListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface CorrespondencePrintDto {
+  approverName: string | null;
+  approverSignature: string | null;
+  body: string;
+  branchName: string;
+  date: string;
+  dateHijri: string;
+  externalNumber: string | null;
+  isIssued: boolean;
+  number: string | null;
+  party: string;
+  replyToNumber: string | null;
+  subject: string;
+}
+
+export interface CorrespondenceReferralDto {
+  acknowledgedAt: string | null;
+  acknowledgedByName: string | null;
+  createdAt: string;
+  fromDepartmentName: string | null;
+  fromUserId: number;
+  fromUserName: string;
+  id: number;
+  note: string;
+  toDepartmentId: number;
+  toDepartmentName: string;
+  toOfficeId: number | null;
+  toOfficeName: string | null;
+  toUserId: number | null;
+  toUserName: string | null;
+}
+
+export interface CorrespondenceResponseDto {
+  approvedAt: string | null;
+  approvedByName: string | null;
+  attachments: CorrespondenceAttachmentDto[];
+  branchId: number;
+  canAcknowledge: boolean;
+  canApprove: boolean;
+  canAttach: boolean;
+  canChangeStatus: boolean;
+  canClose: boolean;
+  canEdit: boolean;
+  canIssue: boolean;
+  canRefer: boolean;
+  canSubmit: boolean;
+  closedAt: string | null;
+  currentDepartmentId: number | null;
+  currentOfficeId: number | null;
+  currentUnitName: string | null;
+  currentUserId: number | null;
+  currentUserName: string | null;
+  direction: number;
+  directionAr: string;
+  dueDate: string | null;
+  externalDate: string | null;
+  externalNumber: string | null;
+  id: number;
+  isClosed: boolean;
+  isOverdue: boolean;
+  issuedAt: string | null;
+  issuedByName: string | null;
+  number: string | null;
+  outgoingState: number | null;
+  outgoingStateAr: string | null;
+  party: string;
+  projectId: number | null;
+  projectName: string | null;
+  referrals: CorrespondenceReferralDto[];
+  registeredAt: string;
+  registeredByName: string;
+  replyToId: number | null;
+  replyToNumber: string | null;
+  returnNote: string | null;
+  rowVersion: string;
+  stage: number | null;
+  statusColor: string | null;
+  statusId: number | null;
+  statusName: string | null;
+  subject: string;
+  summary: string;
+  typeId: number;
+  typeName: string;
+}
+
+export interface CorrespondenceStatusRequestDto {
+  branchId: number | null;
+  color: string;
+  isActive: boolean;
+  name: string;
+  sortOrder: number;
+  stage: number;
+}
+
+export interface CorrespondenceStatusResponseDto {
+  branchId: number;
+  color: string;
+  id: number;
+  isActive: boolean;
+  name: string;
+  sortOrder: number;
+  stage: number;
+  stageAr: string;
+}
+
+export interface CorrespondenceTypeRequestDto {
+  branchId: number | null;
+  deadlineDays: number | null;
+  isActive: boolean;
+  name: string;
+  sortOrder: number;
+}
+
+export interface CorrespondenceTypeResponseDto {
+  branchId: number;
+  deadlineDays: number | null;
+  id: number;
+  isActive: boolean;
+  name: string;
+  sortOrder: number;
+}
+
 export interface CreateAssignedTaskRequestDto {
   checklistItems: string[] | null;
   description: string;
@@ -248,6 +428,17 @@ export interface CreateAssignedTaskRequestDto {
   targetId: number;
   targetType: string | null;
   title: string;
+}
+
+export interface CreateOutgoingDraftRequestDto {
+  branchId: number | null;
+  externalNumber: string | null;
+  party: string;
+  projectId: number | null;
+  replyToId: number | null;
+  subject: string;
+  summary: string | null;
+  typeId: number;
 }
 
 export interface CreateVacationTypeRequestDto {
@@ -320,6 +511,12 @@ export interface DecideMaintenanceTransferDto {
   approve: boolean;
   note: string | null;
   userId: number | null;
+}
+
+export interface DecideOutgoingDraftRequestDto {
+  approve: boolean;
+  note: string | null;
+  rowVersion: string | null;
 }
 
 export interface DepartmentDashboardDto {
@@ -1173,6 +1370,41 @@ export interface ReceiveSparePartDto {
   unitCost: number;
 }
 
+export interface ReferCorrespondenceRequestDto {
+  note: string | null;
+  toDepartmentId: number;
+  toOfficeId: number | null;
+  toUserId: number | null;
+}
+
+export interface ReferralDepartmentDto {
+  id: number;
+  name: string;
+  offices: ReferralOfficeDto[];
+}
+
+export interface ReferralOfficeDto {
+  id: number;
+  name: string;
+}
+
+export interface ReferralUserDto {
+  fullName: string;
+  id: number;
+  officeName: string | null;
+}
+
+export interface RegisterIncomingRequestDto {
+  branchId: number | null;
+  externalDate: string | null;
+  externalNumber: string | null;
+  party: string;
+  projectId: number | null;
+  subject: string;
+  summary: string | null;
+  typeId: number;
+}
+
 export interface RegisterRequest {
   branchId: number;
   departmentId: number;
@@ -1962,6 +2194,18 @@ export interface UpdateAssignedTaskRequestDto {
 export interface UpdateChecklistItemRequestDto {
   isDone: boolean | null;
   text: string | null;
+}
+
+export interface UpdateCorrespondenceRequestDto {
+  externalDate: string | null;
+  externalNumber: string | null;
+  party: string;
+  projectId: number | null;
+  replyToId: number | null;
+  rowVersion: string | null;
+  subject: string;
+  summary: string | null;
+  typeId: number;
 }
 
 export interface UpdateScheduleProgressRequestDto {

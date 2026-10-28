@@ -14,7 +14,7 @@ import { AppearanceMenu } from './appearance-menu';
 import { BackButton } from '@shared/ui/back-button';
 import { hasOpenModal } from '@shared/ui/modal';
 import { roleLabel } from '@core/utils/roles';
-import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN, REPORT_ACCESS, MY_VACATIONS_ACCESS, PROJECT_ACCESS } from '@core/constants/access';
+import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN, REPORT_ACCESS, MY_VACATIONS_ACCESS, PROJECT_ACCESS, DIWAN_ACCESS, MANAGE_DIWAN_LOOKUPS } from '@core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
 /** عرض الشاشة الذي تتحول عنده القائمة إلى أزرار تُفتح بزر «القائمة» (مطابق لـ @media في main-layout-compact.scss) */
@@ -24,7 +24,7 @@ const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(pre
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
 /** icon: أيقونة القسم في السايدبار المطوي (تنسدل تحتها أيقونات صفحاته) */
-interface NavSection { id: 'main' | 'tasks' | 'projects' | 'vacations' | 'maintenance' | 'sites' | 'devices' | 'reports' | 'admin'; title: string; icon: IconName; items: NavItem[]; }
+interface NavSection { id: 'main' | 'tasks' | 'projects' | 'diwan' | 'vacations' | 'maintenance' | 'sites' | 'devices' | 'reports' | 'admin'; title: string; icon: IconName; items: NavItem[]; }
 
 @Component({
   selector: 'app-main-layout',
@@ -84,6 +84,10 @@ export class MainLayout {
       { id: 'projects', title: 'المشاريع', icon: 'folder', items: [
         canAny(PROJECT_ACCESS) && { path: '/projects', label: 'المشاريع', icon: 'briefcase', exact: true },
         can(AppPermission.ViewProjectDocuments) && { path: '/projects/documents', label: 'وثائق المشاريع', icon: 'docText' }
+      ].filter(Boolean) as NavItem[] },
+      { id: 'diwan', title: 'الديوان', icon: 'mail', items: [
+        canAny(DIWAN_ACCESS) && { path: '/diwan', label: 'المعاملات', icon: 'mail', exact: true },
+        canAny(MANAGE_DIWAN_LOOKUPS) && { path: '/diwan/settings', label: 'إعدادات الديوان', icon: 'gear' }
       ].filter(Boolean) as NavItem[] },
       { id: 'vacations', title: 'الإجازات', icon: 'suitcase', items: [
         canAny(MY_VACATIONS_ACCESS) && { path: '/vacations/my', label: 'إجازاتي', icon: 'beach' },

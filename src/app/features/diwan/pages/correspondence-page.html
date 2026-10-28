@@ -1,0 +1,161 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">الديوان · {{ item()?.directionAr ?? '…' }}</span>
+      <h1>{{ item()?.subject || (loading() ? 'جارٍ التحميل…' : 'المعاملة') }}</h1>
+      @if (item(); as c) {
+        <p class="muted"><span dir="ltr">{{ c.number || 'مسودة' }}</span> · <span [class]="stateClass(c)">{{ stateLabel(c) }}</span>
+          @if (c.isOverdue) { · <strong class="late">تجاوزت مهلتها</strong> }
+          @if (c.direction === incoming && c.currentUnitName) { · عند: {{ c.currentUnitName }}{{ c.currentUserName ? ' — ' + c.currentUserName : '' }} }</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (item(); as c) {
+        @if (c.canAcknowledge) { <button class="btn" type="button" (click)="acknowledge()" [disabled]="saving()">تأكيد الاستلام</button> }
+        @if (c.canRefer) { <button class="btn" type="button" (click)="open('refer')">إحالة</button> }
+        @if (c.canChangeStatus) { <button class="btn btn-ghost" type="button" (click)="open('status')">{{ c.isClosed ? 'إعادة فتح' : 'تغيير الحالة' }}</button> }
+        @if (c.canSubmit) { <button class="btn" type="button" (click)="submit()" [disabled]="saving()">رفع للاعتماد</button> }
+        @if (c.canApprove) { <button class="btn" type="button" (click)="open('decide')">اعتماد / إعادة</button> }
+        @if (c.canIssue) { <button class="btn" type="button" (click)="issue()" [disabled]="saving()">إصدار برقم</button> }
+        @if (canPrint()) { <button class="btn btn-ghost" type="button" (click)="print()">طباعة الكتاب</button> }
+        @if (c.direction === incoming && access().canRegister && !c.isClosed) { <button class="btn btn-ghost" type="button" (click)="open('reply')">رد بمسودة</button> }
+        @if (c.canEdit) { <button class="btn btn-ghost" type="button" (click)="open('edit')">تعديل</button> }
+      }
+      <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (item(); as c) {
+    @if (c.returnNote && isDraft()) {
+      <p class="notice" role="status"><strong>أعادها المعتمِد:</strong> {{ c.returnNote }}</p>
+    }
+    @if (c.direction === outgoing && c.outgoingState === states.approved) {
+      <p class="notice" role="status">اعتُمدت بتوقيع {{ c.approvedByName }} — بانتظار الإصدار من الديوان.</p>
+    }
+    @if (c.isClosed) { <p class="notice" role="status">المعاملة {{ c.direction === incoming ? 'مغلقة' : 'صادرة' }}: للقراءة{{ c.canChangeStatus ? ' — «إعادة فتح» لمتابعتها' : '' }}.</p> }
+
+    <nav class="tabs" role="tablist" aria-label="أقسام المعاملة">
+      @for (t of tabs; track t.key) {
+        <button type="button" role="tab" class="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="select(t.key)">
+          {{ t.label }}{{ t.key === 'attachments' ? ' (' + c.attachments.length + ')' : '' }}</button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('overview') {
+        <section class="panel">
+          <div class="panel-heading"><h2>بيانات المعاملة</h2></div>
+          <dl class="facts">
+            <div><dt>الرقم الداخلي</dt><dd dir="ltr">{{ c.number || 'مسودة — لا رقم قبل الصدور' }}</dd></div>
+            <div><dt>الاتجاه</dt><dd>{{ c.directionAr }}</dd></div>
+            <div><dt>{{ c.direction === incoming ? 'الجهة المرسِلة' : 'المرسَل إليه' }}</dt><dd>{{ c.party }}</dd></div>
+            <div><dt>النوع</dt><dd>{{ c.typeName }}</dd></div>
+            <div><dt>رقم الكتاب</dt><dd dir="ltr">{{ c.externalNumber || '—' }}</dd></div>
+            @if (c.direction === incoming) {
+              <div><dt>تاريخ الكتاب</dt><dd>{{ c.externalDate ? (c.externalDate | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+              <div><dt>الموعد</dt><dd>{{ c.dueDate ? (c.dueDate | utc | date:'yyyy/MM/dd') : 'بلا مهلة' }}</dd></div>
+              <div><dt>الجهة الحاملة الآن</dt><dd>{{ c.currentUnitName || '—' }}{{ c.currentUserName ? ' — ' + c.currentUserName : '' }}</dd></div>
+            }
+            <div><dt>المشروع</dt><dd>
+              @if (c.projectId) { <a href="javascript:void 0" (click)="router.navigate(['/projects', c.projectId])">{{ c.projectName }}</a> } @else { — }</dd></div>
+            @if (c.replyToId) { <div><dt>ردّ على</dt><dd><a href="javascript:void 0" dir="ltr" (click)="router.navigate(['/diwan', c.replyToId])">{{ c.replyToNumber }}</a></dd></div> }
+            <div><dt>سجّلها</dt><dd>{{ c.registeredByName }} · {{ c.registeredAt | utc | date:'yyyy/MM/dd — HH:mm' }}</dd></div>
+            @if (c.approvedAt) { <div><dt>اعتمدها</dt><dd>{{ c.approvedByName }} · {{ c.approvedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</dd></div> }
+            @if (c.issuedAt) { <div><dt>صدرت</dt><dd>{{ c.issuedByName }} · {{ c.issuedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</dd></div> }
+            @if (c.closedAt) { <div><dt>أُغلقت</dt><dd>{{ c.closedAt | utc | date:'yyyy/MM/dd — HH:mm' }}</dd></div> }
+            <div class="wide"><dt>{{ c.direction === incoming ? 'الملخص' : 'نص الكتاب' }}</dt><dd class="pre">{{ c.summary || '—' }}</dd></div>
+          </dl>
+        </section>
+
+        @if (c.direction === incoming) {
+          <section class="panel">
+            <div class="panel-heading"><h2>الإحالات <span class="count">({{ c.referrals.length }})</span></h2></div>
+            @if (!c.referrals.length) { <p class="muted">لم تُحَل بعد — هي عند وحدة من سجّلها.</p> }
+            <ol class="timeline">
+              @for (r of c.referrals; track r.id) {
+                <li>
+                  <div class="when">{{ r.createdAt | utc | date:'yyyy/MM/dd — HH:mm' }}</div>
+                  <div class="what">
+                    <strong>{{ r.fromUserName }}</strong>{{ r.fromDepartmentName ? ' (' + r.fromDepartmentName + ')' : '' }}
+                    ← <strong>{{ r.toUserName || r.toOfficeName || r.toDepartmentName }}</strong>{{ r.toOfficeName || r.toUserName ? ' — ' + r.toDepartmentName : '' }}
+                    @if (r.note) { <p class="pre">{{ r.note }}</p> }
+                    <small>{{ r.acknowledgedAt ? 'استلمها ' + (r.acknowledgedByName ?? '') + ' · ' + (r.acknowledgedAt | utc | date:'yyyy/MM/dd HH:mm') : 'بانتظار الاستلام' }}</small>
+                  </div>
+                </li>
+              }
+            </ol>
+          </section>
+        }
+      }
+      @case ('attachments') {
+        <app-correspondence-attachments [item]="c" (changed)="attachmentsChanged($event)" />
+      }
+      @case ('tasks') {
+        <app-linked-tasks entityType="Correspondence" [entityId]="c.id" />
+        <section class="panel"><p class="muted">تظهر هنا مهام لوحة المهام المرتبطة بهذه المعاملة. اربط مهمة بها من «الروابط» في نافذة المهمة بكتابة رقمها <span dir="ltr">{{ c.number || '' }}</span>.</p></section>
+      }
+      @case ('history') {
+        <section class="panel">
+          <div class="panel-heading"><h2>سجل العمليات</h2></div>
+          @if (!history().length) { <p class="muted">لا سجل.</p> }
+          <ol class="timeline">
+            @for (h of history(); track h.id) {
+              <li>
+                <div class="when">{{ h.at | utc | date:'yyyy/MM/dd — HH:mm' }}</div>
+                <div class="what"><strong>{{ actionAr(h.action) }}</strong> · {{ h.userName }}
+                  <p>{{ h.title }}</p>
+                  @if (h.details) { <p class="pre muted">{{ h.details }}</p> }</div>
+              </li>
+            }
+          </ol>
+        </section>
+      }
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@switch (panel()) {
+  @case ('edit') {
+    @if (item(); as c) { <app-register-dialog mode="edit" [item]="c" [busy]="saving()" [error]="formError()" (submitted)="save($event)" (closed)="panel.set(null)" /> }
+  }
+  @case ('reply') {
+    @if (item(); as c) { <app-register-dialog mode="draft" [replyTo]="c" [busy]="saving()" [error]="formError()" (submitted)="reply($event)" (closed)="panel.set(null)" /> }
+  }
+  @case ('refer') {
+    @if (item(); as c) { <app-refer-dialog [item]="c" [busy]="saving()" [error]="formError()" (submitted)="refer($event)" (closed)="panel.set(null)" /> }
+  }
+  @case ('status') {
+    <app-modal [heading]="item()?.isClosed ? 'إعادة فتح المعاملة' : 'تغيير الحالة'" size="md" [busy]="saving()" (closed)="panel.set(null)">
+      <div class="modal-body form-stack">
+        <app-alert [message]="formError()" />
+        <label class="form-field"><span class="form-label">الحالة</span>
+          <select [(ngModel)]="statusChoice" name="status" aria-label="الحالة">
+            <option [ngValue]="0">اختر الحالة</option>
+            @for (s of statuses(); track s.id) { <option [ngValue]="s.id">{{ s.name }} — {{ s.stageAr }}</option> }
+          </select></label>
+      </div>
+      <footer class="modal-actions">
+        <button type="button" class="ghost" (click)="panel.set(null)" [disabled]="saving()">إلغاء</button>
+        <button type="button" (click)="changeStatus()" [disabled]="saving() || !statusChoice">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button>
+      </footer>
+    </app-modal>
+  }
+  @case ('decide') {
+    <app-modal heading="اعتماد مسودة الصادر" subheading="يُحفظ توقيعك مع الاعتماد ويُطبع على الكتاب" size="md" [busy]="saving()" (closed)="panel.set(null)">
+      <div class="modal-body form-stack">
+        <app-alert [message]="formError()" />
+        <label class="form-field"><span class="form-label">سبب الإعادة <small class="hint">(مطلوب عند الإعادة فقط)</small></span>
+          <textarea [(ngModel)]="note" name="note" rows="3" maxlength="1000"></textarea></label>
+      </div>
+      <footer class="modal-actions">
+        <button type="button" class="ghost" (click)="panel.set(null)" [disabled]="saving()">إلغاء</button>
+        <button type="button" class="ghost" (click)="decide(false)" [disabled]="saving()">إعادة للمُعدّ</button>
+        <button type="button" (click)="decide(true)" [disabled]="saving()">اعتماد</button>
+      </footer>
+    </app-modal>
+  }
+}

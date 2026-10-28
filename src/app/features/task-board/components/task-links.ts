@@ -15,6 +15,7 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
     case 'MaintenanceRequest': return `/maintenance/requests/${id}`;
     case 'Site': return `/devices/sites/${id}`;
     case 'Project': return `/projects/${id}`;
+    case 'Correspondence': return `/diwan/${id}`;
     default: return canPrintVacation ? `/vacations/print/${id}` : null;
   }
 }
@@ -56,6 +57,16 @@ export class TaskLinks implements OnInit {
 
   ngOnInit() {
     if (this.canSites()) this.devices.sites().subscribe({ next: s => this.sites.set(s), error: () => { /* الموقع اختياري */ } });
+  }
+
+  /** تلميح خانة الرقم بحسب نوع السجل */
+  placeholder() {
+    switch (this.type) {
+      case 'Vacation': return 'رقم الإجازة: VAC-2026-00005';
+      case 'Project': return 'رقم المشروع: PRJ-2026-00012';
+      case 'Correspondence': return 'رقم المعاملة: IN-2026-00012';
+      default: return 'رقم الطلب: MR-2026-00012';
+    }
   }
 
   route(l: TaskLink) { return l.available ? linkRoute(l.entityType, l.entityId, this.canPrint()) : null; }

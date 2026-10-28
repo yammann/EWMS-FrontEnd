@@ -1,0 +1,74 @@
+<div class="page">
+  <app-page-header eyebrow="الديوان" heading="المعاملات"
+                   subtitle="الوارد والصادر بأرقامه وحالته ووحدته الحالية — ضمن ما تراه صلاحياتك: معاملاتي ثم قسمي ثم فرعي">
+    @if (access().canRegister) {
+      <button class="btn" type="button" (click)="openDialog('incoming')">+ تسجيل وارد</button>
+      <button class="btn btn-ghost" type="button" (click)="openDialog('draft')">+ مسودة صادر</button>
+    }
+    <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  <section class="panel">
+    <nav class="tabs" role="tablist" aria-label="عرض المعاملات">
+      @for (v of views(); track v.key) {
+        <button type="button" role="tab" class="tab" [class.active]="view() === v.key" [attr.aria-selected]="view() === v.key" (click)="setView(v.key)">{{ v.label }}</button>
+      }
+    </nav>
+
+    <div class="toolbar">
+      <input #q class="search" type="search" placeholder="بحث بالموضوع أو الجهة أو رقم الكتاب أو IN-…" [value]="filter().search"
+             (input)="typing(q.value)" aria-label="بحث">
+      @if (types().length) {
+        <select #ty [appSelectValue]="filter().typeId ?? ''" (change)="setFilter({ typeId: ty.value ? +ty.value : null })" aria-label="النوع">
+          <option value="">كل الأنواع</option>
+          @for (t of types(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
+        </select>
+      }
+      @if (view() !== 'outgoing') {
+        <select #st [appSelectValue]="filter().stage ?? ''" (change)="setFilter({ stage: st.value ? +st.value : null })" aria-label="المرحلة">
+          <option value="">كل المراحل</option>
+          @for (s of stages; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
+        </select>
+      }
+      <label class="check"><input type="checkbox" [checked]="filter().overdueOnly" (change)="setFilter({ overdueOnly: !filter().overdueOnly })"> تجاوزت المدة فقط</label>
+      @if (hasFilters()) { <button type="button" class="btn btn-ghost" (click)="clearFilters()">مسح الفلاتر</button> }
+    </div>
+
+    @if (loading() && !items().length) { <app-empty-state>جارٍ التحميل…</app-empty-state> }
+    @else if (!items().length && !error()) { <app-empty-state>{{ emptyText() }}</app-empty-state> }
+    @else if (items().length) {
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>الرقم</th><th>الموضوع</th><th>الجهة</th><th>النوع</th><th>الحالة</th><th>الجهة الحاملة</th><th>الموعد</th><th>سُجّلت</th>
+        </tr></thead>
+        <tbody>
+          @for (c of items(); track c.id) {
+            <tr class="row-link" tabindex="0" (click)="open(c)" (keydown.enter)="open(c)">
+              <td class="num" dir="ltr">
+                @if (c.number) { {{ c.number }} } @else { <span class="muted">مسودة</span> }
+                <small>{{ c.directionAr }}</small>
+              </td>
+              <td><span class="cell-strong">{{ c.subject }}</span>
+                @if (c.externalNumber) { <small dir="ltr">{{ c.externalNumber }}</small> }
+                @if (c.projectName) { <small>{{ c.projectName }}</small> }</td>
+              <td>{{ c.party }}</td>
+              <td>{{ c.typeName }}</td>
+              <td><span [class]="stateClass(c)" [style.--dot]="c.statusColor">{{ stateLabel(c) }}</span>
+                @if (c.isOverdue) { <small class="late">متأخرة</small> }</td>
+              <td>{{ c.currentUnitName || '—' }}</td>
+              <td>{{ c.dueDate ? (c.dueDate | utc | date:'yyyy/MM/dd') : '—' }}</td>
+              <td>{{ c.registeredAt | utc | date:'yyyy/MM/dd' }}<small>{{ c.registeredByName }}</small></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="filter().page" [pageSize]="filter().pageSize" [total]="total()" (pageChange)="setFilter({ page: $event })" />
+    }
+  </section>
+</div>
+
+@if (dialog(); as mode) {
+  <app-register-dialog [mode]="mode" [busy]="saving()" [error]="formError()" (submitted)="create($event)" (closed)="dialog.set(null)" />
+}

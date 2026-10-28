@@ -92,7 +92,15 @@ export const AppPermission = {
   ViewProjectSchedule: 'ViewProjectSchedule', EditProjectStartOrder: 'EditProjectStartOrder', EditProjectSchedule: 'EditProjectSchedule',
   ApproveProjectSchedule: 'ApproveProjectSchedule', UpdateScheduleProgress: 'UpdateScheduleProgress', ClassifyScheduleTask: 'ClassifyScheduleTask',
   RecordScheduleDelay: 'RecordScheduleDelay', ApproveDelayJustification: 'ApproveDelayJustification',
-  RequestScheduleExtension: 'RequestScheduleExtension', ApproveScheduleExtension: 'ApproveScheduleExtension'
+  RequestScheduleExtension: 'RequestScheduleExtension', ApproveScheduleExtension: 'ApproveScheduleExtension',
+
+  // الديوان: معاملاتي (سجّلتها أو مرّت بي) ← قسمي ← فرعي؛ الإحالة إلى وحدة لا تفتح المعاملة إلا لحاملي HandleCorrespondence فيها
+  ViewCorrespondence: 'ViewCorrespondence', ViewDepartmentCorrespondence: 'ViewDepartmentCorrespondence', ViewBranchCorrespondence: 'ViewBranchCorrespondence',
+  RegisterCorrespondence: 'RegisterCorrespondence', ReferCorrespondence: 'ReferCorrespondence', HandleCorrespondence: 'HandleCorrespondence',
+  CloseCorrespondence: 'CloseCorrespondence', ApproveOutgoingCorrespondence: 'ApproveOutgoingCorrespondence',
+  ViewCorrespondenceLookups: 'ViewCorrespondenceLookups', CreateCorrespondenceLookup: 'CreateCorrespondenceLookup',
+  EditCorrespondenceLookup: 'EditCorrespondenceLookup', DeleteCorrespondenceLookup: 'DeleteCorrespondenceLookup',
+  ExportCorrespondenceReport: 'ExportCorrespondenceReport', ExportOverdueCorrespondenceReport: 'ExportOverdueCorrespondenceReport'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -142,7 +150,7 @@ export const REPORT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ExportVacationsReport, AppPermission.ExportVacationUsageReport, AppPermission.ExportUsersReport, AppPermission.ExportStructureReport,
   AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
   AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport,
-  AppPermission.ExportProjectsReport
+  AppPermission.ExportProjectsReport, AppPermission.ExportCorrespondenceReport, AppPermission.ExportOverdueCorrespondenceReport
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [
@@ -170,4 +178,19 @@ export const SCHEDULE_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewProjectSchedule, AppPermission.EditProjectStartOrder, AppPermission.EditProjectSchedule, AppPermission.ApproveProjectSchedule,
   AppPermission.UpdateScheduleProgress, AppPermission.ClassifyScheduleTask, AppPermission.RecordScheduleDelay,
   AppPermission.ApproveDelayJustification, AppPermission.RequestScheduleExtension, AppPermission.ApproveScheduleExtension
+];
+
+/** الديوان: من يسجّل أو يعالج أو يعتمد يدخل القائمة (يرى ما يخصه) — نفس سياسة AnyCorrespondenceView في الباكاند */
+export const DIWAN_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewCorrespondence, AppPermission.ViewDepartmentCorrespondence, AppPermission.ViewBranchCorrespondence,
+  AppPermission.RegisterCorrespondence, AppPermission.HandleCorrespondence, AppPermission.ApproveOutgoingCorrespondence
+];
+/** قوائم أنواع الديوان وحالاته للتسجيل والفلاتر — نفس سياسة AnyCorrespondenceLookupView */
+export const DIWAN_LOOKUP_VIEW: readonly AppPermissionName[] = [
+  AppPermission.ViewCorrespondenceLookups, AppPermission.CreateCorrespondenceLookup, AppPermission.EditCorrespondenceLookup,
+  AppPermission.DeleteCorrespondenceLookup, AppPermission.RegisterCorrespondence, AppPermission.HandleCorrespondence
+];
+/** صفحة إعدادات الديوان: لمن يدير الأنواع والحالات (العرض وحده يُمنح لكل من يسجّل) */
+export const MANAGE_DIWAN_LOOKUPS: readonly AppPermissionName[] = [
+  AppPermission.CreateCorrespondenceLookup, AppPermission.EditCorrespondenceLookup, AppPermission.DeleteCorrespondenceLookup
 ];

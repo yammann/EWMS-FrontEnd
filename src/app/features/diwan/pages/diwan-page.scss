@@ -1,0 +1,13 @@
+.toolbar { margin-bottom: 16px; align-items: center; }
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+.tab { min-height: 34px; padding: 0 16px; border-radius: 999px; background: var(--fill); color: var(--ink-700); font-weight: 600; box-shadow: none; }
+.tab.active { background: var(--brand-600); color: var(--on-brand); }
+.tab:hover:not(.active):not(:disabled) { background: var(--fill-strong); transform: none; box-shadow: none; }
+.check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-700); }
+.row-link { cursor: pointer; }
+.row-link:hover td, .row-link:focus-visible td { background: var(--fill); }
+td small { display: block; color: var(--ink-500); font-size: 12px; }
+td.num[dir=ltr] { white-space: nowrap; }
+.pill-late { background: color-mix(in srgb, var(--danger, #c0392b) 14%, transparent); color: var(--danger, #c0392b); }
+small.late { color: var(--danger, #c0392b); font-weight: 700; }
+.muted { color: var(--ink-500); }

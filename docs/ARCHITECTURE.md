@@ -130,3 +130,8 @@ crud = new CrudPage<Item, Body>({
   - **التأخيرات (`schedule-delays-panel.ts`):** تسجيل (نافذة)، رفع التبرير (من سجّل التأخير وحده، بمستند من وثائق المشروع)، قرار غيره (`schedule-shared.ts` نافذة قرار مشتركة؛ الرفض بسبب). «تسجيل تأخير» يظهر على بند مرشَّح من الجدول؛ اللواحق المقترحة تُعرض للمراجعة ولا تُختار.
   - **التمديدات (`schedule-extensions-panel.ts`):** نافذة الطلب تعاين دون حفظ (تواريخ جديدة، تعارضات، لواحق مقترحة تُضاف بزر صريح)، ثم مسودة ← رفع ← قرار غير صاحب الطلب. جماعي أو مستقل، أيام تقويمية أو أيام عمل. طلب واحد غير مبتوت فيه للمشروع.
   - الخدمة `data-access/schedule.service.ts` (`api/ProjectSchedules`)، النماذج `schedule.models.ts`. الإشعارات `Schedule*` تفتح `/projects/:id?tab=schedule`؛ مجموعتا «الجدول الزمني» و«التأخير والتمديد» في صفحة الأدوار؛ مرشّحات سجل التدقيق تشمل كياناتها.
+
+## الديوان (features/diwan، 2026-10-28)
+- **الصفحات:** `/diwan` (تبويبات صندوقي/الكل/الوارد/الصادر، فلاتر، ترقيم من الخادم)، `/diwan/:id` (تبويبات في الصفحة؛ الأزرار تُشتق من أعلام الخادم `canRefer/canAcknowledge/canChangeStatus/canSubmit/canApprove/canIssue/canEdit` فلا قواعد مكرَّرة)، `/diwan/settings` (أنواع وحالات الفرع؛ مرحلة الحالة تحدد سلوكها)، `/diwan/print/:id` خارج الإطار (A4 بترويسة `PRINT_HEADER` وتوقيع المعتمِد).
+- المكوّنات: `register-dialog` (وضع incoming/draft/edit)، `refer-dialog`، `correspondence-attachments` (معاينة blob، رفع ≤10MB)، `project-correspondence` (تبويب إضبارة المشروع، مصدَّر من `index.ts`). الخدمة `data-access/diwan.service.ts` (`access` محسوبة من الصلاحيات الـ14)، والنماذج `diwan.models.ts` مع `diwan.contract.spec.ts` لمطابقتها للعقد.
+- ربط: خيار «معاملة» في روابط المهام (`/diwan/:id`)، وإشعارات `Correspondence` تفتح المعاملة، وقسم «الديوان» في الشريط الجانبي وصفحة الأدوار.

@@ -2,6 +2,7 @@
   "permissions": [
     "AdjustSparePartStock",
     "ApproveDelayJustification",
+    "ApproveOutgoingCorrespondence",
     "ApproveProjectDocument",
     "ApproveProjectSchedule",
     "ApproveScheduleExtension",
@@ -15,7 +16,9 @@
     "CancelVacation",
     "ChangeMaintenanceStatus",
     "ClassifyScheduleTask",
+    "CloseCorrespondence",
     "CreateBranch",
+    "CreateCorrespondenceLookup",
     "CreateDepartment",
     "CreateDevice",
     "CreateHoliday",
@@ -36,6 +39,7 @@
     "CreateVacationType",
     "CreateWorkTask",
     "DeleteBranch",
+    "DeleteCorrespondenceLookup",
     "DeleteDepartment",
     "DeleteDevice",
     "DeleteHoliday",
@@ -56,6 +60,7 @@
     "DeleteWorkTask",
     "DownloadProjectDocument",
     "EditBranch",
+    "EditCorrespondenceLookup",
     "EditDepartment",
     "EditDevice",
     "EditHoliday",
@@ -76,9 +81,11 @@
     "EditUser",
     "EditVacationType",
     "EditWorkTask",
+    "ExportCorrespondenceReport",
     "ExportInstallationsReport",
     "ExportMaintenanceRequestsReport",
     "ExportMapEntriesReport",
+    "ExportOverdueCorrespondenceReport",
     "ExportProjectsReport",
     "ExportSitesReport",
     "ExportSparePartMovementsReport",
@@ -89,12 +96,15 @@
     "ExportUsersReport",
     "ExportVacationUsageReport",
     "ExportVacationsReport",
+    "HandleCorrespondence",
     "HandleUnitTasks",
     "IssueSparePart",
     "ManageMySignature",
     "PrintVacation",
     "ReceiveSpareParts",
     "RecordScheduleDelay",
+    "ReferCorrespondence",
+    "RegisterCorrespondence",
     "RequestMaintenanceTransfer",
     "RequestScheduleExtension",
     "RevealDevicePasswords",
@@ -102,6 +112,7 @@
     "ToggleUserActive",
     "UpdateScheduleProgress",
     "UploadProjectDocument",
+    "ViewBranchCorrespondence",
     "ViewBranchDashboard",
     "ViewBranchDevices",
     "ViewBranchMap",
@@ -109,6 +120,9 @@
     "ViewBranchProjects",
     "ViewBranchVacations",
     "ViewBranches",
+    "ViewCorrespondence",
+    "ViewCorrespondenceLookups",
+    "ViewDepartmentCorrespondence",
     "ViewDepartmentDashboard",
     "ViewDepartmentMaintenance",
     "ViewDepartmentMapEntries",
@@ -148,6 +162,26 @@
     "ViewWorkTasks"
   ],
   "anyOf": {
+    "AnyCorrespondenceLookupView": [
+      "CreateCorrespondenceLookup",
+      "DeleteCorrespondenceLookup",
+      "EditCorrespondenceLookup",
+      "HandleCorrespondence",
+      "RegisterCorrespondence",
+      "ViewCorrespondenceLookups"
+    ],
+    "AnyCorrespondenceView": [
+      "ApproveOutgoingCorrespondence",
+      "HandleCorrespondence",
+      "RegisterCorrespondence",
+      "ViewBranchCorrespondence",
+      "ViewCorrespondence",
+      "ViewDepartmentCorrespondence"
+    ],
+    "AnyCorrespondenceWrite": [
+      "HandleCorrespondence",
+      "RegisterCorrespondence"
+    ],
     "AnyDepartmentDashboard": [
       "ViewBranchDashboard",
       "ViewDepartmentDashboard"
@@ -202,9 +236,11 @@
       "ViewProjects"
     ],
     "AnyReportExport": [
+      "ExportCorrespondenceReport",
       "ExportInstallationsReport",
       "ExportMaintenanceRequestsReport",
       "ExportMapEntriesReport",
+      "ExportOverdueCorrespondenceReport",
       "ExportProjectsReport",
       "ExportSitesReport",
       "ExportSparePartMovementsReport",

@@ -41,6 +41,12 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'project-schedule', title: 'الجدول الزمني (الإعداد غير الاعتماد، والاعتماد لغير من أعدّ)', names: ['ViewProjectSchedule', 'EditProjectStartOrder', 'EditProjectSchedule', 'ApproveProjectSchedule', 'UpdateScheduleProgress', 'ClassifyScheduleTask'] },
     { key: 'project-delays', title: 'التأخير والتمديد', names: ['RecordScheduleDelay', 'ApproveDelayJustification', 'RequestScheduleExtension', 'ApproveScheduleExtension'] }
   ] },
+  { key: 'diwan', title: 'الديوان', groups: [
+    { key: 'diwan-view', title: 'الاطلاع على المعاملات (معاملاتي = سجّلتها أو أُحيلت إليّ أو مرّت بي، ثم قسمي، ثم فرعي)', names: ['ViewCorrespondence', 'ViewDepartmentCorrespondence', 'ViewBranchCorrespondence'] },
+    { key: 'diwan-work', title: 'تسجيل المعاملات ومعالجتها (الإحالة لا تفتح المعاملة إلا لحاملي المعالجة في الوحدة الحالية)', names: ['RegisterCorrespondence', 'ReferCorrespondence', 'HandleCorrespondence', 'CloseCorrespondence'] },
+    { key: 'diwan-outgoing', title: 'اعتماد الصادر (لغير من أعدّ المسودة)', names: ['ApproveOutgoingCorrespondence'] },
+    { key: 'diwan-lookups', title: 'أنواع المعاملات وحالاتها (إعدادات الفرع)', names: ['ViewCorrespondenceLookups', 'CreateCorrespondenceLookup', 'EditCorrespondenceLookup', 'DeleteCorrespondenceLookup'] }
+  ] },
   { key: 'devices', title: 'توثيق الأجهزة', groups: [
     { key: 'devices', title: 'كتالوج الأجهزة والتركيبات (التركيب ملك قسم من أضافه)', names: ['ViewDevices', 'ViewBranchDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
   ] },
@@ -53,6 +59,7 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
     { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
     { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport'] },
+    { key: 'reports-diwan', title: 'تقارير الديوان', names: ['ExportCorrespondenceReport', 'ExportOverdueCorrespondenceReport'] },
     { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
   ] },
   { key: 'admin', title: 'الإدارة والهيكل', groups: [
