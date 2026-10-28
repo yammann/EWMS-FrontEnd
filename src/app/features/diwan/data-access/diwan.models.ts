@@ -11,6 +11,9 @@ export const STAGES = [
   { value: 4, label: 'مغلقة' }
 ] as const;
 
+/** المرحلة التي يلزم لها صلاحية الإغلاق */
+export const CLOSED_STAGE = 4;
+
 /** مراحل الصادر: مسودة ← معتمد بتوقيع ← صادر برقمه */
 export const OUTGOING_STATES = { draft: 1, approved: 2, issued: 3 } as const;
 
@@ -39,6 +42,8 @@ export interface CorrespondenceItem {
   stage: number | null;
   outgoingState: number | null;
   outgoingStateAr: string | null;
+  /** مسودة صادر رُفعت للاعتماد وبانتظار قرار المعتمِد */
+  isSubmitted: boolean;
   projectId: number | null;
   projectName: string | null;
   currentUnitName: string | null;
@@ -79,6 +84,7 @@ export interface Correspondence extends CorrespondenceItem {
   currentUserId: number | null;
   currentUserName: string | null;
   returnNote: string | null;
+  submittedAt: string | null;
   approvedByName: string | null;
   approvedAt: string | null;
   issuedAt: string | null;

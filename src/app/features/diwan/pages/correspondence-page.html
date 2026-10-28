@@ -31,6 +31,9 @@
     @if (c.returnNote && isDraft()) {
       <p class="notice" role="status"><strong>أعادها المعتمِد:</strong> {{ c.returnNote }}</p>
     }
+    @if (c.isSubmitted) {
+      <p class="notice" role="status">رُفعت للاعتماد {{ c.submittedAt | utc | date:'yyyy/MM/dd — HH:mm' }} — بانتظار قرار المعتمِد. تعديلها أو تغيير مرفقاتها يُلغي الرفع فتُرفع من جديد.</p>
+    }
     @if (c.direction === outgoing && c.outgoingState === states.approved) {
       <p class="notice" role="status">اعتُمدت بتوقيع {{ c.approvedByName }} — بانتظار الإصدار من الديوان.</p>
     }
@@ -135,7 +138,7 @@
         <label class="form-field"><span class="form-label">الحالة</span>
           <select [(ngModel)]="statusChoice" name="status" aria-label="الحالة">
             <option [ngValue]="0">اختر الحالة</option>
-            @for (s of statuses(); track s.id) { <option [ngValue]="s.id">{{ s.name }} — {{ s.stageAr }}</option> }
+            @for (s of statusOptions(); track s.id) { <option [ngValue]="s.id">{{ s.name }} — {{ s.stageAr }}</option> }
           </select></label>
       </div>
       <footer class="modal-actions">

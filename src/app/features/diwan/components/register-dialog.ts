@@ -1,3 +1,4 @@
+import { daysAr } from '@core/utils/arabic-count';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Branch } from '@core/models/ewms.models';
@@ -49,7 +50,7 @@ export interface RegisterPayload {
             <label class="form-field"><span class="form-label">نوع المعاملة</span>
               <select #t [appSelectValue]="form.controls.typeId.value" (change)="form.controls.typeId.setValue(+t.value)">
                 <option value="0">اختر النوع</option>
-                @for (ty of types(); track ty.id) { <option [value]="ty.id">{{ ty.name }}{{ ty.deadlineDays ? ' — مهلة ' + ty.deadlineDays + ' يوماً' : '' }}</option> }
+                @for (ty of types(); track ty.id) { <option [value]="ty.id">{{ ty.name }}{{ ty.deadlineDays ? ' — مهلة ' + daysAr(ty.deadlineDays) : '' }}</option> }
               </select>
               @if (form.controls.typeId.touched && !form.controls.typeId.value) { <small class="form-error">اختر نوع المعاملة</small> }
             </label>
@@ -97,6 +98,7 @@ export interface RegisterPayload {
   `
 })
 export class RegisterDialog implements OnInit {
+  daysAr = daysAr;
   private service = inject(DiwanService);
   private lookups = inject(LookupsService);
 

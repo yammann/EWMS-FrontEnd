@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { daysAr } from '@core/utils/arabic-count';
 import { Branch } from '@core/models/ewms.models';
 import { LookupsService } from '@core/services/lookups.service';
 import { Alert } from '@shared/ui/alert';
@@ -57,7 +58,7 @@ type Editing = { kind: 'type'; id: number | null } | { kind: 'status'; id: numbe
                 @for (t of types(); track t.id) {
                   <tr [class.off]="!t.isActive">
                     <td class="cell-strong">{{ t.name }}</td>
-                    <td>{{ t.deadlineDays ? t.deadlineDays + ' يوماً' : 'بلا مهلة' }}</td>
+                    <td>{{ t.deadlineDays ? daysAr(t.deadlineDays) : 'بلا مهلة' }}</td>
                     <td>{{ t.isActive ? 'فعّال' : 'معطّل' }}</td>
                     <td class="actions">
                       @if (access().canEditLookup) { <button type="button" class="btn btn-ghost btn-sm" (click)="openType(t)">تعديل</button> }
@@ -137,6 +138,7 @@ export class DiwanSettingsPage {
   private toast = inject(ToastService);
 
   access = this.service.access;
+  daysAr = daysAr;
   stages = STAGES;
   branches = signal<Branch[]>([]);
   branchId = signal<number | null>(null);

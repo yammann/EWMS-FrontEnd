@@ -8,7 +8,7 @@ import { CorrespondencePage } from './correspondence-page';
 
 const item = (patch = {}) => ({
   id: 5, number: 'IN-2026-00005', direction: 1, directionAr: 'وارد', branchId: 1, subject: 'أمر دراسة المدرسة', party: 'المركزية', externalNumber: 'م/55',
-  typeId: 1, typeName: 'أمر دراسة', statusId: 2, statusName: 'قيد المعالجة', statusColor: '#34C759', stage: 2, outgoingState: null, outgoingStateAr: null,
+  typeId: 1, typeName: 'أمر دراسة', statusId: 2, statusName: 'قيد المعالجة', statusColor: '#34C759', stage: 2, outgoingState: null, outgoingStateAr: null, isSubmitted: false,
   projectId: null, projectName: null, currentUnitName: 'قسم الدراسات', dueDate: '2026-11-10T00:00:00', isOverdue: true, isClosed: false,
   registeredAt: '2026-11-01T08:00:00Z', registeredByName: 'كاتب', ...patch
 });
@@ -85,5 +85,42 @@ describe('Diwan pages', () => {
     expect(text).not.toContain('تأكيد الاستلام');
     expect(text).not.toContain('إصدار برقم');
     expect(text).toContain('تجاوزت مهلتها');
+  });
+  const detail = (patch = {}) => ({
+    ...item(), summary: 'ملخص', externalDate: null, replyToId: null, replyToNumber: null, currentDepartmentId: 3, currentOfficeId: null, currentUserId: null,
+    currentUserName: null, returnNote: null, submittedAt: null, approvedByName: null, approvedAt: null, issuedAt: null, issuedByName: null, closedAt: null,
+    referrals: [], attachments: [], canEdit: false, canRefer: false, canAcknowledge: false, canChangeStatus: true, canClose: false, canAttach: false,
+    canSubmit: false, canApprove: false, canIssue: false, rowVersion: 'AAAA', ...patch
+  });
+  const statuses = [1, 2, 3, 4].map(stage => ({ id: stage, name: 'حالة ' + stage, stage, stageAr: '', color: '#000000', sortOrder: stage, isActive: true }));
+
+  it('shows the submitted-for-approval notice and hides the submit button', () => {
+    login(['ViewCorrespondence']);
+    const fixture = TestBed.createComponent(CorrespondencePage);
+    fixture.detectChanges();
+    fixture.componentInstance.load(5);
+    http.expectOne('/api/Correspondence/Get/5').flush(detail({
+      direction: 2, directionAr: 'صادر', number: null, outgoingState: 1, outgoingStateAr: 'بانتظار الاعتماد', statusId: null, statusName: null, stage: null,
+      isSubmitted: true, submittedAt: '2026-10-28T10:00:00Z', canSubmit: false, canChangeStatus: false
+    }));
+    fixture.detectChanges();
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('بانتظار الاعتماد');
+    expect(text).toContain('بانتظار قرار المعتمِد');
+    expect(text).not.toContain('رفع للاعتماد');
+  });
+
+  it('offers the closed stage only to someone who may close', () => {
+    login(['ViewCorrespondence']);
+    const fixture = TestBed.createComponent(CorrespondencePage);
+    fixture.detectChanges();
+    const page = fixture.componentInstance;
+    page.statuses.set(statuses as never);
+    page.item.set(detail({ canClose: false }) as never);
+    expect(page.statusOptions().map(s => s.stage)).toEqual([1, 2, 3]);
+    page.item.set(detail({ canClose: true }) as never);
+    expect(page.statusOptions().map(s => s.stage)).toEqual([1, 2, 3, 4]);
+    page.item.set(detail({ isClosed: true, canClose: false }) as never);   // إعادة الفتح
+    expect(page.statusOptions()).toHaveLength(4);
   });
 });

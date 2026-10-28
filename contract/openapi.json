@@ -883,6 +883,9 @@
           "isOverdue": {
             "type": "boolean"
           },
+          "isSubmitted": {
+            "type": "boolean"
+          },
           "number": {
             "nullable": true,
             "type": "string"
@@ -1193,6 +1196,9 @@
           "isOverdue": {
             "type": "boolean"
           },
+          "isSubmitted": {
+            "type": "boolean"
+          },
           "issuedAt": {
             "format": "date-time",
             "nullable": true,
@@ -1276,6 +1282,11 @@
             "type": "string"
           },
           "subject": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "summary": {

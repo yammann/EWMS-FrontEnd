@@ -272,6 +272,7 @@ export interface CorrespondenceListItemDto {
   id: number;
   isClosed: boolean;
   isOverdue: boolean;
+  isSubmitted: boolean;
   number: string | null;
   outgoingState: number | null;
   outgoingStateAr: string | null;
@@ -357,6 +358,7 @@ export interface CorrespondenceResponseDto {
   id: number;
   isClosed: boolean;
   isOverdue: boolean;
+  isSubmitted: boolean;
   issuedAt: string | null;
   issuedByName: string | null;
   number: string | null;
@@ -377,6 +379,7 @@ export interface CorrespondenceResponseDto {
   statusId: number | null;
   statusName: string | null;
   subject: string;
+  submittedAt: string | null;
   summary: string;
   typeId: number;
   typeName: string;

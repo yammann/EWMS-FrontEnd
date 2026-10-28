@@ -14,7 +14,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
 import { CorrespondenceAttachments } from '../components/correspondence-attachments';
 import { ReferDialog } from '../components/refer-dialog';
 import { RegisterDialog, RegisterMode, RegisterPayload } from '../components/register-dialog';
-import { Correspondence, CorrespondenceStatus, HistoryEntry, INCOMING, OUTGOING, OUTGOING_STATES, ReferInput } from '../data-access/diwan.models';
+import { CLOSED_STAGE, Correspondence, CorrespondenceStatus, HistoryEntry, INCOMING, OUTGOING, OUTGOING_STATES, ReferInput } from '../data-access/diwan.models';
 import { DiwanService } from '../data-access/diwan.service';
 
 type Tab = 'overview' | 'attachments' | 'tasks' | 'history';
@@ -65,6 +65,11 @@ export class CorrespondencePage {
   saving = signal(false);
   formError = signal('');
   statusChoice = 0;
+  /** الحالات المتاحة للمستخدم: مرحلة «مغلقة» لمن يملك صلاحية الإغلاق فقط (الخادم يفرضها أيضاً) */
+  statusOptions = computed(() => {
+    const c = this.item();
+    return this.statuses().filter(s => s.stage !== CLOSED_STAGE || !c || c.canClose || c.isClosed);
+  });
   note = '';
 
   constructor() {
