@@ -14,7 +14,7 @@ import { DiwanService } from '../data-access/diwan.service';
 @Component({
   selector: 'app-project-correspondence', standalone: true, imports: [DatePipe, RouterLink, UtcPipe, EmptyState],
   styleUrls: ['../../../shared/styles/data-tools.scss'],
-  styles: [`td small { display: block; color: var(--ink-500); font-size: 12px; } .late { color: var(--danger, #c0392b); font-weight: 700; }`],
+  styles: [`:host { display: block; min-width: 0; } td small { display: block; color: var(--ink-500); font-size: 12px; } .late { color: var(--danger, #c0392b); font-weight: 700; }`],
   template: `
     <section class="panel">
       <div class="panel-heading"><h2>المعاملات <span class="count">({{ total() }})</span></h2></div>
