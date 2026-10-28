@@ -108,6 +108,12 @@ crud = new CrudPage<Item, Body>({
   - `crud.spec.ts`: إضافة/تعديل/حذف وأخطاء الخادم لكل صفحات الإدارة (أنواع الإجازات، العطل، مهام العمل، الكتالوج، المواقع، إعدادات الصيانة، الهيكل، المستخدمون، الأدوار، أجهزة الصيانة، قطع الغيار). كل سجل باسم «e2e …»، و`cleanup.teardown.ts` يحذف ما تبقّى بعد كل تشغيل.
   - `visual-parity.spec.ts`: تطابق الشكل مع لقطات مرجعية (راجع تعليق الملف لتوليد المرجع من الكود الأصلي).
 - الاختبارات التي تحتاج الباكاند الحي تُشغَّل يدوياً؛ الباقي بلا خادم.
+- **عقد الباكاند (2026-10-28):** مستودع الباكاند يملك لقطتين ذهبيتين في `contract/` (`permissions.json` كتالوج الصلاحيات، `openapi.json` وثيقة OpenAPI الكاملة) ويفشل بناؤه إن تغيّر الـ API دون تحديثهما. هنا نسخة منهما في `contract/` (`npm run contract:sync` ينسخ من المستودع المجاور، `EWMS_BACKEND` لتغيير مساره؛ `npm run contract:check` يقارن النسختين محلياً ويتخطّى حين لا يوجد الباكاند كما في CI).
+  - `npm run api:types` يولّد `src/app/core/api/api-types.ts` (واجهات DTO بلا `| null` للحقل الذي يُرسَل دائماً)؛ `api:types:check` بوابة CI. الملف مولَّد: لا يُعدَّل يدوياً.
+  - `npm run api:routes` (بوابة CI) يطابق كل نداء ثابت `api.get/post/put/delete(...)` مع نقاط العقد ومع الفعل نفسه، فمسار أُعيدت تسميته أو فعل خاطئ يفشل قبل أن يصير 404.
+  - اختبارات تطابق وقت الترجمة: `*.contract.spec.ts` بجوار نماذج كل ميزة تستعمل `Conforms<UiModel, Dto>` من `@core/api/contract-check` — حقل في نموذج الواجهة ليس في الـ DTO أو بنوع مخالف يفشل الترجمة بذكر اسم الحقل. نموذج جديد = سطر `conforms<Conforms<…>>()` في ملف الميزة.
+  - `permissions.contract.spec.ts` يطابق `AppPermission` في `access.ts` مع كتالوج الباكاند في الاتجاهين.
+  - **سير تغيير الـ API:** عدّل الباكاند ← حدّث لقطاته (`UPDATE_API_CONTRACT=1 dotnet test`) ← هنا `npm run contract:sync && npm run api:types` ← أصلح ما فشل (نماذج/نداءات/`access.ts`) ← commit في المستودعين.
 
 ## أدوات الترحيل (scripts/)
 سكربتات node استُعملت في إعادة الهيكلة وتبقى مرجعاً (`phase*-*.mjs`): نقل الملفات وإعادة كتابة الاستيرادات وتوليد `index.ts` (`phase3-restructure.mjs`)، وتوحيد الأنماط المكرَّرة (alert/empty-state/page-header/form-actions/trackRequest/…). تحذير: heredoc الـ bash يلتهم الشرطات المائلة العكسية — اكتب السكربتات المعتمدة على regex بأداة الكتابة لا بـ `cat <<EOF`.

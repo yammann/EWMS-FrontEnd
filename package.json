@@ -14,7 +14,12 @@
     "metrics:duplicates": "jscpd src/app --format typescript,scss,markup --min-lines 10 --min-tokens 70 --reporters console --silent",
     "check:cycles": "node scripts/check-cycles.mjs",
     "fonts:woff2": "node scripts/fonts-woff2.mjs",
-    "icons": "node scripts/build-icons.mjs"
+    "icons": "node scripts/build-icons.mjs",
+    "contract:sync": "node scripts/contract-sync.mjs",
+    "contract:check": "node scripts/contract-sync.mjs --check",
+    "api:types": "node scripts/api-types.mjs",
+    "api:types:check": "node scripts/api-types.mjs --check",
+    "api:routes": "node scripts/check-api-routes.mjs"
   },
   "private": true,
   "packageManager": "npm@11.19.0",

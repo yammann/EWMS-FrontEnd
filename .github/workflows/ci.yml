@@ -35,6 +35,14 @@ jobs:
       - name: لا دورات اعتماد بين الملفات
         run: npm run check:cycles
 
+      # عقد الباكاند (contract/) نسخة من لقطات مستودع الباكاند: الأنواع المولَّدة محدّثة، وكل نداء ثابت للـ API له نقطة وفعل في العقد.
+      # مطابقة النسخة لمستودع الباكاند نفسه (npm run contract:check) تعمل محلياً حيث المستودعان متجاوران.
+      - name: أنواع الـ API محدّثة من العقد
+        run: npm run api:types:check
+
+      - name: كل نداءات الـ API لها نقطة في العقد
+        run: npm run api:routes
+
       - name: اختبارات الوحدة
         run: npx ng test --watch=false
 
