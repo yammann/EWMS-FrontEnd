@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ProjectCorrespondence } from '@features/diwan';
+import { ProjectStudies } from '@features/studies';
 import { LinkedTasks } from '@features/task-board';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -11,7 +12,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { AuthService } from '@core/services/auth.service';
-import { DIWAN_ACCESS } from '@core/constants/access';
+import { DIWAN_ACCESS, STUDY_ACCESS } from '@core/constants/access';
 import { ProjectAuditPanel } from '../components/project-audit-panel';
 import { ProjectDocumentsPanel } from '../components/project-documents-panel';
 import { ProjectFormDialog } from '../components/project-form-dialog';
@@ -20,7 +21,7 @@ import { ProjectSchedulePanel } from '../components/project-schedule-panel';
 import { Project, ProjectInput } from '../data-access/projects.models';
 import { ProjectsService } from '../data-access/projects.service';
 
-type Tab = 'overview' | 'documents' | 'schedule' | 'correspondence' | 'tasks' | 'members' | 'audit';
+type Tab = 'overview' | 'documents' | 'schedule' | 'studies' | 'correspondence' | 'tasks' | 'members' | 'audit';
 
 /**
  * صفحة المشروع (إضبارته): نظرة عامة، الوثائق بإصداراتها، المهام المرتبطة، المشاركون، وسجل التدقيق.
@@ -28,7 +29,7 @@ type Tab = 'overview' | 'documents' | 'schedule' | 'correspondence' | 'tasks' | 
  */
 @Component({
   selector: 'app-project-page', standalone: true,
-  imports: [DatePipe, Alert, EmptyState, UtcPipe, LinkedTasks, ProjectCorrespondence, ProjectAuditPanel, ProjectDocumentsPanel, ProjectFormDialog, ProjectMembersPanel, ProjectSchedulePanel],
+  imports: [DatePipe, Alert, EmptyState, UtcPipe, LinkedTasks, ProjectCorrespondence, ProjectStudies, ProjectAuditPanel, ProjectDocumentsPanel, ProjectFormDialog, ProjectMembersPanel, ProjectSchedulePanel],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './project-page.scss'],
   templateUrl: './project-page.html'
 })
@@ -53,6 +54,7 @@ export class ProjectPage {
     { key: 'overview', label: 'نظرة عامة' },
     ...(this.access().canViewDocuments ? [{ key: 'documents' as const, label: 'الوثائق' }] : []),
     ...(this.access().canViewSchedule ? [{ key: 'schedule' as const, label: 'الجدول الزمني' }] : []),
+    ...(this.auth.hasAnyPermission(STUDY_ACCESS) ? [{ key: 'studies' as const, label: 'الدراسة' }] : []),
     ...(this.auth.hasAnyPermission(DIWAN_ACCESS) ? [{ key: 'correspondence' as const, label: 'المعاملات' }] : []),
     { key: 'tasks', label: 'المهام' },
     { key: 'members', label: 'المشاركون' },

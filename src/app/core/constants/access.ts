@@ -190,6 +190,21 @@ export const SCHEDULE_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ApproveDelayJustification, AppPermission.RequestScheduleExtension, AppPermission.ApproveScheduleExtension
 ];
 
+/** الدراسات: من يعمل على أمر دراسة (يعدّ أو يراجع أو يسند أو يرسل) يدخل القائمة — نفس سياسة AnyStudyView في الباكاند */
+export const STUDY_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewStudies, AppPermission.CreateStudyOrder, AppPermission.EditStudyOrder,
+  AppPermission.PrepareStudyDeliverable, AppPermission.ReviewStudyDeliverable, AppPermission.RecordStudySubmission
+];
+/** قائمة أنواع المخرجات للإسناد والفلاتر — نفس سياسة AnyDeliverableTypeView */
+export const DELIVERABLE_TYPE_VIEW: readonly AppPermissionName[] = [
+  AppPermission.ViewDeliverableTypes, AppPermission.CreateDeliverableType, AppPermission.EditDeliverableType, AppPermission.DeleteDeliverableType,
+  AppPermission.CreateStudyOrder, AppPermission.EditStudyOrder, AppPermission.ViewStudies
+];
+/** صفحة أنواع المخرجات: لمن يديرها (العرض وحده يُمنح لكل من يسند) */
+export const MANAGE_DELIVERABLE_TYPES: readonly AppPermissionName[] = [
+  AppPermission.CreateDeliverableType, AppPermission.EditDeliverableType, AppPermission.DeleteDeliverableType
+];
+
 /** الديوان: من يسجّل أو يعالج أو يعتمد يدخل القائمة (يرى ما يخصه) — نفس سياسة AnyCorrespondenceView في الباكاند */
 export const DIWAN_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewCorrespondence, AppPermission.ViewDepartmentCorrespondence, AppPermission.ViewBranchCorrespondence,

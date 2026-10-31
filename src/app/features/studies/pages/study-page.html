@@ -1,0 +1,220 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      @if (study(); as s) {
+        <span class="eyebrow">الدراسات · <a [routerLink]="['/projects', s.projectId]">{{ s.projectName }}</a></span>
+      } @else { <span class="eyebrow">الدراسات</span> }
+      <h1>{{ study()?.title || (loading() ? 'جارٍ التحميل…' : 'أمر الدراسة') }}</h1>
+      @if (study(); as s) {
+        <p class="muted"><span dir="ltr">{{ s.number }}</span> · <span [class]="statusClass(s)">{{ s.statusAr }}</span> · {{ s.modeAr }}
+          · المعتمد {{ s.deliverablesApproved }} من {{ s.deliverablesTotal }}
+          @if (s.isOverdue) { · <strong class="late">فيه مخرج تجاوز موعده</strong> }
+          @if (s.correspondenceNumber) { · معاملة: <a [routerLink]="['/diwan', s.correspondenceId]" dir="ltr">{{ s.correspondenceNumber }}</a> }</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (study(); as s) {
+        @if (s.canSend) { <button class="btn" type="button" (click)="open({ kind: 'send' })">إرسال إلى المركزية</button> }
+        @if (s.canDecide && pendingRound(); as r) { <button class="btn" type="button" (click)="open({ kind: 'decide', s: r })">تسجيل قرار المركزية</button> }
+        @if (s.canReopen) { <button class="btn" type="button" (click)="reopen()" [disabled]="saving()">فتح جولة جديدة</button> }
+        @if (s.canAddDeliverable) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'add' })">+ مخرج</button> }
+        @if (s.canEdit) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'edit' })">تعديل</button> }
+        @if (s.canCancel) { <button class="btn btn-ghost" type="button" (click)="cancelStudy()" [disabled]="saving()">إلغاء الأمر</button> }
+      }
+      <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (study(); as s) {
+    @if (s.status === st.returned && lastRound(); as r) {
+      <p class="notice warn" role="status"><strong>أعادتها المركزية بملاحظات (الجولة {{ r.round }}):</strong> {{ r.decisionNote || '—' }}
+        @if (s.canReopen) { — افتح جولة جديدة ثم أعد ما يلزم من المخرجات. }</p>
+    } @else if (s.status === st.sent && pendingRound(); as r) {
+      <p class="notice" role="status">أُرسلت إلى المركزية (الجولة {{ r.round }}) وبانتظار قرارها{{ s.canDecide ? ' — سجّله بعد ورود الرد.' : '.' }}</p>
+    } @else if (s.status === st.approved) {
+      <p class="notice" role="status">اعتمدتها المركزية: الأمر للقراءة.</p>
+    } @else if (s.status === st.cancelled) {
+      <p class="notice" role="status">أمر ملغى: للقراءة.</p>
+    }
+
+    <nav class="tabs" role="tablist" aria-label="أقسام الأمر">
+      @for (t of tabs; track t.key) {
+        <button type="button" role="tab" class="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="select(t.key)">
+          {{ t.label }}{{ t.key === 'deliverables' ? ' (' + s.deliverablesTotal + ')' : t.key === 'submissions' ? ' (' + s.submissions.length + ')' : '' }}</button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('deliverables') {
+        @if (!s.deliverables.length) {
+          <app-empty-state>لا مخرجات بعد{{ s.canAddDeliverable ? ' — أضف مخرجات المكاتب الفنية (معماري، إنشائي، كهربائي…) بزر «+ مخرج»' : '' }}</app-empty-state>
+        }
+        <div class="deliverables">
+          @for (d of s.deliverables; track d.id) {
+            <article class="deliverable" [class.late]="d.isOverdue">
+              <header>
+                <h3>{{ d.typeName }}</h3>
+                <span [class]="stateClass(d)">{{ d.stateAr }}</span>
+              </header>
+              <p class="meta">
+                <span>المسؤول: <strong>{{ d.assigneeName || 'غير مسند' }}</strong></span>
+                @if (d.dueDate) { <span [class.late]="d.isOverdue">الموعد: {{ d.dueDate | utc | date:'yyyy/MM/dd' }}{{ d.isOverdue ? ' — متأخر' : '' }}</span> }
+              </p>
+              @if (d.blockedByName) { <p class="blocked"><app-icon name="clock" [size]="14" /> ينتظر اعتماد «{{ d.blockedByName }}» (الأمر بالتسلسل)</p> }
+              @if (d.note) { <p class="note-text">{{ d.note }}</p> }
+
+              <p class="versions">
+                @if (d.documentId) {
+                  الملف: الإصدار <strong>{{ d.latestVersionNumber }}</strong>
+                  @if (d.submittedVersionNumber) { · المرفوع للمراجعة <strong>{{ d.submittedVersionNumber }}</strong> }
+                  @if (d.approvedVersionNumber) { · المعتمد <strong>{{ d.approvedVersionNumber }}</strong> }
+                  · <a [routerLink]="['/projects', s.projectId]" [queryParams]="{ tab: 'documents' }">الوثائق</a>
+                } @else { <span class="muted">لم يُرفع ملف بعد</span> }
+              </p>
+              @if (d.state === ds.returned && d.returnNote) { <p class="return-note"><strong>أُعيد بسبب:</strong> {{ d.returnNote }}</p> }
+              @if (d.submittedByName && d.state === ds.inReview) { <small class="muted">رفعه {{ d.submittedByName }} {{ d.submittedAt | utc | date:'yyyy/MM/dd HH:mm' }}</small> }
+              @if (d.reviewedByName && d.state === ds.approved) { <small class="muted">اعتمده {{ d.reviewedByName }} {{ d.reviewedAt | utc | date:'yyyy/MM/dd HH:mm' }}</small> }
+
+              @for (p of uploadsFor(d.id); track p.job.id) {
+                <div class="uploading" role="status">
+                  <span>يُرفع «{{ p.job.file.name }}» — {{ percent(p.job) }}%</span>
+                  <span class="bar"><span [style.width.%]="percent(p.job)"></span></span>
+                </div>
+              }
+
+              <footer class="actions">
+                @if (d.canPrepare) { <button type="button" class="btn btn-sm" (click)="open({ kind: 'upload', d })">{{ d.documentId ? 'رفع إصدار جديد' : 'رفع الملف' }}</button> }
+                @if (d.canSubmit) { <button type="button" class="btn btn-sm" (click)="submitForReview(d)" [disabled]="saving()">رفع للمراجعة</button> }
+                @if (d.canReview) { <button type="button" class="btn btn-sm" (click)="open({ kind: 'review', d })">اعتماد / إعادة</button> }
+                @if (d.canSendBack) { <button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'sendBack', d })">إعادة لجولة جديدة</button> }
+                @if (d.canEdit && d.state !== ds.approved && d.state !== ds.inReview) { <button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'editDeliverable', d })">تعديل</button> }
+                @if (d.canRemove) { <button type="button" class="btn btn-ghost btn-sm" (click)="removeDeliverable(d)" [disabled]="saving()">حذف</button> }
+              </footer>
+            </article>
+          }
+        </div>
+      }
+      @case ('submissions') {
+        <section class="panel">
+          <div class="panel-heading"><h2>جولات الإرسال إلى المركزية <span class="count">({{ s.submissions.length }})</span></h2></div>
+          @if (!s.submissions.length) { <p class="muted">لم تُرسل الدراسة بعد: تُرسل بعد اعتماد كل مخرجاتها.</p> }
+          <ol class="timeline">
+            @for (r of s.submissions; track r.id) {
+              <li>
+                <div class="when">الجولة {{ r.round }}<br>{{ r.sentAt | utc | date:'yyyy/MM/dd HH:mm' }}</div>
+                <div class="what">
+                  <strong>أرسلها {{ r.sentByName }}</strong>
+                  @if (r.outgoingCorrespondenceNumber) { · الكتاب <a [routerLink]="['/diwan', r.outgoingCorrespondenceId]" dir="ltr">{{ r.outgoingCorrespondenceNumber }}</a> }
+                  @if (r.note) { <p class="pre">{{ r.note }}</p> }
+                  <p><span class="pill" [class.ok]="r.decision === center.approved" [class.warn]="r.decision === center.notes">{{ r.decisionAr }}</span>
+                    @if (r.decidedByName) { <small>سجّله {{ r.decidedByName }} {{ r.decidedAt | utc | date:'yyyy/MM/dd HH:mm' }}</small> }</p>
+                  @if (r.decisionNote) { <p class="pre"><strong>ملاحظات المركزية:</strong> {{ r.decisionNote }}</p> }
+                  @if (s.canDecide && r.decision === center.pending) { <button type="button" class="btn btn-sm" (click)="open({ kind: 'decide', s: r })">تسجيل القرار</button> }
+                </div>
+              </li>
+            }
+          </ol>
+        </section>
+      }
+      @case ('tasks') {
+        <app-linked-tasks entityType="Study" [entityId]="s.id" />
+        <section class="panel"><p class="muted">تظهر هنا مهام لوحة المهام المرتبطة بهذا الأمر. اربط مهمة به من «الروابط» في نافذة المهمة بكتابة رقمه <span dir="ltr">{{ s.number }}</span>.</p></section>
+      }
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (dialog(); as d) {
+  @switch (d.kind) {
+    @case ('edit') { <app-study-form-dialog [projectId]="study()!.projectId" [study]="study()" [busy]="saving()" [error]="formError()" (submitted)="saveStudy($event)" (closed)="dialog.set(null)" /> }
+    @case ('add') { <app-deliverable-dialog [study]="study()!" [types]="types()" [members]="members()" [busy]="saving()" [error]="formError()" (submitted)="saveDeliverable($event)" (closed)="dialog.set(null)" /> }
+    @case ('editDeliverable') { <app-deliverable-dialog [study]="study()!" [deliverable]="d.d" [types]="types()" [members]="members()" [busy]="saving()" [error]="formError()" (submitted)="saveDeliverable($event)" (closed)="dialog.set(null)" /> }
+
+    @case ('upload') {
+      <app-modal [heading]="d.d.documentId ? 'إصدار جديد من الملف' : 'رفع ملف المخرج'" [subheading]="d.d.typeName" size="md" (closed)="dialog.set(null)">
+        <form (ngSubmit)="startUpload()">
+          <div class="modal-body form-stack">
+            <label class="form-field"><span class="form-label">الملف</span>
+              <input type="file" (change)="choose($any($event.target).files)" aria-label="اختر الملف"></label>
+            @if (file(); as f) { <small class="hint">{{ f.name }} — <bdi dir="ltr">{{ size(f.size) }}</bdi></small> }
+            <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span>
+              <textarea name="note" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></label>
+            <small class="hint">يُرفع الملف بأجزاء في الخلفية (يمكنك متابعة العمل) ثم يُربط بالمخرج. بعد اكتماله ارفع المخرج للمراجعة.</small>
+          </div>
+          <footer class="modal-actions">
+            <button type="button" class="ghost" (click)="dialog.set(null)">إلغاء</button>
+            <button type="submit" [disabled]="!file()">بدء الرفع</button>
+          </footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('review') {
+      <app-modal heading="مراجعة المخرج" [subheading]="d.d.typeName + ' — الإصدار ' + (d.d.submittedVersionNumber ?? '')" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">الاعتماد يثبّت الإصدار المرفوع معتمداً في الأمر وفي إضبارة المشروع ولا يُستبدل. لا تراجع مخرجاً أعددته أو رفعت ملفه.</p>
+          <label class="form-field"><span class="form-label">سبب الإعادة <small class="hint">(مطلوب عند الإعادة فقط)</small></span>
+            <textarea name="note" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions">
+          <button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button>
+          <button type="button" class="ghost" (click)="review(false)" [disabled]="saving()">إعادة للمُعِدّ</button>
+          <button type="button" (click)="review(true)" [disabled]="saving()">اعتماد</button>
+        </footer>
+      </app-modal>
+    }
+
+    @case ('sendBack') {
+      <app-modal heading="إعادة مخرج معتمد لجولة جديدة" [subheading]="d.d.typeName" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">يعود المخرج إلى الإعداد؛ الإصدار المعتمد السابق يبقى في الإضبارة.</p>
+          <label class="form-field"><span class="form-label">السبب</span>
+            <textarea name="note" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions">
+          <button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button>
+          <button type="button" (click)="sendBack()" [disabled]="saving()">إعادة المخرج</button>
+        </footer>
+      </app-modal>
+    }
+
+    @case ('send') {
+      <app-modal heading="إرسال الدراسة إلى المركزية" [subheading]="study()!.number + ' — ' + study()!.title" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">يُسجَّل الإرسال يدوياً (لا ربط إلكتروني مع المركزية)؛ بعد ورود ردّها سجّل قرارها.</p>
+          <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري — مثل رقم الكتاب أو طريقة التسليم)</small></span>
+            <textarea name="note" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions">
+          <button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button>
+          <button type="button" (click)="send()" [disabled]="saving()">تسجيل الإرسال</button>
+        </footer>
+      </app-modal>
+    }
+
+    @case ('decide') {
+      <app-modal heading="قرار المركزية" [subheading]="'الجولة ' + d.s.round" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <div class="choices" role="radiogroup">
+            <label class="choice" [class.on]="decision === center.approved"><input type="radio" name="decision" [value]="center.approved" [(ngModel)]="decision"><strong>اعتمدتها المركزية</strong></label>
+            <label class="choice" [class.on]="decision === center.notes"><input type="radio" name="decision" [value]="center.notes" [(ngModel)]="decision"><strong>أعادتها بملاحظات</strong></label>
+          </div>
+          <label class="form-field"><span class="form-label">{{ decision === center.notes ? 'ملاحظات المركزية' : 'ملاحظة' }} <small class="hint">{{ decision === center.notes ? '(مطلوبة)' : '(اختياري)' }}</small></span>
+            <textarea name="note" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions">
+          <button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button>
+          <button type="button" (click)="decide()" [disabled]="saving()">تسجيل القرار</button>
+        </footer>
+      </app-modal>
+    }
+  }
+}

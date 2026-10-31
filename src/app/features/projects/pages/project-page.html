@@ -52,6 +52,9 @@
       @case ('schedule') {
         <app-project-schedule-panel [project]="p" [open]="isOpen()" (changed)="scheduleChanged()" />
       }
+      @case ('studies') {
+        <app-project-studies [projectId]="p.id" [finished]="p.isFinished" />
+      }
       @case ('correspondence') {
         <app-project-correspondence [projectId]="p.id" />
       }

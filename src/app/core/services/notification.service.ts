@@ -167,6 +167,7 @@ export function notificationRoute(n: AppNotification, canReview: boolean): strin
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'Project' && n.relatedEntityId) return n.type.startsWith('Schedule') ? `/projects/${n.relatedEntityId}?tab=schedule` : `/projects/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'Correspondence' && n.relatedEntityId) return `/diwan/${n.relatedEntityId}`;
+  if (n.relatedEntityType === 'StudyOrder' && n.relatedEntityId) return `/studies/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
   if (n.relatedEntityType === 'ToDoList' && n.relatedEntityId) return `/todo-lists/${n.relatedEntityId}`;

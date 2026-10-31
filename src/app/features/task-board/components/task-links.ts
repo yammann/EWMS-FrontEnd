@@ -16,6 +16,7 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
     case 'Site': return `/devices/sites/${id}`;
     case 'Project': return `/projects/${id}`;
     case 'Correspondence': return `/diwan/${id}`;
+    case 'Study': return `/studies/${id}`;
     default: return canPrintVacation ? `/vacations/print/${id}` : null;
   }
 }
@@ -65,6 +66,7 @@ export class TaskLinks implements OnInit {
       case 'Vacation': return 'رقم الإجازة: VAC-2026-00005';
       case 'Project': return 'رقم المشروع: PRJ-2026-00012';
       case 'Correspondence': return 'رقم المعاملة: IN-2026-00012';
+      case 'Study': return 'رقم الدراسة: STD-2026-00012';
       default: return 'رقم الطلب: MR-2026-00012';
     }
   }
