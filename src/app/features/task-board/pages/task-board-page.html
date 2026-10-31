@@ -146,7 +146,7 @@
 
 @if (form(); as f) {
   @defer {
-    <app-task-form-dialog [mode]="f.mode" [task]="f.task" [targetTypes]="targetTypes()"
+    <app-task-form-dialog [mode]="f.mode" [task]="f.task"
                           (saved)="formSaved($event)" (uploadFailed)="uploadFailed($event)" (closed)="form.set(null)" />
   }
 }

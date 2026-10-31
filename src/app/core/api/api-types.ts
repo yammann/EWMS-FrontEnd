@@ -2275,6 +2275,7 @@ export interface TaskTargetOptionDto {
   detail: string;
   headNames: string;
   id: number;
+  kind: string;
   name: string;
 }
 

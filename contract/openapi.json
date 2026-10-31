@@ -7643,6 +7643,9 @@
             "format": "int32",
             "type": "integer"
           },
+          "kind": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           }

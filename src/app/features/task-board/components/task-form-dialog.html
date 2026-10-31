@@ -21,27 +21,22 @@
         </label>
 
         @if (mode() !== 'edit') {
-          @if (kindOptions().length > 1) {
-            <fieldset class="form-field">
-              <legend class="form-label">نوع الجهة</legend>
-              <div class="segmented types" role="radiogroup">
-                @for (type of kindOptions(); track type.value) {
-                  <button type="button" class="seg" role="radio" [attr.aria-checked]="kind() === type.value"
-                          [class.on]="kind() === type.value" (click)="chooseKind(type.value)">{{ type.label }}</button>
-                }
-              </div>
-            </fieldset>
-          }
           <label class="form-field">
-            <span class="form-label">إسناد إلى {{ targetLabel() }}</span>
+            <span class="form-label">{{ mode() === 'delegate' ? 'تفويض إلى' : 'إسناد إلى' }}</span>
+            @if (showFilter()) {
+              <input type="search" [ngModel]="filter()" (ngModelChange)="filter.set($event)" [ngModelOptions]="{ standalone: true }"
+                     placeholder="ابحث بالاسم…" aria-label="بحث في الجهات">
+            }
             <select formControlName="targetId">
-              <option [ngValue]="0">{{ targetsLoading() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel() }}</option>
-              @for (t of targets(); track t.id) {
-                <option [ngValue]="t.id">{{ t.name }}@if (targetLabel() !== 'موظف') { — {{ t.headNames || 'لا أحد يتولاها حالياً' }} } @else if (t.detail) { — {{ t.detail }} }</option>
+              <option value="">{{ targetsLoading() ? 'جارٍ التحميل…' : 'اختر الجهة' }}</option>
+              @for (g of groups(); track g.kind) {
+                <optgroup [label]="g.label">
+                  @for (t of g.items; track key(t)) { <option [value]="key(t)">{{ optionText(t) }}</option> }
+                </optgroup>
               }
             </select>
             @if (!targetsLoading() && !targets().length) { <small class="form-hint">لا توجد جهات متاحة للإسناد ضمن صلاحياتك.</small> }
-            @else if (selectedTarget() && targetLabel() !== 'موظف' && !selectedTarget()!.headNames) {
+            @else if (selectedTarget() && selectedTarget()!.kind !== 'User' && !selectedTarget()!.headNames) {
               <small class="form-hint warn">لا يوجد من يملك صلاحية تولّي مهام هذه الجهة حالياً — ستبقى المهمة بانتظاره.</small>
             }
           </label>

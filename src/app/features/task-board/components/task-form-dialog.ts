@@ -6,7 +6,7 @@ import { ToastService } from '@shared/ui/toast.service';
 import { Modal } from '@shared/ui/modal';
 import { AssignedTaskService } from '../data-access/assigned-task.service';
 import {
-  AssignedTaskDetail, TaskPriority, TaskTargetKind, TaskTargetOption, TaskTargetType, TaskTemplate, TASK_ATTACHMENTS, TASK_PRIORITY_LABEL,
+  AssignedTaskDetail, TaskPriority, TaskTargetKind, TaskTargetOption, TaskTemplate, TASK_ATTACHMENTS, TASK_PRIORITY_LABEL,
   TASK_PRIORITY_VALUE, attachmentProblem
 } from '../data-access/assigned-task.models';
 import { fileSize } from '@core/utils/file-size';
@@ -17,7 +17,10 @@ import { Icon } from '@shared/ui/icon';
 
 export type TaskFormMode = 'create' | 'edit' | 'delegate';
 
-const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };
+/** عناوين مجموعات القائمة بالترتيب: أقسام ثم مكاتب ثم موظفون */
+const GROUPS: { kind: TaskTargetKind; label: string }[] = [
+  { kind: 'Department', label: 'الأقسام' }, { kind: 'Office', label: 'المكاتب' }, { kind: 'User', label: 'الموظفون' }
+];
 
 /** نافذة إنشاء مهمة / تعديلها / تفويض جزء من مهمة واردة لجهة أدنى */
 @Component({
@@ -34,8 +37,6 @@ export class TaskFormDialog implements OnInit {
   mode = input.required<TaskFormMode>();
   /** للتعديل: المهمة نفسها — للتفويض: المهمة الأصل */
   task = input<AssignedTaskDetail | null>(null);
-  /** أنواع الإسناد المتاحة لي (من اللوحة) — يظهر اختيار النوع إن كانت أكثر من واحد */
-  targetTypes = input<TaskTargetType[]>([]);
   saved = output<AssignedTaskDetail>();
   /** حُفظت المهمة لكن فشل رفع المرفقات (تبقى المهمة، وتُضاف الملفات من تفاصيلها) */
   uploadFailed = output<string>();
@@ -70,19 +71,33 @@ export class TaskFormDialog implements OnInit {
     description: ['', Validators.maxLength(4000)],
     priority: ['Normal' as TaskPriority],
     dueDate: [''],
-    targetId: [0]
+    /** مفتاح الجهة المختارة «النوع:المعرّف» (تتشابه المعرّفات بين الأقسام والمكاتب والموظفين) */
+    targetId: ['']
   });
 
   targets = signal<TaskTargetOption[]>([]);
   targetsLoading = signal(false);
-  /** نوع الجهة المختار (الإنشاء) أو المشتق من المهمة الأصل (التفويض: قسم ← مكتب، مكتب ← موظف) */
-  kind = signal<TaskTargetKind | null>(null);
-  targetLabel = computed(() => TARGET_LABEL[this.kind() ?? 'User']);
-  /** أنواع الجهة للاختيار: أنواع الإسناد (الإنشاء) أو أنواع التفويض (للمهمة الأصل: مكتب و/أو موظف) */
-  kindOptions = computed<TaskTargetType[]>(() => this.mode() === 'delegate' ? this.task()?.delegationTypes ?? [] : this.mode() === 'create' ? this.targetTypes() : []);
+  /** بحث بالاسم داخل القائمة حين تطول (الجهة المختارة تبقى ظاهرة دائماً) */
+  filter = signal('');
+  showFilter = computed(() => this.targets().length > 8);
+  key = (t: TaskTargetOption) => `${t.kind}:${t.id}`;
 
-  private targetId = signal(0);
-  selectedTarget = computed(() => this.targets().find(t => t.id === this.targetId()) ?? null);
+  private targetKey = signal('');
+  selectedTarget = computed(() => this.targets().find(t => this.key(t) === this.targetKey()) ?? null);
+
+  /** الجهات مجمّعة (أقسام ← مكاتب ← موظفون) بعد البحث؛ لا اختيار «نوع»: النوع يأتي من العنصر نفسه */
+  groups = computed(() => {
+    const q = this.filter().trim().toLowerCase(), chosen = this.targetKey();
+    return GROUPS.map(g => ({
+      ...g,
+      items: this.targets().filter(t => t.kind === g.kind
+        && (!q || this.key(t) === chosen || `${t.name} ${t.detail ?? ''} ${t.headNames}`.toLowerCase().includes(q)))
+    })).filter(g => g.items.length > 0);
+  });
+
+  optionText(t: TaskTargetOption) {
+    return t.kind === 'User' ? t.name + (t.detail ? ` — ${t.detail}` : '') : `${t.name} — ${t.headNames || 'لا أحد يتولاها حالياً'}`;
+  }
 
   heading = computed(() => ({ create: 'مهمة جديدة', edit: 'تعديل المهمة', delegate: 'تفويض مهمة فرعية' })[this.mode()]);
   subheading = computed(() => this.mode() === 'delegate' && this.task() ? `من المهمة: «${this.task()!.title}»` : '');
@@ -94,15 +109,12 @@ export class TaskFormDialog implements OnInit {
     } else if (this.mode() === 'delegate' && t) {
       // التفويض يرث الأولوية والموعد من الأصل افتراضياً، والجهات أدنى منه بدرجة
       this.form.patchValue({ priority: t.priority, dueDate: t.dueDate?.slice(0, 10) ?? '' });
-      const first = t.delegationTypes[0]?.value ?? (t.targetType === 'Department' ? 'Office' : 'User');
-      this.kind.set(first);
-      this.loadTargets({ type: first, parentTaskId: t.id });
+      this.loadTargets({ parentTaskId: t.id });
     } else if (this.mode() === 'create') {
-      const first = this.targetTypes()[0]?.value;
-      if (first) this.chooseKind(first);
+      this.loadTargets({});
       if (this.canTemplate()) this.service.templates().subscribe({ next: list => this.templates.set(list), error: () => { /* القوالب اختيارية */ } });
     }
-    this.form.controls.targetId.valueChanges.subscribe(v => this.targetId.set(Number(v)));
+    this.form.controls.targetId.valueChanges.subscribe(v => this.targetKey.set(v));
   }
 
   /** يملأ النموذج من القالب (العنوان والوصف والأولوية وموعد التسليم وبنود التحقق) */
@@ -144,14 +156,7 @@ export class TaskFormDialog implements OnInit {
 
   dropFile(file: File) { this.files.update(list => list.filter(f => f !== file)); }
 
-  chooseKind(kind: TaskTargetKind) {
-    if (this.kind() === kind && this.targets().length) return;
-    this.kind.set(kind);
-    this.form.patchValue({ targetId: 0 });
-    this.loadTargets(this.mode() === 'delegate' ? { type: kind, parentTaskId: this.task()!.id } : { type: kind });
-  }
-
-  private loadTargets(options: { type?: TaskTargetKind; parentTaskId?: number }) {
+  private loadTargets(options: { parentTaskId?: number }) {
     this.targets.set([]);
     this.targetsLoading.set(true);
     this.service.targets(options).subscribe({
@@ -171,13 +176,15 @@ export class TaskFormDialog implements OnInit {
       dueDate: v.dueDate || null
     };
     if (!common.title) { this.error.set('أدخل عنوان المهمة'); return; }
+    const picked = this.selectedTarget();
+    if (this.mode() !== 'edit' && !picked) { this.error.set('اختر الجهة'); return; }
 
     this.saving.set(true); this.error.set('');
     const request = this.mode() === 'edit'
       ? this.service.update(this.task()!.id, common)
       : this.service.create({
-        ...common, targetId: Number(v.targetId),
-        targetType: this.mode() === 'edit' ? null : this.kind(),
+        ...common, targetId: picked!.id,
+        targetType: picked!.kind,
         parentTaskId: this.mode() === 'delegate' ? this.task()!.id : null,
         checklistItems: this.checklist()
       });

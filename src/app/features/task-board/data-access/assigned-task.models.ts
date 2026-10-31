@@ -112,6 +112,8 @@ export interface TaskTargetOption {
   id: number;
   name: string;
   headNames: string;
+  /** نوع الجهة: تُجمَّع به القائمة، ويُرسَل مع الاختيار فلا يختاره المستخدم */
+  kind: TaskTargetKind;
   /** للموظف: قسمه ومكتبه */
   detail?: string;
 }

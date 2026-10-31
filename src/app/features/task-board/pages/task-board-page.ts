@@ -8,7 +8,7 @@ import { AuthService } from '@core/services/auth.service';
 import { AppPermission, TASK_ASSIGN, TASK_OVERSIGHT } from '@core/constants/access';
 import { NotificationService } from '@core/services/notification.service';
 import {
-  AssignedTaskCard, AssignedTaskDetail, TaskBoardMode, TaskPriority, TaskStatus, TaskTargetType,
+  AssignedTaskCard, AssignedTaskDetail, TaskBoardMode, TaskPriority, TaskStatus,
   TASK_PRIORITY_LABEL, TASK_STATUS_LABEL
 } from '../data-access/assigned-task.models';
 
@@ -58,7 +58,6 @@ export class TaskBoardPage {
   mode = signal<TaskBoardMode>('incoming');
   tasks = signal<AssignedTaskCard[]>([]);
   canCreate = signal(false);
-  targetTypes = signal<TaskTargetType[]>([]);
   loading = signal(false);
   error = signal('');
   private toast = inject(ToastService);
@@ -165,7 +164,7 @@ export class TaskBoardPage {
     this.service.board(this.mode(), this.doneDays()).subscribe({
       next: b => {
         this.tasks.set(b.tasks); this.canCreate.set(b.canCreate);
-        this.targetTypes.set(b.targetTypes ?? []); this.hasScope.set(b.hasScope);
+        this.hasScope.set(b.hasScope);
         this.loading.set(false);
       },
       error: e => { this.error.set(e.message); this.loading.set(false); }
