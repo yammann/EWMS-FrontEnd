@@ -81,6 +81,15 @@
 }
 .modal-actions button { min-width: 96px; }
 
+/* تنبيه الخطأ داخل جسم النافذة يبقى ظاهراً أعلاه أثناء التمرير (فمن ملأ نموذجاً طويلاً ونزل لا يفوته الخطأ) */
+.modal-body .alert-error {
+  position: sticky;
+  top: 4px;
+  z-index: 3;
+  background: linear-gradient(var(--danger-100), var(--danger-100)), var(--surface);
+  box-shadow: 0 6px 14px -8px rgb(0 0 0 / .35);
+}
+
 /* أزرار النافذة خارج الجسم: شريط ثابت أسفلها بينما يتمرر المحتوى */
 .modal > .modal-actions,
 .modal > form > .modal-actions,
