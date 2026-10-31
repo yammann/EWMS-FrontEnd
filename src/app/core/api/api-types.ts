@@ -122,6 +122,7 @@ export interface AssignedTaskDetailDto {
   createdAt: string;
   createdByName: string;
   createdByUserId: number;
+  delegationTypes: TaskTargetTypeDto[];
   description: string;
   dueDate: string | null;
   id: number;
@@ -144,6 +145,11 @@ export interface AssignedTaskDetailDto {
   targetType: string;
   title: string;
   updatedAt: string;
+}
+
+export interface AttachDeliverableDocumentRequestDto {
+  documentId: number;
+  rowVersion: string | null;
 }
 
 export interface AuditLogResponseDto {
@@ -520,6 +526,32 @@ export interface DecideOutgoingDraftRequestDto {
   approve: boolean;
   note: string | null;
   rowVersion: string | null;
+}
+
+export interface DecideStudyRequestDto {
+  decision: number;
+  decisionVersionId: number | null;
+  note: string | null;
+  rowVersion: string | null;
+}
+
+export interface DeliverableTypeRequestDto {
+  branchId: number | null;
+  documentKind: number;
+  isActive: boolean;
+  name: string;
+  sortOrder: number;
+}
+
+export interface DeliverableTypeResponseDto {
+  branchId: number;
+  documentKind: number;
+  documentKindAr: string;
+  id: number;
+  isActive: boolean;
+  name: string;
+  rowVersion: string;
+  sortOrder: number;
 }
 
 export interface DepartmentDashboardDto {
@@ -1530,6 +1562,12 @@ export interface RequestPartsDto {
   total: number;
 }
 
+export interface ReviewDeliverableRequestDto {
+  approve: boolean;
+  note: string | null;
+  rowVersion: string | null;
+}
+
 export interface RoleResponseDto {
   id: number;
   name: string;
@@ -1829,6 +1867,17 @@ export interface ScheduleVersionResponseDto {
   versionNumber: number;
 }
 
+export interface SendBackDeliverableRequestDto {
+  note: string;
+  rowVersion: string | null;
+}
+
+export interface SendStudyRequestDto {
+  note: string | null;
+  outgoingCorrespondenceId: number | null;
+  rowVersion: string | null;
+}
+
 export interface SetRecurrenceActiveRequestDto {
   isActive: boolean;
 }
@@ -1999,6 +2048,152 @@ export interface StartProjectUploadRequestDto {
   title: string | null;
 }
 
+export interface StudyDeliverableDto {
+  approvedVersionId: number | null;
+  approvedVersionNumber: number | null;
+  assigneeName: string | null;
+  assigneeUserId: number | null;
+  blockedByName: string | null;
+  canAttachDocument: boolean;
+  canEdit: boolean;
+  canPrepare: boolean;
+  canRemove: boolean;
+  canReview: boolean;
+  canSendBack: boolean;
+  canSubmit: boolean;
+  documentId: number | null;
+  dueDate: string | null;
+  id: number;
+  isOverdue: boolean;
+  latestVersionId: number | null;
+  latestVersionNumber: number | null;
+  note: string;
+  officeId: number | null;
+  officeName: string | null;
+  returnNote: string | null;
+  reviewedAt: string | null;
+  reviewedByName: string | null;
+  rowVersion: string;
+  sortOrder: number;
+  state: number;
+  stateAr: string;
+  submittedAt: string | null;
+  submittedByName: string | null;
+  submittedVersionId: number | null;
+  submittedVersionNumber: number | null;
+  typeId: number;
+  typeName: string;
+}
+
+export interface StudyDeliverableRequestDto {
+  assigneeUserId: number | null;
+  dueDate: string | null;
+  note: string | null;
+  officeId: number | null;
+  rowVersion: string | null;
+  sortOrder: number | null;
+  typeId: number;
+}
+
+export interface StudyDetailDto {
+  approvedPercent: number;
+  branchId: number;
+  canAddDeliverable: boolean;
+  canCancel: boolean;
+  canDecide: boolean;
+  canEdit: boolean;
+  canReopen: boolean;
+  canSend: boolean;
+  correspondenceId: number | null;
+  correspondenceNumber: string | null;
+  createdAt: string;
+  createdByName: string;
+  deliverables: StudyDeliverableDto[];
+  deliverablesApproved: number;
+  deliverablesTotal: number;
+  dueDate: string | null;
+  externalNumber: string | null;
+  id: number;
+  isOverdue: boolean;
+  mode: number;
+  modeAr: string;
+  notes: string;
+  number: string;
+  projectId: number;
+  projectName: string;
+  rowVersion: string;
+  status: number;
+  statusAr: string;
+  submissions: StudySubmissionDto[];
+  title: string;
+}
+
+export interface StudyListItemDto {
+  approvedPercent: number;
+  branchId: number;
+  correspondenceId: number | null;
+  correspondenceNumber: string | null;
+  createdAt: string;
+  deliverablesApproved: number;
+  deliverablesTotal: number;
+  dueDate: string | null;
+  externalNumber: string | null;
+  id: number;
+  isOverdue: boolean;
+  mode: number;
+  modeAr: string;
+  number: string;
+  projectId: number;
+  projectName: string;
+  status: number;
+  statusAr: string;
+  title: string;
+}
+
+export interface StudyListItemDtoPagedResultDto {
+  items: StudyListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface StudyOrderRequestDto {
+  correspondenceId: number | null;
+  dueDate: string | null;
+  externalNumber: string | null;
+  mode: number;
+  notes: string | null;
+  projectId: number;
+  rowVersion: string | null;
+  title: string;
+}
+
+export interface StudyStatusRequestDto {
+  rowVersion: string | null;
+}
+
+export interface StudySubmissionDto {
+  decidedAt: string | null;
+  decidedByName: string | null;
+  decision: number;
+  decisionAr: string;
+  decisionNote: string;
+  decisionVersionId: number | null;
+  id: number;
+  note: string;
+  outgoingCorrespondenceId: number | null;
+  outgoingCorrespondenceNumber: string | null;
+  round: number;
+  rowVersion: string;
+  sentAt: string;
+  sentByName: string;
+}
+
+export interface SubmitDeliverableRequestDto {
+  rowVersion: string | null;
+}
+
 export interface TaskBoardDto {
   canCreate: boolean;
   hasScope: boolean;
@@ -2077,6 +2272,7 @@ export interface TaskStatsMonthDto {
 }
 
 export interface TaskTargetOptionDto {
+  detail: string;
   headNames: string;
   id: number;
   name: string;

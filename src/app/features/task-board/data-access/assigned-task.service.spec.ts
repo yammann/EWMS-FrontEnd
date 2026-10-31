@@ -15,6 +15,17 @@ describe('Task board API contract', () => {
   });
   afterEach(() => http.verify());
 
+  it('asks for the targets of a kind, or of a delegation with both the parent task and the kind (office or employee)', () => {
+    service.targets({ type: 'User' }).subscribe();
+    http.expectOne('/api/AssignedTasks/Targets?type=User').flush([]);
+    service.targets({ type: 'User', parentTaskId: 7 }).subscribe();
+    http.expectOne('/api/AssignedTasks/Targets?parentTaskId=7&type=User').flush([]);
+    service.targets({ parentTaskId: 7 }).subscribe();
+    http.expectOne('/api/AssignedTasks/Targets?parentTaskId=7').flush([]);
+    service.targets().subscribe();
+    http.expectOne('/api/AssignedTasks/Targets').flush([]);
+  });
+
   it('sends the numeric status the backend enum expects when a card is dropped', () => {
     service.changeStatus(7, 'InProgress').subscribe();
     const req = http.expectOne('/api/AssignedTasks/Status/7');

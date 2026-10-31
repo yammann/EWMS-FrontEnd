@@ -87,3 +87,8 @@
   /* على الشاشات الضيقة: الأعمدة جنباً لجنب مع تمرير أفقي (ضروري للسحب بين الأعمدة) */
   .board { grid-template-columns: repeat(4, minmax(260px, 1fr)); overflow-x: auto; padding-bottom: 8px; }
 }
+
+/* مرقِّم العمود: مضغوط ليتّسع لعرض العمود */
+.col-pager { display: block; padding: 0 8px 10px; }
+.col-pager ::ng-deep .pager { justify-content: center; padding-top: 8px; gap: 6px 10px; }
+.col-pager ::ng-deep .pages .nav { padding: 0 10px; }

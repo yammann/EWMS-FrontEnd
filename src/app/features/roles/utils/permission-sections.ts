@@ -11,7 +11,7 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'holidays', title: 'العطل الرسمية', names: ['ViewHolidays', 'CreateHoliday', 'EditHoliday', 'DeleteHoliday'] }
   ] },
   { key: 'tasks', title: 'المهام', groups: [
-    { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'HandleUnitTasks', 'ViewTaskStats'] },
+    { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'AssignTaskToDepartmentUser', 'AssignTaskToBranchUser', 'HandleUnitTasks', 'ViewTaskStats'] },
     { key: 'todo-lists', title: 'مفكرتي — قوائم المهام الشخصية (قوائمه هو فقط؛ البنود والتثبيت والأرشفة بصلاحية التعديل)', names: ['ViewToDoLists', 'CreateToDoList', 'EditToDoList', 'DeleteToDoList'] },
     { key: 'work-tasks', title: 'مهام العمل', names: ['ViewMyWorkTasks', 'ViewWorkTasks', 'CreateWorkTask', 'EditWorkTask', 'DeleteWorkTask'] }
   ] },
@@ -39,7 +39,9 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'project-docs', title: 'وثائق المشاريع (بحدّ المشاريع التي يراها)', names: ['ViewProjectDocuments', 'DownloadProjectDocument', 'UploadProjectDocument', 'ApproveProjectDocument', 'DeleteProjectDocument'] },
     { key: 'project-audit', title: 'سجل تدقيق المشاريع', names: ['ViewProjectAudit'] },
     { key: 'project-schedule', title: 'الجدول الزمني (الإعداد غير الاعتماد، والاعتماد لغير من أعدّ)', names: ['ViewProjectSchedule', 'EditProjectStartOrder', 'EditProjectSchedule', 'ApproveProjectSchedule', 'UpdateScheduleProgress', 'ClassifyScheduleTask'] },
-    { key: 'project-delays', title: 'التأخير والتمديد', names: ['RecordScheduleDelay', 'ApproveDelayJustification', 'RequestScheduleExtension', 'ApproveScheduleExtension'] }
+    { key: 'project-delays', title: 'التأخير والتمديد', names: ['RecordScheduleDelay', 'ApproveDelayJustification', 'RequestScheduleExtension', 'ApproveScheduleExtension'] },
+    { key: 'studies', title: 'الدراسات والمكاتب الفنية (بحدّ المشاريع التي يراها؛ المراجع غير من أعدّ المخرج)', names: ['ViewStudies', 'CreateStudyOrder', 'EditStudyOrder', 'PrepareStudyDeliverable', 'ReviewStudyDeliverable', 'RecordStudySubmission'] },
+    { key: 'deliverable-types', title: 'أنواع المخرجات الفنية (إعدادات الفرع)', names: ['ViewDeliverableTypes', 'CreateDeliverableType', 'EditDeliverableType', 'DeleteDeliverableType'] }
   ] },
   { key: 'diwan', title: 'الديوان', groups: [
     { key: 'diwan-view', title: 'الاطلاع على المعاملات (معاملاتي = سجّلتها أو أُحيلت إليّ أو مرّت بي، ثم قسمي، ثم فرعي)', names: ['ViewCorrespondence', 'ViewDepartmentCorrespondence', 'ViewBranchCorrespondence'] },
@@ -58,7 +60,7 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'reports-staff', title: 'تقارير الموظفين والهيكل', names: ['ExportUsersReport', 'ExportStructureReport'] },
     { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
     { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
-    { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport'] },
+    { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport', 'ExportStudiesReport'] },
     { key: 'reports-diwan', title: 'تقارير الديوان', names: ['ExportCorrespondenceReport', 'ExportOverdueCorrespondenceReport'] },
     { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
   ] },

@@ -395,6 +395,12 @@
             "format": "int32",
             "type": "integer"
           },
+          "delegationTypes": {
+            "items": {
+              "$ref": "#/components/schemas/TaskTargetTypeDto"
+            },
+            "type": "array"
+          },
           "description": {
             "type": "string"
           },
@@ -476,6 +482,21 @@
           },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttachDeliverableDocumentRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
             "type": "string"
           }
         },
@@ -1723,6 +1744,90 @@
             "format": "byte",
             "nullable": true,
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DecideStudyRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "decisionVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DeliverableTypeRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "branchId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "documentKind": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DeliverableTypeResponseDto": {
+        "additionalProperties": false,
+        "properties": {
+          "branchId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "documentKind": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "documentKindAr": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
           }
         },
         "type": "object"
@@ -5038,6 +5143,24 @@
         },
         "type": "object"
       },
+      "ReviewDeliverableRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "RoleResponseDto": {
         "additionalProperties": false,
         "properties": {
@@ -6085,6 +6208,40 @@
         },
         "type": "object"
       },
+      "SendBackDeliverableRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SendStudyRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "outgoingCorrespondenceId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SetRecurrenceActiveRequestDto": {
         "additionalProperties": false,
         "properties": {
@@ -6673,6 +6830,536 @@
         },
         "type": "object"
       },
+      "StudyDeliverableDto": {
+        "additionalProperties": false,
+        "properties": {
+          "approvedVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "approvedVersionNumber": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "assigneeName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "assigneeUserId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "blockedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "canAttachDocument": {
+            "type": "boolean"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canPrepare": {
+            "type": "boolean"
+          },
+          "canRemove": {
+            "type": "boolean"
+          },
+          "canReview": {
+            "type": "boolean"
+          },
+          "canSendBack": {
+            "type": "boolean"
+          },
+          "canSubmit": {
+            "type": "boolean"
+          },
+          "documentId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "latestVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "latestVersionNumber": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "officeId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "officeName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "returnNote": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "state": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stateAr": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "submittedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "submittedVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "submittedVersionNumber": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "typeId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "typeName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StudyDeliverableRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "assigneeUserId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "officeId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "typeId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "StudyDetailDto": {
+        "additionalProperties": false,
+        "properties": {
+          "approvedPercent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "branchId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "canAddDeliverable": {
+            "type": "boolean"
+          },
+          "canCancel": {
+            "type": "boolean"
+          },
+          "canDecide": {
+            "type": "boolean"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canReopen": {
+            "type": "boolean"
+          },
+          "canSend": {
+            "type": "boolean"
+          },
+          "correspondenceId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "correspondenceNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdByName": {
+            "type": "string"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/StudyDeliverableDto"
+            },
+            "type": "array"
+          },
+          "deliverablesApproved": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "deliverablesTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "mode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "modeAr": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusAr": {
+            "type": "string"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/StudySubmissionDto"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StudyListItemDto": {
+        "additionalProperties": false,
+        "properties": {
+          "approvedPercent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "branchId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "correspondenceId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "correspondenceNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliverablesApproved": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "deliverablesTotal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "mode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "modeAr": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusAr": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StudyListItemDtoPagedResultDto": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StudyListItemDto"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "StudyOrderRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "correspondenceId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "notes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StudyStatusRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StudySubmissionDto": {
+        "additionalProperties": false,
+        "properties": {
+          "decidedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "decidedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "decision": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "decisionAr": {
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "decisionVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "outgoingCorrespondenceId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "outgoingCorrespondenceNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "round": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "type": "string"
+          },
+          "sentAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sentByName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SubmitDeliverableRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TaskBoardDto": {
         "additionalProperties": false,
         "properties": {
@@ -6946,6 +7633,9 @@
       "TaskTargetOptionDto": {
         "additionalProperties": false,
         "properties": {
+          "detail": {
+            "type": "string"
+          },
           "headNames": {
             "type": "string"
           },
@@ -11827,6 +12517,209 @@
         },
         "tags": [
           "Dashboard"
+        ]
+      }
+    },
+    "/api/DeliverableTypes/Create": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliverableTypeRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliverableTypeRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliverableTypeRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "DeliverableTypes"
+        ]
+      }
+    },
+    "/api/DeliverableTypes/Delete/{id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "DeliverableTypes"
+        ]
+      }
+    },
+    "/api/DeliverableTypes/GetAll": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "branchId",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeInactive",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                  },
+                  "type": "array"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                  },
+                  "type": "array"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "DeliverableTypes"
+        ]
+      }
+    },
+    "/api/DeliverableTypes/Update/{id}": {
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliverableTypeRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliverableTypeRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliverableTypeRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeResponseDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "DeliverableTypes"
         ]
       }
     },
@@ -20368,6 +21261,877 @@
         ]
       }
     },
+    "/api/Studies/Cancel/{id}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyStatusRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyStatusRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyStatusRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Create": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyOrderRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyOrderRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyOrderRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Decide/{submissionId}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideStudyRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideStudyRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideStudyRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Deliverable/{id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyDeliverableRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyDeliverableRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyDeliverableRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Deliverable/{id}/Document": {
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachDeliverableDocumentRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachDeliverableDocumentRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachDeliverableDocumentRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Deliverable/{id}/Review": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDeliverableRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDeliverableRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDeliverableRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Deliverable/{id}/SendBack": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBackDeliverableRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBackDeliverableRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBackDeliverableRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Deliverable/{id}/Submit": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitDeliverableRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitDeliverableRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitDeliverableRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Deliverables/{studyId}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "studyId",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyDeliverableRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyDeliverableRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyDeliverableRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Get/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Reopen/{id}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyStatusRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyStatusRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyStatusRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Search": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "branchId",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdueOnly",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mine",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyListItemDtoPagedResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyListItemDtoPagedResultDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyListItemDtoPagedResultDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Send/{studyId}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "studyId",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendStudyRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendStudyRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendStudyRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
+    "/api/Studies/Update/{id}": {
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyOrderRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyOrderRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyOrderRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Studies"
+        ]
+      }
+    },
     "/api/ToDoLists/Archive/{id}": {
       "put": {
         "parameters": [
@@ -22661,6 +24425,9 @@
       "name": "Dashboard"
     },
     {
+      "name": "DeliverableTypes"
+    },
+    {
       "name": "Departments"
     },
     {
@@ -22728,6 +24495,9 @@
     },
     {
       "name": "SpareParts"
+    },
+    {
+      "name": "Studies"
     },
     {
       "name": "ToDoLists"

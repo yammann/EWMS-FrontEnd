@@ -78,6 +78,8 @@ export class TaskFormDialog implements OnInit {
   /** نوع الجهة المختار (الإنشاء) أو المشتق من المهمة الأصل (التفويض: قسم ← مكتب، مكتب ← موظف) */
   kind = signal<TaskTargetKind | null>(null);
   targetLabel = computed(() => TARGET_LABEL[this.kind() ?? 'User']);
+  /** أنواع الجهة للاختيار: أنواع الإسناد (الإنشاء) أو أنواع التفويض (للمهمة الأصل: مكتب و/أو موظف) */
+  kindOptions = computed<TaskTargetType[]>(() => this.mode() === 'delegate' ? this.task()?.delegationTypes ?? [] : this.mode() === 'create' ? this.targetTypes() : []);
 
   private targetId = signal(0);
   selectedTarget = computed(() => this.targets().find(t => t.id === this.targetId()) ?? null);
@@ -92,8 +94,9 @@ export class TaskFormDialog implements OnInit {
     } else if (this.mode() === 'delegate' && t) {
       // التفويض يرث الأولوية والموعد من الأصل افتراضياً، والجهات أدنى منه بدرجة
       this.form.patchValue({ priority: t.priority, dueDate: t.dueDate?.slice(0, 10) ?? '' });
-      this.kind.set(t.targetType === 'Department' ? 'Office' : 'User');
-      this.loadTargets({ parentTaskId: t.id });
+      const first = t.delegationTypes[0]?.value ?? (t.targetType === 'Department' ? 'Office' : 'User');
+      this.kind.set(first);
+      this.loadTargets({ type: first, parentTaskId: t.id });
     } else if (this.mode() === 'create') {
       const first = this.targetTypes()[0]?.value;
       if (first) this.chooseKind(first);
@@ -145,7 +148,7 @@ export class TaskFormDialog implements OnInit {
     if (this.kind() === kind && this.targets().length) return;
     this.kind.set(kind);
     this.form.patchValue({ targetId: 0 });
-    this.loadTargets({ type: kind });
+    this.loadTargets(this.mode() === 'delegate' ? { type: kind, parentTaskId: this.task()!.id } : { type: kind });
   }
 
   private loadTargets(options: { type?: TaskTargetKind; parentTaskId?: number }) {
@@ -174,7 +177,7 @@ export class TaskFormDialog implements OnInit {
       ? this.service.update(this.task()!.id, common)
       : this.service.create({
         ...common, targetId: Number(v.targetId),
-        targetType: this.mode() === 'create' ? this.kind() : null,
+        targetType: this.mode() === 'edit' ? null : this.kind(),
         parentTaskId: this.mode() === 'delegate' ? this.task()!.id : null,
         checklistItems: this.checklist()
       });

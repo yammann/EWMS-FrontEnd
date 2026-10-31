@@ -91,7 +91,7 @@
 
           <div class="col-body" cdkDropList [id]="'col-' + col.status" [cdkDropListData]="col.status"
                [cdkDropListEnterPredicate]="canDrop" (cdkDropListDropped)="drop($event)">
-            @for (t of byStatus()[col.status]; track t.id) {
+            @for (t of pagers[col.status].items(); track t.id) {
               <article class="card p-{{ t.priority }}" cdkDrag [cdkDragData]="t" [cdkDragDisabled]="!t.canChangeStatus"
                        [class.draggable]="t.canChangeStatus" tabindex="0" role="button"
                        (click)="open(t)" (keydown.enter)="open(t)" [attr.aria-label]="t.title + ' — ' + t.statusAr">
@@ -130,6 +130,7 @@
               <p class="col-empty">لا توجد مهام</p>
             }
           </div>
+          <app-pager class="col-pager" [sizes]="[]" [page]="pagers[col.status].page()" [pageSize]="pagers[col.status].size()" [total]="pagers[col.status].total()" (pageChange)="pagers[col.status].go($event)" />
         </section>
       }
     </div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -21,8 +21,12 @@ import { TaskFormDialog, TaskFormMode } from '../components/task-form-dialog';
 import { ToastService } from '@shared/ui/toast.service';
 import { SelectValue } from '@shared/ui/select-value';
 import { Icon } from '@shared/ui/icon';
+import { Pager } from '@shared/ui/pager';
+import { Pagination } from '@core/utils/pagination';
 
 interface Column { status: TaskStatus; label: string; hint: string; }
+
+const COLUMN_PAGE_SIZE = 10;
 
 /**
  * لوحة المهام: أربعة أعمدة (لم تُنفَّذ / قيد التنفيذ / بانتظار المراجعة / تم التنفيذ) وتغيير الحالة بالسحب والإفلات.
@@ -31,7 +35,7 @@ interface Column { status: TaskStatus; label: string; hint: string; }
  */
 @Component({
   selector: 'app-task-board', standalone: true,
-  imports: [Icon, SelectValue, CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog, TaskNoteDialog, TaskCalendar, RouterLink],
+  imports: [Icon, Pager, SelectValue, CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog, TaskNoteDialog, TaskCalendar, RouterLink],
   templateUrl: './task-board-page.html',
   styleUrl: './task-board-page.scss'
 })
@@ -113,6 +117,21 @@ export class TaskBoardPage {
     const groups: Record<TaskStatus, AssignedTaskCard[]> = { Todo: [], InProgress: [], InReview: [], Done: [] };
     for (const t of this.filtered()) groups[t.status].push(t);
     return groups;
+  });
+
+  /** ترقيم كل عمود على حدة (10 بطاقات في الصفحة، بنمط «مفكرتي»): العدد في رأس العمود يبقى الكلي */
+  pagers: Record<TaskStatus, Pagination<AssignedTaskCard>> = {
+    Todo: new Pagination(() => this.byStatus().Todo, { size: COLUMN_PAGE_SIZE, sizes: [COLUMN_PAGE_SIZE] }),
+    InProgress: new Pagination(() => this.byStatus().InProgress, { size: COLUMN_PAGE_SIZE, sizes: [COLUMN_PAGE_SIZE] }),
+    InReview: new Pagination(() => this.byStatus().InReview, { size: COLUMN_PAGE_SIZE, sizes: [COLUMN_PAGE_SIZE] }),
+    Done: new Pagination(() => this.byStatus().Done, { size: COLUMN_PAGE_SIZE, sizes: [COLUMN_PAGE_SIZE] })
+  };
+
+  /** تغيير الفلاتر أو العرض يعيد كل الأعمدة إلى صفحتها الأولى (السحب وإعادة التحميل لا يفعلان) */
+  private resetPages = effect(() => {
+    this.search(); this.priorityFilter(); this.overdueOnly(); this.creatorFilter(); this.targetFilter();
+    this.dueFrom(); this.dueTo(); this.mode();
+    untracked(() => Object.values(this.pagers).forEach(p => p.reset()));
   });
 
   counts = computed(() => {

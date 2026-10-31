@@ -79,6 +79,8 @@ export interface AssignedTaskDetail extends AssignedTaskCard {
   canDelete: boolean;
   canComment: boolean;
   canDelegate: boolean;
+  /** أنواع الجهات التي أفوّض إليها (مكتب و/أو موظف) */
+  delegationTypes: TaskTargetType[];
   subTasks: AssignedTaskCard[];
   activities: AssignedTaskActivity[];
   attachments: TaskAttachment[];
@@ -110,6 +112,8 @@ export interface TaskTargetOption {
   id: number;
   name: string;
   headNames: string;
+  /** للموظف: قسمه ومكتبه */
+  detail?: string;
 }
 
 export type TaskTargetKind = 'Department' | 'Office' | 'User';

@@ -29,6 +29,7 @@ export const AppPermission = {
   // لوحة المهام: ViewTaskBoard تفتح اللوحة (واستقبال ما أُسند للمستخدم شخصياً)؛ الإسناد والتولّي بصلاحيات
   ViewTaskBoard: 'ViewTaskBoard',
   AssignTaskToDepartment: 'AssignTaskToDepartment', AssignTaskToOffice: 'AssignTaskToOffice', AssignTaskToUser: 'AssignTaskToUser',
+  AssignTaskToDepartmentUser: 'AssignTaskToDepartmentUser', AssignTaskToBranchUser: 'AssignTaskToBranchUser',
   HandleUnitTasks: 'HandleUnitTasks', ViewTaskStats: 'ViewTaskStats',
 
   // قوائم المهام الشخصية: كل صلاحية على قوائمه هو فقط
@@ -100,7 +101,14 @@ export const AppPermission = {
   CloseCorrespondence: 'CloseCorrespondence', ApproveOutgoingCorrespondence: 'ApproveOutgoingCorrespondence',
   ViewCorrespondenceLookups: 'ViewCorrespondenceLookups', CreateCorrespondenceLookup: 'CreateCorrespondenceLookup',
   EditCorrespondenceLookup: 'EditCorrespondenceLookup', DeleteCorrespondenceLookup: 'DeleteCorrespondenceLookup',
-  ExportCorrespondenceReport: 'ExportCorrespondenceReport', ExportOverdueCorrespondenceReport: 'ExportOverdueCorrespondenceReport'
+  ExportCorrespondenceReport: 'ExportCorrespondenceReport', ExportOverdueCorrespondenceReport: 'ExportOverdueCorrespondenceReport',
+
+  // الدراسات والمكاتب الفنية: حدّها حدّ رؤية المشروع (تحتاج معها «عرض المشاريع»)؛ المراجع غير المُعدّ
+  ViewStudies: 'ViewStudies', CreateStudyOrder: 'CreateStudyOrder', EditStudyOrder: 'EditStudyOrder',
+  PrepareStudyDeliverable: 'PrepareStudyDeliverable', ReviewStudyDeliverable: 'ReviewStudyDeliverable', RecordStudySubmission: 'RecordStudySubmission',
+  ViewDeliverableTypes: 'ViewDeliverableTypes', CreateDeliverableType: 'CreateDeliverableType',
+  EditDeliverableType: 'EditDeliverableType', DeleteDeliverableType: 'DeleteDeliverableType',
+  ExportStudiesReport: 'ExportStudiesReport'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -122,11 +130,12 @@ export const VACATION_STATS: readonly AppPermissionName[] = [AppPermission.ViewD
 /** يتابع مهام وحدة (يُظهر تبويب "كل مهام نطاقي") */
 /** من يملك صلاحية إسناد: يدير قوالبه ومهامه الدورية */
 export const TASK_ASSIGN: readonly AppPermissionName[] = [
-  AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser
+  AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser,
+  AppPermission.AssignTaskToDepartmentUser, AppPermission.AssignTaskToBranchUser
 ];
 
 export const TASK_OVERSIGHT: readonly AppPermissionName[] = [
-  AppPermission.AssignTaskToDepartment, AppPermission.AssignTaskToOffice, AppPermission.AssignTaskToUser, AppPermission.HandleUnitTasks
+  ...TASK_ASSIGN, AppPermission.HandleUnitTasks
 ];
 /** توثيق الأجهزة: من يضيف أو يعدّل أو يحذف يرى ما يعمل عليه (نفس سياسة AnyDeviceView في الباكاند) */
 export const DEVICE_ACCESS: readonly AppPermissionName[] = [
@@ -150,7 +159,8 @@ export const REPORT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ExportVacationsReport, AppPermission.ExportVacationUsageReport, AppPermission.ExportUsersReport, AppPermission.ExportStructureReport,
   AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
   AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport,
-  AppPermission.ExportProjectsReport, AppPermission.ExportCorrespondenceReport, AppPermission.ExportOverdueCorrespondenceReport
+  AppPermission.ExportProjectsReport, AppPermission.ExportCorrespondenceReport, AppPermission.ExportOverdueCorrespondenceReport,
+  AppPermission.ExportStudiesReport
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [

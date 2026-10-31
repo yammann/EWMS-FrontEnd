@@ -109,7 +109,7 @@ export class RecurrenceDialog implements OnInit {
     const k: TaskTargetKind[] = [];
     if (this.auth.hasPermission(AppPermission.AssignTaskToDepartment)) k.push('Department');
     if (this.auth.hasPermission(AppPermission.AssignTaskToOffice)) k.push('Office');
-    if (this.auth.hasPermission(AppPermission.AssignTaskToUser)) k.push('User');
+    if (this.auth.hasAnyPermission([AppPermission.AssignTaskToUser, AppPermission.AssignTaskToDepartmentUser, AppPermission.AssignTaskToBranchUser])) k.push('User');
     return k;
   });
   kind = signal<TaskTargetKind>('User');

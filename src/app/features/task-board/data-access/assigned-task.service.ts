@@ -18,7 +18,9 @@ export class AssignedTaskService {
   get(id: number) { return this.api.get<AssignedTaskDetail>(`/AssignedTasks/Get/${id}`); }
   /** جهات الإسناد من نوع معيّن، أو جهات التفويض من مهمة واردة (parentTaskId) */
   targets(options: { type?: TaskTargetKind; parentTaskId?: number } = {}) {
-    const query = options.parentTaskId ? `?parentTaskId=${options.parentTaskId}` : options.type ? `?type=${options.type}` : '';
+    // التفويض يحمل المهمة الأصل ونوع الجهة معاً (مكتب أو موظف)
+    const params = [options.parentTaskId ? `parentTaskId=${options.parentTaskId}` : '', options.type ? `type=${options.type}` : ''].filter(Boolean);
+    const query = params.length ? `?${params.join('&')}` : '';
     return this.api.get<TaskTargetOption[]>(`/AssignedTasks/Targets${query}`);
   }
 

@@ -21,11 +21,11 @@
         </label>
 
         @if (mode() !== 'edit') {
-          @if (mode() === 'create' && targetTypes().length > 1) {
+          @if (kindOptions().length > 1) {
             <fieldset class="form-field">
               <legend class="form-label">نوع الجهة</legend>
               <div class="segmented types" role="radiogroup">
-                @for (type of targetTypes(); track type.value) {
+                @for (type of kindOptions(); track type.value) {
                   <button type="button" class="seg" role="radio" [attr.aria-checked]="kind() === type.value"
                           [class.on]="kind() === type.value" (click)="chooseKind(type.value)">{{ type.label }}</button>
                 }
@@ -37,7 +37,7 @@
             <select formControlName="targetId">
               <option [ngValue]="0">{{ targetsLoading() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel() }}</option>
               @for (t of targets(); track t.id) {
-                <option [ngValue]="t.id">{{ t.name }}@if (targetLabel() !== 'موظف') { — {{ t.headNames || 'لا أحد يتولاها حالياً' }} }</option>
+                <option [ngValue]="t.id">{{ t.name }}@if (targetLabel() !== 'موظف') { — {{ t.headNames || 'لا أحد يتولاها حالياً' }} } @else if (t.detail) { — {{ t.detail }} }</option>
               }
             </select>
             @if (!targetsLoading() && !targets().length) { <small class="form-hint">لا توجد جهات متاحة للإسناد ضمن صلاحياتك.</small> }
