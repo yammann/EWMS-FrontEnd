@@ -7,6 +7,8 @@ import { DASHBOARD_ROUTES } from '@features/dashboard/dashboard.routes';
 import { DEPARTMENTS_ROUTES } from '@features/departments/departments.routes';
 import { DIWAN_PRINT_ROUTES, DIWAN_ROUTES } from '@features/diwan/diwan.routes';
 import { STUDIES_ROUTES } from '@features/studies/studies.routes';
+import { CONTRACTS_ROUTES } from '@features/contracts/contracts.routes';
+import { HANDOVER_ROUTES } from '@features/handover/handover.routes';
 import { DEVICES_ROUTES } from '@features/devices/devices.routes';
 import { MAINTENANCE_PRINT_ROUTES, MAINTENANCE_ROUTES } from '@features/maintenance/maintenance.routes';
 import { MAP_LAYERS_ROUTES } from '@features/map-layers/map-layers.routes';
@@ -51,6 +53,8 @@ export const routes: Routes = [
       ...PROJECTS_ROUTES,
       ...DIWAN_ROUTES,
       ...STUDIES_ROUTES,
+      ...CONTRACTS_ROUTES,
+      ...HANDOVER_ROUTES,
       ...MAINTENANCE_ROUTES,
       ...VACATIONS_ROUTES,
       ...REPORTS_ROUTES,

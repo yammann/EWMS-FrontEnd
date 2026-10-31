@@ -55,6 +55,12 @@
       @case ('studies') {
         <app-project-studies [projectId]="p.id" [finished]="p.isFinished" />
       }
+      @case ('contracts') {
+        <app-project-contracts [projectId]="p.id" [branchId]="p.branchId" [finished]="p.isFinished" />
+      }
+      @case ('handover') {
+        <app-project-handovers [projectId]="p.id" [finished]="p.isFinished" />
+      }
       @case ('correspondence') {
         <app-project-correspondence [projectId]="p.id" />
       }

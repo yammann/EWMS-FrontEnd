@@ -173,6 +173,12 @@ export interface AuditLogResponseDtoPagedResultDto {
   totalPages: number;
 }
 
+export interface AwardOfferRequestDto {
+  awardedAt: string | null;
+  note: string | null;
+  rowVersion: string | null;
+}
+
 export interface BranchDashboardDto {
   branchId: number;
   branchName: string;
@@ -215,6 +221,11 @@ export interface BulkAddToDoItemsRequestDto {
   titles: string[];
 }
 
+export interface CancelHandoverRequestDto {
+  reason: string | null;
+  rowVersion: string | null;
+}
+
 export interface ChangeAssignedTaskStatusRequestDto {
   expectedStatus: number | null;
   note: string | null;
@@ -248,6 +259,297 @@ export interface ClaimAssignedTaskRequestDto {
 export interface ClassifyScheduleTaskRequestDto {
   isCritical: boolean;
   rowVersion: string | null;
+}
+
+export interface ClosureWarningsDto {
+  projectId: number;
+  warnings: string[];
+}
+
+export interface CommitteeDto {
+  canEdit: boolean;
+  decisionNumber: string | null;
+  decisionVersionId: number | null;
+  formedAt: string;
+  id: number;
+  kind: number;
+  kindAr: string;
+  members: CommitteeMemberDto[];
+  recommendations: string;
+  rowVersion: string;
+}
+
+export interface CommitteeMemberDto {
+  capacity: string;
+  isChair: boolean;
+  isExternal: boolean;
+  name: string;
+  userId: number | null;
+}
+
+export interface CommitteeMemberRequestDto {
+  capacity: string;
+  externalName: string | null;
+  isChair: boolean;
+  userId: number | null;
+}
+
+export interface CommitteeRequestDto {
+  decisionNumber: string | null;
+  decisionVersionId: number | null;
+  formedAt: string;
+  members: CommitteeMemberRequestDto[];
+  recommendations: string | null;
+  rowVersion: string | null;
+}
+
+export interface ConcludeHandoverRequestDto {
+  inspectionDate: string;
+  minutesVersionId: number | null;
+  result: number;
+  resultNote: string | null;
+  rowVersion: string | null;
+  supervisionReportVersionId: number | null;
+}
+
+export interface ContractAmendmentDto {
+  approvedAt: string;
+  description: string;
+  documentVersionId: number | null;
+  durationChangeDays: number | null;
+  id: number;
+  number: number;
+  recordedAt: string;
+  recordedByName: string;
+  title: string;
+  valueChange: number | null;
+}
+
+export interface ContractAmendmentRequestDto {
+  approvedAt: string;
+  description: string | null;
+  documentVersionId: number | null;
+  durationChangeDays: number | null;
+  title: string;
+  valueChange: number | null;
+}
+
+export interface ContractDetailDto {
+  allowedStatuses: number[];
+  amendments: ContractAmendmentDto[];
+  awardedAt: string | null;
+  awardNote: string;
+  branchId: number;
+  canAddAmendment: boolean;
+  canAddOffer: boolean;
+  canEdit: boolean;
+  canEvaluate: boolean;
+  canManageCommittee: boolean;
+  canRecordRetention: boolean;
+  committees: CommitteeDto[];
+  contractDate: string | null;
+  contractorId: number | null;
+  contractorName: string | null;
+  correspondenceId: number | null;
+  correspondenceNumber: string | null;
+  createdAt: string;
+  createdByName: string;
+  currency: string;
+  durationDays: number | null;
+  effectiveDurationDays: number | null;
+  effectiveValue: number | null;
+  evaluations: ContractEvaluationDto[];
+  executionOrderDate: string | null;
+  executionOrderNumber: string | null;
+  id: number;
+  method: number;
+  methodAr: string;
+  notes: string;
+  number: string;
+  offers: ContractOfferDto[];
+  officialNumber: string | null;
+  projectId: number;
+  projectName: string;
+  retention: RetentionEntryDto[];
+  rowVersion: string;
+  scope: string;
+  startDate: string | null;
+  status: number;
+  statusAr: string;
+  stillWithheld: number;
+  suggestedWarrantyEnd: string | null;
+  tenderNumber: string | null;
+  tenderOpenedAt: string | null;
+  tenderSentAt: string | null;
+  value: number | null;
+  warrantyDaysLeft: number | null;
+  warrantyEnd: string | null;
+  warrantyEndingSoon: boolean;
+  warrantyMonths: number | null;
+  warrantyStart: string | null;
+}
+
+export interface ContractEvaluationDto {
+  canEdit: boolean;
+  canReview: boolean;
+  canSubmit: boolean;
+  contractorId: number;
+  contractorName: string;
+  documentVersionId: number | null;
+  evaluatedByName: string;
+  evaluatedByUserId: number;
+  evaluationDate: string;
+  id: number;
+  notes: string;
+  reviewedAt: string | null;
+  reviewedByName: string | null;
+  reviewNote: string;
+  rowVersion: string;
+  scores: EvaluationScoreDto[];
+  status: number;
+  statusAr: string;
+  submittedAt: string | null;
+}
+
+export interface ContractEvaluationRequestDto {
+  documentVersionId: number | null;
+  evaluationDate: string;
+  notes: string | null;
+  rowVersion: string | null;
+  scores: EvaluationScoreRequestDto[];
+}
+
+export interface ContractListItemDto {
+  branchId: number;
+  contractDate: string | null;
+  contractorId: number | null;
+  contractorName: string | null;
+  createdAt: string;
+  currency: string;
+  effectiveValue: number | null;
+  id: number;
+  method: number;
+  methodAr: string;
+  number: string;
+  officialNumber: string | null;
+  projectId: number;
+  projectName: string;
+  status: number;
+  statusAr: string;
+  value: number | null;
+  warrantyDaysLeft: number | null;
+  warrantyEnd: string | null;
+  warrantyEndingSoon: boolean;
+}
+
+export interface ContractListItemDtoPagedResultDto {
+  items: ContractListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface ContractOfferDto {
+  amount: number;
+  canAward: boolean;
+  contractorId: number;
+  contractorName: string;
+  id: number;
+  isAwarded: boolean;
+  note: string;
+  receivedAt: string;
+  recordedByName: string;
+}
+
+export interface ContractOfferRequestDto {
+  amount: number;
+  contractorId: number;
+  note: string | null;
+  receivedAt: string;
+}
+
+export interface ContractRequestDto {
+  awardedAt: string | null;
+  awardNote: string | null;
+  contractDate: string | null;
+  contractorId: number | null;
+  correspondenceId: number | null;
+  currency: string;
+  durationDays: number | null;
+  executionOrderDate: string | null;
+  executionOrderNumber: string | null;
+  method: number;
+  notes: string | null;
+  number: string | null;
+  projectId: number;
+  rowVersion: string | null;
+  scope: string | null;
+  startDate: string | null;
+  tenderNumber: string | null;
+  tenderOpenedAt: string | null;
+  tenderSentAt: string | null;
+  value: number | null;
+  warrantyEnd: string | null;
+  warrantyMonths: number | null;
+  warrantyStart: string | null;
+}
+
+export interface ContractStatusRequestDto {
+  reason: string | null;
+  rowVersion: string | null;
+  status: number;
+}
+
+export interface ContractorEvaluationHistoryDto {
+  canEdit: boolean;
+  canReview: boolean;
+  canSubmit: boolean;
+  contractId: number;
+  contractNumber: string;
+  contractorId: number;
+  contractorName: string;
+  documentVersionId: number | null;
+  evaluatedByName: string;
+  evaluatedByUserId: number;
+  evaluationDate: string;
+  id: number;
+  notes: string;
+  projectId: number;
+  projectName: string;
+  reviewedAt: string | null;
+  reviewedByName: string | null;
+  reviewNote: string;
+  rowVersion: string;
+  scores: EvaluationScoreDto[];
+  status: number;
+  statusAr: string;
+  submittedAt: string | null;
+}
+
+export interface ContractorRequestDto {
+  address: string | null;
+  branchId: number | null;
+  contactName: string | null;
+  isActive: boolean;
+  name: string;
+  notes: string | null;
+  phone: string | null;
+  registrationNumber: string | null;
+  rowVersion: string | null;
+}
+
+export interface ContractorResponseDto {
+  address: string | null;
+  branchId: number;
+  contactName: string | null;
+  id: number;
+  isActive: boolean;
+  name: string;
+  notes: string;
+  phone: string | null;
+  registrationNumber: string | null;
+  rowVersion: string;
 }
 
 export interface CorrespondenceAttachmentDto {
@@ -742,6 +1044,46 @@ export interface EmployeeDashboardDto {
   teamName: string;
 }
 
+export interface EvaluationCriterionRequestDto {
+  branchId: number | null;
+  description: string | null;
+  isActive: boolean;
+  name: string;
+  rowVersion: string | null;
+  sortOrder: number;
+  weight: number | null;
+}
+
+export interface EvaluationCriterionResponseDto {
+  branchId: number;
+  description: string;
+  id: number;
+  isActive: boolean;
+  name: string;
+  rowVersion: string;
+  sortOrder: number;
+  weight: number | null;
+}
+
+export interface EvaluationScoreDto {
+  criterionId: number;
+  criterionName: string;
+  note: string;
+  score: number | null;
+  weight: number | null;
+}
+
+export interface EvaluationScoreRequestDto {
+  criterionId: number;
+  note: string | null;
+  score: number | null;
+}
+
+export interface EvaluationStepRequestDto {
+  note: string | null;
+  rowVersion: string | null;
+}
+
 export interface ExtensionLineRequestDto {
   days: number;
   movesStart: boolean;
@@ -750,6 +1092,120 @@ export interface ExtensionLineRequestDto {
 
 export interface FieldUsageDto {
   count: number;
+}
+
+export interface FixHandoverNoteRequestDto {
+  evidenceVersionId: number | null;
+  fixNote: string;
+  rowVersion: string | null;
+}
+
+export interface HandoverDetailDto {
+  branchId: number;
+  canAddNote: boolean;
+  canCancel: boolean;
+  canConclude: boolean;
+  canEditCommittee: boolean;
+  canFormCommittee: boolean;
+  committee: CommitteeDto;
+  concludedAt: string | null;
+  concludedByName: string | null;
+  contractId: number | null;
+  contractNumber: string | null;
+  correspondenceId: number | null;
+  correspondenceNumber: string | null;
+  createdAt: string;
+  hasOverdueNote: boolean;
+  id: number;
+  inspectionDate: string | null;
+  kind: number;
+  kindAr: string;
+  minutesVersionId: number | null;
+  notes: HandoverNoteDto[];
+  number: string;
+  openNotes: number;
+  projectId: number;
+  projectName: string;
+  requestedAt: string;
+  requestedByName: string;
+  requestNote: string;
+  result: number | null;
+  resultAr: string;
+  resultNote: string;
+  rowVersion: string;
+  status: number;
+  statusAr: string;
+  supervisionReportVersionId: number | null;
+  totalNotes: number;
+}
+
+export interface HandoverListItemDto {
+  branchId: number;
+  contractId: number | null;
+  contractNumber: string | null;
+  createdAt: string;
+  hasOverdueNote: boolean;
+  id: number;
+  inspectionDate: string | null;
+  kind: number;
+  kindAr: string;
+  number: string;
+  openNotes: number;
+  projectId: number;
+  projectName: string;
+  requestedAt: string;
+  result: number | null;
+  resultAr: string;
+  status: number;
+  statusAr: string;
+  totalNotes: number;
+}
+
+export interface HandoverListItemDtoPagedResultDto {
+  items: HandoverListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface HandoverNoteDto {
+  canEdit: boolean;
+  canFix: boolean;
+  canRemove: boolean;
+  canVerify: boolean;
+  createdAt: string;
+  description: string;
+  dueDate: string | null;
+  evidenceVersionId: number | null;
+  fixedAt: string | null;
+  fixedByName: string | null;
+  fixNote: string;
+  id: number;
+  isOverdue: boolean;
+  responsibleName: string | null;
+  responsibleUserId: number | null;
+  rowVersion: string;
+  status: number;
+  statusAr: string;
+  verifiedAt: string | null;
+  verifiedByName: string | null;
+}
+
+export interface HandoverNoteRequestDto {
+  description: string;
+  dueDate: string | null;
+  responsibleName: string | null;
+  responsibleUserId: number | null;
+  rowVersion: string | null;
+}
+
+export interface HandoverRequestDto {
+  contractId: number | null;
+  correspondenceId: number | null;
+  kind: number;
+  note: string | null;
+  projectId: number;
 }
 
 export interface InstallationImportReportDto {
@@ -1560,6 +2016,43 @@ export interface RequestPartsDto {
   deviceLifetimeCost: number;
   items: MaintenanceRequestPartDto[];
   total: number;
+}
+
+export interface RetentionDecisionDto {
+  approvingAuthority: string;
+  decidedAt: string;
+  decision: number;
+  decisionAr: string;
+  documentVersionId: number | null;
+  id: number;
+  note: string;
+  recordedByName: string;
+}
+
+export interface RetentionDecisionRequestDto {
+  approvingAuthority: string;
+  decidedAt: string;
+  decision: number;
+  documentVersionId: number | null;
+  note: string | null;
+}
+
+export interface RetentionEntryDto {
+  amount: number;
+  canDecide: boolean;
+  decisions: RetentionDecisionDto[];
+  id: number;
+  note: string;
+  recordedByName: string;
+  state: number;
+  stateAr: string;
+  withheldAt: string;
+}
+
+export interface RetentionRequestDto {
+  amount: number;
+  note: string | null;
+  withheldAt: string;
 }
 
 export interface ReviewDeliverableRequestDto {
@@ -2596,6 +3089,12 @@ export interface VacationTypeResponseDto {
   isPaid: boolean;
   name: string;
   paymentTypeAr: string;
+}
+
+export interface VerifyHandoverNoteRequestDto {
+  evidenceVersionId: number | null;
+  note: string | null;
+  rowVersion: string | null;
 }
 
 export interface WorkTaskAssigneeDto {

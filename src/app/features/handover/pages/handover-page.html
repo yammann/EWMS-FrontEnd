@@ -1,0 +1,209 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      @if (handover(); as h) {
+        <span class="eyebrow">الاستلام · <a [routerLink]="['/projects', h.projectId]">{{ h.projectName }}</a></span>
+      } @else { <span class="eyebrow">الاستلام</span> }
+      <h1>{{ handover()?.number || (loading() ? 'جارٍ التحميل…' : 'محضر الاستلام') }}</h1>
+      @if (handover(); as h) {
+        <p class="muted">{{ h.kindAr }} · <span class="pill">{{ h.statusAr }}</span>@if (h.resultAr) { · <strong>{{ h.resultAr }}</strong> }
+          · الملاحظات المفتوحة {{ h.openNotes }} من {{ h.totalNotes }}
+          @if (h.hasOverdueNote) { · <strong class="late">فيه ملاحظة تجاوزت موعدها</strong> }
+          @if (h.contractId) { · العقد: <a [routerLink]="['/contracts', h.contractId]" dir="ltr">{{ h.contractNumber }}</a> }
+          @if (h.correspondenceNumber) { · معاملة: <a [routerLink]="['/diwan', h.correspondenceId]" dir="ltr">{{ h.correspondenceNumber }}</a> }</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (handover(); as h) {
+        @if (h.canFormCommittee) { <button class="btn" type="button" (click)="open({ kind: 'committee' })">تشكيل لجنة الاستلام</button> }
+        @if (h.canConclude) { <button class="btn" type="button" (click)="open({ kind: 'conclude' })">تسجيل الكشف والنتيجة</button> }
+        @if (h.canEditCommittee) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'committee' })">تعديل اللجنة</button> }
+        @if (h.canCancel) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'cancel' })">إلغاء الطلب</button> }
+      }
+      <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (handover(); as h) {
+    @if (h.status === hs.requested) { <p class="notice" role="status">طلب بانتظار تشكيل لجنة الاستلام{{ h.canFormCommittee ? ' — شكّلها بزر «تشكيل لجنة الاستلام».' : '.' }}</p> }
+    @else if (h.status === hs.formed) { <p class="notice" role="status">اللجنة مشكَّلة: سجّل ملاحظاتها أثناء الكشف ثم النتيجة.</p> }
+    @else if (h.status === hs.cancelled) { <p class="notice" role="status">طلب ملغى: للقراءة.</p> }
+    @else if (h.result === hr.withNotes && h.openNotes > 0) { <p class="notice warn" role="status">انتهى «بملاحظات»: تُتابَع الملاحظات حتى تُغلق (معالجة ثم تحقق من غير من عالج).</p> }
+
+    <nav class="tabs" role="tablist" aria-label="أقسام المحضر">
+      @for (t of tabs; track t.key) {
+        <button type="button" role="tab" class="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="select(t.key)">{{ t.label }}</button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('main') {
+        <section class="panel">
+          <div class="panel-heading"><h2>الطلب والنتيجة</h2></div>
+          <dl class="facts">
+            <div><dt>قدّمه</dt><dd>{{ h.requestedByName }} · {{ h.requestedAt | utc | date:'yyyy/MM/dd' }}</dd></div>
+            <div><dt>تاريخ الكشف</dt><dd>{{ h.inspectionDate ? (h.inspectionDate | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+            <div><dt>النتيجة</dt><dd>{{ h.resultAr || '—' }}</dd></div>
+            @if (h.concludedByName) { <div><dt>سجّلها</dt><dd>{{ h.concludedByName }} · {{ h.concludedAt | utc | date:'yyyy/MM/dd' }}</dd></div> }
+          </dl>
+          @if (h.requestNote) { <p class="pre"><strong>ملاحظة الطلب:</strong> {{ h.requestNote }}</p> }
+          @if (h.resultNote) { <p class="pre"><strong>ملاحظة النتيجة:</strong> {{ h.resultNote }}</p> }
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><h2>لجنة الاستلام</h2></div>
+          @if (!h.committee) { <app-empty-state>لم تُشكَّل لجنة بعد</app-empty-state> }
+          @else {
+            <p class="muted">شُكّلت {{ h.committee.formedAt | utc | date:'yyyy/MM/dd' }}@if (h.committee.decisionNumber) { · قرار <span dir="ltr">{{ h.committee.decisionNumber }}</span> }</p>
+            <ul class="members">
+              @for (m of h.committee.members; track $index) { <li><strong>{{ m.name }}</strong>{{ m.isChair ? ' (رئيس)' : '' }} — {{ m.capacity }}{{ m.isExternal ? ' · من خارج النظام' : '' }}</li> }
+            </ul>
+            @if (h.committee.recommendations) { <p class="pre"><strong>التوصيات:</strong> {{ h.committee.recommendations }}</p> }
+          }
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><h2>ملاحظات اللجنة <span class="count">({{ h.notes.length }})</span></h2>
+            @if (h.canAddNote) { <button class="btn" type="button" (click)="open({ kind: 'note', n: null })">+ ملاحظة</button> }</div>
+          @if (!h.notes.length) { <app-empty-state>لا ملاحظات مسجَّلة</app-empty-state> }
+          <div class="cards">
+            @for (n of h.notes; track n.id) {
+              <article class="card">
+                <header><h3>ملاحظة {{ $index + 1 }}</h3><span [class]="noteClass(n)">{{ n.statusAr }}{{ n.isOverdue ? ' — متأخرة' : '' }}</span></header>
+                <p class="pre">{{ n.description }}</p>
+                <p class="muted">المسؤول: <strong>{{ n.responsibleName || 'غير مسند' }}</strong>@if (n.dueDate) { · الموعد {{ n.dueDate | utc | date:'yyyy/MM/dd' }} }</p>
+                @if (n.fixedByName) { <p class="pre"><strong>عالجها {{ n.fixedByName }}</strong> {{ n.fixedAt | utc | date:'yyyy/MM/dd' }}: {{ n.fixNote }}</p> }
+                @if (n.verifiedByName) { <p class="muted">تحقّق منها {{ n.verifiedByName }} {{ n.verifiedAt | utc | date:'yyyy/MM/dd' }}</p> }
+                <footer class="actions">
+                  @if (n.canFix) { <button type="button" class="btn btn-sm" (click)="open({ kind: 'fix', n })">تسجيل المعالجة</button> }
+                  @if (n.canVerify) {
+                    <button type="button" class="btn btn-sm" (click)="open({ kind: 'verify', n })">تحقّق وأغلق</button>
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'reject', n })">رفض المعالجة</button>
+                  }
+                  @if (n.canEdit) { <button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'note', n })">تعديل</button> }
+                  @if (n.canRemove) { <button type="button" class="btn btn-ghost btn-sm" (click)="removeNote(n)" [disabled]="saving()">حذف</button> }
+                </footer>
+              </article>
+            }
+          </div>
+        </section>
+      }
+      @case ('tasks') {
+        <app-linked-tasks entityType="Handover" [entityId]="h.id" />
+        <section class="panel"><p class="muted">تظهر هنا مهام لوحة المهام المرتبطة بهذا المحضر. اربط مهمة به من «الروابط» في نافذة المهمة بكتابة رقمه <span dir="ltr">{{ h.number }}</span>.</p></section>
+      }
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (dialog(); as d) {
+  @switch (d.kind) {
+    @case ('committee') {
+      <app-modal [heading]="handover()!.committee ? 'تعديل لجنة الاستلام' : 'تشكيل لجنة الاستلام'" [subheading]="handover()!.number" size="lg" [busy]="saving()" (closed)="dialog.set(null)">
+        <form (ngSubmit)="saveCommittee()">
+          <div class="modal-body form-stack">
+            <app-alert [message]="formError()" />
+            <div class="form-grid-2">
+              <label class="form-field"><span class="form-label">تاريخ التشكيل</span><input name="f" type="date" [(ngModel)]="formedAt"></label>
+              <label class="form-field"><span class="form-label">رقم قرار التشكيل <small class="hint">(اختياري)</small></span><input name="dn" [(ngModel)]="decisionNumber" maxlength="100" dir="ltr"></label>
+            </div>
+            <div class="form-field"><span class="form-label">الأعضاء <small class="hint">(رئيس واحد؛ موظف من مشاركي المشروع أو اسم من خارج النظام)</small></span>
+              @for (m of memberRows; track $index) {
+                <div class="member-row">
+                  <select [name]="'u' + $index" [(ngModel)]="m.userId"><option [ngValue]="null">اسم من خارج النظام…</option>@for (p of members(); track p.userId) { <option [ngValue]="p.userId">{{ p.fullName }}</option> }</select>
+                  @if (!m.userId) { <input [name]="'x' + $index" [(ngModel)]="m.externalName" placeholder="الاسم" maxlength="150"> } @else { <span></span> }
+                  <input [name]="'c' + $index" [(ngModel)]="m.capacity" placeholder="الصفة" maxlength="100">
+                  <label class="check"><input type="radio" name="chair" [checked]="m.isChair" (change)="setChair($index)"> رئيس</label>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="removeMember($index)" [disabled]="memberRows.length < 2">حذف</button>
+                </div>
+              }
+              <button type="button" class="btn btn-ghost btn-sm" (click)="addMember()">+ عضو</button>
+            </div>
+            <label class="form-field"><span class="form-label">التوصيات <small class="hint">(اختياري)</small></span><textarea name="r" [(ngModel)]="recommendations" rows="3" maxlength="4000"></textarea></label>
+          </div>
+          <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="submit" [disabled]="saving()">{{ handover()!.committee ? 'حفظ' : 'تشكيل' }}</button></footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('conclude') {
+      <app-modal heading="الكشف والنتيجة" [subheading]="handover()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <div class="choices" role="radiogroup">
+            <label class="choice" [class.on]="result === hr.withoutNotes"><input type="radio" name="result" [value]="hr.withoutNotes" [(ngModel)]="result"><strong>بلا ملاحظات</strong></label>
+            <label class="choice" [class.on]="result === hr.withNotes"><input type="radio" name="result" [value]="hr.withNotes" [(ngModel)]="result"><strong>بملاحظات</strong></label>
+          </div>
+          <p class="muted">«بملاحظات» تشترط ملاحظة مسجَّلة واحدة على الأقل؛ و«بلا ملاحظات» لا تُقبل والمحضر فيه ملاحظات{{ handover()!.kind === 2 ? '، أو في المشروع ملاحظات لم تُغلق' : '' }}.</p>
+          <label class="form-field"><span class="form-label">تاريخ الكشف</span><input name="i" type="date" [(ngModel)]="inspectionDate"></label>
+          <label class="form-field"><span class="form-label">ملاحظة النتيجة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="2000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="conclude()" [disabled]="saving()">تسجيل النتيجة</button></footer>
+      </app-modal>
+    }
+
+    @case ('cancel') {
+      <app-modal heading="إلغاء طلب الاستلام" [subheading]="handover()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">يبقى الأثر ولا يُحذف الطلب؛ ويُسمح بطلب جديد من النوع نفسه.</p>
+          <label class="form-field"><span class="form-label">السبب <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">رجوع</button><button type="button" (click)="cancel()" [disabled]="saving()">إلغاء الطلب</button></footer>
+      </app-modal>
+    }
+
+    @case ('note') {
+      <app-modal [heading]="d.n ? 'تعديل ملاحظة' : 'ملاحظة جديدة'" [subheading]="handover()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <form (ngSubmit)="saveNote()">
+          <div class="modal-body form-stack">
+            <app-alert [message]="formError()" />
+            <label class="form-field"><span class="form-label">وصف الملاحظة (العمل الذي يحتاج معالجة)</span><textarea name="t" [(ngModel)]="noteText" rows="3" maxlength="2000"></textarea></label>
+            <label class="form-field"><span class="form-label">المسؤول عن المعالجة</span>
+              <select name="u" [(ngModel)]="responsibleUserId"><option [ngValue]="null">جهة بالاسم (مثل المقاول)…</option>@for (p of members(); track p.userId) { <option [ngValue]="p.userId">{{ p.fullName }}</option> }</select></label>
+            @if (!responsibleUserId) { <label class="form-field"><span class="form-label">اسم الجهة <small class="hint">(اختياري)</small></span><input name="rn" [(ngModel)]="responsibleName" maxlength="150" autocomplete="off"></label> }
+            <label class="form-field"><span class="form-label">موعد المعالجة <small class="hint">(اختياري — تجاوزه تنبيه لا قرار)</small></span><input name="dd" type="date" [(ngModel)]="dueDate"></label>
+          </div>
+          <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="submit" [disabled]="saving()">حفظ</button></footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('fix') {
+      <app-modal heading="تسجيل معالجة الملاحظة" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="pre muted">{{ d.n.description }}</p>
+          <label class="form-field"><span class="form-label">ما عولج</span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+          <small class="hint">تنتظر المعالجة التحقق من غير من سجّلها.</small>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="fix()" [disabled]="saving()">تسجيل</button></footer>
+      </app-modal>
+    }
+
+    @case ('verify') {
+      <app-modal heading="التحقق من المعالجة" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="pre muted">{{ d.n.description }}<br><strong>المعالجة:</strong> {{ d.n.fixNote }}</p>
+          <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="verify()" [disabled]="saving()">تحقّق وأغلق</button></footer>
+      </app-modal>
+    }
+
+    @case ('reject') {
+      <app-modal heading="رفض المعالجة" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <label class="form-field"><span class="form-label">السبب</span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="reject()" [disabled]="saving()">رفض وإعادة الفتح</button></footer>
+      </app-modal>
+    }
+  }
+}

@@ -1,0 +1,382 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      @if (contract(); as c) {
+        <span class="eyebrow">العقود · <a [routerLink]="['/projects', c.projectId]">{{ c.projectName }}</a></span>
+      } @else { <span class="eyebrow">العقود</span> }
+      <h1>{{ contract()?.number || (loading() ? 'جارٍ التحميل…' : 'العقد') }}</h1>
+      @if (contract(); as c) {
+        <p class="muted">@if (c.officialNumber) { <span dir="ltr">{{ c.officialNumber }}</span> · }<span class="pill">{{ c.statusAr }}</span> · {{ c.methodAr }}
+          @if (c.contractorName) { · {{ c.contractorName }} }
+          @if (c.warrantyEndingSoon) { · <strong class="late">ينتهي ضمانه بعد {{ c.warrantyDaysLeft }} يوم</strong> }
+          @if (c.correspondenceNumber) { · أمر التنفيذ: <a [routerLink]="['/diwan', c.correspondenceId]" dir="ltr">{{ c.correspondenceNumber }}</a> }</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (contract(); as c) {
+        @for (s of c.allowedStatuses; track s) { <button class="btn" type="button" (click)="open({ kind: 'status', to: s })">{{ s === cs.active ? 'سريان العقد' : s === cs.completed ? 'إنجاز العقد' : s === cs.terminated ? 'فسخ العقد' : 'إلغاء العقد' }}</button> }
+        @if (c.canEdit) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'edit' })">تعديل</button> }
+      }
+      <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (contract(); as c) {
+    <nav class="tabs" role="tablist" aria-label="أقسام العقد">
+      @for (t of tabs(); track t.key) {
+        <button type="button" role="tab" class="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="select(t.key)">{{ t.label }}</button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('info') {
+        <section class="panel">
+          <dl class="facts">
+            <div><dt>القيمة التعاقدية</dt><dd class="big">{{ c.value !== null ? (c.value | number:'1.0-2') + ' ' + c.currency : '—' }}</dd></div>
+            <div><dt>القيمة بعد الملاحق المعتمدة</dt><dd class="big">{{ c.effectiveValue !== null ? (c.effectiveValue | number:'1.0-2') + ' ' + c.currency : '—' }}</dd></div>
+            <div><dt>تاريخ العقد</dt><dd>{{ c.contractDate ? (c.contractDate | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+            <div><dt>بدء التنفيذ</dt><dd>{{ c.startDate ? (c.startDate | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+            <div><dt>مدة التنفيذ</dt><dd>{{ c.durationDays ? c.durationDays + ' يوم' : '—' }}@if (c.effectiveDurationDays && c.effectiveDurationDays !== c.durationDays) { <small class="muted"> (بعد الملاحق {{ c.effectiveDurationDays }})</small> }</dd></div>
+            <div><dt>أمر التنفيذ</dt><dd dir="ltr">{{ c.executionOrderNumber || '—' }}</dd></div>
+            <div><dt>فتحه</dt><dd>{{ c.createdByName }} · {{ c.createdAt | utc | date:'yyyy/MM/dd' }}</dd></div>
+          </dl>
+          @if (c.scope) { <h3>نطاق الأعمال</h3><p class="pre">{{ c.scope }}</p> }
+          @if (c.notes) { <h3>ملاحظات</h3><p class="pre">{{ c.notes }}</p> }
+          @if (c.method === 2) {
+            <h3>المناقصة</h3>
+            <dl class="facts">
+              <div><dt>رقم المناقصة</dt><dd dir="ltr">{{ c.tenderNumber || '—' }}</dd></div>
+              <div><dt>إرسالها</dt><dd>{{ c.tenderSentAt ? (c.tenderSentAt | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+              <div><dt>فضّها</dt><dd>{{ c.tenderOpenedAt ? (c.tenderOpenedAt | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+              <div><dt>الإرساء</dt><dd>{{ c.awardedAt ? (c.awardedAt | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+            </dl>
+            @if (c.awardNote) { <p class="pre muted">{{ c.awardNote }}</p> }
+          }
+        </section>
+      }
+
+      @case ('offers') {
+        <section class="panel">
+          <div class="panel-heading"><h2>عروض {{ c.methodAr }} <span class="count">({{ c.offers.length }})</span></h2>
+            @if (c.canAddOffer) { <button class="btn" type="button" (click)="open({ kind: 'offer' })">+ عرض</button> }</div>
+          @if (!c.offers.length) { <app-empty-state>لا عروض بعد — يُحدَّد المتعاقد معه بالإرساء على أحدها بالقرار الرسمي</app-empty-state> }
+          @else {
+            <div class="table-wrap"><table>
+              <thead><tr><th>المقاول</th><th>المبلغ</th><th>تاريخ الاستلام</th><th>ملاحظة</th><th>سجّله</th><th></th></tr></thead>
+              <tbody>
+                @for (o of c.offers; track o.id) {
+                  <tr>
+                    <td class="cell-strong">{{ o.contractorName }}@if (o.isAwarded) { <span class="pill ok">رسا عليه</span> }</td>
+                    <td class="num">{{ o.amount | number:'1.0-2' }} {{ c.currency }}</td>
+                    <td>{{ o.receivedAt | utc | date:'yyyy/MM/dd' }}</td>
+                    <td>{{ o.note || '—' }}</td>
+                    <td>{{ o.recordedByName }}</td>
+                    <td>@if (o.canAward) { <button type="button" class="btn btn-sm" (click)="open({ kind: 'award', o })">الإرساء عليه</button> }</td>
+                  </tr>
+                }
+              </tbody>
+            </table></div>
+            <p class="muted">الترتيب بالمبلغ للعرض فقط؛ الإرساء قرار رسمي لا يحسبه النظام.</p>
+          }
+        </section>
+      }
+
+      @case ('amendments') {
+        <section class="panel">
+          <div class="panel-heading"><h2>الملاحق المعتمدة <span class="count">({{ c.amendments.length }})</span></h2>
+            @if (c.canAddAmendment) { <button class="btn" type="button" (click)="open({ kind: 'amendment' })">+ ملحق</button> }</div>
+          @if (!c.amendments.length) { <app-empty-state>لا ملاحق{{ c.canAddAmendment ? '' : ' (تُسجَّل على العقد الساري)' }}</app-empty-state> }
+          @else {
+            <div class="table-wrap"><table>
+              <thead><tr><th>#</th><th>العنوان</th><th>أثره على القيمة</th><th>أثره على المدة</th><th>اعتُمد</th><th>سجّله</th></tr></thead>
+              <tbody>
+                @for (a of c.amendments; track a.id) {
+                  <tr>
+                    <td class="num">{{ a.number }}</td>
+                    <td class="cell-strong">{{ a.title }}@if (a.description) { <small class="muted"> {{ a.description }}</small> }</td>
+                    <td class="num">{{ a.valueChange !== null ? (a.valueChange | number:'1.0-2') : '—' }}</td>
+                    <td class="num">{{ a.durationChangeDays !== null ? a.durationChangeDays + ' يوم' : '—' }}</td>
+                    <td>{{ a.approvedAt | utc | date:'yyyy/MM/dd' }}</td>
+                    <td>{{ a.recordedByName }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table></div>
+          }
+        </section>
+      }
+
+      @case ('committee') {
+        <section class="panel">
+          <div class="panel-heading"><h2>اللجنة الفنية والمالية <span class="count">({{ c.committees.length }})</span></h2>
+            @if (c.canManageCommittee && !c.committees.length) { <button class="btn" type="button" (click)="open({ kind: 'committee', c: null })">تشكيل اللجنة</button> }</div>
+          @if (!c.committees.length) { <app-empty-state>لم تُشكَّل لجنة بعد: يشكّلها رئيس قسم الإشراف (مسؤول العقود، ممثل التسعير، ممثل المساحة والكميات…)</app-empty-state> }
+          <div class="cards">
+            @for (k of c.committees; track k.id) {
+              <article class="card">
+                <header><h3>{{ k.kindAr }}</h3><span class="muted">{{ k.formedAt | utc | date:'yyyy/MM/dd' }}</span></header>
+                @if (k.decisionNumber) { <p>قرار التشكيل: <strong dir="ltr">{{ k.decisionNumber }}</strong></p> }
+                <ul class="members">
+                  @for (m of k.members; track $index) { <li><strong>{{ m.name }}</strong>{{ m.isChair ? ' (رئيس)' : '' }} — {{ m.capacity }}{{ m.isExternal ? ' · من خارج النظام' : '' }}</li> }
+                </ul>
+                @if (k.recommendations) { <p class="pre"><strong>التوصيات:</strong> {{ k.recommendations }}</p> }
+                @if (k.canEdit) { <footer class="actions"><button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'committee', c: k })">تعديل</button></footer> }
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      @case ('retention') {
+        <section class="panel">
+          <div class="panel-heading"><h2>الضمان</h2></div>
+          <dl class="facts">
+            <div><dt>مدة الضمان</dt><dd>{{ c.warrantyMonths ? c.warrantyMonths + ' شهر' : '—' }}</dd></div>
+            <div><dt>بدايته</dt><dd>{{ c.warrantyStart ? (c.warrantyStart | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+            <div><dt>نهايته</dt><dd [class.late]="c.warrantyEndingSoon">{{ c.warrantyEnd ? (c.warrantyEnd | utc | date:'yyyy/MM/dd') : '—' }}@if (c.warrantyDaysLeft !== null) { <small> ({{ c.warrantyDaysLeft >= 0 ? 'بعد ' + c.warrantyDaysLeft + ' يوم' : 'انتهى' }})</small> }</dd></div>
+            @if (!c.warrantyEnd && c.suggestedWarrantyEnd) { <div><dt>المقترح من البداية والمدة</dt><dd>{{ c.suggestedWarrantyEnd | utc | date:'yyyy/MM/dd' }}</dd></div> }
+          </dl>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><h2>المبالغ المحتجزة <span class="count">({{ c.retention.length }})</span></h2>
+            @if (c.canRecordRetention) { <button class="btn" type="button" (click)="open({ kind: 'retention' })">+ مبلغ محتجز</button> }</div>
+          @if (!c.retention.length) { <app-empty-state>لا مبالغ محتجزة مسجَّلة</app-empty-state> }
+          @else {
+            <p class="notice">غير المفرج عنه: <strong>{{ c.stillWithheld | number:'1.0-2' }} {{ c.currency }}</strong> — أرقام تُدخَل يدوياً؛ لا معادلة للنسبة ولا للإفراج.</p>
+            <div class="cards">
+              @for (r of c.retention; track r.id) {
+                <article class="card">
+                  <header><h3>{{ r.amount | number:'1.0-2' }} {{ c.currency }}</h3><span [class]="retentionClass(r)">{{ r.stateAr }}</span></header>
+                  <p class="muted">احتُجز {{ r.withheldAt | utc | date:'yyyy/MM/dd' }} · سجّله {{ r.recordedByName }}</p>
+                  @if (r.note) { <p>{{ r.note }}</p> }
+                  @for (d of r.decisions; track d.id) {
+                    <p class="pre"><strong>{{ d.decisionAr }}</strong> — {{ d.decidedAt | utc | date:'yyyy/MM/dd' }} — {{ d.approvingAuthority }}@if (d.note) { : {{ d.note }} }</p>
+                  }
+                  @if (r.canDecide) { <footer class="actions"><button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'decide', r })">تسجيل قرار</button></footer> }
+                </article>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('evaluations') {
+        <section class="panel">
+          <div class="panel-heading"><h2>تقييم المقاول <span class="count">({{ c.evaluations.length }})</span></h2>
+            @if (c.canEvaluate) { <button class="btn" type="button" (click)="open({ kind: 'evaluation', e: null })">+ تقييم</button> }</div>
+          @if (!c.evaluations.length) { <app-empty-state>لا تقييمات تراها على هذا العقد</app-empty-state> }
+          <div class="cards">
+            @for (e of c.evaluations; track e.id) {
+              <article class="card">
+                <header><h3>{{ e.contractorName }}</h3><span [class]="evaluationClass(e)">{{ e.statusAr }}</span></header>
+                <p class="muted">{{ e.evaluationDate | utc | date:'yyyy/MM/dd' }} · أعدّه {{ e.evaluatedByName }}@if (e.reviewedByName) { · راجعه {{ e.reviewedByName }} }</p>
+                @if (e.notes) { <p class="pre">{{ e.notes }}</p> }
+                @if (e.reviewNote) { <p class="notice warn pre"><strong>ملاحظة المراجعة:</strong> {{ e.reviewNote }}</p> }
+                <ul class="members">
+                  @for (s of e.scores; track s.criterionId) { <li>{{ s.criterionName }}: <strong>{{ s.score ?? '—' }}</strong>{{ s.weight ? ' (وزن ' + s.weight + ')' : '' }}@if (s.note) { <small class="muted"> — {{ s.note }}</small> }</li> }
+                </ul>
+                <footer class="actions">
+                  @if (e.canEdit) { <button type="button" class="btn btn-sm" (click)="open({ kind: 'evaluation', e })">تعديل</button> }
+                  @if (e.canSubmit) { <button type="button" class="btn btn-sm" (click)="submitEvaluation(e)" [disabled]="saving()">إرسال إلى مكتب العقود</button> }
+                  @if (e.canEdit) { <button type="button" class="btn btn-ghost btn-sm" (click)="deleteEvaluation(e)" [disabled]="saving()">حذف المسودة</button> }
+                  @if (e.canReview) {
+                    <button type="button" class="btn btn-sm" (click)="open({ kind: 'evalReview', e })">حفظ في ملف المقاول</button>
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'evalReturn', e })">إعادة لمُعدّه</button>
+                  }
+                </footer>
+              </article>
+            }
+          </div>
+          <p class="muted">الدرجات يدوية (0–100) بلا مجموع ولا تصنيف تلقائي؛ ومن أعدّ التقييم لا يراجعه.</p>
+        </section>
+      }
+
+      @case ('tasks') {
+        <app-linked-tasks entityType="Contract" [entityId]="c.id" />
+        <section class="panel"><p class="muted">تظهر هنا مهام لوحة المهام المرتبطة بهذا العقد. اربط مهمة به من «الروابط» في نافذة المهمة بكتابة رقمه <span dir="ltr">{{ c.number }}</span>.</p></section>
+      }
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (dialog(); as d) {
+  @switch (d.kind) {
+    @case ('edit') { <app-contract-form-dialog [projectId]="contract()!.projectId" [branchId]="contract()!.branchId" [contract]="contract()" [busy]="saving()" [error]="formError()" (submitted)="saveContract($event)" (closed)="dialog.set(null)" /> }
+
+    @case ('status') {
+      <app-modal [heading]="d.to === cs.active ? 'سريان العقد' : d.to === cs.completed ? 'إنجاز العقد' : d.to === cs.terminated ? 'فسخ العقد' : 'إلغاء العقد'" [subheading]="contract()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">من «{{ contract()!.statusAr }}» إلى «{{ statusAr(d.to) }}» بقرار يدوي (لا تنتقل الحالة بمرور الوقت).{{ d.to === cs.active ? ' يشترط السريان الرقم الرسمي والمتعاقد معه وتاريخ العقد والقيمة، وللمناقصة وعروض الأسعار عرضاً مُرسًّى عليه.' : '' }}</p>
+          <label class="form-field"><span class="form-label">السبب <small class="hint">{{ d.to === cs.terminated || d.to === cs.cancelled ? '(مطلوب)' : '(اختياري)' }}</small></span>
+            <textarea name="note" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions">
+          <button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button>
+          <button type="button" (click)="changeStatus()" [disabled]="saving()">تأكيد</button>
+        </footer>
+      </app-modal>
+    }
+
+    @case ('offer') {
+      <app-modal heading="تسجيل عرض" [subheading]="contract()!.methodAr" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <form (ngSubmit)="addOffer()">
+          <div class="modal-body form-stack">
+            <app-alert [message]="formError()" />
+            <label class="form-field"><span class="form-label">المقاول</span>
+              <select name="c" [(ngModel)]="contractorId"><option [ngValue]="null">— اختر —</option>@for (k of contractors(); track k.id) { <option [ngValue]="k.id">{{ k.name }}</option> }</select></label>
+            <div class="form-grid-2">
+              <label class="form-field"><span class="form-label">مبلغ العرض ({{ contract()!.currency }})</span><input name="a" type="number" min="0" step="0.01" [(ngModel)]="amount"></label>
+              <label class="form-field"><span class="form-label">تاريخ الاستلام</span><input name="d" type="date" [(ngModel)]="date"></label>
+            </div>
+            <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></label>
+          </div>
+          <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="submit" [disabled]="saving()">تسجيل العرض</button></footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('award') {
+      <app-modal heading="الإرساء على عرض" [subheading]="d.o.contractorName" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">بالقرار الرسمي: يصير «{{ d.o.contractorName }}» المتعاقد معه، وإن لم تكن للعقد قيمة بعد تُنسخ قيمة العرض ({{ d.o.amount | number:'1.0-2' }} {{ contract()!.currency }}) ويعدّلها مكتب العقود عند الإبرام.</p>
+          <label class="form-field"><span class="form-label">تاريخ الإرساء</span><input name="d" type="date" [(ngModel)]="date"></label>
+          <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="award()" [disabled]="saving()">تأكيد الإرساء</button></footer>
+      </app-modal>
+    }
+
+    @case ('amendment') {
+      <app-modal heading="ملحق معتمد" [subheading]="contract()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <form (ngSubmit)="addAmendment()">
+          <div class="modal-body form-stack">
+            <app-alert [message]="formError()" />
+            <label class="form-field"><span class="form-label">العنوان</span><input name="t" [(ngModel)]="title" maxlength="200" autocomplete="off"></label>
+            <div class="form-grid-2">
+              <label class="form-field"><span class="form-label">أثره على القيمة ({{ contract()!.currency }}) <small class="hint">(موجب أو سالب)</small></span><input name="v" type="number" step="0.01" [(ngModel)]="valueChange"></label>
+              <label class="form-field"><span class="form-label">أثره على المدة (يوم) <small class="hint">(موجب أو سالب)</small></span><input name="dd" type="number" [(ngModel)]="durationChange"></label>
+            </div>
+            <label class="form-field"><span class="form-label">تاريخ الاعتماد</span><input name="d" type="date" [(ngModel)]="date"></label>
+            <label class="form-field"><span class="form-label">الوصف <small class="hint">(مطلوب إن لم يُذكر أثر على القيمة أو المدة)</small></span><textarea name="n" [(ngModel)]="description" rows="2" maxlength="2000"></textarea></label>
+            <small class="hint">الملحق سجل يُضاف ولا يُعدَّل؛ ارفع وثيقته من «وثائق» المشروع.</small>
+          </div>
+          <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="submit" [disabled]="saving()">تسجيل الملحق</button></footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('committee') {
+      <app-modal [heading]="d.c ? 'تعديل اللجنة' : 'تشكيل اللجنة الفنية والمالية'" [subheading]="contract()!.number" size="lg" [busy]="saving()" (closed)="dialog.set(null)">
+        <form (ngSubmit)="saveCommittee()">
+          <div class="modal-body form-stack">
+            <app-alert [message]="formError()" />
+            <div class="form-grid-2">
+              <label class="form-field"><span class="form-label">تاريخ التشكيل</span><input name="f" type="date" [(ngModel)]="formedAt"></label>
+              <label class="form-field"><span class="form-label">رقم قرار التشكيل <small class="hint">(اختياري)</small></span><input name="dn" [(ngModel)]="decisionNumber" maxlength="100" dir="ltr"></label>
+            </div>
+            <div class="form-field"><span class="form-label">الأعضاء <small class="hint">(رئيس واحد؛ موظف من مشاركي المشروع أو اسم من خارج النظام)</small></span>
+              @for (m of memberRows; track $index) {
+                <div class="member-row">
+                  <select [name]="'u' + $index" [(ngModel)]="m.userId"><option [ngValue]="null">اسم من خارج النظام…</option>@for (p of members(); track p.userId) { <option [ngValue]="p.userId">{{ p.fullName }}</option> }</select>
+                  @if (!m.userId) { <input [name]="'x' + $index" [(ngModel)]="m.externalName" placeholder="الاسم" maxlength="150"> } @else { <span></span> }
+                  <input [name]="'c' + $index" [(ngModel)]="m.capacity" placeholder="الصفة" maxlength="100">
+                  <label class="check"><input type="radio" name="chair" [checked]="m.isChair" (change)="setChair($index)"> رئيس</label>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="removeMember($index)" [disabled]="memberRows.length < 2">حذف</button>
+                </div>
+              }
+              <button type="button" class="btn btn-ghost btn-sm" (click)="addMember()">+ عضو</button>
+            </div>
+            <label class="form-field"><span class="form-label">التوصيات والقرارات <small class="hint">(اختياري)</small></span><textarea name="r" [(ngModel)]="recommendations" rows="3" maxlength="4000"></textarea></label>
+          </div>
+          <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="submit" [disabled]="saving()">{{ d.c ? 'حفظ' : 'تشكيل' }}</button></footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('retention') {
+      <app-modal heading="مبلغ محتجز" [subheading]="contract()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <form (ngSubmit)="addRetention()">
+          <div class="modal-body form-stack">
+            <app-alert [message]="formError()" />
+            <div class="form-grid-2">
+              <label class="form-field"><span class="form-label">المبلغ ({{ contract()!.currency }})</span><input name="a" type="number" min="0" step="0.01" [(ngModel)]="amount"></label>
+              <label class="form-field"><span class="form-label">تاريخ الاحتجاز</span><input name="d" type="date" [(ngModel)]="date"></label>
+            </div>
+            <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></label>
+            <small class="hint">يُدخَل المبلغ يدوياً كما احتُجز؛ لا يحسب النظام نسبة ولا يقرر الإفراج.</small>
+          </div>
+          <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="submit" [disabled]="saving()">تسجيل</button></footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('decide') {
+      <app-modal heading="قرار في مبلغ محتجز" [subheading]="(d.r.amount | number:'1.0-2') + ' ' + contract()!.currency" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <div class="choices" role="radiogroup">
+            <label class="choice" [class.on]="decision === rd.release"><input type="radio" name="decision" [value]="rd.release" [(ngModel)]="decision"><strong>إفراج (نهائي)</strong></label>
+            <label class="choice" [class.on]="decision === rd.continue"><input type="radio" name="decision" [value]="rd.continue" [(ngModel)]="decision"><strong>استمرار الاحتجاز</strong></label>
+          </div>
+          <div class="form-grid-2">
+            <label class="form-field"><span class="form-label">جهة الاعتماد</span><input name="au" [(ngModel)]="authority" maxlength="200" autocomplete="off"></label>
+            <label class="form-field"><span class="form-label">تاريخ القرار</span><input name="d" type="date" [(ngModel)]="date"></label>
+          </div>
+          <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="decideRetention()" [disabled]="saving()">تسجيل القرار</button></footer>
+      </app-modal>
+    }
+
+    @case ('evaluation') {
+      <app-modal [heading]="d.e ? 'تعديل مسودة التقييم' : 'تقييم المقاول'" [subheading]="contract()!.contractorName ?? ''" size="lg" [busy]="saving()" (closed)="dialog.set(null)">
+        <form (ngSubmit)="saveEvaluation()">
+          <div class="modal-body form-stack">
+            <app-alert [message]="formError()" />
+            <label class="form-field"><span class="form-label">تاريخ التقييم</span><input name="ed" type="date" [(ngModel)]="evaluationDate"></label>
+            @if (!scoreRows.length) { <p class="muted">لا معايير فعّالة في الفرع — يعرّفها مكتب العقود من «معايير تقييم المقاولين».</p> }
+            <div class="form-field">
+              @for (s of scoreRows; track s.criterionId) {
+                <div class="score-row">
+                  <span><strong>{{ s.name }}</strong>@if (s.weight) { <small class="muted"> (وزن {{ s.weight }})</small> }</span>
+                  <input [name]="'s' + s.criterionId" type="number" min="0" max="100" step="0.01" [(ngModel)]="s.score" placeholder="0–100">
+                  <input [name]="'n' + s.criterionId" [(ngModel)]="s.note" maxlength="500" placeholder="ملاحظة">
+                </div>
+              }
+            </div>
+            <label class="form-field"><span class="form-label">ملاحظات عامة <small class="hint">(اختياري)</small></span><textarea name="en" [(ngModel)]="evaluationNotes" rows="2" maxlength="2000"></textarea></label>
+            <small class="hint">الدرجات يدوية؛ لا يحسب النظام مجموعاً ولا تصنيفاً. بعد الحفظ أرسل التقييم إلى مكتب العقود.</small>
+          </div>
+          <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="submit" [disabled]="saving()">حفظ المسودة</button></footer>
+        </form>
+      </app-modal>
+    }
+
+    @case ('evalReview') {
+      <app-modal heading="حفظ التقييم في ملف المقاول" [subheading]="d.e.evaluatedByName" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">بعد الحفظ لا يُعدَّل التقييم. لا تراجع تقييماً أعددته.</p>
+          <label class="form-field"><span class="form-label">ملاحظة المراجعة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="reviewEvaluation()" [disabled]="saving()">حفظ</button></footer>
+      </app-modal>
+    }
+
+    @case ('evalReturn') {
+      <app-modal heading="إعادة التقييم لمُعدّه" [subheading]="d.e.evaluatedByName" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <label class="form-field"><span class="form-label">السبب</span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="returnEvaluation()" [disabled]="saving()">إعادة</button></footer>
+      </app-modal>
+    }
+  }
+}

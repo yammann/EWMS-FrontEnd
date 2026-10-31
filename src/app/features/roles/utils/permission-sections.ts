@@ -43,6 +43,13 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'studies', title: 'الدراسات والمكاتب الفنية (بحدّ المشاريع التي يراها؛ المراجع غير من أعدّ المخرج)', names: ['ViewStudies', 'CreateStudyOrder', 'EditStudyOrder', 'PrepareStudyDeliverable', 'ReviewStudyDeliverable', 'RecordStudySubmission'] },
     { key: 'deliverable-types', title: 'أنواع المخرجات الفنية (إعدادات الفرع)', names: ['ViewDeliverableTypes', 'CreateDeliverableType', 'EditDeliverableType', 'DeleteDeliverableType'] }
   ] },
+  { key: 'contracts', title: 'العقود والتسليم والكفالة', groups: [
+    { key: 'contracts-work', title: 'العقود (بحدّ المشاريع التي يراها؛ المبالغ يدوية بلا معادلات)', names: ['ViewContracts', 'CreateContract', 'EditContract', 'ManageContractCommittees', 'AddContractAmendment', 'RecordContractRetention'] },
+    { key: 'contractors', title: 'المقاولون (بيانات الفرع)', names: ['ViewContractors', 'CreateContractor', 'EditContractor', 'DeleteContractor'] },
+    { key: 'contractor-evaluations', title: 'تقييم المقاولين (من أعدّ التقييم لا يراجعه)', names: ['ViewContractorEvaluations', 'EvaluateContractor', 'ReviewContractorEvaluation'] },
+    { key: 'evaluation-criteria', title: 'معايير التقييم (إعدادات الفرع، بلا مجموع ولا تصنيف)', names: ['ViewEvaluationCriteria', 'CreateEvaluationCriterion', 'EditEvaluationCriterion', 'DeleteEvaluationCriterion'] },
+    { key: 'handovers', title: 'الاستلام والتسليم (بحدّ المشاريع التي يراها؛ من عالج الملاحظة لا يتحقق منها)', names: ['ViewHandovers', 'RequestHandover', 'ManageHandover', 'FollowHandoverNotes'] }
+  ] },
   { key: 'diwan', title: 'الديوان', groups: [
     { key: 'diwan-view', title: 'الاطلاع على المعاملات (معاملاتي = سجّلتها أو أُحيلت إليّ أو مرّت بي، ثم قسمي، ثم فرعي)', names: ['ViewCorrespondence', 'ViewDepartmentCorrespondence', 'ViewBranchCorrespondence'] },
     { key: 'diwan-work', title: 'تسجيل المعاملات ومعالجتها (الإحالة لا تفتح المعاملة إلا لحاملي المعالجة في الوحدة الحالية)', names: ['RegisterCorrespondence', 'ReferCorrespondence', 'HandleCorrespondence', 'CloseCorrespondence'] },
@@ -60,7 +67,7 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'reports-staff', title: 'تقارير الموظفين والهيكل', names: ['ExportUsersReport', 'ExportStructureReport'] },
     { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
     { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
-    { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport', 'ExportStudiesReport'] },
+    { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport', 'ExportStudiesReport', 'ExportContractsReport'] },
     { key: 'reports-diwan', title: 'تقارير الديوان', names: ['ExportCorrespondenceReport', 'ExportOverdueCorrespondenceReport'] },
     { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
   ] },

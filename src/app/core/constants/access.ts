@@ -108,7 +108,17 @@ export const AppPermission = {
   PrepareStudyDeliverable: 'PrepareStudyDeliverable', ReviewStudyDeliverable: 'ReviewStudyDeliverable', RecordStudySubmission: 'RecordStudySubmission',
   ViewDeliverableTypes: 'ViewDeliverableTypes', CreateDeliverableType: 'CreateDeliverableType',
   EditDeliverableType: 'EditDeliverableType', DeleteDeliverableType: 'DeleteDeliverableType',
-  ExportStudiesReport: 'ExportStudiesReport'
+  ExportStudiesReport: 'ExportStudiesReport',
+
+  // العقود والتسليم والكفالة: حدّ العقود والاستلام حدّ رؤية المشروع (تحتاج معها «عرض المشاريع»)؛ المقاولون ومعايير التقييم بيانات الفرع.
+  // المبالغ يدوية بلا معادلات؛ من أعدّ التقييم لا يراجعه، ومن عالج الملاحظة لا يتحقق منها
+  ViewContracts: 'ViewContracts', CreateContract: 'CreateContract', EditContract: 'EditContract', ManageContractCommittees: 'ManageContractCommittees',
+  AddContractAmendment: 'AddContractAmendment', RecordContractRetention: 'RecordContractRetention', ExportContractsReport: 'ExportContractsReport',
+  ViewContractors: 'ViewContractors', CreateContractor: 'CreateContractor', EditContractor: 'EditContractor', DeleteContractor: 'DeleteContractor',
+  ViewContractorEvaluations: 'ViewContractorEvaluations', EvaluateContractor: 'EvaluateContractor', ReviewContractorEvaluation: 'ReviewContractorEvaluation',
+  ViewEvaluationCriteria: 'ViewEvaluationCriteria', CreateEvaluationCriterion: 'CreateEvaluationCriterion',
+  EditEvaluationCriterion: 'EditEvaluationCriterion', DeleteEvaluationCriterion: 'DeleteEvaluationCriterion',
+  ViewHandovers: 'ViewHandovers', RequestHandover: 'RequestHandover', ManageHandover: 'ManageHandover', FollowHandoverNotes: 'FollowHandoverNotes'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -160,7 +170,7 @@ export const REPORT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
   AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport,
   AppPermission.ExportProjectsReport, AppPermission.ExportCorrespondenceReport, AppPermission.ExportOverdueCorrespondenceReport,
-  AppPermission.ExportStudiesReport
+  AppPermission.ExportStudiesReport, AppPermission.ExportContractsReport
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [
@@ -203,6 +213,29 @@ export const DELIVERABLE_TYPE_VIEW: readonly AppPermissionName[] = [
 /** صفحة أنواع المخرجات: لمن يديرها (العرض وحده يُمنح لكل من يسند) */
 export const MANAGE_DELIVERABLE_TYPES: readonly AppPermissionName[] = [
   AppPermission.CreateDeliverableType, AppPermission.EditDeliverableType, AppPermission.DeleteDeliverableType
+];
+
+/** العقود: من يعمل على عقد (ينشئ أو يعدّل أو يلحق أو يحتجز أو يقيّم) يدخل القائمة — نفس سياسة AnyContractView في الباكاند */
+export const CONTRACT_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewContracts, AppPermission.CreateContract, AppPermission.EditContract, AppPermission.ManageContractCommittees,
+  AppPermission.AddContractAmendment, AppPermission.RecordContractRetention,
+  AppPermission.ViewContractorEvaluations, AppPermission.EvaluateContractor, AppPermission.ReviewContractorEvaluation
+];
+/** قائمة المقاولين للتعاقد والتقييم والفلاتر — نفس سياسة AnyContractorView */
+export const CONTRACTOR_VIEW: readonly AppPermissionName[] = [
+  AppPermission.ViewContractors, AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor,
+  AppPermission.ViewContracts, AppPermission.CreateContract, AppPermission.EditContract, AppPermission.EvaluateContractor, AppPermission.ViewContractorEvaluations
+];
+export const MANAGE_CONTRACTORS: readonly AppPermissionName[] = [AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor];
+/** معايير التقييم لمن يقيّم أو يراجع أو يديرها — نفس سياسة AnyEvaluationCriterionView */
+export const CRITERION_VIEW: readonly AppPermissionName[] = [
+  AppPermission.ViewEvaluationCriteria, AppPermission.CreateEvaluationCriterion, AppPermission.EditEvaluationCriterion, AppPermission.DeleteEvaluationCriterion,
+  AppPermission.EvaluateContractor, AppPermission.ReviewContractorEvaluation
+];
+export const MANAGE_CRITERIA: readonly AppPermissionName[] = [AppPermission.CreateEvaluationCriterion, AppPermission.EditEvaluationCriterion, AppPermission.DeleteEvaluationCriterion];
+/** الاستلام: من يطلب أو يدير أو يتابع ملاحظات يدخل القائمة — نفس سياسة AnyHandoverView */
+export const HANDOVER_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewHandovers, AppPermission.RequestHandover, AppPermission.ManageHandover, AppPermission.FollowHandoverNotes
 ];
 
 /** الديوان: من يسجّل أو يعالج أو يعتمد يدخل القائمة (يرى ما يخصه) — نفس سياسة AnyCorrespondenceView في الباكاند */
