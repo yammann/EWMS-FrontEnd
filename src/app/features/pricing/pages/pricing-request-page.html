@@ -1,0 +1,225 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      @if (request(); as r) {
+        <span class="eyebrow">مكتب التسعير@if (r.projectId) { · <a [routerLink]="['/projects', r.projectId]">{{ r.projectName }}</a> }</span>
+      } @else { <span class="eyebrow">مكتب التسعير</span> }
+      <h1>{{ request()?.number || (loading() ? 'جارٍ التحميل…' : 'طلب التسعير') }}</h1>
+      @if (request(); as r) {
+        <p class="muted"><strong>{{ r.title }}</strong> · <span class="pill">{{ r.statusAr }}</span>
+          @if (r.isOverdue) { · <strong class="late">تجاوز الموعد</strong> }
+          @if (r.outsideContractScope) { · خارج نطاق العقد }
+          @if (r.contractId) { · العقد: <a [routerLink]="['/contracts', r.contractId]" dir="ltr">{{ r.contractNumber }}</a> }
+          @if (r.correspondenceId) { · <a [routerLink]="['/diwan', r.correspondenceId]">المعاملة المرتبطة</a> }</p>
+      }
+    </div>
+    <div class="header-actions">
+      @if (request(); as r) {
+        @if (r.canAddOffer) { <button class="btn" type="button" (click)="open({ kind: 'offer', offer: null })">+ عرض مورد</button> }
+        @if (r.canRecommend) { <button class="btn" type="button" (click)="open({ kind: 'recommend' })">توثيق التوصية</button> }
+        @if (r.canDecide) { <button class="btn" type="button" (click)="open({ kind: 'decide' })">قرار الاعتماد</button> }
+        @if (r.canSendResult) { <button class="btn" type="button" (click)="open({ kind: 'send' })">تسجيل إرسال النتيجة</button> }
+        @if (r.canAssign) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'assign' })">{{ r.assigneeUserId ? 'تغيير المكلَّف' : 'تكليف موظف' }}</button> }
+        @if (r.canEdit) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'edit' })">تعديل</button> }
+        @if (r.canCancel) { <button class="btn btn-ghost" type="button" (click)="open({ kind: 'cancel' })">إلغاء الطلب</button> }
+      }
+      <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  @if (request(); as r) {
+    @if (r.status === ps.registered) { <p class="notice" role="status">طلب مسجَّل بانتظار تكليف موظف المكتب{{ r.canAssign ? ' — كلّفه بزر «تكليف موظف».' : '.' }}</p> }
+    @else if (r.status === ps.collecting) { <p class="notice" role="status">قيد جمع العروض: سجّل عرض كل مورد، قيّم المطابقة، ثم اختر لكل بند سطراً بسبب مكتوب. لا يختار النظام الأرخص عنك.</p> }
+    @else if (r.status === ps.recommended) { <p class="notice" role="status">وُثّقت التوصية وتنتظر الاعتماد من غير من أوصى بها.</p> }
+    @else if (r.status === ps.rejected) { <p class="notice warn" role="status">رُفضت النتيجة: {{ r.decisionNote }}</p> }
+    @else if (r.status === ps.cancelled) { <p class="notice" role="status">طلب ملغى: للقراءة.</p> }
+
+    <nav class="tabs" role="tablist" aria-label="أقسام الطلب">
+      @for (t of tabs; track t.key) {
+        <button type="button" role="tab" class="tab" [class.active]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="select(t.key)">{{ t.label }}</button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('main') {
+        <section class="panel">
+          <div class="panel-heading"><h2>بيانات الطلب</h2></div>
+          <dl class="facts">
+            <div><dt>سجّله</dt><dd>{{ r.registeredByName }} · {{ r.createdAt | utc | date:'yyyy/MM/dd' }}</dd></div>
+            <div><dt>المكلَّف</dt><dd>{{ r.assigneeName || '—' }}@if (r.assignedByName) { <small>كلّفه {{ r.assignedByName }} {{ r.assignedAt | utc | date:'yyyy/MM/dd' }}</small> }</dd></div>
+            <div><dt>الموعد</dt><dd>{{ r.dueDate ? (r.dueDate | utc | date:'yyyy/MM/dd') : '—' }}</dd></div>
+            <div><dt>البنود / العروض</dt><dd>{{ r.itemsCount }} / {{ r.offersCount }}</dd></div>
+          </dl>
+          @if (r.description) { <p class="pre">{{ r.description }}</p> }
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><h2>مقارنة العروض <span class="count">({{ r.items.length }} بنداً)</span></h2></div>
+          <p class="muted">تُقارَن الأسعار بحسب الوحدة والعملة نفسهما فقط؛ المختلف يظهر «غير قابل للمقارنة» ولا يُحوَّل. «الأرخص» معلومة بين المطابق القابل للمقارنة في كل عملة وليست اختياراً.</p>
+          @if (!r.items.length) { <app-empty-state>لا بنود</app-empty-state> }
+          @for (item of r.items; track item.id) {
+            <article class="item">
+              <header>
+                <h3>{{ $index + 1 }}. {{ item.description }}</h3>
+                <span class="muted">{{ item.quantity | number:'1.0-3' }} {{ item.unit }}@if (item.hasSelection) { · <span class="pill ok">مختار</span> }</span>
+              </header>
+              @if (item.specifications) { <p class="muted pre">{{ item.specifications }}</p> }
+              @if (!item.rows.length) { <p class="muted">لا عروض على هذا البند بعد</p> }
+              @else {
+                <div class="table-wrap"><table>
+                  <thead><tr><th>المورد</th><th>سعر الوحدة</th><th>الإجمالي</th><th>المطابقة</th><th>الحالة</th><th></th></tr></thead>
+                  <tbody>
+                    @for (row of item.rows; track row.lineId) {
+                      <tr [class.selected]="row.isSelected">
+                        <td>{{ row.supplierName }}</td>
+                        <td>{{ row.unitPrice | number:'1.0-4' }} {{ row.currency }} / {{ row.unit }}</td>
+                        <td>{{ row.comparable ? ((row.total | number:'1.0-2') + ' ' + row.currency) : '—' }}</td>
+                        <td><span [class]="conformityClass(row)">{{ row.conformityAr }}</span>@if (row.conformityNote) { <small>{{ row.conformityNote }}</small> }</td>
+                        <td>
+                          @if (row.isSelected) { <span class="pill ok">مختار</span>@if (row.selectionReason) { <small>{{ row.selectionReason }}</small> } }
+                          @if (!row.comparable) { <span class="pill warn">غير قابل للمقارنة</span>@if (row.notComparableReason) { <small>{{ row.notComparableReason }}</small> } }
+                          @else if (row.isLowest) { <span class="pill info">الأرخص بين المطابق</span> }
+                          @if (row.offerExpired) { <span class="pill warn">العرض منتهي</span> }
+                        </td>
+                        <td class="row-actions">
+                          @if (row.canSelect) { <button type="button" class="btn btn-sm" (click)="open({ kind: 'select', row, item: item.description })">اختيار</button> }
+                          @if (row.canUnselect) { <button type="button" class="btn btn-ghost btn-sm" (click)="unselect(row)" [disabled]="saving()">إلغاء الاختيار</button> }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table></div>
+              }
+            </article>
+          }
+
+          @if (r.selectedTotals.length) {
+            <div class="totals">
+              <strong>إجمالي المختار (لكل عملة على حدة):</strong>
+              @for (t of r.selectedTotals; track t.currency) { <span class="pill ok">{{ t.total | number:'1.0-2' }} {{ t.currency }}</span> }
+            </div>
+          }
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><h2>العروض الواردة <span class="count">({{ r.offers.length }})</span></h2></div>
+          @if (!r.offers.length) { <app-empty-state>لم يُسجَّل عرض بعد</app-empty-state> }
+          <div class="cards">
+            @for (o of r.offers; track o.id) {
+              <article class="card">
+                <header><h3>{{ o.supplierName }}</h3>@if (o.expired) { <span class="pill warn">منتهي</span> }</header>
+                <p class="muted">العملة: <strong dir="ltr">{{ o.currency }}</strong> · وصل {{ o.receivedAt | utc | date:'yyyy/MM/dd' }}@if (o.validUntil) { · صالح حتى {{ o.validUntil | utc | date:'yyyy/MM/dd' }} }@if (o.offerNumber) { · رقم <span dir="ltr">{{ o.offerNumber }}</span> }</p>
+                <p class="muted">أسعار {{ o.lines.length }} من {{ r.items.length }} بنداً · سجّله {{ o.recordedByName }}</p>
+                @if (o.supplyTerms) { <p class="pre"><strong>الشروط:</strong> {{ o.supplyTerms }}</p> }
+                @if (o.note) { <p class="pre">{{ o.note }}</p> }
+                <footer class="actions">@if (o.canEdit) { <button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'offer', offer: o })">تعديل</button> }</footer>
+              </article>
+            }
+          </div>
+        </section>
+
+        @if (r.recommendedByName || r.decidedByName || r.resultSentByName) {
+          <section class="panel">
+            <div class="panel-heading"><h2>التوصية والقرار والإرسال</h2></div>
+            <dl class="facts">
+              @if (r.recommendedByName) { <div><dt>أوصى</dt><dd>{{ r.recommendedByName }} · {{ r.recommendedAt | utc | date:'yyyy/MM/dd' }}</dd></div> }
+              @if (r.decidedByName) { <div><dt>قرّر</dt><dd>{{ r.decidedByName }} · {{ r.decidedAt | utc | date:'yyyy/MM/dd' }}</dd></div> }
+              @if (r.resultSentByName) { <div><dt>أرسل النتيجة</dt><dd>{{ r.resultSentByName }} إلى {{ r.resultRecipient }} · {{ r.resultSentAt | utc | date:'yyyy/MM/dd' }}</dd></div> }
+            </dl>
+            @if (r.recommendationNote) { <p class="pre"><strong>التوصية:</strong> {{ r.recommendationNote }}</p> }
+            @if (r.decisionNote) { <p class="pre"><strong>ملاحظة القرار:</strong> {{ r.decisionNote }}</p> }
+            @if (r.resultNote) { <p class="pre"><strong>ملاحظة الإرسال:</strong> {{ r.resultNote }}</p> }
+          </section>
+        }
+      }
+      @case ('tasks') {
+        <app-linked-tasks entityType="PricingRequest" [entityId]="r.id" />
+        <section class="panel"><p class="muted">تظهر هنا مهام لوحة المهام المرتبطة بهذا الطلب. اربط مهمة به من «الروابط» في نافذة المهمة بكتابة رقمه <span dir="ltr">{{ r.number }}</span>.</p></section>
+      }
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (dialog(); as d) {
+  @switch (d.kind) {
+    @case ('edit') { <app-pricing-request-form-dialog [request]="request()" [busy]="saving()" [error]="formError()" (submitted)="saveRequest($event)" (closed)="dialog.set(null)" /> }
+
+    @case ('offer') { <app-pricing-offer-form-dialog [request]="request()!" [offer]="d.offer" [busy]="saving()" [error]="formError()" (submitted)="saveOffer($event)" (closed)="dialog.set(null)" /> }
+
+    @case ('assign') {
+      <app-modal [heading]="request()!.assigneeUserId ? 'تغيير المكلَّف' : 'تكليف موظف'" [subheading]="request()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <label class="form-field"><span class="form-label">موظف المكتب</span>
+            <select name="a" [(ngModel)]="assigneeId"><option [ngValue]="null">اختر الموظف</option>@for (u of assignees(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }</select></label>
+          <small class="hint">القائمة: موظفو الفرع الذين يحملون صلاحية إعداد العروض. يتولى المكلَّف تسجيل العروض ومقارنتها واختيار السطور.</small>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="assign()" [disabled]="saving()">تكليف</button></footer>
+      </app-modal>
+    }
+
+    @case ('select') {
+      <app-modal heading="اختيار العرض لهذا البند" [subheading]="d.item" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted"><strong>{{ d.row.supplierName }}</strong> — {{ d.row.unitPrice }} {{ d.row.currency }} / {{ d.row.unit }}@if (d.row.isLowest) { · الأرخص بين المطابق } @else { · <strong>ليس الأرخص</strong> }</p>
+          <label class="form-field"><span class="form-label">سبب الاختيار <small class="hint">(مطلوب — يُحفظ مع القرار)</small></span><textarea name="r" [(ngModel)]="reason" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="confirmSelect()" [disabled]="saving()">اختيار</button></footer>
+      </app-modal>
+    }
+
+    @case ('recommend') {
+      <app-modal heading="توثيق التوصية" [subheading]="request()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">تشترط اختيار سطر لكل بند. بعد التوصية يُعتمد الطلب من غيرك؛ ومن أوصى لا يعتمد.</p>
+          <label class="form-field"><span class="form-label">التوصية</span><textarea name="n" [(ngModel)]="note" rows="4" maxlength="2000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="recommend()" [disabled]="saving()">إرسال للاعتماد</button></footer>
+      </app-modal>
+    }
+
+    @case ('decide') {
+      <app-modal heading="قرار الاعتماد" [subheading]="request()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          @if (request()!.recommendationNote) { <p class="pre muted"><strong>التوصية ({{ request()!.recommendedByName }}):</strong> {{ request()!.recommendationNote }}</p> }
+          <div class="choices" role="radiogroup">
+            <label class="choice" [class.on]="decision === decisions.approve"><input type="radio" name="dec" [value]="decisions.approve" [(ngModel)]="decision"><strong>اعتماد</strong></label>
+            <label class="choice" [class.on]="decision === decisions.return"><input type="radio" name="dec" [value]="decisions.return" [(ngModel)]="decision"><strong>إعادة لجمع العروض</strong></label>
+            <label class="choice" [class.on]="decision === decisions.reject"><input type="radio" name="dec" [value]="decisions.reject" [(ngModel)]="decision"><strong>رفض</strong></label>
+          </div>
+          <label class="form-field"><span class="form-label">الملاحظة <small class="hint">({{ decision === decisions.approve ? 'اختياري' : 'مطلوب' }})</small></span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="2000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="decide()" [disabled]="saving()">تأكيد القرار</button></footer>
+      </app-modal>
+    }
+
+    @case ('send') {
+      <app-modal heading="تسجيل إرسال النتيجة" [subheading]="request()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <label class="form-field"><span class="form-label">الجهة المستلمة <small class="hint">(مهندس الموقع أو مكتب العقود…)</small></span><input name="rc" [(ngModel)]="recipient" maxlength="200" autocomplete="off"></label>
+          <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">إلغاء</button><button type="button" (click)="sendResult()" [disabled]="saving()">تسجيل</button></footer>
+      </app-modal>
+    }
+
+    @case ('cancel') {
+      <app-modal heading="إلغاء طلب التسعير" [subheading]="request()!.number" size="md" [busy]="saving()" (closed)="dialog.set(null)">
+        <div class="modal-body form-stack">
+          <app-alert [message]="formError()" />
+          <p class="muted">يبقى الأثر ولا يُحذف الطلب.</p>
+          <label class="form-field"><span class="form-label">السبب <small class="hint">(اختياري)</small></span><textarea name="n" [(ngModel)]="note" rows="3" maxlength="1000"></textarea></label>
+        </div>
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="dialog.set(null)" [disabled]="saving()">رجوع</button><button type="button" (click)="cancel()" [disabled]="saving()">إلغاء الطلب</button></footer>
+      </app-modal>
+    }
+  }
+}

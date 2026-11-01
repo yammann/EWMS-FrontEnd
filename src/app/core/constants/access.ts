@@ -118,7 +118,13 @@ export const AppPermission = {
   ViewContractorEvaluations: 'ViewContractorEvaluations', EvaluateContractor: 'EvaluateContractor', ReviewContractorEvaluation: 'ReviewContractorEvaluation',
   ViewEvaluationCriteria: 'ViewEvaluationCriteria', CreateEvaluationCriterion: 'CreateEvaluationCriterion',
   EditEvaluationCriterion: 'EditEvaluationCriterion', DeleteEvaluationCriterion: 'DeleteEvaluationCriterion',
-  ViewHandovers: 'ViewHandovers', RequestHandover: 'RequestHandover', ManageHandover: 'ManageHandover', FollowHandoverNotes: 'FollowHandoverNotes'
+  ViewHandovers: 'ViewHandovers', RequestHandover: 'RequestHandover', ManageHandover: 'ManageHandover', FollowHandoverNotes: 'FollowHandoverNotes',
+
+  // مكتب التسعير: حدّ الطلب فرعه (ومقدّمه والمكلَّف يريانه)؛ لا مقارنة بين وحدات أو عملات مختلفة ولا اختيار آلي للأرخص؛ من أوصى أو أعدّ لا يعتمد
+  ViewPricingRequests: 'ViewPricingRequests', RegisterPricingRequest: 'RegisterPricingRequest', AssignPricingRequest: 'AssignPricingRequest',
+  PreparePricingOffers: 'PreparePricingOffers', ApprovePricingRequest: 'ApprovePricingRequest', SendPricingResult: 'SendPricingResult',
+  ViewPricingAgreements: 'ViewPricingAgreements', PreparePricingAgreement: 'PreparePricingAgreement', ApprovePricingAgreement: 'ApprovePricingAgreement',
+  ExportPricingReport: 'ExportPricingReport'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -170,7 +176,7 @@ export const REPORT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
   AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport,
   AppPermission.ExportProjectsReport, AppPermission.ExportCorrespondenceReport, AppPermission.ExportOverdueCorrespondenceReport,
-  AppPermission.ExportStudiesReport, AppPermission.ExportContractsReport
+  AppPermission.ExportStudiesReport, AppPermission.ExportContractsReport, AppPermission.ExportPricingReport
 ];
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [
@@ -224,7 +230,9 @@ export const CONTRACT_ACCESS: readonly AppPermissionName[] = [
 /** قائمة المقاولين للتعاقد والتقييم والفلاتر — نفس سياسة AnyContractorView */
 export const CONTRACTOR_VIEW: readonly AppPermissionName[] = [
   AppPermission.ViewContractors, AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor,
-  AppPermission.ViewContracts, AppPermission.CreateContract, AppPermission.EditContract, AppPermission.EvaluateContractor, AppPermission.ViewContractorEvaluations
+  AppPermission.ViewContracts, AppPermission.CreateContract, AppPermission.EditContract, AppPermission.EvaluateContractor, AppPermission.ViewContractorEvaluations,
+  // معدّو العروض والمحاضر يختارون المورد من السجل نفسه — نفس سياسة AnyContractorView
+  AppPermission.PreparePricingOffers, AppPermission.PreparePricingAgreement
 ];
 export const MANAGE_CONTRACTORS: readonly AppPermissionName[] = [AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor];
 /** معايير التقييم لمن يقيّم أو يراجع أو يديرها — نفس سياسة AnyEvaluationCriterionView */
@@ -237,6 +245,18 @@ export const MANAGE_CRITERIA: readonly AppPermissionName[] = [AppPermission.Crea
 export const HANDOVER_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewHandovers, AppPermission.RequestHandover, AppPermission.ManageHandover, AppPermission.FollowHandoverNotes
 ];
+
+/** مكتب التسعير: من يسجّل أو يكلّف أو يعدّ العروض أو يعتمد أو يرسل يدخل القائمة — نفس سياسة AnyPricingRequestView */
+export const PRICING_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewPricingRequests, AppPermission.RegisterPricingRequest, AppPermission.AssignPricingRequest,
+  AppPermission.PreparePricingOffers, AppPermission.ApprovePricingRequest, AppPermission.SendPricingResult
+];
+/** محاضر الاتفاق — نفس سياسة AnyPricingAgreementView */
+export const PRICING_AGREEMENT_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewPricingAgreements, AppPermission.PreparePricingAgreement, AppPermission.ApprovePricingAgreement
+];
+/** تعديل الطلب وإلغاؤه: لمقدّمه قبل التكليف أو لصاحب التكليف — نفس سياسة AnyPricingRequestEdit */
+export const PRICING_EDIT: readonly AppPermissionName[] = [AppPermission.RegisterPricingRequest, AppPermission.AssignPricingRequest];
 
 /** الديوان: من يسجّل أو يعالج أو يعتمد يدخل القائمة (يرى ما يخصه) — نفس سياسة AnyCorrespondenceView في الباكاند */
 export const DIWAN_ACCESS: readonly AppPermissionName[] = [

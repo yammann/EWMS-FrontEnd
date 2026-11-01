@@ -22,6 +22,8 @@
       <option value="Study">{{ labels.Study }}</option>
       <option value="Contract">{{ labels.Contract }}</option>
       <option value="Handover">{{ labels.Handover }}</option>
+      <option value="PricingRequest">{{ labels.PricingRequest }}</option>
+      <option value="PricingAgreement">{{ labels.PricingAgreement }}</option>
     </select>
     @if (type === 'Site') {
       <select name="site" [(ngModel)]="siteId" aria-label="الموقع">

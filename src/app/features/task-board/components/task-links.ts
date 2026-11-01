@@ -19,6 +19,8 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
     case 'Study': return `/studies/${id}`;
     case 'Contract': return `/contracts/${id}`;
     case 'Handover': return `/handovers/${id}`;
+    case 'PricingRequest': return `/pricing/${id}`;
+    case 'PricingAgreement': return `/pricing/agreements/${id}`;
     default: return canPrintVacation ? `/vacations/print/${id}` : null;
   }
 }
@@ -71,6 +73,8 @@ export class TaskLinks implements OnInit {
       case 'Study': return 'رقم الدراسة: STD-2026-00012';
       case 'Contract': return 'رقم العقد: CON-2026-00012';
       case 'Handover': return 'رقم الاستلام: HND-2026-00012';
+      case 'PricingRequest': return 'رقم طلب التسعير: PRC-2026-00012';
+      case 'PricingAgreement': return 'رقم المحضر: AGR-2026-00012';
       default: return 'رقم الطلب: MR-2026-00012';
     }
   }

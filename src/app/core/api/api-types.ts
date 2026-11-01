@@ -38,6 +38,13 @@ export interface AdjustSparePartDto {
   reason: string;
 }
 
+export interface AgreementLineRequestDto {
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+}
+
 export interface ApproveVacationRequestDto {
   approve: boolean;
   reason: string | null;
@@ -45,6 +52,11 @@ export interface ApproveVacationRequestDto {
 
 export interface AssignMaintenanceDto {
   userId: number;
+}
+
+export interface AssignPricingRequestDto {
+  assigneeUserId: number;
+  rowVersion: string | null;
 }
 
 export interface AssignedTaskActivityDto {
@@ -826,6 +838,12 @@ export interface DecideMaintenanceTransferDto {
 
 export interface DecideOutgoingDraftRequestDto {
   approve: boolean;
+  note: string | null;
+  rowVersion: string | null;
+}
+
+export interface DecidePricingRequestDto {
+  decision: number;
   note: string | null;
   rowVersion: string | null;
 }
@@ -1717,6 +1735,290 @@ export interface PermissionResponseDto {
   name: string;
 }
 
+export interface PricingAgreementDetailDto {
+  agreementDate: string;
+  approvalNote: string;
+  approvedAt: string | null;
+  approvedByName: string | null;
+  branchId: number;
+  canCancel: boolean;
+  canEdit: boolean;
+  canReview: boolean;
+  canSubmit: boolean;
+  contractId: number | null;
+  createdAt: string;
+  currency: string;
+  documentVersionId: number | null;
+  executionMethod: string;
+  id: number;
+  internalNumber: string;
+  lines: PricingAgreementLineDto[];
+  notes: string;
+  number: string | null;
+  preparedByName: string;
+  pricingRequestId: number | null;
+  projectId: number | null;
+  projectName: string | null;
+  returnNote: string;
+  rowVersion: string;
+  status: number;
+  statusAr: string;
+  submittedAt: string | null;
+  supplierId: number;
+  supplierName: string;
+  technicalSpecs: string;
+  total: number;
+}
+
+export interface PricingAgreementLineDto {
+  description: string;
+  id: number;
+  quantity: number;
+  sortOrder: number;
+  total: number;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface PricingAgreementListItemDto {
+  agreementDate: string;
+  branchId: number;
+  createdAt: string;
+  currency: string;
+  id: number;
+  internalNumber: string;
+  number: string | null;
+  preparedByName: string;
+  projectId: number | null;
+  projectName: string | null;
+  status: number;
+  statusAr: string;
+  supplierId: number;
+  supplierName: string;
+  total: number;
+}
+
+export interface PricingAgreementListItemDtoPagedResultDto {
+  items: PricingAgreementListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface PricingAgreementRequestDto {
+  agreementDate: string;
+  branchId: number | null;
+  contractId: number | null;
+  currency: string;
+  documentVersionId: number | null;
+  executionMethod: string | null;
+  lines: AgreementLineRequestDto[];
+  notes: string | null;
+  number: string | null;
+  pricingRequestId: number | null;
+  projectId: number | null;
+  rowVersion: string | null;
+  supplierId: number;
+  technicalSpecs: string | null;
+}
+
+export interface PricingAssigneeDto {
+  fullName: string;
+  id: number;
+}
+
+export interface PricingComparisonRowDto {
+  canSelect: boolean;
+  canUnselect: boolean;
+  comparable: boolean;
+  conformity: number;
+  conformityAr: string;
+  conformityNote: string;
+  currency: string;
+  isLowest: boolean;
+  isSelected: boolean;
+  lineId: number;
+  notComparableReason: string | null;
+  offerExpired: boolean;
+  offerId: number;
+  selectionReason: string;
+  supplierId: number;
+  supplierName: string;
+  total: number;
+  unit: string;
+  unitPrice: number;
+  validUntil: string | null;
+}
+
+export interface PricingDetailDto {
+  assignedAt: string | null;
+  assignedByName: string | null;
+  assigneeName: string | null;
+  assigneeUserId: number | null;
+  branchId: number;
+  canAddOffer: boolean;
+  canAssign: boolean;
+  canCancel: boolean;
+  canDecide: boolean;
+  canEdit: boolean;
+  canEditItems: boolean;
+  canRecommend: boolean;
+  canSendResult: boolean;
+  contractId: number | null;
+  contractNumber: string | null;
+  correspondenceId: number | null;
+  createdAt: string;
+  decidedAt: string | null;
+  decidedByName: string | null;
+  decisionNote: string;
+  description: string;
+  dueDate: string | null;
+  id: number;
+  isOverdue: boolean;
+  items: PricingItemDto[];
+  itemsCount: number;
+  number: string;
+  offers: PricingOfferDto[];
+  offersCount: number;
+  outsideContractScope: boolean;
+  projectId: number | null;
+  projectName: string | null;
+  recommendationNote: string;
+  recommendedAt: string | null;
+  recommendedByName: string | null;
+  registeredByName: string;
+  resultNote: string;
+  resultRecipient: string | null;
+  resultSentAt: string | null;
+  resultSentByName: string | null;
+  rowVersion: string;
+  selectedTotals: PricingTotalDto[];
+  status: number;
+  statusAr: string;
+  title: string;
+}
+
+export interface PricingItemDto {
+  currencies: string[];
+  description: string;
+  hasSelection: boolean;
+  id: number;
+  quantity: number;
+  rows: PricingComparisonRowDto[];
+  sortOrder: number;
+  specifications: string;
+  unit: string;
+}
+
+export interface PricingItemRequestDto {
+  description: string;
+  quantity: number;
+  specifications: string | null;
+  unit: string;
+}
+
+export interface PricingLineRequestDto {
+  conformity: number;
+  conformityNote: string | null;
+  itemId: number;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface PricingListItemDto {
+  assigneeName: string | null;
+  assigneeUserId: number | null;
+  branchId: number;
+  contractId: number | null;
+  createdAt: string;
+  dueDate: string | null;
+  id: number;
+  isOverdue: boolean;
+  itemsCount: number;
+  number: string;
+  offersCount: number;
+  outsideContractScope: boolean;
+  projectId: number | null;
+  projectName: string | null;
+  registeredByName: string;
+  status: number;
+  statusAr: string;
+  title: string;
+}
+
+export interface PricingListItemDtoPagedResultDto {
+  items: PricingListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface PricingOfferDto {
+  canEdit: boolean;
+  currency: string;
+  documentVersionId: number | null;
+  expired: boolean;
+  id: number;
+  lines: PricingOfferLineDto[];
+  note: string;
+  offerNumber: string | null;
+  receivedAt: string;
+  recordedByName: string;
+  rowVersion: string;
+  supplierId: number;
+  supplierName: string;
+  supplyTerms: string;
+  validUntil: string | null;
+}
+
+export interface PricingOfferLineDto {
+  conformity: number;
+  conformityNote: string;
+  id: number;
+  isSelected: boolean;
+  itemId: number;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface PricingOfferRequestDto {
+  currency: string;
+  documentVersionId: number | null;
+  lines: PricingLineRequestDto[];
+  note: string | null;
+  offerNumber: string | null;
+  receivedAt: string;
+  rowVersion: string | null;
+  supplierId: number;
+  supplyTerms: string | null;
+  validUntil: string | null;
+}
+
+export interface PricingRequestRequestDto {
+  branchId: number | null;
+  contractId: number | null;
+  correspondenceId: number | null;
+  description: string | null;
+  dueDate: string | null;
+  items: PricingItemRequestDto[];
+  outsideContractScope: boolean;
+  projectId: number | null;
+  rowVersion: string | null;
+  title: string;
+}
+
+export interface PricingStepRequestDto {
+  note: string | null;
+  rowVersion: string | null;
+}
+
+export interface PricingTotalDto {
+  currency: string;
+  total: number;
+}
+
 export interface ProjectDocumentResponseDto {
   approved: ProjectDocumentVersionResponseDto;
   canDelete: boolean;
@@ -2061,6 +2363,12 @@ export interface ReviewDeliverableRequestDto {
   rowVersion: string | null;
 }
 
+export interface ReviewPricingAgreementRequestDto {
+  approve: boolean;
+  note: string | null;
+  rowVersion: string | null;
+}
+
 export interface RoleResponseDto {
   id: number;
   name: string;
@@ -2360,8 +2668,18 @@ export interface ScheduleVersionResponseDto {
   versionNumber: number;
 }
 
+export interface SelectPricingLineRequestDto {
+  reason: string;
+}
+
 export interface SendBackDeliverableRequestDto {
   note: string;
+  rowVersion: string | null;
+}
+
+export interface SendPricingResultRequestDto {
+  note: string | null;
+  recipient: string;
   rowVersion: string | null;
 }
 

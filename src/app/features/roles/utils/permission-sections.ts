@@ -50,6 +50,10 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'evaluation-criteria', title: 'معايير التقييم (إعدادات الفرع، بلا مجموع ولا تصنيف)', names: ['ViewEvaluationCriteria', 'CreateEvaluationCriterion', 'EditEvaluationCriterion', 'DeleteEvaluationCriterion'] },
     { key: 'handovers', title: 'الاستلام والتسليم (بحدّ المشاريع التي يراها؛ من عالج الملاحظة لا يتحقق منها)', names: ['ViewHandovers', 'RequestHandover', 'ManageHandover', 'FollowHandoverNotes'] }
   ] },
+  { key: 'pricing', title: 'مكتب التسعير', groups: [
+    { key: 'pricing-requests', title: 'طلبات التسعير (بحدّ الفرع؛ لا اختيار آلي للأرخص، والاعتماد لغير من أوصى)', names: ['ViewPricingRequests', 'RegisterPricingRequest', 'AssignPricingRequest', 'PreparePricingOffers', 'ApprovePricingRequest', 'SendPricingResult'] },
+    { key: 'pricing-agreements', title: 'محاضر الاتفاق مع المتعهدين الجدد (الإعداد لمدير المكتب، والاعتماد لغير من أعدّ)', names: ['ViewPricingAgreements', 'PreparePricingAgreement', 'ApprovePricingAgreement'] }
+  ] },
   { key: 'diwan', title: 'الديوان', groups: [
     { key: 'diwan-view', title: 'الاطلاع على المعاملات (معاملاتي = سجّلتها أو أُحيلت إليّ أو مرّت بي، ثم قسمي، ثم فرعي)', names: ['ViewCorrespondence', 'ViewDepartmentCorrespondence', 'ViewBranchCorrespondence'] },
     { key: 'diwan-work', title: 'تسجيل المعاملات ومعالجتها (الإحالة لا تفتح المعاملة إلا لحاملي المعالجة في الوحدة الحالية)', names: ['RegisterCorrespondence', 'ReferCorrespondence', 'HandleCorrespondence', 'CloseCorrespondence'] },
@@ -67,7 +71,7 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
     { key: 'reports-staff', title: 'تقارير الموظفين والهيكل', names: ['ExportUsersReport', 'ExportStructureReport'] },
     { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
     { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
-    { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport', 'ExportStudiesReport', 'ExportContractsReport'] },
+    { key: 'reports-projects', title: 'تقارير المشاريع', names: ['ExportProjectsReport', 'ExportStudiesReport', 'ExportContractsReport', 'ExportPricingReport'] },
     { key: 'reports-diwan', title: 'تقارير الديوان', names: ['ExportCorrespondenceReport', 'ExportOverdueCorrespondenceReport'] },
     { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
   ] },
