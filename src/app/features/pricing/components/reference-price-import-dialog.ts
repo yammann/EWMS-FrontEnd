@@ -42,9 +42,9 @@ import { PricingService } from '../data-access/pricing.service';
 
         @if (report(); as r) {
           <div class="summary">
-            <span class="pill" [class.ok]="!r.invalid">{{ r.total }} سطر</span>
-            <span class="pill ok">{{ r.valid }} سليم</span>
-            @if (r.invalid) { <span class="pill warn">{{ r.invalid }} فيه أخطاء</span> }
+            <span class="pill" [class.ok]="!r.invalid">الأسطر: {{ r.total }}</span>
+            <span class="pill ok">السليمة: {{ r.valid }}</span>
+            @if (r.invalid) { <span class="pill warn">الخاطئة: {{ r.invalid }}</span> }
           </div>
           <p [class.late]="r.invalid" role="status">{{ r.message }}</p>
           <div class="table-wrap report"><table>
@@ -116,7 +116,7 @@ export class ReferencePriceImportDialog {
     if (!f) return;
     trackRequest(this.service.importReferencePrices(f, false, this.branchId), this.busy, this.error, r => {
       this.report.set(r);
-      if (r.saved) { this.toast.success(`استُورد ${r.imported} سعراً وهي بانتظار الاعتماد`); this.imported.emit(); this.closed.emit(); }
+      if (r.saved) { this.toast.success(`استُوردت الأسعار (عددها ${r.imported}) وهي بانتظار الاعتماد`); this.imported.emit(); this.closed.emit(); }
     });
   }
 }
