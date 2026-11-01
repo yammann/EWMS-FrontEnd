@@ -5,7 +5,7 @@ import { AppPermission, AppPermissionName, PRICING_ACCESS, PRICING_AGREEMENT_ACC
 import { PagedResult } from '@core/models/paged-result.model';
 import {
   Agreement, AgreementFilter, AgreementInput, AgreementListItem, PricingAccess, PricingAssignee, PricingFilter, PricingListItem, PricingOfferInput, PricingRequest, PricingRequestInput,
-  ReferencePrice, ReferencePriceCorrection, ReferencePriceFilter, ReferencePriceInput, ReferencePriceItem
+  ReferencePrice, ReferencePriceCorrection, ReferencePriceFilter, ReferencePriceImportReport, ReferencePriceInput, ReferencePriceItem
 } from './pricing.models';
 
 /** مكتب التسعير (api/PricingRequests و api/PricingAgreements) — الحدود يطبّقها الخادم، ويعيد الطلب كاملاً بأعلام الأزرار وصفوف المقارنة بعد كل عملية */
@@ -30,6 +30,7 @@ export class PricingService {
       canViewReferencePrices: this.auth.hasAnyPermission(REFERENCE_PRICE_ACCESS),
       canAddReferencePrice: has(AppPermission.AddReferencePrice),
       canApproveReferencePrice: has(AppPermission.ApproveReferencePrice),
+      canImportReferencePrices: has(AppPermission.ImportReferencePrices),
       canChooseBranch: has(AppPermission.ViewOrganizationDashboard)
     };
   });
@@ -98,5 +99,14 @@ export class PricingService {
   getReferencePrice(id: number) { return this.api.get<ReferencePrice>(`/ReferencePrices/Get/${id}`); }
   createReferencePrice(v: ReferencePriceInput) { return this.api.post<ReferencePrice>('/ReferencePrices/Create', v); }
   correctReferencePrice(id: number, v: ReferencePriceCorrection) { return this.api.post<ReferencePrice>(`/ReferencePrices/Correct/${id}`, v); }
+  referencePriceTemplate() { return this.api.getBlob('/ReferencePrices/ImportTemplate'); }
+  /** dryRun=true معاينة بلا حفظ؛ false يحفظ كل الأسعار أو لا شيء (سطر خاطئ واحد يمنع الحفظ). branchId لنظرة المؤسسة */
+  importReferencePrices(file: File, dryRun: boolean, branchId: number | null = null) {
+    const body = new FormData();
+    body.append('file', file);
+    const q = new URLSearchParams({ dryRun: String(dryRun) });
+    if (branchId) q.set('branchId', String(branchId));
+    return this.api.post<ReferencePriceImportReport>(`/ReferencePrices/Import?${q}`, body);
+  }
   approveReferencePrice(id: number, note: string, rowVersion: string) { return this.api.post<ReferencePrice>(`/ReferencePrices/Approve/${id}`, { note: note.trim() || null, rowVersion }); }
 }

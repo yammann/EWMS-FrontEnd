@@ -2202,6 +2202,8 @@ export interface ReferencePriceDetailDto {
   documentVersionId: number | null;
   history: ReferencePriceListItemDto[];
   id: number;
+  importFileName: string | null;
+  importId: number | null;
   isLatest: boolean;
   isLatestForSupplier: boolean;
   itemCode: string | null;
@@ -2226,6 +2228,33 @@ export interface ReferencePriceDetailDto {
   supplierName: string;
   unit: string;
   unitPrice: number;
+}
+
+export interface ReferencePriceImportReportDto {
+  dryRun: boolean;
+  fileName: string;
+  imported: number;
+  importId: number | null;
+  invalid: number;
+  message: string;
+  rows: ReferencePriceImportRowDto[];
+  saved: boolean;
+  total: number;
+  valid: number;
+}
+
+export interface ReferencePriceImportRowDto {
+  currency: string;
+  errors: string[];
+  itemCode: string;
+  itemName: string;
+  priceDate: string;
+  row: number;
+  sourceDocument: string;
+  supplier: string;
+  unit: string;
+  unitPrice: string;
+  valid: boolean;
 }
 
 export interface ReferencePriceListItemDto {

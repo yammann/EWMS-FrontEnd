@@ -12,6 +12,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
 import { REFERENCE_STATUSES, ReferencePriceFilter, ReferencePriceInput, ReferencePriceItem } from '../data-access/pricing.models';
 import { PricingService } from '../data-access/pricing.service';
 import { ReferencePriceFormDialog, ReferencePriceSubmit } from '../components/reference-price-form-dialog';
+import { ReferencePriceImportDialog } from '../components/reference-price-import-dialog';
 
 const PAGE_SIZE = 20;
 
@@ -22,7 +23,7 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-reference-prices-page', standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, PageHeader, Alert, EmptyState, Pager, SelectValue, UtcPipe, ReferencePriceFormDialog],
+  imports: [DatePipe, DecimalPipe, RouterLink, PageHeader, Alert, EmptyState, Pager, SelectValue, UtcPipe, ReferencePriceFormDialog, ReferencePriceImportDialog],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './pricing-page.scss'],
   template: `
     <div class="page">
@@ -30,6 +31,7 @@ const PAGE_SIZE = 20;
                        subtitle="أسعار المواد عند الموردين بمصدرها وتاريخها — سجل لا يُعدَّل، والتصحيح بسجل بديل، والمعتمد للاستخدام الحالي غير التاريخي">
         @if (access().canView) { <a class="btn btn-ghost" routerLink="/pricing">طلبات التسعير</a> }
         <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+        @if (access().canImportReferencePrices) { <button class="btn btn-ghost" type="button" (click)="importing.set(true)">استيراد من Excel</button> }
         @if (access().canAddReferencePrice) { <button class="btn" type="button" (click)="dialog.set(true)">+ سعر مرجعي</button> }
       </app-page-header>
 
@@ -72,6 +74,10 @@ const PAGE_SIZE = 20;
       </section>
     </div>
 
+    @if (importing()) {
+      <app-reference-price-import-dialog (imported)="load()" (closed)="importing.set(false)" />
+    }
+
     @if (dialog()) {
       <app-reference-price-form-dialog [busy]="saving()" [error]="formError()" (submitted)="create($event)" (closed)="dialog.set(false)" />
     }`
@@ -89,6 +95,7 @@ export class ReferencePricesPage {
   loading = signal(false);
   error = signal('');
   dialog = signal(false);
+  importing = signal(false);
   saving = signal(false);
   formError = signal('');
 

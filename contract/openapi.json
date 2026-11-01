@@ -7495,6 +7495,15 @@
             "format": "int32",
             "type": "integer"
           },
+          "importFileName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "importId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
           "isLatest": {
             "type": "boolean"
           },
@@ -7582,6 +7591,94 @@
           "unitPrice": {
             "format": "double",
             "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ReferencePriceImportReportDto": {
+        "additionalProperties": false,
+        "properties": {
+          "dryRun": {
+            "type": "boolean"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "importId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "imported": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "invalid": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ReferencePriceImportRowDto"
+            },
+            "type": "array"
+          },
+          "saved": {
+            "type": "boolean"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "valid": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReferencePriceImportRowDto": {
+        "additionalProperties": false,
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "priceDate": {
+            "type": "string"
+          },
+          "row": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceDocument": {
+            "type": "string"
+          },
+          "supplier": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -26593,6 +26690,85 @@
                 }
               }
             },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ReferencePrices"
+        ]
+      }
+    },
+    "/api/ReferencePrices/Import": {
+      "post": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dryRun",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "branchId",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceImportReportDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceImportReportDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceImportReportDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ReferencePrices"
+        ]
+      }
+    },
+    "/api/ReferencePrices/ImportTemplate": {
+      "get": {
+        "responses": {
+          "200": {
             "description": "OK"
           }
         },

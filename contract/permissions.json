@@ -124,6 +124,7 @@
     "FollowHandoverNotes",
     "HandleCorrespondence",
     "HandleUnitTasks",
+    "ImportReferencePrices",
     "IssueSparePart",
     "ManageContractCommittees",
     "ManageHandover",
@@ -351,6 +352,7 @@
     "AnyReferencePriceView": [
       "AddReferencePrice",
       "ApproveReferencePrice",
+      "ImportReferencePrices",
       "ViewReferencePrices"
     ],
     "AnyReportExport": [

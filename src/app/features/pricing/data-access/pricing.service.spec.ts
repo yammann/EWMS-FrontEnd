@@ -51,6 +51,27 @@ describe('Pricing service', () => {
     expect(http.expectOne('/api/ReferencePrices/Approve/7').request.body).toEqual({ note: null, rowVersion: 'BBBB' });
   });
 
+  it('opens the reference price import only with its own permission', () => {
+    login(['AddReferencePrice']);
+    expect(service.access()).toMatchObject({ canAddReferencePrice: true, canImportReferencePrices: false });
+    login(['ImportReferencePrices']);
+    expect(service.access()).toMatchObject({ canViewReferencePrices: true, canImportReferencePrices: true, canAddReferencePrice: false });
+  });
+
+  it('uploads the import file as a form field with the dry run flag and the optional branch', () => {
+    const file = new File(['x'], 'prices.xlsx');
+    service.importReferencePrices(file, true).subscribe();
+    const preview = http.expectOne('/api/ReferencePrices/Import?dryRun=true');
+    expect((preview.request.body as FormData).get('file')).toBeInstanceOf(File);
+    preview.flush({});
+
+    service.importReferencePrices(file, false, 5).subscribe();
+    http.expectOne('/api/ReferencePrices/Import?dryRun=false&branchId=5').flush({});
+
+    service.referencePriceTemplate().subscribe();
+    http.expectOne('/api/ReferencePrices/ImportTemplate').flush(new Blob());
+  });
+
   it('builds the search query with only the filters that are set', () => {
     service.search({ branchId: null, projectId: 4, status: 2, search: ' أسلاك ', overdueOnly: true, mine: false, page: 2, pageSize: 20 }).subscribe();
     const req = http.expectOne(r => r.url.startsWith('/api/PricingRequests/Search'));

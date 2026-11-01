@@ -127,7 +127,8 @@ export const AppPermission = {
   ExportPricingReport: 'ExportPricingReport',
 
   // الأسعار المرجعية: سجل لا يُعدَّل (التصحيح بسجل بديل)؛ الإضافة غير الاعتماد، ومن أضاف لا يعتمد؛ «آخر سعر» الأحدث تاريخاً لا الأرخص
-  ViewReferencePrices: 'ViewReferencePrices', AddReferencePrice: 'AddReferencePrice', ApproveReferencePrice: 'ApproveReferencePrice'
+  ViewReferencePrices: 'ViewReferencePrices', AddReferencePrice: 'AddReferencePrice', ApproveReferencePrice: 'ApproveReferencePrice',
+  ImportReferencePrices: 'ImportReferencePrices'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -260,7 +261,7 @@ export const PRICING_AGREEMENT_ACCESS: readonly AppPermissionName[] = [
 ];
 /** الأسعار المرجعية: من يعرض أو يضيف أو يعتمد يدخل القائمة — نفس سياسة AnyReferencePriceView */
 export const REFERENCE_PRICE_ACCESS: readonly AppPermissionName[] = [
-  AppPermission.ViewReferencePrices, AppPermission.AddReferencePrice, AppPermission.ApproveReferencePrice
+  AppPermission.ViewReferencePrices, AppPermission.AddReferencePrice, AppPermission.ApproveReferencePrice, AppPermission.ImportReferencePrices
 ];
 /** تعديل الطلب وإلغاؤه: لمقدّمه قبل التكليف أو لصاحب التكليف — نفس سياسة AnyPricingRequestEdit */
 export const PRICING_EDIT: readonly AppPermissionName[] = [AppPermission.RegisterPricingRequest, AppPermission.AssignPricingRequest];

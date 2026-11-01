@@ -1,7 +1,7 @@
 import type {
   AgreementLineRequestDto, PricingAgreementDetailDto, PricingAgreementListItemDto, PricingAgreementRequestDto, PricingAssigneeDto, PricingComparisonRowDto,
   CorrectReferencePriceRequestDto, PricingDetailDto, PricingItemDto, PricingItemRequestDto, PricingLineRequestDto, PricingListItemDto, PricingOfferDto, PricingOfferRequestDto,
-  PricingRequestRequestDto, PricingTotalDto, ReferencePriceDetailDto, ReferencePriceListItemDto, ReferencePriceRequestDto
+  PricingRequestRequestDto, PricingTotalDto, ReferencePriceDetailDto, ReferencePriceImportReportDto, ReferencePriceImportRowDto, ReferencePriceListItemDto, ReferencePriceRequestDto
 } from '@core/api/api-types';
 
 // نماذج الواجهة هي أنواع العقد نفسها المولَّدة من الباكاند: الأعلام (can…) وصفوف المقارنة يحسبها الخادم بقواعده
@@ -27,6 +27,8 @@ export type ReferencePriceItem = ReferencePriceListItemDto;
 export type ReferencePrice = ReferencePriceDetailDto;
 export type ReferencePriceInput = ReferencePriceRequestDto;
 export type ReferencePriceCorrection = CorrectReferencePriceRequestDto;
+export type ReferencePriceImportReport = ReferencePriceImportReportDto;
+export type ReferencePriceImportRow = ReferencePriceImportRowDto;
 
 /** حالة السعر المرجعي (ReferencePriceStatus): تاريخي، معتمد للاستخدام الحالي، مُستبدَل بتصحيح */
 export const REFERENCE_STATUS = { historical: 1, approved: 2, superseded: 3 } as const;
@@ -64,7 +66,7 @@ export interface AgreementFilter { branchId: number | null; status: number | nul
 export interface PricingAccess {
   canView: boolean; canRegister: boolean; canAssign: boolean; canPrepareOffers: boolean; canApprove: boolean; canSendResult: boolean;
   canViewAgreements: boolean; canPrepareAgreement: boolean; canApproveAgreement: boolean;
-  canViewReferencePrices: boolean; canAddReferencePrice: boolean; canApproveReferencePrice: boolean;
+  canViewReferencePrices: boolean; canAddReferencePrice: boolean; canApproveReferencePrice: boolean; canImportReferencePrices: boolean;
   /** يختار الفرع (نظرة المؤسسة) */
   canChooseBranch: boolean;
 }
