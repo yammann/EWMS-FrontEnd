@@ -34,11 +34,12 @@
             @for (dep of departmentOptions(); track dep.id) { <option [value]="dep.id">{{ dep.name }}</option> }
           </select></label>
 
-        <label class="form-field"><span class="form-label">الموقع <small class="hint">(من السجل المشترك، اختياري)</small></span>
+        <label class="form-field"><span class="form-label">الموقع <small class="hint">(مطلوب — من السجل المشترك؛ يظهر المشروع على الخريطة بحسب موقعه)</small></span>
           <select #s [appSelectValue]="form.controls.siteId.value" (change)="form.controls.siteId.setValue(+s.value)">
-            <option value="0">بلا موقع بعد</option>
+            <option value="0">اختر الموقع</option>
             @for (site of sites(); track site.id) { <option [value]="site.id">{{ site.name }}{{ site.governorateName ? ' — ' + site.governorateName : '' }}</option> }
-          </select></label>
+          </select>
+          @if (form.controls.siteId.touched && !form.controls.siteId.value) { <small class="form-error">اختر موقع المشروع</small> }</label>
 
         @if (project()) {
           <label class="form-field"><span class="form-label">المرحلة</span>
