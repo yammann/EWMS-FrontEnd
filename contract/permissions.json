@@ -1,6 +1,7 @@
 {
   "permissions": [
     "AddContractAmendment",
+    "AddReferencePrice",
     "AdjustSparePartStock",
     "ApproveDelayJustification",
     "ApproveOutgoingCorrespondence",
@@ -8,6 +9,7 @@
     "ApprovePricingRequest",
     "ApproveProjectDocument",
     "ApproveProjectSchedule",
+    "ApproveReferencePrice",
     "ApproveScheduleExtension",
     "ApproveVacationFinal",
     "ApproveVacationFirst",
@@ -192,6 +194,7 @@
     "ViewProjectDocuments",
     "ViewProjectSchedule",
     "ViewProjects",
+    "ViewReferencePrices",
     "ViewReportLog",
     "ViewRoles",
     "ViewSites",
@@ -219,6 +222,7 @@
       "ViewContracts"
     ],
     "AnyContractorView": [
+      "AddReferencePrice",
       "CreateContract",
       "CreateContractor",
       "DeleteContractor",
@@ -343,6 +347,11 @@
       "ViewBranchProjects",
       "ViewDepartmentProjects",
       "ViewProjects"
+    ],
+    "AnyReferencePriceView": [
+      "AddReferencePrice",
+      "ApproveReferencePrice",
+      "ViewReferencePrices"
     ],
     "AnyReportExport": [
       "ExportContractsReport",

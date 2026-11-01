@@ -564,6 +564,24 @@ export interface ContractorResponseDto {
   rowVersion: string;
 }
 
+export interface CorrectReferencePriceRequestDto {
+  currency: string;
+  documentVersionId: number | null;
+  itemCode: string | null;
+  itemName: string;
+  notes: string | null;
+  priceDate: string;
+  projectId: number | null;
+  reason: string;
+  rowVersion: string | null;
+  source: number;
+  sourceDocument: string;
+  specifications: string | null;
+  supplierId: number;
+  unit: string;
+  unitPrice: number;
+}
+
 export interface CorrespondenceAttachmentDto {
   contentType: string;
   fileName: string;
@@ -2168,6 +2186,97 @@ export interface ReferCorrespondenceRequestDto {
   toDepartmentId: number;
   toOfficeId: number | null;
   toUserId: number | null;
+}
+
+export interface ReferencePriceDetailDto {
+  approvalNote: string;
+  approvedAt: string | null;
+  approvedByName: string | null;
+  branchId: number;
+  canApprove: boolean;
+  canCorrect: boolean;
+  correctionReason: string;
+  createdAt: string;
+  createdByName: string;
+  currency: string;
+  documentVersionId: number | null;
+  history: ReferencePriceListItemDto[];
+  id: number;
+  isLatest: boolean;
+  isLatestForSupplier: boolean;
+  itemCode: string | null;
+  itemName: string;
+  notes: string;
+  number: string;
+  priceDate: string;
+  projectId: number | null;
+  projectName: string | null;
+  rowVersion: string;
+  source: number;
+  sourceAr: string;
+  sourceDocument: string;
+  specifications: string;
+  status: number;
+  statusAr: string;
+  supersededById: number | null;
+  supersededByNumber: string | null;
+  supersedesId: number | null;
+  supersedesNumber: string | null;
+  supplierId: number;
+  supplierName: string;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface ReferencePriceListItemDto {
+  approvedByName: string | null;
+  branchId: number;
+  createdByName: string;
+  currency: string;
+  id: number;
+  isLatest: boolean;
+  isLatestForSupplier: boolean;
+  itemCode: string | null;
+  itemName: string;
+  number: string;
+  priceDate: string;
+  projectId: number | null;
+  projectName: string | null;
+  source: number;
+  sourceAr: string;
+  sourceDocument: string;
+  status: number;
+  statusAr: string;
+  supersedesId: number | null;
+  supplierId: number;
+  supplierName: string;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface ReferencePriceListItemDtoPagedResultDto {
+  items: ReferencePriceListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface ReferencePriceRequestDto {
+  branchId: number | null;
+  currency: string;
+  documentVersionId: number | null;
+  itemCode: string | null;
+  itemName: string;
+  notes: string | null;
+  priceDate: string;
+  projectId: number | null;
+  source: number;
+  sourceDocument: string;
+  specifications: string | null;
+  supplierId: number;
+  unit: string;
+  unitPrice: number;
 }
 
 export interface ReferralDepartmentDto {

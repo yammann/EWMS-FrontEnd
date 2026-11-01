@@ -1,10 +1,11 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
-import { AppPermission, AppPermissionName, PRICING_ACCESS, PRICING_AGREEMENT_ACCESS } from '@core/constants/access';
+import { AppPermission, AppPermissionName, PRICING_ACCESS, PRICING_AGREEMENT_ACCESS, REFERENCE_PRICE_ACCESS } from '@core/constants/access';
 import { PagedResult } from '@core/models/paged-result.model';
 import {
-  Agreement, AgreementFilter, AgreementInput, AgreementListItem, PricingAccess, PricingAssignee, PricingFilter, PricingListItem, PricingOfferInput, PricingRequest, PricingRequestInput
+  Agreement, AgreementFilter, AgreementInput, AgreementListItem, PricingAccess, PricingAssignee, PricingFilter, PricingListItem, PricingOfferInput, PricingRequest, PricingRequestInput,
+  ReferencePrice, ReferencePriceCorrection, ReferencePriceFilter, ReferencePriceInput, ReferencePriceItem
 } from './pricing.models';
 
 /** مكتب التسعير (api/PricingRequests و api/PricingAgreements) — الحدود يطبّقها الخادم، ويعيد الطلب كاملاً بأعلام الأزرار وصفوف المقارنة بعد كل عملية */
@@ -26,6 +27,9 @@ export class PricingService {
       canViewAgreements: this.auth.hasAnyPermission(PRICING_AGREEMENT_ACCESS),
       canPrepareAgreement: has(AppPermission.PreparePricingAgreement),
       canApproveAgreement: has(AppPermission.ApprovePricingAgreement),
+      canViewReferencePrices: this.auth.hasAnyPermission(REFERENCE_PRICE_ACCESS),
+      canAddReferencePrice: has(AppPermission.AddReferencePrice),
+      canApproveReferencePrice: has(AppPermission.ApproveReferencePrice),
       canChooseBranch: has(AppPermission.ViewOrganizationDashboard)
     };
   });
@@ -76,4 +80,23 @@ export class PricingService {
   submitAgreement(id: number, rowVersion: string) { return this.api.post<Agreement>(`/PricingAgreements/Submit/${id}`, { note: null, rowVersion }); }
   reviewAgreement(id: number, approve: boolean, note: string, rowVersion: string) { return this.api.post<Agreement>(`/PricingAgreements/Review/${id}`, { approve, note: note.trim() || null, rowVersion }); }
   cancelAgreement(id: number, note: string, rowVersion: string) { return this.api.post<Agreement>(`/PricingAgreements/Cancel/${id}`, { note: note.trim() || null, rowVersion }); }
+
+  // ─────────── الأسعار المرجعية ───────────
+  searchReferencePrices(f: ReferencePriceFilter) {
+    const q = new URLSearchParams();
+    if (f.branchId) q.set('branchId', String(f.branchId));
+    if (f.search.trim()) q.set('search', f.search.trim());
+    if (f.supplierId) q.set('supplierId', String(f.supplierId));
+    if (f.projectId) q.set('projectId', String(f.projectId));
+    if (f.status) q.set('status', String(f.status));
+    if (f.includeSuperseded) q.set('includeSuperseded', 'true');
+    if (f.from) q.set('from', f.from);
+    if (f.to) q.set('to', f.to);
+    q.set('page', String(f.page)); q.set('pageSize', String(f.pageSize));
+    return this.api.get<PagedResult<ReferencePriceItem>>(`/ReferencePrices/Search?${q}`);
+  }
+  getReferencePrice(id: number) { return this.api.get<ReferencePrice>(`/ReferencePrices/Get/${id}`); }
+  createReferencePrice(v: ReferencePriceInput) { return this.api.post<ReferencePrice>('/ReferencePrices/Create', v); }
+  correctReferencePrice(id: number, v: ReferencePriceCorrection) { return this.api.post<ReferencePrice>(`/ReferencePrices/Correct/${id}`, v); }
+  approveReferencePrice(id: number, note: string, rowVersion: string) { return this.api.post<ReferencePrice>(`/ReferencePrices/Approve/${id}`, { note: note.trim() || null, rowVersion }); }
 }

@@ -124,7 +124,10 @@ export const AppPermission = {
   ViewPricingRequests: 'ViewPricingRequests', RegisterPricingRequest: 'RegisterPricingRequest', AssignPricingRequest: 'AssignPricingRequest',
   PreparePricingOffers: 'PreparePricingOffers', ApprovePricingRequest: 'ApprovePricingRequest', SendPricingResult: 'SendPricingResult',
   ViewPricingAgreements: 'ViewPricingAgreements', PreparePricingAgreement: 'PreparePricingAgreement', ApprovePricingAgreement: 'ApprovePricingAgreement',
-  ExportPricingReport: 'ExportPricingReport'
+  ExportPricingReport: 'ExportPricingReport',
+
+  // الأسعار المرجعية: سجل لا يُعدَّل (التصحيح بسجل بديل)؛ الإضافة غير الاعتماد، ومن أضاف لا يعتمد؛ «آخر سعر» الأحدث تاريخاً لا الأرخص
+  ViewReferencePrices: 'ViewReferencePrices', AddReferencePrice: 'AddReferencePrice', ApproveReferencePrice: 'ApproveReferencePrice'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -232,7 +235,7 @@ export const CONTRACTOR_VIEW: readonly AppPermissionName[] = [
   AppPermission.ViewContractors, AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor,
   AppPermission.ViewContracts, AppPermission.CreateContract, AppPermission.EditContract, AppPermission.EvaluateContractor, AppPermission.ViewContractorEvaluations,
   // معدّو العروض والمحاضر يختارون المورد من السجل نفسه — نفس سياسة AnyContractorView
-  AppPermission.PreparePricingOffers, AppPermission.PreparePricingAgreement
+  AppPermission.PreparePricingOffers, AppPermission.PreparePricingAgreement, AppPermission.AddReferencePrice
 ];
 export const MANAGE_CONTRACTORS: readonly AppPermissionName[] = [AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor];
 /** معايير التقييم لمن يقيّم أو يراجع أو يديرها — نفس سياسة AnyEvaluationCriterionView */
@@ -254,6 +257,10 @@ export const PRICING_ACCESS: readonly AppPermissionName[] = [
 /** محاضر الاتفاق — نفس سياسة AnyPricingAgreementView */
 export const PRICING_AGREEMENT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewPricingAgreements, AppPermission.PreparePricingAgreement, AppPermission.ApprovePricingAgreement
+];
+/** الأسعار المرجعية: من يعرض أو يضيف أو يعتمد يدخل القائمة — نفس سياسة AnyReferencePriceView */
+export const REFERENCE_PRICE_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewReferencePrices, AppPermission.AddReferencePrice, AppPermission.ApproveReferencePrice
 ];
 /** تعديل الطلب وإلغاؤه: لمقدّمه قبل التكليف أو لصاحب التكليف — نفس سياسة AnyPricingRequestEdit */
 export const PRICING_EDIT: readonly AppPermissionName[] = [AppPermission.RegisterPricingRequest, AppPermission.AssignPricingRequest];

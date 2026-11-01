@@ -8,3 +8,6 @@
 td small { display: block; color: var(--ink-500); font-size: 12px; }
 td.num[dir=ltr] { white-space: nowrap; }
 small.late { color: var(--danger, #c0392b); font-weight: 700; }
+.latest { color: var(--brand-700, var(--brand-600)); font-weight: 700; }
+.toolbar .date { max-width: 160px; }
+.toolbar .check { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }

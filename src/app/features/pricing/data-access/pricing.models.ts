@@ -1,7 +1,7 @@
 import type {
   AgreementLineRequestDto, PricingAgreementDetailDto, PricingAgreementListItemDto, PricingAgreementRequestDto, PricingAssigneeDto, PricingComparisonRowDto,
-  PricingDetailDto, PricingItemDto, PricingItemRequestDto, PricingLineRequestDto, PricingListItemDto, PricingOfferDto, PricingOfferRequestDto,
-  PricingRequestRequestDto, PricingTotalDto
+  CorrectReferencePriceRequestDto, PricingDetailDto, PricingItemDto, PricingItemRequestDto, PricingLineRequestDto, PricingListItemDto, PricingOfferDto, PricingOfferRequestDto,
+  PricingRequestRequestDto, PricingTotalDto, ReferencePriceDetailDto, ReferencePriceListItemDto, ReferencePriceRequestDto
 } from '@core/api/api-types';
 
 // نماذج الواجهة هي أنواع العقد نفسها المولَّدة من الباكاند: الأعلام (can…) وصفوف المقارنة يحسبها الخادم بقواعده
@@ -22,6 +22,22 @@ export type AgreementListItem = PricingAgreementListItemDto;
 export type Agreement = PricingAgreementDetailDto;
 export type AgreementInput = PricingAgreementRequestDto;
 export type AgreementLineInput = AgreementLineRequestDto;
+
+export type ReferencePriceItem = ReferencePriceListItemDto;
+export type ReferencePrice = ReferencePriceDetailDto;
+export type ReferencePriceInput = ReferencePriceRequestDto;
+export type ReferencePriceCorrection = CorrectReferencePriceRequestDto;
+
+/** حالة السعر المرجعي (ReferencePriceStatus): تاريخي، معتمد للاستخدام الحالي، مُستبدَل بتصحيح */
+export const REFERENCE_STATUS = { historical: 1, approved: 2, superseded: 3 } as const;
+export const REFERENCE_STATUSES = [{ value: 1, label: 'تاريخي' }, { value: 2, label: 'معتمد للاستخدام الحالي' }, { value: 3, label: 'مُستبدَل بتصحيح' }] as const;
+/** مصدر السعر عند الإضافة: يدوي أو عرض مورد/مستند (الاستيراد من Excel يأتي لاحقاً) */
+export const REFERENCE_SOURCES = [{ value: 1, label: 'إدخال يدوي' }, { value: 2, label: 'عرض مورد أو مستند' }] as const;
+
+export interface ReferencePriceFilter {
+  branchId: number | null; search: string; supplierId: number | null; projectId: number | null; status: number | null; includeSuperseded: boolean;
+  from: string; to: string; page: number; pageSize: number;
+}
 
 /** حالة طلب التسعير (PricingRequestStatus) */
 export const PRICING_STATUS = { registered: 1, collecting: 2, recommended: 3, approved: 4, rejected: 5, resultSent: 6, cancelled: 7 } as const;
@@ -48,6 +64,7 @@ export interface AgreementFilter { branchId: number | null; status: number | nul
 export interface PricingAccess {
   canView: boolean; canRegister: boolean; canAssign: boolean; canPrepareOffers: boolean; canApprove: boolean; canSendResult: boolean;
   canViewAgreements: boolean; canPrepareAgreement: boolean; canApproveAgreement: boolean;
+  canViewReferencePrices: boolean; canAddReferencePrice: boolean; canApproveReferencePrice: boolean;
   /** يختار الفرع (نظرة المؤسسة) */
   canChooseBranch: boolean;
 }

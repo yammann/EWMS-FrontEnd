@@ -30,6 +30,27 @@ describe('Pricing service', () => {
     expect(service.access()).toMatchObject({ canView: false, canViewAgreements: true, canApproveAgreement: true, canPrepareAgreement: true });
   });
 
+  it('derives the reference price buttons from their own permissions', () => {
+    login(['ViewReferencePrices']);
+    expect(service.access()).toMatchObject({ canViewReferencePrices: true, canAddReferencePrice: false, canApproveReferencePrice: false, canView: false });
+    login(['AddReferencePrice', 'ApproveReferencePrice']);
+    expect(service.access()).toMatchObject({ canViewReferencePrices: true, canAddReferencePrice: true, canApproveReferencePrice: true });
+  });
+
+  it('builds the reference price query with only the filters that are set and trims the approval note', () => {
+    service.searchReferencePrices({ branchId: null, search: ' سلك ', supplierId: 3, projectId: null, status: 2, includeSuperseded: true, from: '2026-01-01', to: '', page: 1, pageSize: 20 }).subscribe();
+    const req = http.expectOne(r => r.url.startsWith('/api/ReferencePrices/Search'));
+    expect(Object.fromEntries(new URLSearchParams(req.request.url.split('?')[1]))).toEqual({
+      search: 'سلك', supplierId: '3', status: '2', includeSuperseded: 'true', from: '2026-01-01', page: '1', pageSize: '20'
+    });
+    req.flush({ items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 });
+
+    service.approveReferencePrice(7, '  معتمد  ', 'AAAA').subscribe();
+    expect(http.expectOne('/api/ReferencePrices/Approve/7').request.body).toEqual({ note: 'معتمد', rowVersion: 'AAAA' });
+    service.approveReferencePrice(7, '', 'BBBB').subscribe();
+    expect(http.expectOne('/api/ReferencePrices/Approve/7').request.body).toEqual({ note: null, rowVersion: 'BBBB' });
+  });
+
   it('builds the search query with only the filters that are set', () => {
     service.search({ branchId: null, projectId: 4, status: 2, search: ' أسلاك ', overdueOnly: true, mine: false, page: 2, pageSize: 20 }).subscribe();
     const req = http.expectOne(r => r.url.startsWith('/api/PricingRequests/Search'));
@@ -72,6 +93,7 @@ describe('Pricing service', () => {
     const n = (relatedEntityType: string) => ({ relatedEntityType, relatedEntityId: 12, type: 'x' }) as Parameters<typeof notificationRoute>[0];
     expect(notificationRoute(n('PricingRequest'), false)).toBe('/pricing/12');
     expect(notificationRoute(n('PricingAgreement'), false)).toBe('/pricing/agreements/12');
+    expect(notificationRoute(n('ReferencePrice'), false)).toBe('/pricing/reference-prices/12');
     expect(linkRoute('PricingRequest', 12, false)).toBe('/pricing/12');
     expect(linkRoute('PricingAgreement', 12, false)).toBe('/pricing/agreements/12');
   });

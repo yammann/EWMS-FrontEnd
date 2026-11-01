@@ -1954,6 +1954,70 @@
         },
         "type": "object"
       },
+      "CorrectReferencePriceRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "documentVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "itemCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "notes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "priceDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceDocument": {
+            "type": "string"
+          },
+          "specifications": {
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "CorrespondenceAttachmentDto": {
         "additionalProperties": false,
         "properties": {
@@ -7374,6 +7438,329 @@
             "format": "int32",
             "nullable": true,
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReferencePriceDetailDto": {
+        "additionalProperties": false,
+        "properties": {
+          "approvalNote": {
+            "type": "string"
+          },
+          "approvedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "branchId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "canApprove": {
+            "type": "boolean"
+          },
+          "canCorrect": {
+            "type": "boolean"
+          },
+          "correctionReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdByName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "documentVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ReferencePriceListItemDto"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "isLatest": {
+            "type": "boolean"
+          },
+          "isLatestForSupplier": {
+            "type": "boolean"
+          },
+          "itemCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "priceDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "projectName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "byte",
+            "type": "string"
+          },
+          "source": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceAr": {
+            "type": "string"
+          },
+          "sourceDocument": {
+            "type": "string"
+          },
+          "specifications": {
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusAr": {
+            "type": "string"
+          },
+          "supersededById": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "supersededByNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "supersedesId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "supersedesNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ReferencePriceListItemDto": {
+        "additionalProperties": false,
+        "properties": {
+          "approvedByName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "branchId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "createdByName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "isLatest": {
+            "type": "boolean"
+          },
+          "isLatestForSupplier": {
+            "type": "boolean"
+          },
+          "itemCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "priceDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "projectName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceAr": {
+            "type": "string"
+          },
+          "sourceDocument": {
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusAr": {
+            "type": "string"
+          },
+          "supersedesId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "supplierId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ReferencePriceListItemDtoPagedResultDto": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReferencePriceListItemDto"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReferencePriceRequestDto": {
+        "additionalProperties": false,
+        "properties": {
+          "branchId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "documentVersionId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "itemCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "notes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "priceDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "source": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sourceDocument": {
+            "type": "string"
+          },
+          "specifications": {
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "format": "double",
+            "type": "number"
           }
         },
         "type": "object"
@@ -26008,6 +26395,324 @@
         ]
       }
     },
+    "/api/ReferencePrices/Approve/{id}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingStepRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingStepRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingStepRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ReferencePrices"
+        ]
+      }
+    },
+    "/api/ReferencePrices/Correct/{id}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectReferencePriceRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectReferencePriceRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectReferencePriceRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ReferencePrices"
+        ]
+      }
+    },
+    "/api/ReferencePrices/Create": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReferencePriceRequestDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReferencePriceRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReferencePriceRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ReferencePrices"
+        ]
+      }
+    },
+    "/api/ReferencePrices/Get/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceDetailDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ReferencePrices"
+        ]
+      }
+    },
+    "/api/ReferencePrices/Search": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "branchId",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "supplierId",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeSuperseded",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceListItemDtoPagedResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceListItemDtoPagedResultDto"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferencePriceListItemDtoPagedResultDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "ReferencePrices"
+        ]
+      }
+    },
     "/api/Reports/Catalog": {
       "get": {
         "responses": {
@@ -30904,6 +31609,9 @@
     },
     {
       "name": "PublicHolidays"
+    },
+    {
+      "name": "ReferencePrices"
     },
     {
       "name": "Reports"
