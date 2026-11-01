@@ -56,7 +56,7 @@
         </section>
 
         <section class="panel">
-          <div class="panel-heading"><h2>مقارنة العروض <span class="count">({{ r.items.length }} بنداً)</span></h2></div>
+          <div class="panel-heading"><h2>مقارنة العروض <span class="count">({{ r.items.length }})</span></h2></div>
           <p class="muted">تُقارَن الأسعار بحسب الوحدة والعملة نفسهما فقط؛ المختلف يظهر «غير قابل للمقارنة» ولا يُحوَّل. «الأرخص» معلومة بين المطابق القابل للمقارنة في كل عملة وليست اختياراً.</p>
           @if (!r.items.length) { <app-empty-state>لا بنود</app-empty-state> }
           @for (item of r.items; track item.id) {
@@ -80,7 +80,7 @@
                         <td>
                           @if (row.isSelected) { <span class="pill ok">مختار</span>@if (row.selectionReason) { <small>{{ row.selectionReason }}</small> } }
                           @if (!row.comparable) { <span class="pill warn">غير قابل للمقارنة</span>@if (row.notComparableReason) { <small>{{ row.notComparableReason }}</small> } }
-                          @else if (row.isLowest) { <span class="pill info">الأرخص بين المطابق</span> }
+                          @else if (row.isLowest) { <span class="pill info">الأرخص بين المطابق ({{ row.currency }})</span> }
                           @if (row.offerExpired) { <span class="pill warn">العرض منتهي</span> }
                         </td>
                         <td class="row-actions">
@@ -111,7 +111,7 @@
               <article class="card">
                 <header><h3>{{ o.supplierName }}</h3>@if (o.expired) { <span class="pill warn">منتهي</span> }</header>
                 <p class="muted">العملة: <strong dir="ltr">{{ o.currency }}</strong> · وصل {{ o.receivedAt | utc | date:'yyyy/MM/dd' }}@if (o.validUntil) { · صالح حتى {{ o.validUntil | utc | date:'yyyy/MM/dd' }} }@if (o.offerNumber) { · رقم <span dir="ltr">{{ o.offerNumber }}</span> }</p>
-                <p class="muted">أسعار {{ o.lines.length }} من {{ r.items.length }} بنداً · سجّله {{ o.recordedByName }}</p>
+                <p class="muted">أسعار البنود: {{ o.lines.length }} من {{ r.items.length }} · سجّله {{ o.recordedByName }}</p>
                 @if (o.supplyTerms) { <p class="pre"><strong>الشروط:</strong> {{ o.supplyTerms }}</p> }
                 @if (o.note) { <p class="pre">{{ o.note }}</p> }
                 <footer class="actions">@if (o.canEdit) { <button type="button" class="btn btn-ghost btn-sm" (click)="open({ kind: 'offer', offer: o })">تعديل</button> }</footer>
