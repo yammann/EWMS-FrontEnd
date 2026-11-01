@@ -60,7 +60,7 @@
             <tbody>
               @for (s of sitesInFocus(); track s.id) {
                 <tr>
-                  <td><a class="cell-link" [routerLink]="['/devices/sites', s.id]">{{ s.name }}</a></td>
+                  <td><a class="cell-link" tabindex="0" role="button" style="cursor: pointer" (click)="openSite(s.id)" (keydown.enter)="openSite(s.id)">{{ s.name }}</a></td>
                   <td class="wrap">{{ s.description || '—' }}</td>
                   <td class="wrap">
                     @for (l of s.layers; track l.key) {
@@ -96,3 +96,11 @@
   <ng-content />
  </div>
 </section>
+
+@if (chooser(); as c) {
+  <app-modal [heading]="c.site.name" subheading="ماذا تريد أن تفتح لهذا الموقع؟" size="md" (closed)="chooser.set(null)">
+    <div class="modal-body form-stack">
+      @for (o of c.options; track o.label) { <button type="button" class="btn" (click)="go(o)">{{ o.label }}</button> }
+    </div>
+  </app-modal>
+}

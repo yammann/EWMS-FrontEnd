@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Department } from '@core/models/ewms.models';
 import { LookupsService } from '@core/services/lookups.service';
 import { Alert } from '@shared/ui/alert';
@@ -19,7 +19,7 @@ const PAGE_SIZE = 20;
 
 /**
  * قائمة المشاريع بحدّ رؤية المستخدم (مشاريعي ← قسمي ← فرعي ← المؤسسة): بحث وفلاتر وترقيم من الخادم.
- * الصف يفتح صفحة المشروع (إضبارته).
+ * الصف يفتح صفحة المشروع (إضبارته). `?siteId=` (من الخريطة) يقيّد القائمة بمشاريع موقع واحد مع شريط يمسح التقييد.
  */
 @Component({
   selector: 'app-projects-page', standalone: true,
@@ -32,6 +32,7 @@ export class ProjectsPage {
   private lookups = inject(LookupsService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private latest = latestRequest();
 
   access = this.service.access;
@@ -46,11 +47,17 @@ export class ProjectsPage {
   filter = signal<ProjectFilter>({ search: '', branchId: null, departmentId: null, siteId: null, stage: null, page: 1, pageSize: PAGE_SIZE });
   private searchTimer?: ReturnType<typeof setTimeout>;
 
+  /** اسم الموقع المقيَّد به (يأتي مع الرابط من الخريطة) */
+  siteName = signal('');
+
   dialog = signal(false);
   saving = signal(false);
   formError = signal('');
 
   constructor() {
+    const params = this.route.snapshot.queryParamMap;
+    const siteId = Number(params.get('siteId'));
+    if (siteId > 0) { this.filter.update(f => ({ ...f, siteId })); this.siteName.set(params.get('site') ?? ''); }
     this.load();
     if (this.access().canListDepartments) {
       this.lookups.departments().subscribe({ next: list => this.departments.set(list), error: () => this.departments.set([]) });
@@ -72,8 +79,15 @@ export class ProjectsPage {
     this.searchTimer = setTimeout(() => this.setFilter({ search: value }), 300);
   }
 
-  hasFilters() { const f = this.filter(); return !!(f.search || f.departmentId || f.stage); }
-  clearFilters() { this.setFilter({ search: '', departmentId: null, stage: null }); }
+  hasFilters() { const f = this.filter(); return !!(f.search || f.departmentId || f.stage || f.siteId); }
+  clearFilters() { this.clearSite(false); this.setFilter({ search: '', departmentId: null, stage: null, siteId: null }); }
+
+  /** رفع التقييد بموقع (من الشريط أو مسح الفلاتر) ويُنظَّف الرابط */
+  clearSite(reload = true) {
+    this.siteName.set('');
+    void this.router.navigate([], { queryParams: { siteId: null, site: null }, queryParamsHandling: 'merge', replaceUrl: true });
+    if (reload) this.setFilter({ siteId: null });
+  }
 
   open(p: Project) { void this.router.navigate(['/projects', p.id]); }
 

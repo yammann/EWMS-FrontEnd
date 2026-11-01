@@ -1,5 +1,5 @@
 import { MapLayer, MapSite } from '@features/devices';
-import { describeLayers, layerTotals, mergeLayers } from './branch-map';
+import { describeLayers, layerTotals, mergeLayers, siteDestinations } from './branch-map';
 
 const site = (id: number, count: number, extra: Partial<MapSite> = {}): MapSite => ({
   id, name: `موقع ${id}`, description: '', governorateCode: 'SY01', governorateName: 'دمشق',
@@ -36,5 +36,36 @@ describe('Branch map layers merge', () => {
       { key: 'devices', title: 'تركيبات الأجهزة', color: 'var(--brand-600)', count: 4 },
       { key: 'layer-5', title: 'المشاريع', color: '#16A34A', count: 3 }
     ]);
+  });
+});
+
+describe('Site destinations from the map', () => {
+  const devices: MapLayer = { key: 'devices', kind: 'devices', title: 'تركيبات الأجهزة', color: '', unit: 'تركيب', sitesWithoutCoordinates: 0, sites: [site(1, 3), site(2, 1)] };
+  const projects: MapLayer = { key: 'projects', kind: 'projects', title: 'المشاريع', color: '', unit: 'مشروع', sitesWithoutCoordinates: 0, sites: [site(2, 2), site(3, 1)] };
+  const merged = mergeLayers([devices, projects]);
+  const byId = (id: number) => merged.find(s => s.id === id)!;
+
+  it('opens the projects of the site for a projects-only site, not the devices page', () => {
+    const [only, ...rest] = siteDestinations(byId(3), true, true);
+    expect(rest).toEqual([]);
+    expect(only.commands).toEqual(['/projects']);
+    expect(only.queryParams).toEqual({ siteId: 3, site: 'موقع 3' });
+  });
+
+  it('opens the site page for a devices-only site', () => {
+    expect(siteDestinations(byId(1), true, true).map(d => d.commands)).toEqual([['/devices/sites', 1]]);
+  });
+
+  it('offers both destinations when the site has both kinds of layers', () => {
+    const options = siteDestinations(byId(2), true, true);
+    expect(options.map(d => d.commands[0])).toEqual(['/projects', '/devices/sites']);
+    expect(options[0].label).toContain('المشاريع (2)');
+    expect(options[1].label).toContain('تركيبات الأجهزة (1)');
+  });
+
+  it('offers only what the user may open', () => {
+    expect(siteDestinations(byId(3), true, false)).toEqual([]);                                          // مشاريع بلا صلاحية المشاريع
+    expect(siteDestinations(byId(2), true, false).map(d => d.commands[0])).toEqual(['/devices/sites']);
+    expect(siteDestinations(byId(2), false, true).map(d => d.commands[0])).toEqual(['/projects']);
   });
 });

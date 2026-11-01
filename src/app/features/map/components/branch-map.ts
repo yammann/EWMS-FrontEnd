@@ -8,6 +8,9 @@ import { MapPoint, SyriaSvgMap } from './syria-svg-map';
 import { latestRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 import { Icon } from '@shared/ui/icon';
+import { Modal } from '@shared/ui/modal';
+import { AuthService } from '@core/services/auth.service';
+import { PROJECT_ACCESS } from '@core/constants/access';
 
 /** تدرّج واحد من لون الثيم لعدد المواقع في المحافظة (متغيرات --map-* في styles/_tokens) — المحافظة بلا مواقع رمادية */
 const RAMP = ['var(--map-1)', 'var(--map-2)', 'var(--map-3)', 'var(--map-4)'];
@@ -22,6 +25,24 @@ let hiddenLayers = new Set<string>();
 
 /** طبقة الموقع في الخريطة المدمجة: عدد عناصرها فيه بوحدتها */
 export interface SiteLayerRef { key: string; kind: string; title: string; color: string; count: number; unit: string; }
+
+/** وجهة فتح موقع من الخريطة: صفحة الموقع (التركيبات وسجلات الطبقات) أو مشاريع الموقع */
+export interface SiteDestination { label: string; commands: (string | number)[]; queryParams?: Record<string, string | number>; }
+
+/**
+ * إلى أين يفتح النقر على موقع بحسب طبقاته: طبقة «المشاريع» ← صفحة مشاريع الموقع (لمن يرى المشاريع)،
+ * وغيرها (التركيبات وطبقات الفرع) ← صفحة الموقع. موقع بالنوعين يُعرض له الخياران.
+ */
+export function siteDestinations(site: MergedSite, canSites: boolean, canProjects: boolean): SiteDestination[] {
+  const out: SiteDestination[] = [];
+  const projects = site.layers.filter(l => l.kind === 'projects');
+  const others = site.layers.filter(l => l.kind !== 'projects');
+  if (projects.length && canProjects) {
+    out.push({ label: 'مشاريع الموقع — ' + projects.map(l => `${l.title} (${l.count})`).join(' · '), commands: ['/projects'], queryParams: { siteId: site.id, site: site.name } });
+  }
+  if (others.length && canSites) out.push({ label: 'صفحة الموقع — ' + others.map(l => `${l.title} (${l.count})`).join(' · '), commands: ['/devices/sites', site.id] });
+  return out;
+}
 
 /** موقع واحد مهما تعددت طبقاته: نقطة واحدة بألوان طبقاته */
 export interface MergedSite extends MapSite { layers: SiteLayerRef[]; }
@@ -74,7 +95,7 @@ export function layerTotals(sites: readonly MergedSite[]): { key: string; title:
  * أثناء السكرول بينما تصغر وتخفت تدريجياً حتى تنغلق.
  */
 @Component({
-  selector: 'app-branch-map', standalone: true, imports: [Icon, SelectValue, RouterLink, SyriaSvgMap],
+  selector: 'app-branch-map', standalone: true, imports: [Icon, SelectValue, RouterLink, SyriaSvgMap, Modal],
   templateUrl: './branch-map.html',
   styleUrl: './branch-map.scss'
 })
@@ -84,6 +105,7 @@ export class BranchMapComponent {
   private service = inject(DeviceService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private auth = inject(AuthService);
   private destroyRef = inject(DestroyRef);
   private pinned = viewChild<ElementRef<HTMLElement>>('pinned');
   private sheet = viewChild<ElementRef<HTMLElement>>('sheet');
@@ -225,13 +247,30 @@ export class BranchMapComponent {
     lastView = { branchId: this.branchId(), focus: code };
   }
 
-  /** صفحة تفاصيل الموقع — لمن يرى سجل المواقع (الخريطة وحدها لا تكفي لفتحها) */
+  /** موقع اختار المستخدم وجهته بين خيارين (طبقات من أنواع مختلفة) */
+  chooser = signal<{ site: MergedSite; options: SiteDestination[] } | null>(null);
+
+  /**
+   * فتح موقع من الخريطة بحسب طبقاته: المشاريع ← مشاريع الموقع، والتركيبات وطبقات الفرع ← صفحة الموقع؛ وبالنوعين يُسأل المستخدم.
+   * الخريطة وحدها لا تكفي لفتح أي منهما: لكل وجهة صلاحيتها.
+   */
   openSite(id: number) {
-    if (!this.service.siteAccess().canView) {
-      this.toast.info('تفاصيل المواقع تحتاج صلاحية عرض المواقع أو توثيق الأجهزة أو سجلات طبقات الفرع');
+    const site = this.sites().find(s => s.id === id);
+    if (!site) return;
+    const options = siteDestinations(site, this.service.siteAccess().canView, this.auth.hasAnyPermission(PROJECT_ACCESS));
+    if (!options.length) {
+      this.toast.info(site.layers.some(l => l.kind === 'projects')
+        ? 'مشاريع الموقع تحتاج صلاحية عرض المشاريع'
+        : 'تفاصيل المواقع تحتاج صلاحية عرض المواقع أو توثيق الأجهزة أو سجلات طبقات الفرع');
       return;
     }
-    this.router.navigate(['/devices/sites', id]);
+    if (options.length === 1) this.go(options[0]);
+    else this.chooser.set({ site, options });
+  }
+
+  go(option: SiteDestination) {
+    this.chooser.set(null);
+    void this.router.navigate(option.commands, { queryParams: option.queryParams });
   }
 
   back() {

@@ -7,6 +7,10 @@
 
   <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
 
+  @if (filter().siteId) {
+    <p class="notice" role="status">مشاريع الموقع: <strong>{{ siteName() || items()[0]?.siteName || 'المحدَّد' }}</strong> — <button type="button" class="btn btn-ghost btn-sm" (click)="clearSite()">عرض كل المشاريع</button></p>
+  }
+
   <section class="panel">
     <div class="panel-heading"><h2>المشاريع <span class="count">({{ total() }})</span></h2></div>
 
