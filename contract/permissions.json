@@ -5,6 +5,7 @@
     "AdjustSparePartStock",
     "ApproveDelayJustification",
     "ApproveOutgoingCorrespondence",
+    "ApprovePriceReconciliation",
     "ApprovePricingAgreement",
     "ApprovePricingRequest",
     "ApproveProjectDocument",
@@ -129,6 +130,7 @@
     "ManageContractCommittees",
     "ManageHandover",
     "ManageMySignature",
+    "PreparePriceReconciliation",
     "PreparePricingAgreement",
     "PreparePricingOffers",
     "PrepareStudyDeliverable",
@@ -189,6 +191,7 @@
     "ViewOfficeDashboard",
     "ViewOffices",
     "ViewOrganizationDashboard",
+    "ViewPriceReconciliations",
     "ViewPricingAgreements",
     "ViewPricingRequests",
     "ViewProjectAudit",
@@ -230,6 +233,7 @@
       "EditContract",
       "EditContractor",
       "EvaluateContractor",
+      "PreparePriceReconciliation",
       "PreparePricingAgreement",
       "PreparePricingOffers",
       "ViewContractorEvaluations",
@@ -324,6 +328,11 @@
       "ViewBranchDashboard",
       "ViewDepartmentDashboard",
       "ViewOfficeDashboard"
+    ],
+    "AnyPriceReconciliationView": [
+      "ApprovePriceReconciliation",
+      "PreparePriceReconciliation",
+      "ViewPriceReconciliations"
     ],
     "AnyPricingAgreementView": [
       "ApprovePricingAgreement",

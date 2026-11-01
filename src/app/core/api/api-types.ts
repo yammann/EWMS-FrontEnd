@@ -2181,11 +2181,158 @@ export interface ReceiveSparePartDto {
   unitCost: number;
 }
 
+export interface ReconciliationCandidateDto {
+  currency: string;
+  date: string;
+  description: string;
+  id: number;
+  kind: number;
+  label: string;
+  quantity: number | null;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface ReconciliationDetailDto {
+  auditedAt: string | null;
+  auditNote: string;
+  auditResult: number | null;
+  auditResultAr: string | null;
+  branchId: number;
+  canCancel: boolean;
+  canDecide: boolean;
+  canEdit: boolean;
+  canRecord: boolean;
+  canRefer: boolean;
+  contractId: number | null;
+  contractNumber: string | null;
+  createdAt: string;
+  currency: string;
+  decidedAt: string | null;
+  decidedByName: string | null;
+  decisionNote: string;
+  documentDate: string;
+  documentKind: number;
+  documentKindAr: string;
+  documentNumber: string;
+  documentVersionId: number | null;
+  id: number;
+  lines: ReconciliationLineDto[];
+  notes: string;
+  number: string;
+  preparedByName: string;
+  projectId: number | null;
+  projectName: string | null;
+  referralNote: string;
+  referredAt: string | null;
+  referredByName: string | null;
+  referredTo: string | null;
+  rowVersion: string;
+  status: number;
+  statusAr: string;
+  suggestedResult: number;
+  suggestedResultAr: string;
+  supplierId: number;
+  supplierName: string;
+  total: number;
+}
+
+export interface ReconciliationLineDto {
+  comparable: boolean;
+  description: string;
+  hasDifference: boolean;
+  hasReference: boolean;
+  id: number;
+  notComparableReason: string | null;
+  note: string;
+  priceDifference: number | null;
+  quantity: number;
+  quantityDifference: number | null;
+  referenceCurrency: string | null;
+  referenceKind: number;
+  referenceLabel: string;
+  referenceOfferLineId: number | null;
+  referencePriceId: number | null;
+  referenceQuantity: number | null;
+  referenceUnit: string | null;
+  referenceUnitPrice: number | null;
+  sortOrder: number;
+  total: number;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface ReconciliationLineRequestDto {
+  description: string;
+  note: string | null;
+  quantity: number;
+  referenceId: number | null;
+  referenceKind: number;
+  unit: string;
+  unitPrice: number;
+}
+
+export interface ReconciliationListItemDto {
+  branchId: number;
+  createdAt: string;
+  currency: string;
+  documentDate: string;
+  documentKind: number;
+  documentKindAr: string;
+  documentNumber: string;
+  id: number;
+  linesCount: number;
+  number: string;
+  preparedByName: string;
+  projectId: number | null;
+  projectName: string | null;
+  status: number;
+  statusAr: string;
+  supplierId: number;
+  supplierName: string;
+  total: number;
+}
+
+export interface ReconciliationListItemDtoPagedResultDto {
+  items: ReconciliationListItemDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface ReconciliationRequestDto {
+  branchId: number | null;
+  contractId: number | null;
+  currency: string;
+  documentDate: string;
+  documentKind: number;
+  documentNumber: string;
+  documentVersionId: number | null;
+  lines: ReconciliationLineRequestDto[];
+  notes: string | null;
+  projectId: number | null;
+  rowVersion: string | null;
+  supplierId: number;
+}
+
+export interface RecordReconciliationRequestDto {
+  note: string | null;
+  result: number;
+  rowVersion: string | null;
+}
+
 export interface ReferCorrespondenceRequestDto {
   note: string | null;
   toDepartmentId: number;
   toOfficeId: number | null;
   toUserId: number | null;
+}
+
+export interface ReferReconciliationRequestDto {
+  note: string | null;
+  recipient: string;
+  rowVersion: string | null;
 }
 
 export interface ReferencePriceDetailDto {
@@ -2502,6 +2649,12 @@ export interface ReviewDeliverableRequestDto {
 }
 
 export interface ReviewPricingAgreementRequestDto {
+  approve: boolean;
+  note: string | null;
+  rowVersion: string | null;
+}
+
+export interface ReviewReconciliationRequestDto {
   approve: boolean;
   note: string | null;
   rowVersion: string | null;

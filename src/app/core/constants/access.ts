@@ -128,7 +128,10 @@ export const AppPermission = {
 
   // الأسعار المرجعية: سجل لا يُعدَّل (التصحيح بسجل بديل)؛ الإضافة غير الاعتماد، ومن أضاف لا يعتمد؛ «آخر سعر» الأحدث تاريخاً لا الأرخص
   ViewReferencePrices: 'ViewReferencePrices', AddReferencePrice: 'AddReferencePrice', ApproveReferencePrice: 'ApproveReferencePrice',
-  ImportReferencePrices: 'ImportReferencePrices'
+  ImportReferencePrices: 'ImportReferencePrices',
+
+  // مطابقة الفواتير والكشوف: النظام يقارن ويقترح ولا يقرر؛ المدقق يسجّل النتيجة وغيره يعتمد؛ المرجع مجمَّد؛ لا مقارنة بين وحدات أو عملات
+  ViewPriceReconciliations: 'ViewPriceReconciliations', PreparePriceReconciliation: 'PreparePriceReconciliation', ApprovePriceReconciliation: 'ApprovePriceReconciliation'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -236,7 +239,7 @@ export const CONTRACTOR_VIEW: readonly AppPermissionName[] = [
   AppPermission.ViewContractors, AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor,
   AppPermission.ViewContracts, AppPermission.CreateContract, AppPermission.EditContract, AppPermission.EvaluateContractor, AppPermission.ViewContractorEvaluations,
   // معدّو العروض والمحاضر يختارون المورد من السجل نفسه — نفس سياسة AnyContractorView
-  AppPermission.PreparePricingOffers, AppPermission.PreparePricingAgreement, AppPermission.AddReferencePrice
+  AppPermission.PreparePricingOffers, AppPermission.PreparePricingAgreement, AppPermission.AddReferencePrice, AppPermission.PreparePriceReconciliation
 ];
 export const MANAGE_CONTRACTORS: readonly AppPermissionName[] = [AppPermission.CreateContractor, AppPermission.EditContractor, AppPermission.DeleteContractor];
 /** معايير التقييم لمن يقيّم أو يراجع أو يديرها — نفس سياسة AnyEvaluationCriterionView */
@@ -265,6 +268,11 @@ export const REFERENCE_PRICE_ACCESS: readonly AppPermissionName[] = [
 ];
 /** تعديل الطلب وإلغاؤه: لمقدّمه قبل التكليف أو لصاحب التكليف — نفس سياسة AnyPricingRequestEdit */
 export const PRICING_EDIT: readonly AppPermissionName[] = [AppPermission.RegisterPricingRequest, AppPermission.AssignPricingRequest];
+
+/** مطابقة الفواتير: من يعرض أو يدقّق أو يعتمد يدخل القائمة — نفس سياسة AnyPriceReconciliationView */
+export const RECONCILIATION_ACCESS: readonly AppPermissionName[] = [
+  AppPermission.ViewPriceReconciliations, AppPermission.PreparePriceReconciliation, AppPermission.ApprovePriceReconciliation
+];
 
 /** الديوان: من يسجّل أو يعالج أو يعتمد يدخل القائمة (يرى ما يخصه) — نفس سياسة AnyCorrespondenceView في الباكاند */
 export const DIWAN_ACCESS: readonly AppPermissionName[] = [

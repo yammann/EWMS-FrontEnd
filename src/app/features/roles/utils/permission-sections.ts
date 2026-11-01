@@ -53,6 +53,7 @@ export const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: s
   { key: 'pricing', title: 'مكتب التسعير', groups: [
     { key: 'pricing-requests', title: 'طلبات التسعير (بحدّ الفرع؛ لا اختيار آلي للأرخص، والاعتماد لغير من أوصى)', names: ['ViewPricingRequests', 'RegisterPricingRequest', 'AssignPricingRequest', 'PreparePricingOffers', 'ApprovePricingRequest', 'SendPricingResult'] },
     { key: 'reference-prices', title: 'الأسعار المرجعية (سجل لا يُعدَّل؛ التصحيح بسجل بديل، والاعتماد لغير من أضاف)', names: ['ViewReferencePrices', 'AddReferencePrice', 'ApproveReferencePrice', 'ImportReferencePrices'] },
+    { key: 'price-reconciliations', title: 'مطابقة الفواتير والكشوف (المدقق يسجّل النتيجة وغيره يعتمد؛ لا مقارنة بين وحدات أو عملات)', names: ['ViewPriceReconciliations', 'PreparePriceReconciliation', 'ApprovePriceReconciliation'] },
     { key: 'pricing-agreements', title: 'محاضر الاتفاق مع المتعهدين الجدد (الإعداد لمدير المكتب، والاعتماد لغير من أعدّ)', names: ['ViewPricingAgreements', 'PreparePricingAgreement', 'ApprovePricingAgreement'] }
   ] },
   { key: 'diwan', title: 'الديوان', groups: [

@@ -1,10 +1,11 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
-import { AppPermission, AppPermissionName, PRICING_ACCESS, PRICING_AGREEMENT_ACCESS, REFERENCE_PRICE_ACCESS } from '@core/constants/access';
+import { AppPermission, AppPermissionName, PRICING_ACCESS, PRICING_AGREEMENT_ACCESS, REFERENCE_PRICE_ACCESS, RECONCILIATION_ACCESS } from '@core/constants/access';
 import { PagedResult } from '@core/models/paged-result.model';
 import {
   Agreement, AgreementFilter, AgreementInput, AgreementListItem, PricingAccess, PricingAssignee, PricingFilter, PricingListItem, PricingOfferInput, PricingRequest, PricingRequestInput,
+  Reconciliation, ReconciliationCandidate, ReconciliationFilter, ReconciliationInput, ReconciliationItem,
   ReferencePrice, ReferencePriceCorrection, ReferencePriceFilter, ReferencePriceImportReport, ReferencePriceInput, ReferencePriceItem
 } from './pricing.models';
 
@@ -31,6 +32,9 @@ export class PricingService {
       canAddReferencePrice: has(AppPermission.AddReferencePrice),
       canApproveReferencePrice: has(AppPermission.ApproveReferencePrice),
       canImportReferencePrices: has(AppPermission.ImportReferencePrices),
+      canViewReconciliations: this.auth.hasAnyPermission(RECONCILIATION_ACCESS),
+      canPrepareReconciliation: has(AppPermission.PreparePriceReconciliation),
+      canApproveReconciliation: has(AppPermission.ApprovePriceReconciliation),
       canChooseBranch: has(AppPermission.ViewOrganizationDashboard)
     };
   });
@@ -109,4 +113,30 @@ export class PricingService {
     return this.api.post<ReferencePriceImportReport>(`/ReferencePrices/Import?${q}`, body);
   }
   approveReferencePrice(id: number, note: string, rowVersion: string) { return this.api.post<ReferencePrice>(`/ReferencePrices/Approve/${id}`, { note: note.trim() || null, rowVersion }); }
+
+  // ─────────── مطابقة الفواتير والكشوف ───────────
+  searchReconciliations(f: ReconciliationFilter) {
+    const q = new URLSearchParams();
+    if (f.branchId) q.set('branchId', String(f.branchId));
+    if (f.status) q.set('status', String(f.status));
+    if (f.supplierId) q.set('supplierId', String(f.supplierId));
+    if (f.projectId) q.set('projectId', String(f.projectId));
+    if (f.search.trim()) q.set('search', f.search.trim());
+    q.set('page', String(f.page)); q.set('pageSize', String(f.pageSize));
+    return this.api.get<PagedResult<ReconciliationItem>>(`/PriceReconciliations/Search?${q}`);
+  }
+  getReconciliation(id: number) { return this.api.get<Reconciliation>(`/PriceReconciliations/Get/${id}`); }
+  /** مراجع مقترحة لمورد: أسطر عروض مختارة من طلبات معتمدة وأسعار مرجعية معتمدة */
+  reconciliationCandidates(supplierId: number, search = '', branchId: number | null = null) {
+    const q = new URLSearchParams({ supplierId: String(supplierId) });
+    if (search.trim()) q.set('search', search.trim());
+    if (branchId) q.set('branchId', String(branchId));
+    return this.api.get<ReconciliationCandidate[]>(`/PriceReconciliations/Candidates?${q}`);
+  }
+  createReconciliation(v: ReconciliationInput) { return this.api.post<Reconciliation>('/PriceReconciliations/Create', v); }
+  updateReconciliation(id: number, v: ReconciliationInput) { return this.api.put<Reconciliation>(`/PriceReconciliations/Update/${id}`, v); }
+  recordReconciliation(id: number, result: number, note: string, rowVersion: string) { return this.api.post<Reconciliation>(`/PriceReconciliations/Record/${id}`, { result, note: note.trim() || null, rowVersion }); }
+  decideReconciliation(id: number, approve: boolean, note: string, rowVersion: string) { return this.api.post<Reconciliation>(`/PriceReconciliations/Decide/${id}`, { approve, note: note.trim() || null, rowVersion }); }
+  referReconciliation(id: number, recipient: string, note: string, rowVersion: string) { return this.api.post<Reconciliation>(`/PriceReconciliations/Refer/${id}`, { recipient: recipient.trim(), note: note.trim() || null, rowVersion }); }
+  cancelReconciliation(id: number, note: string, rowVersion: string) { return this.api.post<Reconciliation>(`/PriceReconciliations/Cancel/${id}`, { note: note.trim() || null, rowVersion }); }
 }

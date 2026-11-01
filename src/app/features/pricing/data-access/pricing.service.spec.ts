@@ -72,6 +72,35 @@ describe('Pricing service', () => {
     http.expectOne('/api/ReferencePrices/ImportTemplate').flush(new Blob());
   });
 
+  it('derives the reconciliation buttons from their own permissions', () => {
+    login(['ViewPriceReconciliations']);
+    expect(service.access()).toMatchObject({ canViewReconciliations: true, canPrepareReconciliation: false, canApproveReconciliation: false });
+    login(['ApprovePriceReconciliation']);
+    expect(service.access()).toMatchObject({ canViewReconciliations: true, canApproveReconciliation: true, canPrepareReconciliation: false });
+  });
+
+  it('talks to the reconciliation endpoints with trimmed text and the row version', () => {
+    service.searchReconciliations({ branchId: null, status: 4, supplierId: 3, projectId: null, search: ' F-1 ', page: 1, pageSize: 20 }).subscribe();
+    const req = http.expectOne(r => r.url.startsWith('/api/PriceReconciliations/Search'));
+    expect(Object.fromEntries(new URLSearchParams(req.request.url.split('?')[1]))).toEqual({ status: '4', supplierId: '3', search: 'F-1', page: '1', pageSize: '20' });
+    req.flush({ items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 });
+
+    service.reconciliationCandidates(7, ' سلك ', 2).subscribe();
+    http.expectOne('/api/PriceReconciliations/Candidates?supplierId=7&search=%D8%B3%D9%84%D9%83&branchId=2').flush([]);
+
+    service.recordReconciliation(5, 4, ' فرق ', 'AAAA').subscribe();
+    expect(http.expectOne('/api/PriceReconciliations/Record/5').request.body).toEqual({ result: 4, note: 'فرق', rowVersion: 'AAAA' });
+    service.decideReconciliation(5, false, ' أكملوا ', 'BBBB').subscribe();
+    expect(http.expectOne('/api/PriceReconciliations/Decide/5').request.body).toEqual({ approve: false, note: 'أكملوا', rowVersion: 'BBBB' });
+    service.referReconciliation(5, ' المالية ', '', 'CCCC').subscribe();
+    expect(http.expectOne('/api/PriceReconciliations/Refer/5').request.body).toEqual({ recipient: 'المالية', note: null, rowVersion: 'CCCC' });
+  });
+
+  it('routes the reconciliation notification to its page', () => {
+    const n = { relatedEntityType: 'PriceReconciliation', relatedEntityId: 9, type: 'x' } as Parameters<typeof notificationRoute>[0];
+    expect(notificationRoute(n, false)).toBe('/pricing/reconciliations/9');
+  });
+
   it('builds the search query with only the filters that are set', () => {
     service.search({ branchId: null, projectId: 4, status: 2, search: ' أسلاك ', overdueOnly: true, mine: false, page: 2, pageSize: 20 }).subscribe();
     const req = http.expectOne(r => r.url.startsWith('/api/PricingRequests/Search'));

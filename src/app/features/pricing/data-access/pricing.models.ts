@@ -1,6 +1,6 @@
 import type {
   AgreementLineRequestDto, PricingAgreementDetailDto, PricingAgreementListItemDto, PricingAgreementRequestDto, PricingAssigneeDto, PricingComparisonRowDto,
-  CorrectReferencePriceRequestDto, PricingDetailDto, PricingItemDto, PricingItemRequestDto, PricingLineRequestDto, PricingListItemDto, PricingOfferDto, PricingOfferRequestDto,
+  CorrectReferencePriceRequestDto, ReconciliationCandidateDto, ReconciliationDetailDto, ReconciliationLineDto, ReconciliationListItemDto, ReconciliationRequestDto, PricingDetailDto, PricingItemDto, PricingItemRequestDto, PricingLineRequestDto, PricingListItemDto, PricingOfferDto, PricingOfferRequestDto,
   PricingRequestRequestDto, PricingTotalDto, ReferencePriceDetailDto, ReferencePriceImportReportDto, ReferencePriceImportRowDto, ReferencePriceListItemDto, ReferencePriceRequestDto
 } from '@core/api/api-types';
 
@@ -27,6 +27,25 @@ export type ReferencePriceItem = ReferencePriceListItemDto;
 export type ReferencePrice = ReferencePriceDetailDto;
 export type ReferencePriceInput = ReferencePriceRequestDto;
 export type ReferencePriceCorrection = CorrectReferencePriceRequestDto;
+export type Reconciliation = ReconciliationDetailDto;
+export type ReconciliationItem = ReconciliationListItemDto;
+export type ReconciliationLine = ReconciliationLineDto;
+export type ReconciliationCandidate = ReconciliationCandidateDto;
+export type ReconciliationInput = ReconciliationRequestDto;
+
+/** حالة المطابقة (ReconciliationStatus): الثماني المعتمدة + مسودة وملغى */
+export const RECONCILIATION_STATUS = { draft: 1, match: 2, partial: 3, priceDiff: 4, quantityDiff: 5, incomplete: 6, needsReview: 7, approved: 8, returned: 9, cancelled: 10 } as const;
+export const RECONCILIATION_STATUSES = [
+  { value: 1, label: 'مسودة' }, { value: 2, label: 'مطابق' }, { value: 3, label: 'مطابق جزئياً' }, { value: 4, label: 'يوجد فرق في السعر' }, { value: 5, label: 'يوجد فرق في الكمية' },
+  { value: 6, label: 'بيانات غير مكتملة' }, { value: 7, label: 'يحتاج إلى مراجعة' }, { value: 8, label: 'معتمد بعد التدقيق' }, { value: 9, label: 'معاد للتصحيح' }, { value: 10, label: 'ملغى' }
+] as const;
+/** النتائج التي يسجّلها المدقق (الست الأولى) */
+export const AUDIT_RESULTS = RECONCILIATION_STATUSES.filter(s => s.value >= 2 && s.value <= 7);
+export const DOCUMENT_KINDS = [{ value: 1, label: 'فاتورة' }, { value: 2, label: 'كشف' }] as const;
+export const REFERENCE_KIND = { none: 1, offerLine: 2, referencePrice: 3 } as const;
+
+export interface ReconciliationFilter { branchId: number | null; status: number | null; supplierId: number | null; projectId: number | null; search: string; page: number; pageSize: number; }
+
 export type ReferencePriceImportReport = ReferencePriceImportReportDto;
 export type ReferencePriceImportRow = ReferencePriceImportRowDto;
 
@@ -67,6 +86,7 @@ export interface PricingAccess {
   canView: boolean; canRegister: boolean; canAssign: boolean; canPrepareOffers: boolean; canApprove: boolean; canSendResult: boolean;
   canViewAgreements: boolean; canPrepareAgreement: boolean; canApproveAgreement: boolean;
   canViewReferencePrices: boolean; canAddReferencePrice: boolean; canApproveReferencePrice: boolean; canImportReferencePrices: boolean;
+  canViewReconciliations: boolean; canPrepareReconciliation: boolean; canApproveReconciliation: boolean;
   /** يختار الفرع (نظرة المؤسسة) */
   canChooseBranch: boolean;
 }

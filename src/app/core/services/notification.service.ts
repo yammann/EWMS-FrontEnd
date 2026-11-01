@@ -172,6 +172,7 @@ export function notificationRoute(n: AppNotification, canReview: boolean): strin
   if (n.relatedEntityType === 'HandoverRecord' && n.relatedEntityId) return `/handovers/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'PricingRequest' && n.relatedEntityId) return `/pricing/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'PricingAgreement' && n.relatedEntityId) return `/pricing/agreements/${n.relatedEntityId}`;
+  if (n.relatedEntityType === 'PriceReconciliation' && n.relatedEntityId) return `/pricing/reconciliations/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'ReferencePrice' && n.relatedEntityId) return `/pricing/reference-prices/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
