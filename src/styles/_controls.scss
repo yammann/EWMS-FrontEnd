@@ -56,6 +56,17 @@ button.danger,
   color: #fff;
 }
 
+/* حذف ثانوي (في بطاقة أو صف): أحمر باهت بنص أحمر داكن — الأحمر الممتلئ لتأكيد الحذف فقط */
+button.ghost.danger,
+.btn-ghost.danger,
+.ghost.danger {
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
+button.ghost.danger:hover:not(:disabled),
+.btn-ghost.danger:hover:not(:disabled),
+.ghost.danger:hover:not(:disabled) { background: color-mix(in srgb, var(--danger-500) 24%, transparent); filter: none; }
+
 .btn-sm,
 button.btn-sm {
   min-height: 32px;
@@ -113,6 +124,11 @@ button.btn-sm {
 /* أزرار الصف لا تنكمش ولا يلتف نصها في عمود ضيق — الجدول يتسع لها */
 .row-actions > * { flex-shrink: 0; }
 .row-actions .btn { white-space: nowrap; }
+
+/* أزرار نصية داخل خلية <td> (الخلية لا تصلح flex): فاصل بين المتجاورة وحجم مدمج */
+.row-buttons { white-space: nowrap; }
+.row-buttons > * + * { margin-inline-start: 6px; }
+.row-buttons .ghost { min-height: 30px; padding: 0 8px; font-size: 12px; }
 
 .icon-btn {
   display: grid;

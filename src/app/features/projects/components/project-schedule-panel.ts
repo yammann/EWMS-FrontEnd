@@ -126,7 +126,7 @@ type Section = 'plan' | 'delays' | 'extensions';
                             <button type="button" class="ghost" aria-label="تحريك للأعلى" [disabled]="busy() || first" (click)="move(d, i, -1)">↑</button>
                             <button type="button" class="ghost" aria-label="تحريك للأسفل" [disabled]="busy() || last" (click)="move(d, i, 1)">↓</button>
                             <button type="button" class="ghost" (click)="editTask(t)">تعديل</button>
-                            <button type="button" class="ghost" [disabled]="busy()" (click)="deleteTask(t)">حذف</button>
+                            <button type="button" class="ghost danger" [disabled]="busy()" (click)="deleteTask(t)">حذف</button>
                           }
                         </td>
                       </tr>
@@ -188,8 +188,6 @@ type Section = 'plan' | 'delays' | 'extensions';
     .pill-active { background: var(--brand-50); color: var(--brand-700); }
     .extra { margin-inline-start: 6px; color: var(--warning-700); font-weight: 700; }
     tr.picked td { background: var(--brand-50); }
-    .row-buttons { white-space: nowrap; }
-    .row-buttons .ghost { min-height: 30px; padding: 0 8px; font-size: 12px; }
     .table-wrap { margin-top: 14px; }
     .muted { color: var(--ink-500); line-height: 1.8; margin: 0; }
   `]

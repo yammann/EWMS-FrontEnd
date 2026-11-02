@@ -283,7 +283,6 @@ export class ExtensionDialog implements OnInit {
   styles: [`
     .muted { color: var(--ink-500); line-height: 1.8; margin: 0 0 8px; }
     .clip { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .row-buttons { white-space: nowrap; } .row-buttons .ghost { min-height: 30px; padding: 0 8px; font-size: 12px; }
     .pill-active { background: var(--brand-50); color: var(--brand-700); }
     .warnings { margin: 0; padding: 10px 28px; border-radius: var(--radius-md); background: var(--warning-50); color: var(--warning-700); font-size: 13px; display: grid; gap: 4px; }
   `]

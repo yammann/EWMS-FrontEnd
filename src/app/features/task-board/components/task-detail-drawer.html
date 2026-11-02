@@ -149,7 +149,7 @@
           <button type="button" class="btn btn-ghost btn-sm" (click)="confirmDelete.set(false)">تراجع</button>
         } @else {
           @if (t.canEdit) { <button type="button" class="btn btn-ghost btn-sm" (click)="edit.emit(t)">تعديل</button> }
-          @if (t.canDelete) { <button type="button" class="btn btn-danger btn-sm" (click)="confirmDelete.set(true)">حذف</button> }
+          @if (t.canDelete) { <button type="button" class="btn btn-ghost danger btn-sm" (click)="confirmDelete.set(true)">حذف</button> }
         }
       </footer>
     }

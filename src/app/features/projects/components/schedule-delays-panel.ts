@@ -262,7 +262,6 @@ export class JustifyDelayDialog implements OnInit {
     }`,
   styles: [`
     .muted { color: var(--ink-500); line-height: 1.8; margin: 0 0 8px; }
-    .row-buttons { white-space: nowrap; } .row-buttons .ghost { min-height: 30px; padding: 0 8px; font-size: 12px; }
     .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 22px; margin: 0; }
     .facts div { display: grid; gap: 4px; } .facts .wide { grid-column: 1 / -1; } .facts dt { color: var(--ink-500); font-size: 12px; } .facts dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
   `]

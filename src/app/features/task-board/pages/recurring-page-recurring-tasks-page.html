@@ -25,7 +25,7 @@
               <button type="button" class="btn btn-ghost btn-sm" (click)="toggle(r)">{{ r.isActive ? 'إيقاف' : 'استئناف' }}</button>
               <button type="button" class="btn btn-ghost btn-sm" (click)="runNow(r)">إنشاء الآن</button>
               <button type="button" class="btn btn-ghost btn-sm" (click)="editRecurrence.set(r); recurrenceOpen.set(true)">تعديل</button>
-              <button type="button" class="btn btn-danger btn-sm" (click)="removeRecurrence(r)">حذف</button>
+              <button type="button" class="btn btn-ghost danger btn-sm" (click)="removeRecurrence(r)">حذف</button>
             </div>
           </li>
         }
@@ -46,7 +46,7 @@
             <p class="line muted">@if (t.defaultDueDays !== null) { تسليم بعد {{ t.defaultDueDays }} يوم · } {{ t.items.length }} بند تحقق</p>
             <div class="actions">
               <button type="button" class="btn btn-ghost btn-sm" (click)="editTemplate.set(t); templateOpen.set(true)">تعديل</button>
-              <button type="button" class="btn btn-danger btn-sm" (click)="removeTemplate(t)">حذف</button>
+              <button type="button" class="btn btn-ghost danger btn-sm" (click)="removeTemplate(t)">حذف</button>
             </div>
           </li>
         }
