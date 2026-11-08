@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 
@@ -11,6 +11,11 @@ export class ApiService {
 
   get<T>(path: string): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}${path}`);
+  }
+
+  /** GET بالرد كاملاً (الترويسات مع الجسم) لما يعيد معلومات إضافية في ترويساته كالعدد الكلي */
+  getResponse<T>(path: string): Observable<HttpResponse<T>> {
+    return this.http.get<T>(`${this.baseUrl}${path}`, { observe: 'response' });
   }
 
   /** ملف (مرفق) كـ Blob — يمر بمعترض رمز الدخول كبقية الطلبات */

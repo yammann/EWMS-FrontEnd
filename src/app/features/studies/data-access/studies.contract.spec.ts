@@ -72,7 +72,7 @@ describe('Central studies API contract', () => {
     cancel.flush({});
 
     service.activityLog(1).subscribe();
-    http.expectOne('/api/StudyActivityLogs/ByRequest/1').flush([]);
+    http.expectOne('/api/StudyActivityLogs/ByRequest/1?page=1&pageSize=100').flush({ items: [], totalCount: 0, page: 1, pageSize: 100, totalPages: 0 });
   });
 
   it('sends signature decisions with a trimmed note or null', () => {
@@ -106,8 +106,13 @@ describe('Central studies API contract', () => {
     service.closeStage(5).subscribe();
     expect(http.expectOne('/api/StudyStages/Close/5').request.method).toBe('PUT');
 
-    service.projectTasks(2).subscribe();
-    http.expectOne('/api/StudyTasks/ByProject/2').flush([]);
+    let result: { total: number; truncated: boolean; tasks: unknown[] } | undefined;
+    service.projectTasks(2).subscribe(r => result = r);
+    http.expectOne('/api/StudyTasks/ByProject/2').flush([], { headers: { 'X-Total-Count': '2500', 'X-Truncated': 'true' } });
+    expect(result).toEqual({ tasks: [], total: 2500, truncated: true });
+    service.projectTasks(2).subscribe(r => result = r);
+    http.expectOne('/api/StudyTasks/ByProject/2').flush([{ id: 1 }]);
+    expect(result).toEqual({ tasks: [{ id: 1 }], total: 1, truncated: false });
     service.myTasks(false, 2, 10).subscribe();
     http.expectOne('/api/StudyTasks/My?openOnly=false&page=2&pageSize=10').flush({ items: [], totalCount: 0, page: 2, pageSize: 10, totalPages: 0 });
     service.updateProgress(8, { progress: 40, status: 2 }).subscribe();
@@ -149,11 +154,23 @@ describe('Central studies API contract', () => {
     http.expectOne('/api/StudyPrint/DesignApproval/2').flush({});
   });
 
-  it('reads the whole study log by its root request', () => {
-    TestBed.inject(StudyDocumentsService).activityLog(4).subscribe();
-    http.expectOne('/api/StudyActivityLogs/ByRequest/4').flush([]);
+  const page = (items: { id: number }[], p: number, totalPages: number) => ({ items, totalCount: items.length, page: p, pageSize: 100, totalPages });
+
+  it('reads the whole study log by its root request, page by page', () => {
+    let rows: { id: number }[] = [];
+    TestBed.inject(StudyDocumentsService).activityLog(4).subscribe(r => rows = r as unknown as { id: number }[]);
+    http.expectOne('/api/StudyActivityLogs/ByRequest/4?page=1&pageSize=100').flush(page([{ id: 3 }, { id: 2 }], 1, 2));
+    http.expectOne('/api/StudyActivityLogs/ByRequest/4?page=2&pageSize=100').flush(page([{ id: 1 }], 2, 2));
+    expect(rows.map(r => r.id)).toEqual([3, 2, 1]);
+
     TestBed.inject(StudyProjectsService).activityLog(2).subscribe();
-    http.expectOne('/api/StudyProjects/ActivityLog/2').flush([]);
+    http.expectOne('/api/StudyProjects/ActivityLog/2?page=1&pageSize=100').flush(page([], 1, 0));
+  });
+
+  it('stops collecting log pages at the cap', () => {
+    TestBed.inject(StudyProjectsService).activityLog(9).subscribe();
+    for (let p = 1; p <= 10; p++) http.expectOne(`/api/StudyProjects/ActivityLog/9?page=${p}&pageSize=100`).flush(page([{ id: p }], p, 50));
+    http.expectNone(r => r.url.includes('ActivityLog/9?page=11'));
   });
 
   it('maps drawings, architectural versions and design approvals', () => {

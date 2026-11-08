@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { PagedResult } from '@core/models/paged-result.model';
+import { allPages } from '../utils/all-pages';
 import { query } from '../utils/query';
 import {
   STUDY_DOCUMENT_ROUTES, StudyActivityLog, StudyChain, StudyDocumentFilter, StudyDocumentKind, StudyDocumentKinds, StudyResponse, StudyResponsePlanningInput
@@ -57,8 +58,8 @@ export class StudyDocumentsService {
     return this.get('responses', chain.responseId).pipe(map(r => r.responseNumber || null), catchError(() => of(null)));
   }
 
-  /** سجل الدراسة كلها (من الطلب حتى المشروع)، الأحدث أولاً */
+  /** سجل الدراسة كلها (من الطلب حتى المشروع)، الأحدث أولاً. مُرقَّم في الخادم (100 للصفحة) فتُجمع صفحاته */
   activityLog(requestId: number) {
-    return this.api.get<StudyActivityLog[]>(`/StudyActivityLogs/ByRequest/${requestId}`);
+    return allPages(page => this.api.get<PagedResult<StudyActivityLog>>(`/StudyActivityLogs/ByRequest/${requestId}?page=${page}&pageSize=100`));
   }
 }

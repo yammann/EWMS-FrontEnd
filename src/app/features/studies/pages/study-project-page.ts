@@ -69,6 +69,8 @@ export class StudyProjectPage {
   id = signal(0);
   project = signal<StudyProject | null>(null);
   tasks = signal<StageTask[]>([]);
+  /** العدد الكلي للمهام إن قطع الخادم الرد عند حدّه (2000)، وإلا null */
+  tasksTruncated = signal<number | null>(null);
   loading = signal(false);
   error = signal('');
   busy = signal(false);
@@ -97,7 +99,7 @@ export class StudyProjectPage {
     });
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(p => {
       this.id.set(Number(p.get('id')));
-      this.project.set(null); this.tasks.set([]);
+      this.project.set(null); this.tasks.set([]); this.tasksTruncated.set(null);
       this.load();
     });
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(p => {
@@ -113,7 +115,8 @@ export class StudyProjectPage {
   load() {
     const id = this.id();
     this.latest(forkJoin({ project: this.service.get(id), tasks: this.service.projectTasks(id) }), this.loading, this.error, r => {
-      this.project.set(r.project); this.tasks.set(r.tasks); this.logVersion.update(v => v + 1);
+      this.project.set(r.project); this.tasks.set(r.tasks.tasks); this.logVersion.update(v => v + 1);
+      this.tasksTruncated.set(r.tasks.truncated ? r.tasks.total : null);
     });
   }
 

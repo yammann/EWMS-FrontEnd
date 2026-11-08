@@ -271,6 +271,9 @@ export const STUDY_DOCUMENT_ROUTES: Record<StudyDocumentKind, string> = {
 
 export interface ProjectMember { userId: number; fullName: string; roleTitle: string | null; assignedByName: string; assignedAt: string; }
 
+/** موقع من السجل المشترك لقائمة اختيار موقع الطلب — Sites/GetAll (المحافظة يحسبها الخادم من الإحداثيات) */
+export interface StudySiteOption { id: number; name: string; governorateCode: string; governorateName: string; }
+
 /** موظف في قوائم الاختيار (موظف نشط من فرع الدراسة، بلا بيانات حساسة) — StudyLookups/Employees */
 export interface StudyEmployee {
   id: number; fullName: string; departmentId: number | null; departmentName: string | null;

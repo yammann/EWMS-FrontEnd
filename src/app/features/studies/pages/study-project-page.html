@@ -43,6 +43,11 @@
       </dl>
     </section>
 
+    @if (tasksTruncated(); as total) {
+      <p class="alert alert-warning state-note" role="status"><app-icon name="warning" [size]="16" />
+        لهذا المشروع {{ total }} مهمة وتُعرض أول 2000 فقط، فقد تنقص المراحل والمخطط الزمني بعض المهام.</p>
+    }
+
     <nav class="segmented" role="tablist" aria-label="أقسام المشروع">
       @for (t of visibleTabs(); track t.key) {
         <button type="button" role="tab" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="setTab(t.key)">{{ t.label }}</button>

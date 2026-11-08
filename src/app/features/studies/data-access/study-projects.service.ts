@@ -1,11 +1,16 @@
 import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { PagedResult } from '@core/models/paged-result.model';
+import { allPages } from '../utils/all-pages';
 import { query } from '../utils/query';
 import {
   ProjectStage, StageTask, StageTaskInput, StageTaskProgressInput, StudyActivityLog,
   StudyProject, StudyProjectFilter, StudyProjectInput, StudyStageInput
 } from './studies.models';
+
+/** مهام المشروع كلها (حد الخادم 2000): total العدد الكلي، وtruncated = قُطع الرد فالمعروض بعضها */
+export interface ProjectTasks { tasks: StageTask[]; total: number; truncated: boolean; }
 
 /**
  * مشاريع الدراسات: المشروع يُنشأ من أمر بدء معتمد، وفريقه أقسام مشاركة لكل منها أعضاء يعيّنهم رئيس القسم،
@@ -25,7 +30,10 @@ export class StudyProjectsService {
   cancel(id: number, reason: string) { return this.api.put<StudyProject>(`/StudyProjects/Cancel/${id}`, { reason: reason.trim() }); }
   /** كل المراحل مغلقة: يُرسل الإنجاز لتوقيع إدارة المشاريع ثم رئيس الفرع */
   requestCompletion(id: number) { return this.api.put<StudyProject>(`/StudyProjects/RequestCompletion/${id}`, {}); }
-  activityLog(id: number) { return this.api.get<StudyActivityLog[]>(`/StudyProjects/ActivityLog/${id}`); }
+  /** السجل مُرقَّم في الخادم (100 للصفحة): تُجمع صفحاته لتبقى التصفية في الواجهة كما كانت */
+  activityLog(id: number) {
+    return allPages(page => this.api.get<PagedResult<StudyActivityLog>>(`/StudyProjects/ActivityLog/${id}?page=${page}&pageSize=100`));
+  }
 
   // ─────────── الفريق ───────────
   addDepartment(projectId: number, departmentId: number) {
@@ -56,7 +64,13 @@ export class StudyProjectsService {
   // ─────────── المهام ───────────
   tasks(stageId: number) { return this.api.get<StageTask[]>(`/StudyTasks/ByStage/${stageId}`); }
   /** كل مهام المشروع في طلب واحد (لمخطط Gantt): بترتيب المرحلة ثم البدء المخطط، والأعلام كما في ByStage */
-  projectTasks(projectId: number) { return this.api.get<StageTask[]>(`/StudyTasks/ByProject/${projectId}`); }
+  projectTasks(projectId: number): Observable<ProjectTasks> {
+    return this.api.getResponse<StageTask[]>(`/StudyTasks/ByProject/${projectId}`).pipe(map(r => {
+      const tasks = r.body ?? [];
+      // الخادم يقطع الرد عند 2000 مهمة ويكشف ذلك بترويستين: العدد الكلي وهل قُطع
+      return { tasks, total: Number(r.headers.get('X-Total-Count')) || tasks.length, truncated: r.headers.get('X-Truncated') === 'true' };
+    }));
+  }
   task(id: number) { return this.api.get<StageTask>(`/StudyTasks/Get/${id}`); }
   /** مهامي: المسندة إليّ أو إلى مكتبي أو قسمي */
   myTasks(openOnly = true, page = 1, pageSize = 20) {

@@ -53,6 +53,14 @@
               @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
             </select>
             @if (form.controls.governorateCode.touched && form.controls.governorateCode.invalid) { <small class="form-error">اختر المحافظة</small> }</label>
+          @if (canPickSite) {
+            <label class="form-field"><span class="form-label">الموقع على الخريطة <small class="hint">(اختياري)</small></span>
+              <select formControlName="siteId">
+                <option [ngValue]="0">— بلا موقع —</option>
+                @for (s of siteOptions(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+              </select>
+              <small class="hint">بدون موقع لا يظهر مشروع هذه الدراسة على خريطة الفرع.</small></label>
+          }
           <label class="form-field"><span class="form-label">المنطقة</span><input formControlName="area" maxlength="100"></label>
           <label class="form-field"><span class="form-label">المدينة / القرية</span><input formControlName="cityOrVillage" maxlength="100"></label>
         </div>

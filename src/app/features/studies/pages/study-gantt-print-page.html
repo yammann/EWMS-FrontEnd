@@ -2,6 +2,7 @@
   <app-back-button />
   <div class="actions">
     @if (hasTasks()) {
+      @if (withTasks() && truncated()) { <span class="hint">المهام مقطوعة عند 2000: المخطط غير كامل</span> }
       @if (withTasks() && tooTall()) { <span class="hint">المخطط كبير: سيمتد على أكثر من صفحة</span> }
       <label class="check"><input type="checkbox" [checked]="withTasks()" (change)="withTasks.set($any($event.target).checked)"> مع المهام</label>
     }

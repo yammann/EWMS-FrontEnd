@@ -36,6 +36,8 @@ export class StudyGanttPrintPage {
   project = signal<StudyProject | null>(null);
   tasks = signal<StageTask[]>([]);
   error = signal('');
+  /** قطع الخادم المهام عند 2000: ينبّه الشريط العلوي (لا يُطبع) */
+  truncated = signal(false);
   withTasks = signal(false);
   /** معامل التصغير ليبقى المخطط في صفحة */
   scale = signal(1);
@@ -47,7 +49,7 @@ export class StudyGanttPrintPage {
   constructor() {
     const id = Number(inject(ActivatedRoute).snapshot.paramMap.get('id'));
     forkJoin({ project: this.service.get(id), tasks: this.service.projectTasks(id) }).subscribe({
-      next: r => { this.project.set(r.project); this.tasks.set(r.tasks); },
+      next: r => { this.project.set(r.project); this.tasks.set(r.tasks.tasks); this.truncated.set(r.tasks.truncated); },
       error: e => this.error.set(e.message)
     });
     // القياس بعد رسم المخطط: المراحل وحدها لا تُصغَّر، ومع المهام يُصغَّر إلى أن يتسع الارتفاع المتاح
