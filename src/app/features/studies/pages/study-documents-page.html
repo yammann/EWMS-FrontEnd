@@ -1,0 +1,73 @@
+<div class="page">
+  <app-page-header eyebrow="فرع الدراسات" heading="مستندات الدراسة" subtitle="الطلب ← التكليف الداخلي ← إشعار الرد ← أمر البدء">
+    @if (kind() === 'requests' && can().createRequest) { <button class="btn" type="button" (click)="creating.set(true)">+ طلب تجهيز دراسة</button> }
+    <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  @if (kinds().length > 1) {
+    <nav class="segmented" role="tablist" aria-label="نوع المستند">
+      @for (k of kinds(); track k) {
+        <button type="button" role="tab" [class.on]="kind() === k" [attr.aria-selected]="kind() === k" (click)="setKind(k)">{{ meta[k].plural }}</button>
+      }
+    </nav>
+  }
+
+  <div class="filters">
+    <div class="filters-row">
+      <input #q class="search" type="search" dir="auto" placeholder="بحث بالرقم أو الجهة أو الكود…" aria-label="بحث"
+             [value]="search()" (input)="search.set(q.value); changed()">
+      <select #s (change)="status.set($any(+s.value)); changed()" aria-label="الحالة">
+        <option value="0" [selected]="!status()">كل الحالات</option>
+        @for (x of statuses; track x.value) { <option [value]="x.value" [selected]="x.value === status()">{{ x.label }}</option> }
+      </select>
+      @if (orgWide() && branches().length) {
+        <select #b (change)="branchId.set(+b.value); changed()" aria-label="الفرع">
+          <option value="0" [selected]="!branchId()">كل الفروع</option>
+          @for (x of branches(); track x.id) { <option [value]="x.id" [selected]="x.id === branchId()">{{ x.name }}</option> }
+        </select>
+      }
+      <label class="inline-field">من <input #f type="date" [value]="from()" (change)="from.set(f.value); changed()" aria-label="من تاريخ"></label>
+      <label class="inline-field">إلى <input #t type="date" [value]="to()" (change)="to.set(t.value); changed()" aria-label="إلى تاريخ"></label>
+      @if (hasFilter()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">مسح الفلاتر</button> }
+    </div>
+  </div>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  <section class="panel">
+    @if (!kinds().length) {
+      <app-empty-state>لا تملك صلاحية عرض أي نوع من مستندات الدراسة.</app-empty-state>
+    } @else if (loading() && !rows().length) {
+      <app-empty-state>جارٍ التحميل…</app-empty-state>
+    } @else if (!rows().length && !error()) {
+      <div class="empty-state"><h3>{{ hasFilter() ? 'لا توجد نتائج مطابقة' : 'لا توجد ' + meta[kind()].plural + ' بعد' }}</h3>
+        <p>{{ hasFilter() ? 'جرّب تعديل البحث أو الفلاتر.' : (kind() === 'requests' ? 'يُسجَّل الطلب الوارد من الديوان بزر «طلب تجهيز دراسة».' : 'يُنشأ من صفحة المستند المعتمد السابق في السلسلة.') }}</p></div>
+    } @else if (rows().length) {
+      <div class="table-wrap" [class.dim]="loading()"><table>
+        <thead><tr>
+          <th>الرقم</th><th>التاريخ</th><th>البيان</th>
+          @for (c of columns(); track c) { <th>{{ c }}</th> }
+          @if (orgWide()) { <th>الفرع</th> }
+          <th>الحالة</th>
+        </tr></thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td><a class="mono cell-strong" [routerLink]="link(r)">{{ r.number }}</a></td>
+              <td class="mono">{{ r.date | date:'yyyy/MM/dd' }}</td>
+              <td><span class="cell-strong">{{ r.title }}</span>@if (r.subtitle) { <small>{{ r.subtitle }}</small> }</td>
+              @for (x of r.extra; track $index) { <td>{{ x || '—' }}</td> }
+              @if (orgWide()) { <td>{{ r.branchName }}</td> }
+              <td><app-study-status-chip [status]="r.status" [name]="r.statusName" /></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+    }
+  </section>
+</div>
+
+@if (creating()) {
+  <app-study-request-form-dialog (closed)="creating.set(false)" (saved)="created($event)" />
+}

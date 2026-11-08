@@ -1,0 +1,17 @@
+.title { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.title .mono { font-size: inherit; }
+.state-note { margin: 0; display: flex; align-items: center; gap: 8px; }
+.note { margin: 12px 0 0; font-size: 13px; }
+.outputs { margin: 0; padding-inline-start: 18px; display: grid; gap: 4px; font-weight: 400; }
+
+.panel .table-wrap { margin-top: 16px; }
+tfoot td { font-weight: 700; border-top: 1px solid var(--separator); }
+
+.two-tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 16px; }
+.two-tables h3 { margin: 0 0 8px; font-size: 14px; color: var(--ink-700); }
+.two-tables table { min-width: 0; width: 100%; }
+@media (max-width: 760px) { .two-tables { grid-template-columns: minmax(0, 1fr); } }
+
+.danger-zone { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.danger-zone h2 { font-size: 16px; margin: 0 0 4px; }
+.danger-zone p { margin: 0; font-size: 13px; color: var(--ink-500); }

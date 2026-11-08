@@ -49,6 +49,27 @@ const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; 
     { key: 'maint-department', title: 'الإشراف على صيانة القسم', names: ['ViewDepartmentMaintenance', 'ViewMaintenanceStats', 'SignMaintenanceReceipt'] },
     { key: 'maint-lookups', title: 'جداول الصيانة (أنواع الأجهزة والشركات والأعطال والحالات)', names: ['ViewMaintenanceLookups', 'CreateMaintenanceLookup', 'EditMaintenanceLookup', 'DeleteMaintenanceLookup'] }
   ] },
+  { key: 'studies', title: 'فرع الدراسات المركزية', groups: [
+    { key: 'study-lookups', title: 'القوائم (أنواع المراحل والمرفقات والاختصاصات)', names: ['ViewStudyLookups', 'CreateStudyLookup', 'EditStudyLookup', 'DeleteStudyLookup'] },
+    { key: 'study-requests', title: 'طلبات تجهيز الدراسة', names: ['ViewStudyRequests', 'CreateStudyRequest', 'EditStudyRequest', 'DeleteStudyRequest'] },
+    { key: 'study-assignments', title: 'التكليفات الداخلية IPA', names: ['ViewStudyAssignments', 'CreateStudyAssignment', 'EditStudyAssignment', 'DeleteStudyAssignment'] },
+    { key: 'study-responses', title: 'إشعارات الرد', names: ['ViewStudyResponses', 'CreateStudyResponse', 'EditStudyResponse', 'EditStudyResponsePlanning', 'DeleteStudyResponse'] },
+    { key: 'study-start-orders', title: 'أوامر بدء الدراسة PIO', names: ['ViewStudyStartOrders', 'CreateStudyStartOrder', 'EditStudyStartOrder', 'DeleteStudyStartOrder'] },
+    { key: 'study-signatures', title: 'التواقيع (صلاحية لكل صفة موقّع)', names: [
+      'SignStudyAsFollowingDepartment', 'SignStudyAsPlanning', 'SignStudyAsCompetentDepartment', 'SignStudyAsBranchHead',
+      'SignStudyAsSendingDepartment', 'SignStudyAsDesignManagement', 'SignStudyAsQualityControl', 'SignStudyAsProjectManagement'] },
+    { key: 'study-projects', title: 'المشاريع والفريق', names: [
+      'ViewStudyProjects', 'CreateStudyProject', 'EditStudyProject', 'DeleteStudyProject',
+      'AddStudyProjectDepartment', 'RemoveStudyProjectDepartment', 'AddStudyProjectMember', 'RemoveStudyProjectMember'] },
+    { key: 'study-stages', title: 'المراحل والمهام', names: [
+      'CreateStudyStage', 'EditStudyStage', 'DeleteStudyStage', 'CloseStudyStage',
+      'CreateStudyTask', 'EditStudyTask', 'DeleteStudyTask', 'UpdateStudyTaskProgress'] },
+    { key: 'study-drawings', title: 'المخططات واعتماد المخططات الأولي CDA', names: [
+      'ViewStudyDrawings', 'CreateStudyDrawing', 'EditStudyDrawing', 'DeleteStudyDrawing', 'ReviewStudyDrawing',
+      'CreateArchitecturalVersion', 'EditArchitecturalVersion', 'DeleteArchitecturalVersion',
+      'CreateDesignApproval', 'EditDesignApproval', 'DeleteDesignApproval'] },
+    { key: 'study-log', title: 'الإلغاء وسجل الدراسة', names: ['CancelStudyDocuments', 'ViewStudyActivityLog', 'PrintStudyDocuments'] }
+  ] },
   { key: 'general', title: 'عام', groups: [
     { key: 'notifications', title: 'الإشعارات', names: ['ViewNotifications'] },
     { key: 'signature', title: 'التوقيع الإلكتروني', names: ['ManageMySignature'] }

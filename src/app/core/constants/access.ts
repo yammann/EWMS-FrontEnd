@@ -79,7 +79,33 @@ export const AppPermission = {
   ExportSparePartMovementsReport: 'ExportSparePartMovementsReport', ExportSparePartStockReport: 'ExportSparePartStockReport',
   ExportInstallationsReport: 'ExportInstallationsReport', ExportSitesReport: 'ExportSitesReport', ExportMapEntriesReport: 'ExportMapEntriesReport',
   // تصدير لوحة المهام (من صفحتها) وسجل السحب
-  ExportTasksReport: 'ExportTasksReport', ViewReportLog: 'ViewReportLog'
+  ExportTasksReport: 'ExportTasksReport', ViewReportLog: 'ViewReportLog',
+
+  // فرع الدراسات المركزية: حدّ كل صلاحية = دراسات فرعه (والمؤسسة كلها لنظرة المؤسسة)، ويحسبه الباكاند
+  ViewStudyLookups: 'ViewStudyLookups', CreateStudyLookup: 'CreateStudyLookup', EditStudyLookup: 'EditStudyLookup', DeleteStudyLookup: 'DeleteStudyLookup',
+  ViewStudyRequests: 'ViewStudyRequests', CreateStudyRequest: 'CreateStudyRequest', EditStudyRequest: 'EditStudyRequest', DeleteStudyRequest: 'DeleteStudyRequest',
+  ViewStudyAssignments: 'ViewStudyAssignments', CreateStudyAssignment: 'CreateStudyAssignment',
+  EditStudyAssignment: 'EditStudyAssignment', DeleteStudyAssignment: 'DeleteStudyAssignment',
+  ViewStudyResponses: 'ViewStudyResponses', CreateStudyResponse: 'CreateStudyResponse', EditStudyResponse: 'EditStudyResponse', DeleteStudyResponse: 'DeleteStudyResponse',
+  EditStudyResponsePlanning: 'EditStudyResponsePlanning',
+  ViewStudyStartOrders: 'ViewStudyStartOrders', CreateStudyStartOrder: 'CreateStudyStartOrder',
+  EditStudyStartOrder: 'EditStudyStartOrder', DeleteStudyStartOrder: 'DeleteStudyStartOrder',
+  CancelStudyDocuments: 'CancelStudyDocuments',
+  // التواقيع: صلاحية لكل صفة موقّع (صفات الأقسام الثلاث محدودة بقسم المستند)
+  SignStudyAsFollowingDepartment: 'SignStudyAsFollowingDepartment', SignStudyAsPlanning: 'SignStudyAsPlanning',
+  SignStudyAsCompetentDepartment: 'SignStudyAsCompetentDepartment', SignStudyAsBranchHead: 'SignStudyAsBranchHead',
+  SignStudyAsSendingDepartment: 'SignStudyAsSendingDepartment', SignStudyAsDesignManagement: 'SignStudyAsDesignManagement',
+  SignStudyAsQualityControl: 'SignStudyAsQualityControl', SignStudyAsProjectManagement: 'SignStudyAsProjectManagement',
+  ViewStudyProjects: 'ViewStudyProjects', CreateStudyProject: 'CreateStudyProject', EditStudyProject: 'EditStudyProject', DeleteStudyProject: 'DeleteStudyProject',
+  AddStudyProjectDepartment: 'AddStudyProjectDepartment', RemoveStudyProjectDepartment: 'RemoveStudyProjectDepartment',
+  AddStudyProjectMember: 'AddStudyProjectMember', RemoveStudyProjectMember: 'RemoveStudyProjectMember',
+  CreateStudyStage: 'CreateStudyStage', EditStudyStage: 'EditStudyStage', DeleteStudyStage: 'DeleteStudyStage', CloseStudyStage: 'CloseStudyStage',
+  CreateStudyTask: 'CreateStudyTask', EditStudyTask: 'EditStudyTask', DeleteStudyTask: 'DeleteStudyTask', UpdateStudyTaskProgress: 'UpdateStudyTaskProgress',
+  ViewStudyDrawings: 'ViewStudyDrawings', CreateStudyDrawing: 'CreateStudyDrawing', EditStudyDrawing: 'EditStudyDrawing',
+  DeleteStudyDrawing: 'DeleteStudyDrawing', ReviewStudyDrawing: 'ReviewStudyDrawing',
+  CreateArchitecturalVersion: 'CreateArchitecturalVersion', EditArchitecturalVersion: 'EditArchitecturalVersion', DeleteArchitecturalVersion: 'DeleteArchitecturalVersion',
+  CreateDesignApproval: 'CreateDesignApproval', EditDesignApproval: 'EditDesignApproval', DeleteDesignApproval: 'DeleteDesignApproval',
+  ViewStudyActivityLog: 'ViewStudyActivityLog', PrintStudyDocuments: 'PrintStudyDocuments'
 } as const;
 
 export type AppPermissionName = (typeof AppPermission)[keyof typeof AppPermission];
@@ -130,6 +156,32 @@ export const REPORT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ExportMaintenanceRequestsReport, AppPermission.ExportTechniciansReport, AppPermission.ExportSparePartMovementsReport,
   AppPermission.ExportSparePartStockReport, AppPermission.ExportInstallationsReport, AppPermission.ExportSitesReport, AppPermission.ExportMapEntriesReport
 ];
+/** إعدادات الدراسات (أنواع المراحل والمرفقات والاختصاصات): لمن يدير القوائم — العرض وحده للنماذج */
+export const MANAGE_STUDY_LOOKUPS: readonly AppPermissionName[] = [AppPermission.CreateStudyLookup, AppPermission.EditStudyLookup, AppPermission.DeleteStudyLookup];
+/** التوقيع بأي صفة (نفس سياسة AnyStudySign) — صندوق «بانتظار توقيعي» */
+export const STUDY_SIGN: readonly AppPermissionName[] = [
+  AppPermission.SignStudyAsFollowingDepartment, AppPermission.SignStudyAsPlanning, AppPermission.SignStudyAsCompetentDepartment,
+  AppPermission.SignStudyAsBranchHead, AppPermission.SignStudyAsSendingDepartment, AppPermission.SignStudyAsDesignManagement,
+  AppPermission.SignStudyAsQualityControl, AppPermission.SignStudyAsProjectManagement
+];
+/** من يرى أي مستند دراسة (نفس سياسة AnyStudyView): المرفقات والتواقيع وأنواع المرفقات */
+export const STUDY_VIEW: readonly AppPermissionName[] = [
+  AppPermission.ViewStudyRequests, AppPermission.ViewStudyAssignments, AppPermission.ViewStudyResponses, AppPermission.ViewStudyStartOrders,
+  AppPermission.ViewStudyProjects, AppPermission.ViewStudyDrawings, AppPermission.ViewStudyActivityLog
+];
+/** صفحة مهمة مرحلة: من يرى مشاريع فرعه أو المكلَّف بها (نفس سياسة AnyStudyTaskView) */
+export const STUDY_TASK_VIEW: readonly AppPermissionName[] = [AppPermission.ViewStudyProjects, AppPermission.UpdateStudyTaskProgress];
+/** قائمة موظفي فرع الدراسة لاختيار مدير المشروع والمهندسين وأعضاء الفريق (نفس سياسة AnyStudyEmployeePick) */
+export const STUDY_EMPLOYEE_PICK: readonly AppPermissionName[] = [
+  AppPermission.CreateStudyResponse, AppPermission.EditStudyResponse, AppPermission.CreateStudyStartOrder,
+  AppPermission.EditStudyStartOrder, AppPermission.EditStudyProject, AppPermission.AddStudyProjectMember
+];
+/** رفع مرفق دراسة أو حذفه: صلاحية تعديل صاحبه (نفس سياسة AnyStudyAttachmentWrite) */
+export const STUDY_ATTACHMENT_WRITE: readonly AppPermissionName[] = [
+  AppPermission.EditStudyRequest, AppPermission.EditStudyAssignment, AppPermission.EditStudyResponse, AppPermission.EditStudyStartOrder,
+  AppPermission.EditStudyProject, AppPermission.EditStudyDrawing, AppPermission.EditArchitecturalVersion
+];
+
 /** أي لوحة متابعة (الصفحة الرئيسية) */
 export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewOrganizationDashboard, AppPermission.ViewBranchDashboard, AppPermission.ViewDepartmentDashboard,
@@ -143,4 +195,8 @@ export const OFFICE_DASHBOARD_ACCESS: readonly AppPermissionName[] = [
 export const WORK_TASK_VIEW: readonly AppPermissionName[] = [
   AppPermission.ViewMyWorkTasks, AppPermission.ViewWorkTasks, AppPermission.ViewBranchDashboard,
   AppPermission.ViewDepartmentDashboard, AppPermission.ViewOfficeDashboard
+];
+/** صفحة «مستندات الدراسة»: عرض أي نوع من المستندات الأربعة */
+export const STUDY_DOCUMENTS_VIEW: readonly AppPermissionName[] = [
+  AppPermission.ViewStudyRequests, AppPermission.ViewStudyAssignments, AppPermission.ViewStudyResponses, AppPermission.ViewStudyStartOrders
 ];

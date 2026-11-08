@@ -1,0 +1,75 @@
+<div class="bar no-print">
+  <app-back-button />
+  <button type="button" class="btn" (click)="print()" [disabled]="!data()"><app-icon name="printer" [size]="16" /> طباعة</button>
+</div>
+
+@if (error()) { <p class="alert alert-error no-print" role="alert">{{ error() }}</p> }
+@if (data(); as d) {
+  @if (d.signatures.length && !d.signatures.some(s => s.signerName)) {
+    <p class="alert alert-warning no-print" role="status">المستند لم يُوقَّع بعد — تُطبع مربعات التواقيع فارغة.</p>
+  }
+
+  <article class="sheet" dir="rtl">
+    <header class="head">
+      <div class="side right">
+        <strong>{{ header.countryAr }}</strong>
+        <strong class="branch">{{ d.branchName }}</strong>
+      </div>
+      <div class="center"><app-logo class="emblem" /></div>
+      <div class="side left" dir="ltr"><strong>{{ header.countryEn }}</strong></div>
+    </header>
+
+    <div class="meta-row">
+      <table class="ref"><tbody>
+        <tr><th>الرقم:</th><td class="ltr">{{ d.number }}</td></tr>
+        <tr><th>التاريخ:</th><td class="ltr">{{ d.documentDateHijri }}</td></tr>
+        <tr><th>الموافق لـ:</th><td class="ltr">{{ d.documentDate | date:'yyyy/M/d' }}</td></tr>
+      </tbody></table>
+      <h1>( {{ d.title }} )</h1>
+      <span></span>
+    </div>
+
+    <table class="grid"><tbody>
+      @for (f of fields(); track $index) {
+        @if (f.wide) {
+          <tr><th>{{ f.label }}</th><td colspan="3" class="pre">{{ f.value }}</td></tr>
+        } @else if ($index % 2 === 0) {
+          <tr>
+            <th>{{ f.label }}</th><td>{{ f.value }}</td>
+            @if (fields()[$index + 1]; as g) {
+              @if (!g.wide) { <th>{{ g.label }}</th><td>{{ g.value }}</td> } @else { <th></th><td></td> }
+            } @else { <th></th><td></td> }
+          </tr>
+        }
+      }
+    </tbody></table>
+
+    @for (t of tables(); track t.title) {
+      <h2>❖ {{ t.title }}:</h2>
+      <table class="lines"><thead><tr>@for (h of t.head; track $index) { <th>{{ h }}</th> }</tr></thead>
+        <tbody>@for (row of t.rows; track $index) { <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr> }</tbody>
+        @if (t.foot; as foot) { <tfoot><tr>@for (cell of foot; track $index) { <td>{{ cell }}</td> }</tr></tfoot> }
+      </table>
+    }
+
+    @if (d.signatures.length) {
+      <h2>❖ التواقيع:</h2>
+      <div class="signers">
+        @for (s of d.signatures; track $index) {
+          <div class="signer">
+            <strong>{{ s.signerRoleName }}</strong>
+            @if (s.image) { <img [src]="s.image" alt="التوقيع"> } @else { <span class="sign-space"></span> }
+            <span class="name">{{ s.signerName || '' }}</span>
+            @if (s.jobTitle) { <small>{{ s.jobTitle }}</small> }
+            <small class="ltr">{{ s.decidedAtHijri || '' }}</small>
+            <small>{{ s.signerName ? s.decisionName : '' }}</small>
+            @if (s.note) { <small class="note">{{ s.note }}</small> }
+          </div>
+        }
+        <div class="signer"><span class="stamp">مكان الختم</span></div>
+      </div>
+    }
+
+    <footer class="foot"><p class="copy">نسخة إلى:<br>- أرشيف {{ d.branchName }}</p></footer>
+  </article>
+} @else if (!error()) { <p class="loading no-print" role="status">جارٍ التحميل…</p> }

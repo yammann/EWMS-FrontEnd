@@ -1,0 +1,234 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">فرع الدراسات · {{ meta().single }}</span>
+      <h1 class="title">
+        @if (doc(); as d) { <span class="mono">{{ number() }}</span> <app-study-status-chip [status]="d.status" [name]="d.statusName" /> }
+        @else { {{ loading() ? 'جارٍ التحميل…' : meta().single }} }
+      </h1>
+      @if (doc(); as d) { <p class="muted">{{ d.branchName }} · أنشأه {{ d.createdByName }} في {{ d.createdAt | utc | date:'yyyy/MM/dd' }}</p> }
+    </div>
+    <div class="header-actions">
+      <a class="btn btn-ghost" [routerLink]="['/studies/documents']" [queryParams]="{ type: kind() === 'requests' ? null : kind() }">كل {{ meta().plural }}</a>
+      @if (doc(); as d) {
+        @if (canPrint()) { <a class="btn btn-ghost" [routerLink]="['/studies/print', meta().segment, d.id]"><app-icon name="printer" [size]="16" /> طباعة</a> }
+        @if (kind() === 'responses') {
+          @if (response()?.canEditFollowingPart) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')">تعديل جزء القسم المتابع</button> }
+          @if (response()?.canEditPlanningPart) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('planning')">جزء التخطيط</button> }
+        } @else if (d.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')">تعديل</button> }
+        @if (d.canSubmit) { <button class="btn" type="button" [disabled]="busy()" (click)="submit()">{{ submitLabel() }}</button> }
+        @if (next(); as n) { <button class="btn" type="button" [disabled]="busy()" (click)="dialog.set('next')">+ {{ n.label }}</button> }
+      }
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+  <app-alert [message]="actionError()" />
+
+  @if (doc(); as d) {
+    @if (d.status === 4) {
+      <p class="alert alert-warning state-note" role="status"><app-icon name="warning" [size]="16" /> رُفض المستند — انظر سبب الرفض في التواقيع أدناه. عدّله ثم أرسله من جديد.</p>
+    } @else if (d.status === 5) {
+      <p class="alert state-note" role="status"><app-icon name="lock" [size]="16" /> المستند ملغى ويبقى للأرشيف فقط.</p>
+    }
+
+    @if (d.chain) { <section class="panel"><app-study-chain [chain]="d.chain" [current]="kind()" [responseNumber]="responseNumber()" /></section> }
+
+    <!-- ═════════ الطلب ═════════ -->
+    @if (request(); as r) {
+      <section class="panel">
+        <div class="panel-heading"><div><h2>بيانات الطلب</h2></div></div>
+        <dl class="facts">
+          <div><dt>تاريخ الطلب</dt><dd>{{ r.requestDate | date:'yyyy/MM/dd' }}</dd></div>
+          <div><dt>الاستعجال</dt><dd>{{ r.urgencyName }}</dd></div>
+          <div><dt>إنشاء / صيانة وترميم</dt><dd>{{ r.workTypeName }}</dd></div>
+          <div><dt>رقم الطلب من الديوان المركزي</dt><dd>{{ r.diwanRequestNumber || 'بدون' }}</dd></div>
+          <div><dt>رقم أرشيف ديوان الوزارة</dt><dd>{{ r.ministryArchiveNumber || 'بدون' }}</dd></div>
+          <div><dt>تاريخ أرشيف ديوان الوزارة</dt><dd>{{ r.ministryArchiveDate ? (r.ministryArchiveDate | date:'yyyy/MM/dd') : '—' }}</dd></div>
+          <div><dt>رقم أرشيف الجهة المستفيدة</dt><dd>{{ r.beneficiaryArchiveNumber || 'بدون' }}</dd></div>
+          <div><dt>رقم أرشيف ديوان الإدارة</dt><dd>{{ r.adminArchiveNumber || 'بدون' }}</dd></div>
+          <div><dt>تاريخ أرشيف ديوان الإدارة</dt><dd>{{ r.adminArchiveDate ? (r.adminArchiveDate | date:'yyyy/MM/dd') : '—' }}</dd></div>
+          <div><dt>تاريخ الإضافة</dt><dd>{{ r.addedDate ? (r.addedDate | date:'yyyy/MM/dd') : '—' }}</dd></div>
+        </dl>
+      </section>
+      <section class="panel">
+        <div class="panel-heading"><div><h2>الجهة المستفيدة والموقع</h2></div></div>
+        <dl class="facts">
+          <div><dt>الجهة المستفيدة الرئيسية</dt><dd>{{ r.mainBeneficiary }}</dd></div>
+          <div><dt>الجهة الفرعية (اللواء — الإدارة)</dt><dd>{{ r.subBeneficiary || '—' }}</dd></div>
+          <div><dt>رمز الجهة</dt><dd>{{ r.entityCode || '—' }}</dd></div>
+          <div><dt>المحافظة</dt><dd>{{ r.governorateName }}</dd></div>
+          <div><dt>المنطقة</dt><dd>{{ r.area || '—' }}</dd></div>
+          <div><dt>المدينة / القرية</dt><dd>{{ r.cityOrVillage || '—' }}</dd></div>
+          <div><dt>طبيعة العقار</dt><dd>{{ r.propertyNature || '—' }}</dd></div>
+          <div><dt>الموقع</dt><dd>{{ r.siteName || '—' }}</dd></div>
+          <div><dt>المتابع لدى الجهة</dt><dd>{{ r.followerName || '—' }}@if (r.followerPhone) { <small class="mono"> · {{ formatPhone(r.followerPhone) }}</small> }</dd></div>
+          @if (r.notes) { <div class="wide"><dt>ملاحظات عامة</dt><dd>{{ r.notes }}</dd></div> }
+        </dl>
+      </section>
+    }
+
+    <!-- ═════════ التكليف ═════════ -->
+    @if (assignment(); as a) {
+      <section class="panel">
+        <div class="panel-heading"><div><h2>بيان أمر التكليف</h2></div></div>
+        <dl class="facts">
+          <div><dt>الجهة المستفيدة</dt><dd>{{ a.mainBeneficiary }}</dd></div>
+          <div><dt>القسم المتابع</dt><dd>{{ a.followingDepartmentName }}</dd></div>
+          <div><dt>تاريخ التكليف</dt><dd>{{ a.assignmentDate | date:'yyyy/MM/dd' }}</dd></div>
+          <div><dt>كود المشروع</dt><dd class="mono">{{ a.projectCode || '—' }}</dd></div>
+          <div><dt>الميزانية المرصودة</dt><dd>{{ a.allocatedBudget != null ? money(a.allocatedBudget) : '—' }}</dd></div>
+          <div><dt>درجة الأهمية</dt><dd>{{ a.priorityName }}</dd></div>
+          <div class="wide"><dt>ملخص نطاق العمل والمتطلبات</dt><dd>{{ a.scopeSummary }}</dd></div>
+          <div class="wide"><dt>نطاق التكليف والمخرجات المطلوبة</dt><dd>
+            @if (outputs().length) { <ul class="outputs">@for (o of outputs(); track o) { <li>{{ o }}</li> }</ul> } @else { — }
+          </dd></div>
+          <div><dt>تاريخ الإحالة الداخلي</dt><dd>{{ a.referralDate | date:'yyyy/MM/dd' }}</dd></div>
+          <div><dt>الحد الأقصى للرد</dt><dd>{{ a.responseDeadline | date:'yyyy/MM/dd' }}</dd></div>
+        </dl>
+      </section>
+    }
+
+    <!-- ═════════ الرد ═════════ -->
+    @if (response(); as s) {
+      <section class="panel">
+        <div class="panel-heading"><div><h2>القسم المتابع</h2><p>{{ s.followingDepartmentName }}</p></div></div>
+        <dl class="facts">
+          <div><dt>رقم الرد</dt><dd class="mono">{{ s.responseNumber }}</dd></div>
+          <div><dt>تاريخ الرد</dt><dd>{{ s.responseDate | date:'yyyy/MM/dd' }}</dd></div>
+          <div><dt>مدير المشروع المقترح</dt><dd>{{ s.proposedManagerName || '—' }}</dd></div>
+          <div><dt>التوصية الفنية النهائية</dt><dd>{{ s.recommendationName }}</dd></div>
+          <div><dt>مساحة الموقع العام</dt><dd>{{ s.siteArea != null ? s.siteArea + ' م²' : '—' }}</dd></div>
+          <div><dt>التكلفة المبدئية</dt><dd>{{ s.initialCost != null ? money(s.initialCost) : '—' }}</dd></div>
+        </dl>
+        @if (s.recommendation === notAvailable) { <p class="muted note">التوصية «غير متاح»: لا يُصدر بعد هذا الرد أمر بدء.</p> }
+        @if (s.buildings.length) {
+          <div class="table-wrap"><table>
+            <thead><tr><th>نوع البناء</th><th>عدد المباني</th><th>المساحة الإجمالية للمباني</th></tr></thead>
+            <tbody>@for (b of s.buildings; track b.buildingType) {
+              <tr><td class="cell-strong">{{ b.buildingTypeName }}</td><td class="mono">{{ b.buildingCount }}</td><td class="mono">{{ b.buildingsArea }} م²</td></tr>
+            }</tbody>
+          </table></div>
+        }
+      </section>
+      <section class="panel">
+        <div class="panel-heading"><div><h2>الجدول التفصيلي للتكلفة المبدئية</h2></div></div>
+        @if (!s.costItems.length) { <p class="muted">لا بنود.</p> } @else {
+          <div class="table-wrap"><table>
+            <thead><tr><th>البند</th><th>الوحدة</th><th>الكمية</th><th>سعر الوحدة</th><th>المجموع</th></tr></thead>
+            <tbody>@for (c of s.costItems; track c.id) {
+              <tr><td>{{ c.description }}</td><td>{{ c.unit }}</td><td class="mono">{{ c.quantity }}</td><td class="mono">{{ money(c.unitPrice) }}</td><td class="mono">{{ money(c.total) }}</td></tr>
+            }</tbody>
+            <tfoot><tr><td colspan="4">الإجمالي</td><td class="mono cell-strong">{{ money(s.totalCost) }}</td></tr></tfoot>
+          </table></div>
+        }
+      </section>
+      <section class="panel">
+        <div class="panel-heading"><div><h2>التخطيط وإدارة المشاريع</h2>@if (s.canEditPlanningPart) { <p>جزؤك الآن: عدّله ثم وقّع من قسم «التواقيع».</p> }</div></div>
+        <dl class="facts"><div><dt>تقدير المدة اللازمة لإعداد الدراسة</dt><dd>{{ s.requiredDays ? s.requiredDays + ' يوم تقويمي' : '—' }}</dd></div></dl>
+        <div class="two-tables">
+          <div>
+            <h3>الكوادر الهندسية المقترحة</h3>
+            @if (!s.staffEstimates.length) { <p class="muted">—</p> } @else {
+              <table><thead><tr><th>الاختصاص</th><th>العدد</th></tr></thead>
+                <tbody>@for (x of s.staffEstimates; track x.disciplineId) { <tr><td>{{ x.disciplineName }}</td><td class="mono">{{ x.staffCount }}</td></tr> }</tbody></table>
+            }
+          </div>
+          <div>
+            <h3>الموارد اللوجستية اللازمة</h3>
+            @if (!s.logisticItems.length) { <p class="muted">—</p> } @else {
+              <table><thead><tr><th>المورد</th><th>الكمية</th><th>ملاحظة</th></tr></thead>
+                <tbody>@for (x of s.logisticItems; track x.id) { <tr><td>{{ x.item }}</td><td class="mono">{{ x.quantity }}</td><td>{{ x.note || '—' }}</td></tr> }</tbody></table>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ═════════ أمر البدء ═════════ -->
+    @if (startOrder(); as o) {
+      <section class="panel">
+        <div class="panel-heading"><div><h2>بيان أمر البدء</h2></div></div>
+        <dl class="facts">
+          <div><dt>أمر التكليف المرجعي</dt><dd class="mono">{{ o.assignmentNumber }}</dd></div>
+          <div><dt>كود المشروع</dt><dd class="mono">{{ o.projectCode || '—' }}</dd></div>
+          <div><dt>تاريخ الأمر</dt><dd>{{ o.orderDate | date:'yyyy/MM/dd' }}</dd></div>
+          <div><dt>القسم المختص</dt><dd>{{ o.competentDepartmentName }}</dd></div>
+          <div><dt>مدير المشروع</dt><dd>{{ o.projectManagerName }}</dd></div>
+          <div><dt>تاريخ بدء الدراسة ← الحد الأقصى للإنهاء</dt><dd>{{ o.studyStartDate | date:'yyyy/MM/dd' }} ← {{ o.studyDeadline | date:'yyyy/MM/dd' }}</dd></div>
+        </dl>
+        <div class="two-tables">
+          <div>
+            <h3>الكوادر الهندسية المخصصة</h3>
+            @if (!o.engineers.length) { <p class="muted">—</p> } @else {
+              <table><thead><tr><th>المهندس</th><th>الاختصاص</th></tr></thead>
+                <tbody>@for (e of o.engineers; track e.engineerUserId) { <tr><td>{{ e.engineerName }}</td><td>{{ e.disciplineName }}</td></tr> }</tbody></table>
+            }
+          </div>
+          <div>
+            <h3>الموارد المخصصة</h3>
+            @if (!o.resources.length) { <p class="muted">—</p> } @else {
+              <table><thead><tr><th>المورد</th><th>الكمية</th><th>ملاحظة</th></tr></thead>
+                <tbody>@for (x of o.resources; track x.id) { <tr><td>{{ x.item }}</td><td class="mono">{{ x.quantity }}</td><td>{{ x.note || '—' }}</td></tr> }</tbody></table>
+            }
+          </div>
+        </div>
+        @if (o.canCreateProject) { <p class="muted note">أمر البدء معتمد: يُنشأ منه المشروع بزر «إنشاء مشروع».</p> }
+      </section>
+    }
+
+    @if (kind() !== 'requests') {
+      <app-study-approvals-panel [approvals]="d.approvals" [documentLabel]="number()" (decided)="decided()" />
+    }
+
+    <app-study-attachments [ownerType]="meta().ownerType" [ownerId]="d.id" [canWrite]="canAttach()" (changed)="logVersion.set(logVersion() + 1)" />
+
+    @if (access().viewActivityLog) {
+      <app-study-activity [requestId]="rootRequestId()" [reloadKey]="logKey()" />
+    }
+
+    @if (d.canCancel || d.canDelete) {
+      <section class="panel danger-zone">
+        <div>
+          <h2>{{ d.canDelete ? 'حذف المسودة' : 'إلغاء المستند' }}</h2>
+          <p>{{ d.canDelete ? 'المسودة بلا مستند تالٍ تُحذف نهائياً.' : 'المستند الرسمي لا يُحذف: يُلغى بسبب ويبقى في الأرشيف وسجل الدراسة.' }}</p>
+        </div>
+        <div class="header-actions">
+          @if (d.canCancel) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="actionError.set(''); dialog.set('cancel')">إلغاء المستند</button> }
+          @if (d.canDelete) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="remove()">حذف</button> }
+        </div>
+      </section>
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (doc(); as d) {
+  @switch (dialog()) {
+    @case ('edit') {
+      @switch (kind()) {
+        @case ('requests') { <app-study-request-form-dialog [request]="request()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+        @case ('assignments') { <app-study-assignment-form-dialog [parent]="assignmentParent()!" [assignment]="assignment()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+        @case ('responses') { <app-study-response-form-dialog [parent]="responseParent()!" [response]="response()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+        @case ('startOrders') { <app-study-start-order-form-dialog [parent]="startOrderParent()!" [order]="startOrder()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+      }
+    }
+    @case ('next') {
+      @switch (kind()) {
+        @case ('requests') { <app-study-assignment-form-dialog [parent]="assignmentParent()!" (closed)="dialog.set(null)" (saved)="created('assignments', $event.id)" /> }
+        @case ('assignments') { <app-study-response-form-dialog [parent]="responseParent()!" (closed)="dialog.set(null)" (saved)="created('responses', $event.id)" /> }
+        @case ('responses') { <app-study-start-order-form-dialog [parent]="startOrderParent()!" (closed)="dialog.set(null)" (saved)="created('start-orders', $event.id)" /> }
+        @case ('startOrders') { <app-study-project-form-dialog [startOrder]="startOrder()" (closed)="dialog.set(null)" (saved)="projectCreated($event.id)" /> }
+      }
+    }
+    @case ('planning') {
+      @if (response(); as s) { <app-study-response-planning-dialog [response]="s" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+    }
+    @case ('cancel') {
+      <app-study-reason-dialog heading="إلغاء المستند" [subheading]="number()" label="سبب الإلغاء" confirmLabel="إلغاء المستند"
+        hint="يبقى المستند للأرشيف ويُسجَّل السبب في سجل الدراسة. لا يُلغى مستند بعده مستند تالٍ قائم."
+        [busy]="busy()" [error]="actionError()" (closed)="dialog.set(null)" (submitted)="cancelDocument($event)" />
+    }
+  }
+}

@@ -14,7 +14,7 @@ import { AppearanceMenu } from './appearance-menu';
 import { BackButton } from '@shared/ui/back-button';
 import { hasOpenModal } from '@shared/ui/modal';
 import { roleLabel } from '@core/utils/roles';
-import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN, REPORT_ACCESS, MY_VACATIONS_ACCESS } from '@core/constants/access';
+import { AppPermission, AppPermissionName, MANAGE_DEPARTMENTS, MANAGE_MAINTENANCE_LOOKUPS, MANAGE_VACATION_TYPES, VACATION_STATS, DEVICE_ACCESS, SITE_ACCESS, MAP_LAYER_ACCESS, DASHBOARD_ACCESS, TASK_ASSIGN, REPORT_ACCESS, MY_VACATIONS_ACCESS, MANAGE_STUDY_LOOKUPS, STUDY_DOCUMENTS_VIEW, STUDY_SIGN } from '@core/constants/access';
 
 const SIDEBAR_KEY = 'ewms_sidebar';
 /** عرض الشاشة الذي تتحول عنده القائمة إلى أزرار تُفتح بزر «القائمة» (مطابق لـ @media في main-layout-compact.scss) */
@@ -24,7 +24,7 @@ const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(pre
 
 interface NavItem { path: string; label: string; icon: IconName; exact?: boolean; }
 /** icon: أيقونة القسم في السايدبار المطوي (تنسدل تحتها أيقونات صفحاته) */
-interface NavSection { id: 'main' | 'tasks' | 'vacations' | 'maintenance' | 'sites' | 'devices' | 'reports' | 'admin'; title: string; icon: IconName; items: NavItem[]; }
+interface NavSection { id: 'main' | 'tasks' | 'vacations' | 'studies' | 'maintenance' | 'sites' | 'devices' | 'reports' | 'admin'; title: string; icon: IconName; items: NavItem[]; }
 
 @Component({
   selector: 'app-main-layout',
@@ -87,6 +87,14 @@ export class MainLayout {
         canAny(VACATION_STATS) && { path: '/vacations/stats', label: 'إحصائيات الإجازات', icon: 'chart' },
         canAny(MANAGE_VACATION_TYPES) && { path: '/vacation-types', label: 'أنواع الإجازات', icon: 'tag' },
         can(AppPermission.ViewHolidays) && { path: '/vacations/holidays', label: 'العطل الرسمية', icon: 'calendar' }
+      ].filter(Boolean) as NavItem[] },
+      // فرع الدراسات المركزية: تُضاف صفحاته هنا مع كل مرحلة من بناء الواجهة
+      { id: 'studies', title: 'الدراسات', icon: 'ruler', items: [
+        canAny(STUDY_DOCUMENTS_VIEW) && { path: '/studies/documents', label: 'مستندات الدراسة', icon: 'docText' },
+        can(AppPermission.ViewStudyProjects) && { path: '/studies/projects', label: 'مشاريع الدراسات', icon: 'folderChart' },
+        can(AppPermission.UpdateStudyTaskProgress) && { path: '/studies/my-tasks', label: 'مهامي في الدراسات', icon: 'checklist' },
+        canAny(STUDY_SIGN) && { path: '/studies/approvals', label: 'بانتظار توقيعي', icon: 'pencil' },
+        canAny(MANAGE_STUDY_LOOKUPS) && { path: '/studies/settings', label: 'إعدادات الدراسات', icon: 'gear' }
       ].filter(Boolean) as NavItem[] },
       { id: 'maintenance', title: 'الصيانة', icon: 'toolbox', items: [
         can(AppPermission.ViewMaintenanceRequests) && { path: '/maintenance/requests', label: 'طلبات الصيانة', icon: 'wrench' },
