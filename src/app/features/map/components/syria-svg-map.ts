@@ -46,7 +46,7 @@ export class SyriaSvgMap implements OnDestroy {
   /** طوابع المحافظات (الهوية البصرية): في تلميح المحافظة وفي زاوية المحافظة المعروضة */
   showStamp = input(true);
   /** لون كل قطعة (للتلوين حسب إحصائية) */
-  fillFor = input<(code: string) => string>(() => '#e3e8ef');
+  fillFor = input<(code: string) => string>(() => '#e3e8ef'); // raw-color-ok: تعبئة افتراضية لقطعة بلا لون
   /** نص التلميح الثانوي لكل محافظة */
   subFor = input<(code: string) => string>(() => '');
   /** شارة رقمية فوق المحافظة (0 = بدون شارة) */

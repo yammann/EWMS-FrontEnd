@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Pagination } from '@core/utils/pagination';
+import { integer } from '@core/utils/validators';
 import { Alert } from '@shared/ui/alert';
 import { CrudPage } from '@shared/ui/crud-page';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -68,7 +69,7 @@ export class StudySettingsPage {
   form = inject(FormBuilder).nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
     isActive: [true],
-    defaultOrder: [0, [Validators.required, Validators.min(0), Validators.max(1000)]],
+    defaultOrder: [0, [Validators.required, Validators.min(0), Validators.max(1000), integer]],
     defaultWeight: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     linkedDocument: [0 as StudyLinkedDocument]
   });

@@ -32,6 +32,7 @@ import {
   StudyAssignment, StudyDocumentKind, StudyRecommendation, StudyRequest, StudyResponse, StudyStartOrder
 } from '../data-access/studies.models';
 import { AnyStudyDocument, DOCUMENT_META, documentNumber } from '../utils/document-meta';
+import { RouteDoc, routeNote } from '../utils/route-note';
 
 /** نافذة مفتوحة: تعديل المستند نفسه أو إصدار التالي في السلسلة */
 type Dialog = 'edit' | 'planning' | 'next' | 'cancel' | 'project' | null;
@@ -106,6 +107,9 @@ export class StudyDocumentPage {
   /** زر الإرسال: الطلب بلا موقّعين فيُعتمد فوراً */
   submitLabel = computed(() => this.kind() === 'requests' ? 'تسجيل نهائي' : 'إرسال للاعتماد');
 
+  /** أين وصل المستند وإلى أين يتجه (مسودة، بانتظار توقيع فلان، معتمد وانتقل إلى كذا) */
+  route = computed(() => { const d = this.doc(); return d ? routeNote(this.kind(), d as RouteDoc) : null; });
+
   /** إصدار المستند التالي في السلسلة (من علم الخادم) */
   next = computed<{ label: string } | null>(() => {
     const r = this.request(), a = this.assignment(), s = this.response();
@@ -175,7 +179,7 @@ export class StudyDocumentPage {
     if (!await this.confirm.ask(message, this.submitLabel())) return;
     this.run(this.service.submit(this.kind(), this.id()) as Observable<AnyStudyDocument>, d => {
       this.doc.set(d);
-      this.toast.success(this.kind() === 'requests' ? 'سُجّل الطلب نهائياً' : 'أُرسل المستند للاعتماد');
+      this.toast.success(this.kind() === 'requests' ? 'سُجّل الطلب نهائياً — الخطوة التالية: إصدار التكليف الداخلي' : 'أُرسل المستند للاعتماد — انظر «أين وصل» أعلى الصفحة');
     });
   }
 

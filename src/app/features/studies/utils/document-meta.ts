@@ -26,10 +26,6 @@ export const DOCUMENT_META: Record<StudyDocumentKind, DocumentMeta> = {
 };
 export const DOCUMENT_KINDS = Object.keys(DOCUMENT_META) as StudyDocumentKind[];
 
-export function kindOfSegment(segment: string | null | undefined): StudyDocumentKind | null {
-  return DOCUMENT_KINDS.find(k => DOCUMENT_META[k].segment === segment) ?? null;
-}
-
 /** رابط صفحة صاحب التوقيع: مستند (طلب/تكليف/رد/أمر بدء) أو مشروع أو اعتماد مخططات أولي (CDA) */
 export function ownerLink(ownerType: StudyOwnerType, ownerId: number): string | null {
   if (ownerType === 5) return `/studies/projects/${ownerId}`;

@@ -31,7 +31,8 @@
               <label class="check"><input type="checkbox" formControlName="included"> <strong>{{ buildingTypes[i].label }}</strong></label>
               @if (b.controls.included.value) {
                 <div class="form-grid-3">
-                  <label class="form-field"><span class="form-label">عدد المباني</span><input type="number" formControlName="buildingCount" min="0" step="1"></label>
+                  <label class="form-field"><span class="form-label">عدد المباني</span><input type="number" formControlName="buildingCount" min="0" step="1">
+                    @if (b.controls.buildingCount.invalid) { <small class="form-error">عدد صحيح (بلا كسور)</small> }</label>
                   <label class="form-field"><span class="form-label">المساحة الإجمالية للمباني (م²)</span><input type="number" formControlName="buildingsArea" min="0" step="any"></label>
                 </div>
               }

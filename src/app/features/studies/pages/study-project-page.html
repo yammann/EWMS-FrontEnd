@@ -90,11 +90,11 @@
 
 @if (project(); as p) {
   @switch (dialog()) {
-    @case ('edit') { <app-study-project-form-dialog [project]="p" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+    @case ('edit') { @defer (on immediate) { <app-study-project-form-dialog [project]="p" (closed)="dialog.set(null)" (saved)="edited($event)" /> } }
     @case ('cancel') {
-      <app-study-reason-dialog heading="إلغاء المشروع" [subheading]="p.code" label="سبب الإلغاء" confirmLabel="إلغاء المشروع"
+      @defer (on immediate) { <app-study-reason-dialog heading="إلغاء المشروع" [subheading]="p.code" label="سبب الإلغاء" confirmLabel="إلغاء المشروع"
         hint="يبقى المشروع للأرشيف ويُسجَّل السبب في سجل الدراسة."
-        [busy]="busy()" [error]="actionError()" (closed)="dialog.set(null)" (submitted)="cancelProject($event)" />
+        [busy]="busy()" [error]="actionError()" (closed)="dialog.set(null)" (submitted)="cancelProject($event)" /> }
     }
   }
 }

@@ -68,9 +68,11 @@
                     @else { — }
                   </td>
                   <td class="row-end">
-                    <button type="button" class="btn btn-ghost btn-sm" (click)="filesOf.set(filesOf() === v.id ? null : v.id)">المرفقات</button>
-                    @if (v.status === 1 && canEditVersions()) { <button type="button" class="btn btn-ghost btn-sm" (click)="editingVersion.set(v); dialog.set('version')">تعديل</button> }
-                    @if (v.status === 1 && canEditVersions() && access().deleteVersion) { <button type="button" class="icon-btn del" aria-label="حذف النسخة" (click)="removeVersion(v)"><app-icon name="trash" [size]="15" /></button> }
+                    <div class="cell-actions">
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="filesOf.set(filesOf() === v.id ? null : v.id)">المرفقات</button>
+                      @if (v.status === 1 && canEditVersions()) { <button type="button" class="btn btn-ghost btn-sm" (click)="editingVersion.set(v); dialog.set('version')">تعديل</button> }
+                      @if (v.status === 1 && canEditVersions() && access().deleteVersion) { <button type="button" class="icon-btn del" aria-label="حذف النسخة" (click)="removeVersion(v)"><app-icon name="trash" [size]="15" /></button> }
+                    </div>
                   </td>
                 </tr>
               }

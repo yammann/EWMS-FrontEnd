@@ -15,8 +15,13 @@
         <h2>دليل المكاتب</h2>
         <p>اضغط أيقونة التعديل لتحديث بيانات مكتب، أو الحذف لإزالته. لا يمكن حذف مكتب مرتبط بموظفين.</p>
       </div>
-      <span class="pill">{{ items().length }} مكتب</span>
+      <span class="pill">{{ search() ? filtered().length + ' من ' + items().length : items().length }} مكتب</span>
     </div>
+
+    @if (!crud.loading() && items().length) {
+      <app-list-search [value]="search()" (valueChange)="setSearch($event)" label="بحث في المكاتب"
+        placeholder="بحث باسم المكتب أو القسم أو الفرع أو الوصف…" />
+    }
 
     @if (crud.loading()) {
       <div class="skeleton-list">
@@ -25,6 +30,12 @@
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         }
+      </div>
+    } @else if (items().length && !filtered().length) {
+      <div class="empty-state">
+        <div class="empty-icon"><app-icon name="search" /></div>
+        <h3>لا توجد نتائج</h3>
+        <p>لا يطابق أي مكتب «{{ search() }}».</p>
       </div>
     } @else if (items().length) {
       <div class="table-wrap">

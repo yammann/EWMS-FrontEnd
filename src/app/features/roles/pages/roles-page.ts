@@ -15,93 +15,15 @@ import { RoleService } from '../data-access/role.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
-import { normalizePlaceText } from '@core/utils/places';
+import { PermissionGroup, PermissionSection, buildPermissionSections, matchRoles, roleStats, withSelection } from '../utils/permission-tree';
 import { Icon } from '@shared/ui/icon';
 
 type ModalType = 'create' | 'edit';
-
-interface PermissionGroup { key: string; title: string; items: Permission[]; }
-interface PermissionSection { key: string; title: string; groups: PermissionGroup[]; items: Permission[]; }
 
 /**
  * شجرة الصلاحيات في نافذتي الدور: أقسام ثابتة (عناوين في أعلى القائمة) ← مجموعات قابلة للطي ← صلاحيات.
  * ما لا يرد هنا من صلاحيات جديدة يظهر في قسم "أخرى" فلا يضيع — أضفه لمجموعته حين تُضاف إلى AppPermissions في الباكاند.
  */
-const PERMISSION_SECTIONS: { key: string; title: string; groups: { key: string; title: string; names: string[] }[] }[] = [
-  { key: 'vacations', title: 'الإجازات', groups: [
-    { key: 'vac-own', title: 'طلبات الإجازة', names: ['ViewVacations', 'CreateVacation', 'CancelVacation', 'PrintVacation'] },
-    { key: 'vac-view', title: 'الاطلاع على إجازات الآخرين', names: ['ViewDepartmentVacations', 'ViewBranchVacations'] },
-    { key: 'vac-approve', title: 'الموافقة على الإجازات', names: ['ApproveVacationFirst', 'ApproveVacationFinal'] },
-    { key: 'vacation-types', title: 'أنواع الإجازات', names: ['ViewVacationTypes', 'CreateVacationType', 'EditVacationType', 'DeleteVacationType'] },
-    { key: 'holidays', title: 'العطل الرسمية', names: ['ViewHolidays', 'CreateHoliday', 'EditHoliday', 'DeleteHoliday'] }
-  ] },
-  { key: 'tasks', title: 'المهام', groups: [
-    { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'HandleUnitTasks', 'ViewTaskStats'] },
-    { key: 'todo-lists', title: 'مفكرتي — قوائم المهام الشخصية (قوائمه هو فقط؛ البنود والتثبيت والأرشفة بصلاحية التعديل)', names: ['ViewToDoLists', 'CreateToDoList', 'EditToDoList', 'DeleteToDoList'] },
-    { key: 'work-tasks', title: 'مهام العمل', names: ['ViewMyWorkTasks', 'ViewWorkTasks', 'CreateWorkTask', 'EditWorkTask', 'DeleteWorkTask'] }
-  ] },
-  { key: 'maintenance', title: 'الصيانة', groups: [
-    { key: 'maint-requests', title: 'طلبات الصيانة', names: ['ViewMaintenanceRequests', 'CreateMaintenanceRequest', 'EditMaintenanceRequest', 'ChangeMaintenanceStatus', 'DeleteMaintenanceRequest', 'AssignMaintenanceRequest', 'RequestMaintenanceTransfer'] },
-    { key: 'maint-mine', title: 'متابعة أجهزتي في الصيانة', names: ['ViewMyMaintenanceRequests'] },
-    { key: 'maint-devices', title: 'أجهزة الصيانة', names: ['ViewMaintenanceDevices', 'CreateMaintenanceDevice', 'EditMaintenanceDevice', 'DeleteMaintenanceDevice'] },
-    { key: 'maint-parts', title: 'قطع الغيار (مخزون القسم والصرف على الطلبات)', names: ['ViewSpareParts', 'CreateSparePart', 'EditSparePart', 'DeleteSparePart', 'ReceiveSpareParts', 'AdjustSparePartStock', 'IssueSparePart', 'ViewSparePartReports'] },
-    { key: 'maint-tasks', title: 'مهام الصيانة', names: ['ViewMaintenanceTasks', 'CreateMaintenanceTask', 'EditMaintenanceTask', 'DeleteMaintenanceTask', 'AssignMaintenanceTask'] },
-    { key: 'maint-department', title: 'الإشراف على صيانة القسم', names: ['ViewDepartmentMaintenance', 'ViewMaintenanceStats', 'SignMaintenanceReceipt'] },
-    { key: 'maint-lookups', title: 'جداول الصيانة (أنواع الأجهزة والشركات والأعطال والحالات)', names: ['ViewMaintenanceLookups', 'CreateMaintenanceLookup', 'EditMaintenanceLookup', 'DeleteMaintenanceLookup'] }
-  ] },
-  { key: 'studies', title: 'فرع الدراسات المركزية', groups: [
-    { key: 'study-lookups', title: 'القوائم (أنواع المراحل والمرفقات والاختصاصات)', names: ['ViewStudyLookups', 'CreateStudyLookup', 'EditStudyLookup', 'DeleteStudyLookup'] },
-    { key: 'study-requests', title: 'طلبات تجهيز الدراسة', names: ['ViewStudyRequests', 'CreateStudyRequest', 'EditStudyRequest', 'DeleteStudyRequest'] },
-    { key: 'study-assignments', title: 'التكليفات الداخلية IPA', names: ['ViewStudyAssignments', 'CreateStudyAssignment', 'EditStudyAssignment', 'DeleteStudyAssignment'] },
-    { key: 'study-responses', title: 'إشعارات الرد', names: ['ViewStudyResponses', 'CreateStudyResponse', 'EditStudyResponse', 'EditStudyResponsePlanning', 'DeleteStudyResponse'] },
-    { key: 'study-start-orders', title: 'أوامر بدء الدراسة PIO', names: ['ViewStudyStartOrders', 'CreateStudyStartOrder', 'EditStudyStartOrder', 'DeleteStudyStartOrder'] },
-    { key: 'study-signatures', title: 'التواقيع (صلاحية لكل صفة موقّع)', names: [
-      'SignStudyAsFollowingDepartment', 'SignStudyAsPlanning', 'SignStudyAsCompetentDepartment', 'SignStudyAsBranchHead',
-      'SignStudyAsSendingDepartment', 'SignStudyAsDesignManagement', 'SignStudyAsQualityControl', 'SignStudyAsProjectManagement'] },
-    { key: 'study-projects', title: 'المشاريع والفريق', names: [
-      'ViewStudyProjects', 'CreateStudyProject', 'EditStudyProject', 'DeleteStudyProject',
-      'AddStudyProjectDepartment', 'RemoveStudyProjectDepartment', 'AddStudyProjectMember', 'RemoveStudyProjectMember'] },
-    { key: 'study-stages', title: 'المراحل والمهام', names: [
-      'CreateStudyStage', 'EditStudyStage', 'DeleteStudyStage', 'CloseStudyStage',
-      'CreateStudyTask', 'EditStudyTask', 'DeleteStudyTask', 'UpdateStudyTaskProgress'] },
-    { key: 'study-drawings', title: 'المخططات واعتماد المخططات الأولي CDA', names: [
-      'ViewStudyDrawings', 'CreateStudyDrawing', 'EditStudyDrawing', 'DeleteStudyDrawing', 'ReviewStudyDrawing',
-      'CreateArchitecturalVersion', 'EditArchitecturalVersion', 'DeleteArchitecturalVersion',
-      'CreateDesignApproval', 'EditDesignApproval', 'DeleteDesignApproval'] },
-    { key: 'study-log', title: 'الإلغاء وسجل الدراسة', names: ['CancelStudyDocuments', 'ViewStudyActivityLog', 'PrintStudyDocuments'] }
-  ] },
-  { key: 'general', title: 'عام', groups: [
-    { key: 'notifications', title: 'الإشعارات', names: ['ViewNotifications'] },
-    { key: 'signature', title: 'التوقيع الإلكتروني', names: ['ManageMySignature'] }
-  ] },
-  { key: 'sites', title: 'الخريطة والمواقع', groups: [
-    { key: 'sites', title: 'سجل المواقع المشترك بين الفروع', names: ['ViewSites', 'CreateSite', 'EditSite', 'DeleteSite'] },
-    { key: 'branch-map', title: 'خريطة الفرع', names: ['ViewBranchMap'] },
-    { key: 'map-layers', title: 'طبقات الفرع وحقولها (الطبقة ملك الفرع)', names: ['ViewMapLayers', 'CreateMapLayer', 'EditMapLayer', 'DeleteMapLayer'] },
-    { key: 'map-entries', title: 'سجلات الطبقات على المواقع (السجل ملك قسم من أضافه)', names: ['ViewDepartmentMapEntries', 'ViewBranchMapEntries', 'CreateMapEntry', 'EditMapEntry', 'DeleteMapEntry'] }
-  ] },
-  { key: 'devices', title: 'توثيق الأجهزة', groups: [
-    { key: 'devices', title: 'كتالوج الأجهزة والتركيبات (التركيب ملك قسم من أضافه)', names: ['ViewDevices', 'ViewBranchDevices', 'CreateDevice', 'EditDevice', 'DeleteDevice', 'RevealDevicePasswords'] }
-  ] },
-  { key: 'dashboards', title: 'لوحات المتابعة', groups: [
-    { key: 'dashboards', title: 'لوحات المتابعة', names: ['ViewOrganizationDashboard', 'ViewBranchDashboard', 'ViewDepartmentDashboard', 'ViewOfficeDashboard', 'ViewMyDashboard'] }
-  ] },
-  { key: 'reports', title: 'التقارير', groups: [
-    { key: 'reports-vac', title: 'تقارير الإجازات', names: ['ExportVacationsReport', 'ExportVacationUsageReport'] },
-    { key: 'reports-staff', title: 'تقارير الموظفين والهيكل', names: ['ExportUsersReport', 'ExportStructureReport'] },
-    { key: 'reports-maint', title: 'تقارير الصيانة وقطع الغيار', names: ['ExportMaintenanceRequestsReport', 'ExportTechniciansReport', 'ExportSparePartMovementsReport', 'ExportSparePartStockReport'] },
-    { key: 'reports-devices', title: 'تقارير الأجهزة والخريطة', names: ['ExportInstallationsReport', 'ExportSitesReport', 'ExportMapEntriesReport'] },
-    { key: 'reports-other', title: 'تصدير لوحة المهام وسجل السحب', names: ['ExportTasksReport', 'ViewReportLog'] }
-  ] },
-  { key: 'admin', title: 'الإدارة والهيكل', groups: [
-    { key: 'users', title: 'الموظفون', names: ['ViewUsers', 'CreateUser', 'EditUser', 'ToggleUserActive', 'DeleteUser'] },
-    { key: 'roles', title: 'الأدوار والصلاحيات', names: ['ViewRoles', 'CreateRole', 'EditRole', 'DeleteRole'] },
-    { key: 'branches', title: 'الفروع', names: ['ViewBranches', 'CreateBranch', 'EditBranch', 'DeleteBranch'] },
-    { key: 'departments', title: 'الأقسام', names: ['ViewDepartments', 'CreateDepartment', 'EditDepartment', 'DeleteDepartment'] },
-    { key: 'offices', title: 'المكاتب', names: ['ViewOffices', 'CreateOffice', 'EditOffice', 'DeleteOffice'] }
-  ] }
-];
-
 @Component({
   selector: 'app-roles-page',
   standalone: true,
@@ -126,18 +48,7 @@ export class RolesPage {
    * المطابقة: أدوار اسمها يحوي النص؛ وإن لم يوجد دور بهذا الاسم فالأدوار التي تملك صلاحية تطابقه (باسمها أو وصفها العربي).
    * هي نفسها ما يُعرض في الاقتراحات وفي الجدول، فلا يظهر دور لا يطابق.
    */
-  private matched = computed(() => {
-    const q = normalizePlaceText(this.search());
-    if (!q) return [];
-    const has = (text: string | null | undefined) => normalizePlaceText(text ?? '').includes(q);
-    const byName = this.roles().filter(r => has(r.name));
-    if (byName.length) return byName.map(role => ({ role, byName: true, via: '' }));
-    return this.roles().filter(r => (r.permissions ?? []).some(p => has(p.name) || has(p.description)))
-      .map(role => ({
-        role, byName: false,
-        via: (role.permissions ?? []).filter(p => has(p.name) || has(p.description)).slice(0, 2).map(p => p.name).join('، ')
-      }));
-  });
+  private matched = computed(() => matchRoles(this.roles(), this.search()));
   filteredRoles = computed(() => {
     const picked = this.pickedId();
     if (picked !== null) return this.roles().filter(r => r.id === picked);
@@ -210,31 +121,7 @@ export class RolesPage {
 
   roles = this.crud.items;
 
-  stats = computed(() => {
-    const roles = this.roles();
-    const permissions = this.permissions();
-
-    const totalPermissions = permissions.length;
-    const totalRoles = roles.length;
-
-    const totalAssigned = roles.reduce(
-      (sum, role) => sum + (role.permissions?.length ?? 0),
-      0
-    );
-
-    const avg = totalRoles ? Math.round(totalAssigned / totalRoles) : 0;
-
-    const fullRoles = roles.filter(
-      role => (role.permissions?.length ?? 0) === totalPermissions
-    ).length;
-
-    return {
-      totalRoles,
-      totalPermissions,
-      avgPermissions: avg,
-      fullRoles
-    };
-  });
+  stats = computed(() => roleStats(this.roles(), this.permissions()));
 
   /**
    * نسخ دور: نافذة الإنشاء بنفس صلاحيات الدور ووحدته واسم مقترح — لإنشاء دور شخص جديد من دور مشابه
@@ -253,24 +140,7 @@ export class RolesPage {
    * مجموعات الصلاحيات القابلة للطي
    * ===================================================== */
   /** الأقسام الثابتة ← مجموعاتها ← صلاحياتها (ما لا ينتمي لمجموعة يظهر في قسم "أخرى") */
-  permissionSections = computed<PermissionSection[]>(() => {
-    const all = this.permissions();
-    const byName = new Map(all.map(p => [p.name, p]));
-    const used = new Set<string>();
-
-    const sections: PermissionSection[] = PERMISSION_SECTIONS.map(s => {
-      const groups = s.groups
-        .map(g => ({ key: g.key, title: g.title, items: g.names.map(n => byName.get(n)).filter((p): p is Permission => !!p) }))
-        .filter(g => g.items.length);
-      return { key: s.key, title: s.title, groups, items: groups.flatMap(g => g.items) };
-    }).filter(s => s.items.length);
-
-    sections.forEach(s => s.items.forEach(p => used.add(p.name)));
-    const others = all.filter(p => !used.has(p.name));
-    if (others.length) sections.push({ key: 'others', title: 'أخرى', groups: [{ key: 'others', title: 'أخرى', items: others }], items: others });
-
-    return sections;
-  });
+  permissionSections = computed<PermissionSection[]>(() => buildPermissionSections(this.permissions()));
 
   permissionGroups = computed<PermissionGroup[]>(() => this.permissionSections().flatMap(s => s.groups));
 
@@ -311,10 +181,7 @@ export class RolesPage {
   toggleGroupSelection(modal: ModalType, group: { items: Permission[] }, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     const form = modal === 'create' ? this.createForm : this.editForm;
-    const ids = new Set(group.items.map(p => p.id));
-    const rest = (form.value.permissionIds ?? []).filter(id => !ids.has(id));
-    const next = checked ? [...rest, ...ids] : rest;
-    form.patchValue({ permissionIds: next });
+    form.patchValue({ permissionIds: withSelection(form.value.permissionIds ?? [], group.items.map(p => p.id), checked) });
   }
 
 
@@ -329,13 +196,7 @@ export class RolesPage {
   togglePermission(modal: ModalType, permissionId: number, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     const form = modal === 'create' ? this.createForm : this.editForm;
-    const current = form.value.permissionIds ?? [];
-
-    const next = checked
-      ? [...current, permissionId]
-      : current.filter(id => id !== permissionId);
-
-    form.patchValue({ permissionIds: next });
+    form.patchValue({ permissionIds: withSelection(form.value.permissionIds ?? [], [permissionId], checked) });
   }
 
   selectAllPermissions(modal: ModalType) {

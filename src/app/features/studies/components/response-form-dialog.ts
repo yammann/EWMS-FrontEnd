@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { orEmpty } from '@core/http/or-empty';
 import { localDateInput, money } from '@core/utils/format';
+import { integer } from '@core/utils/validators';
 import { Alert } from '@shared/ui/alert';
 import { FormActions } from '@shared/ui/form-actions';
 import { Icon } from '@shared/ui/icon';
@@ -87,7 +88,7 @@ export class StudyResponseFormDialog implements OnInit {
   }
 
   private buildingGroup(): BuildingGroup {
-    return this.fb.nonNullable.group({ included: [false], buildingCount: [0, Validators.min(0)], buildingsArea: [0, Validators.min(0)] });
+    return this.fb.nonNullable.group({ included: [false], buildingCount: [0, [Validators.min(0), integer]], buildingsArea: [0, Validators.min(0)] });
   }
 
   private costRow(c?: { description: string; unit: string; quantity: number; unitPrice: number }): CostRow {

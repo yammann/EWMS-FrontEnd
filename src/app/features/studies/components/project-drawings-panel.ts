@@ -52,7 +52,7 @@ import { StudyStatusChip } from './study-status-chip';
     </section>
 
     @if (creating()) {
-      <app-study-drawing-form-dialog [project]="project()" [basis]="basis()" (closed)="creating.set(false)" (saved)="created($event)" />
+      @defer (on immediate) { <app-study-drawing-form-dialog [project]="project()" [basis]="basis()" (closed)="creating.set(false)" (saved)="created($event)" /> }
     }
   `,
   styles: [`

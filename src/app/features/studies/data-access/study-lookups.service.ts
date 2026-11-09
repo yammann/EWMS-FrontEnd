@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { query } from '../utils/query';
-import { StudyEmployee, StudyLookup, StudyLookupInput, StudySiteOption, StudyStageType, StudyStageTypeInput } from './studies.models';
+import { StudyEmployee, StudyLookup, StudyLookupInput, StudyStageType, StudyStageTypeInput } from './studies.models';
 
 /** قوائم الدراسات البسيطة (اسم + فعّال) */
 export type StudySimpleLookupKind = 'attachmentTypes' | 'disciplines';
@@ -33,12 +33,6 @@ export class StudyLookupsService {
   employees(filter: { branchId?: number | null; departmentId?: number | null } = {}): Observable<StudyEmployee[]> {
     return this.api.get<StudyEmployee[]>('/StudyLookups/Employees' + query(filter));
   }
-
-  /**
-   * مواقع السجل المشترك لربط الطلب بموقع (فيظهر مشروعه على خريطة الفرع). تحتاج صلاحية عرض المواقع (AnySiteView)،
-   * ومن لا يملكها لا يرى الحقل ولا يمنعه ذلك من حفظ الطلب.
-   */
-  sites(): Observable<StudySiteOption[]> { return this.api.get<StudySiteOption[]>('/Sites/GetAll'); }
 
   lookup(kind: StudySimpleLookupKind, activeOnly = false): Observable<StudyLookup[]> {
     return this.api.get<StudyLookup[]>(`${SIMPLE_ROUTES[kind]}/GetAll` + query({ activeOnly: activeOnly || null }));

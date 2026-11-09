@@ -26,7 +26,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true, allowShortCircuit: true }],
-      '@angular-eslint/no-output-native': 'warn',                        // close/cancel: يُعاد تسميتها في المرحلة 5
+      '@angular-eslint/no-output-native': 'error',
       'no-irregular-whitespace': ['error', { skipStrings: true, skipTemplates: true }],
       'no-restricted-imports': ['error', {
         patterns: [

@@ -32,6 +32,13 @@
       <p class="alert state-note" role="status"><app-icon name="lock" [size]="16" /> المستند ملغى ويبقى للأرشيف فقط.</p>
     }
 
+    @if (route(); as r) {
+      <p class="alert state-note" [class.alert-warning]="r.tone === 'wait'" role="status">
+        <app-icon [name]="r.tone === 'done' ? 'checkmark' : r.tone === 'wait' ? 'clock' : 'info'" [size]="16" />
+        <span class="route-text"><strong>{{ r.title }}</strong><br>{{ r.text }}@if (r.link) { <a class="mono" [routerLink]="r.link"> {{ r.linkLabel }}</a> }</span>
+      </p>
+    }
+
     @if (d.chain) { <section class="panel"><app-study-chain [chain]="d.chain" [current]="kind()" [responseNumber]="responseNumber()" /></section> }
 
     <!-- ═════════ الطلب ═════════ -->
@@ -208,27 +215,27 @@
   @switch (dialog()) {
     @case ('edit') {
       @switch (kind()) {
-        @case ('requests') { <app-study-request-form-dialog [request]="request()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
-        @case ('assignments') { <app-study-assignment-form-dialog [parent]="assignmentParent()!" [assignment]="assignment()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
-        @case ('responses') { <app-study-response-form-dialog [parent]="responseParent()!" [response]="response()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
-        @case ('startOrders') { <app-study-start-order-form-dialog [parent]="startOrderParent()!" [order]="startOrder()" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+        @case ('requests') { @defer (on immediate) { <app-study-request-form-dialog [request]="request()" (closed)="dialog.set(null)" (saved)="edited($event)" /> } }
+        @case ('assignments') { @defer (on immediate) { <app-study-assignment-form-dialog [parent]="assignmentParent()!" [assignment]="assignment()" (closed)="dialog.set(null)" (saved)="edited($event)" /> } }
+        @case ('responses') { @defer (on immediate) { <app-study-response-form-dialog [parent]="responseParent()!" [response]="response()" (closed)="dialog.set(null)" (saved)="edited($event)" /> } }
+        @case ('startOrders') { @defer (on immediate) { <app-study-start-order-form-dialog [parent]="startOrderParent()!" [order]="startOrder()" (closed)="dialog.set(null)" (saved)="edited($event)" /> } }
       }
     }
     @case ('next') {
       @switch (kind()) {
-        @case ('requests') { <app-study-assignment-form-dialog [parent]="assignmentParent()!" (closed)="dialog.set(null)" (saved)="created('assignments', $event.id)" /> }
-        @case ('assignments') { <app-study-response-form-dialog [parent]="responseParent()!" (closed)="dialog.set(null)" (saved)="created('responses', $event.id)" /> }
-        @case ('responses') { <app-study-start-order-form-dialog [parent]="startOrderParent()!" (closed)="dialog.set(null)" (saved)="created('start-orders', $event.id)" /> }
-        @case ('startOrders') { <app-study-project-form-dialog [startOrder]="startOrder()" (closed)="dialog.set(null)" (saved)="projectCreated($event.id)" /> }
+        @case ('requests') { @defer (on immediate) { <app-study-assignment-form-dialog [parent]="assignmentParent()!" (closed)="dialog.set(null)" (saved)="created('assignments', $event.id)" /> } }
+        @case ('assignments') { @defer (on immediate) { <app-study-response-form-dialog [parent]="responseParent()!" (closed)="dialog.set(null)" (saved)="created('responses', $event.id)" /> } }
+        @case ('responses') { @defer (on immediate) { <app-study-start-order-form-dialog [parent]="startOrderParent()!" (closed)="dialog.set(null)" (saved)="created('start-orders', $event.id)" /> } }
+        @case ('startOrders') { @defer (on immediate) { <app-study-project-form-dialog [startOrder]="startOrder()" (closed)="dialog.set(null)" (saved)="projectCreated($event.id)" /> } }
       }
     }
     @case ('planning') {
-      @if (response(); as s) { <app-study-response-planning-dialog [response]="s" (closed)="dialog.set(null)" (saved)="edited($event)" /> }
+      @if (response(); as s) { @defer (on immediate) { <app-study-response-planning-dialog [response]="s" (closed)="dialog.set(null)" (saved)="edited($event)" /> } }
     }
     @case ('cancel') {
-      <app-study-reason-dialog heading="إلغاء المستند" [subheading]="number()" label="سبب الإلغاء" confirmLabel="إلغاء المستند"
+      @defer (on immediate) { <app-study-reason-dialog heading="إلغاء المستند" [subheading]="number()" label="سبب الإلغاء" confirmLabel="إلغاء المستند"
         hint="يبقى المستند للأرشيف ويُسجَّل السبب في سجل الدراسة. لا يُلغى مستند بعده مستند تالٍ قائم."
-        [busy]="busy()" [error]="actionError()" (closed)="dialog.set(null)" (submitted)="cancelDocument($event)" />
+        [busy]="busy()" [error]="actionError()" (closed)="dialog.set(null)" (submitted)="cancelDocument($event)" /> }
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Icon } from '@shared/ui/icon';
 import { DOCUMENT_STATUSES, StudyChain, StudyDocumentKind } from '../data-access/studies.models';
-import { StudyStatusChip } from './study-status-chip';
 
 interface ChainStep {
   key: StudyDocumentKind | 'project';
@@ -12,32 +12,44 @@ interface ChainStep {
   link: string | null;
 }
 
+type StepTone = 'done' | 'wait' | 'bad' | 'off' | 'missing';
+
 const PROJECT_STATUS_NAMES: Record<number, string> = { 1: 'جارٍ', 2: 'معلّق', 3: 'مكتمل', 4: 'ملغى' };
 /** حالة المشروع بألوان حالات المستند: جارٍ/معلّق = بانتظار، مكتمل = معتمد، ملغى = ملغى */
 const PROJECT_TONE: Record<number, number> = { 1: 2, 2: 2, 3: 3, 4: 5 };
 const docStatusName = (s: number | null) => DOCUMENT_STATUSES.find(x => x.value === s)?.label ?? '';
 
 /**
- * سلسلة الدراسة من الطلب إلى المشروع: كل خطوة برقمها وحالتها ورابطها، والمستند الحالي مميَّز.
- * الخطوة التي لم تصدر بعد تظهر باهتة — لا تُنشأ من هنا (زر «إنشاء التالي» في صفحة المستند السابق).
+ * سلسلة الدراسة من الطلب إلى المشروع كمخطط خطوات: دائرة لكل خطوة على خط متصل،
+ * المنجزة ممتلئة بعلامة ✓، والجارية أو المعلّقة بإطار وساعة، والمرفوضة بـ ✕، والملغاة بقفل، والتي لم تصدر متقطعة.
+ * المستند الحالي بهالة واسمه أغمق؛ أرقام الخطوات الأخرى روابط. الخطوة التي لم تصدر لا تُنشأ من هنا
+ * (زر «إنشاء التالي» في صفحة المستند السابق). في الشاشة الضيقة تصير قائمة عمودية بخط جانبي.
  */
 @Component({
   selector: 'app-study-chain',
   standalone: true,
-  imports: [RouterLink, StudyStatusChip],
+  imports: [RouterLink, Icon],
   template: `
     <ol class="chain" aria-label="سلسلة الدراسة">
       @for (step of steps(); track step.key; let i = $index) {
-        <li [class.current]="step.key === current()" [class.missing]="!step.number" [attr.aria-current]="step.key === current() ? 'step' : null">
-          <span class="index" aria-hidden="true">{{ i + 1 }}</span>
+        <li [class]="'step ' + tone(step)" [class.current]="step.key === current()" [class.linked]="linked(i)" [class.filled]="filled(i)"
+            [attr.aria-current]="step.key === current() ? 'step' : null">
+          <span class="dot" aria-hidden="true">
+            @switch (tone(step)) {
+              @case ('done') { <app-icon name="checkmark" [size]="16" [weight]="2.4" /> }
+              @case ('wait') { <app-icon name="clock" [size]="16" /> }
+              @case ('bad') { <app-icon name="xmark" [size]="16" [weight]="2.4" /> }
+              @case ('off') { <app-icon name="lock" [size]="15" /> }
+            }
+          </span>
           <span class="body">
             <span class="label">{{ step.label }}</span>
             @if (step.number) {
               @if (step.link && step.key !== current()) { <a class="number mono" [routerLink]="step.link">{{ step.number }}</a> }
               @else { <span class="number mono">{{ step.number }}</span> }
-              @if (step.status) { <app-study-status-chip [status]="step.status" [name]="step.statusName" /> }
+              @if (step.statusName) { <small class="state">{{ step.statusName }}</small> }
             } @else {
-              <span class="pending">لم يصدر بعد</span>
+              <small class="state">لم يصدر بعد</small>
             }
           </span>
         </li>
@@ -45,22 +57,39 @@ const docStatusName = (s: number | null) => DOCUMENT_STATUSES.find(x => x.value 
     </ol>
   `,
   styles: [`
-    .chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
-    li { position: relative; display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: var(--radius-md, 12px);
-         background: var(--fill); min-width: 0; }
-    li.current { background: var(--brand-50); box-shadow: inset 0 0 0 1.5px var(--brand-300); }
-    li.missing { opacity: .6; }
-    .index { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%;
-             background: var(--surface, #fff); color: var(--ink-600); font-size: 13px; font-weight: 700; }
-    li.current .index { background: var(--brand-600); color: var(--on-brand); }
-    .body { display: grid; gap: 4px; min-width: 0; justify-items: start; }
+    .chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .step { position: relative; display: grid; justify-items: center; align-content: start; gap: 8px; text-align: center; min-width: 0; padding: 0 4px; }
+    .dot { position: relative; z-index: 1; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
+           background: var(--surface, #fff); color: var(--ink-500); box-shadow: inset 0 0 0 2px var(--ink-300); }
+    /* الخط من مركز هذه الدائرة إلى مركز التالية */
+    .step::after { content: ''; position: absolute; top: 15px; inset-inline-start: 50%; width: 100%; height: 2px; background: var(--ink-300); }
+    .step:last-child::after { display: none; }
+    .step.filled::after { background: var(--brand-600); }
+    .step:not(.linked):not(:last-child)::after { background: none; border-top: 2px dashed var(--ink-300); height: 0; }
+    .done .dot { background: var(--brand-600); color: var(--on-brand); box-shadow: none; }
+    .wait .dot { color: var(--brand-700); box-shadow: inset 0 0 0 2px var(--brand-600); }
+    .bad .dot { background: var(--danger-500); color: var(--on-danger); box-shadow: none; }
+    .off .dot { color: var(--ink-500); }
+    .missing .dot { box-shadow: none; border: 2px dashed var(--ink-300); background: transparent; }
+    .current .dot { outline: 4px solid var(--brand-200); }
+    .body { display: grid; gap: 2px; min-width: 0; justify-items: center; max-width: 100%; }
     .label { font-size: 12px; color: var(--ink-500); }
+    .current .label { color: var(--ink-900); font-weight: 700; }
     .number { font-weight: 700; color: var(--ink-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
     a.number { color: var(--brand-700); text-decoration: none; }
     a.number:hover { text-decoration: underline; }
-    .pending { font-size: 13px; color: var(--ink-400); }
-    @media (max-width: 980px) { .chain { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 520px) { .chain { grid-template-columns: minmax(0, 1fr); } }
+    .state { font-size: 12px; color: var(--ink-500); }
+    .done .state { color: var(--brand-700); }
+    .wait .state { color: var(--warning-700); }
+    .bad .state { color: var(--danger-700); }
+    .missing { opacity: .65; }
+    @media (max-width: 640px) {
+      .chain { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+      .step { grid-template-columns: 32px minmax(0, 1fr); justify-items: start; text-align: start; gap: 12px; align-items: start; padding: 0; }
+      .body { justify-items: start; }
+      .step::after { top: 36px; inset-inline-start: 15px; width: 2px; height: calc(100% - 22px); }
+      .step:not(.linked):not(:last-child)::after { border-top: 0; border-inline-start: 2px dashed var(--ink-300); width: 0; background: none; }
+    }
   `]
 })
 export class StudyChainView {
@@ -69,6 +98,16 @@ export class StudyChainView {
   current = input<StudyDocumentKind | 'project' | null>(null);
   /** رقم الرد RSP (بيانات السلسلة من الخادم لا تحمله): تُمرّره الصفحة بعد جلبه، وإلا يظهر اسم الخطوة */
   responseNumber = input<string | null>(null);
+
+  /** حالة الخطوة لشكلها: done منجزة، wait جارية أو بانتظار، bad مرفوضة، off ملغاة، missing لم تصدر */
+  tone(step: ChainStep): StepTone {
+    if (!step.number) return 'missing';
+    switch (step.status) { case 3: return 'done'; case 4: return 'bad'; case 5: return 'off'; default: return 'wait'; }
+  }
+  /** الخط بعد الخطوة i صلب إن وُجدت التالية */
+  linked(i: number) { return !!this.steps()[i + 1]?.number; }
+  /** وممتلئ بلون العلامة إن اكتملت الخطوة i */
+  filled(i: number) { return this.linked(i) && this.tone(this.steps()[i]) === 'done'; }
 
   steps = computed<ChainStep[]>(() => {
     const c = this.chain();

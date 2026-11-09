@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { DeviceService, formatCoords } from './device.service';
+import { DeviceService } from './device.service';
 import { AuthService } from '@core/services/auth.service';
 import { isMac, isSubnetMask, sameSubnet } from '@core/utils/network';
 
@@ -107,10 +107,5 @@ describe('Device inventory', () => {
     expect(isMac('aa-bb-cc-dd-ee-ff')).toBe(true);
     expect(isMac('')).toBe(true);
     expect(isMac('zz:zz:zz:zz:zz:zz')).toBe(false);
-  });
-
-  it('formats coordinates and leaves missing ones empty', () => {
-    expect(formatCoords(33.513812, 36.276512)).toBe('33.51381, 36.27651');
-    expect(formatCoords(null, 36.2)).toBe('');
   });
 });

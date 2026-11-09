@@ -101,4 +101,14 @@ describe('StudyGantt', () => {
     const narrow = setup([stage(2, { plannedStartDate: day(0), plannedEndDate: day(1), progress: 60 })]);
     expect(narrow.placed()[0].pct).toBeNull();
   });
+
+  it('opens a very large project with its stages collapsed, so thousands of rows are not drawn at once', () => {
+    const many = Array.from({ length: 250 }, (_, i) => task(100 + i, 2));
+    const big = setup(stages, many);
+    expect(big.allCollapsed()).toBe(true);
+    expect(big.rows().filter(r => r.kind === 'task')).toHaveLength(0);
+    big.toggle(2);
+    expect(big.rows().filter(r => r.kind === 'task').length).toBeGreaterThan(0);
+    expect(setup(stages, tasks).allCollapsed()).toBe(false);
+  });
 });

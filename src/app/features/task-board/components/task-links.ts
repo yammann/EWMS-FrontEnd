@@ -3,10 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AssignedTaskService } from '../data-access/assigned-task.service';
 import { AuthService } from '@core/services/auth.service';
-import { DeviceService } from '@features/devices';
+import { SiteLookupService, SiteOption } from '@core/services/site-lookup.service';
 import { AppPermission, DEVICE_ACCESS } from '@core/constants/access';
 import { AssignedTaskCard, LINK_TYPE_LABEL, TaskLink, TaskLinkType } from '../data-access/assigned-task.models';
-import { Site } from '@features/devices';
 import { ConfirmService } from '@shared/ui/confirm.service';
 
 /** وجهة رابط سجل في نظامه (أو null إن لم تتوفر للمستخدم صفحة له) */
@@ -30,7 +29,7 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
 export class TaskLinks implements OnInit {
   private service = inject(AssignedTaskService);
   private auth = inject(AuthService);
-  private devices = inject(DeviceService);
+  private siteLookup = inject(SiteLookupService);
   private router = inject(Router);
   private confirm = inject(ConfirmService);
 
@@ -40,7 +39,7 @@ export class TaskLinks implements OnInit {
 
   labels = LINK_TYPE_LABEL;
   links = signal<TaskLink[]>([]);
-  sites = signal<Site[]>([]);
+  sites = signal<SiteOption[]>([]);
   busy = signal(false);
   error = signal('');
   type: TaskLinkType = 'MaintenanceRequest';
@@ -54,7 +53,7 @@ export class TaskLinks implements OnInit {
   }
 
   ngOnInit() {
-    if (this.canSites()) this.devices.sites().subscribe({ next: s => this.sites.set(s), error: () => { /* الموقع اختياري */ } });
+    if (this.canSites()) this.siteLookup.all().subscribe({ next: s => this.sites.set(s), error: () => { /* الموقع اختياري */ } });
   }
 
   route(l: TaskLink) { return l.available ? linkRoute(l.entityType, l.entityId, this.canPrint()) : null; }

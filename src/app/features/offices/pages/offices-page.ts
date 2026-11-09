@@ -9,6 +9,8 @@ import { Department, Office } from '@core/models/ewms.models';
 import { AuthService } from '@core/services/auth.service';
 import { LookupsService } from '@core/services/lookups.service';
 import { Pagination } from '@core/utils/pagination';
+import { searchMatcher } from '@core/utils/text-search';
+import { ListSearch } from '@shared/ui/list-search';
 import { AdminHeader } from '@shared/ui/admin-header';
 import { CrudMode, CrudPage } from '@shared/ui/crud-page';
 import { EntityForm } from '@shared/ui/entity-form';
@@ -22,7 +24,7 @@ import { Icon } from '@shared/ui/icon';
 @Component({
   selector: 'app-offices-page',
   standalone: true,
-  imports: [Icon, Alert, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './offices-page.html',
   styleUrl: './offices-page.scss'
 })
@@ -73,7 +75,14 @@ export class OfficesPage {
   });
 
   items = this.crud.items;
-  pager = new Pagination(() => this.items());
+  search = signal('');
+  /** البحث باسم المكتب أو وصفه أو قسمه أو فرعه */
+  filtered = computed(() => {
+    const match = searchMatcher(this.search());
+    return this.items().filter(o => match(o.name, o.description, o.departmentName, o.branchName));
+  });
+  pager = new Pagination(() => this.filtered());
+  setSearch(text: string) { this.search.set(text); this.pager.reset(); }
 
   title(mode: CrudMode) { return mode === 'create' ? 'إنشاء مكتب جديد' : 'تعديل المكتب'; }
 

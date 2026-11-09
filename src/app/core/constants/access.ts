@@ -150,6 +150,13 @@ export const MAP_LAYER_ACCESS: readonly AppPermissionName[] = [
 export const SITE_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewSites, AppPermission.CreateSite, AppPermission.EditSite, AppPermission.DeleteSite, ...DEVICE_ACCESS, ...MAP_ENTRY_ACCESS
 ];
+/**
+ * صفحة تفاصيل الموقع: من يملك صلاحية المواقع/الأجهزة/الطبقات، أو عرض مشاريع الدراسات (لرئيس فرع الدراسات يرى بطاقة المشاريع وحدها).
+ * لكل بطاقة في الصفحة صلاحيتها (التركيبات = الأجهزة، المشاريع = ViewStudyProjects، معلومات الفروع = سجلات الطبقات)؛ سجل المواقع نفسه يبقى بـ SITE_ACCESS.
+ */
+export const SITE_PAGE_ACCESS: readonly AppPermissionName[] = [...SITE_ACCESS, AppPermission.ViewStudyProjects];
+/** قراءة سجل المواقع (Sites/GetAll) لقائمة اختيار الموقع: نفس سياسة AnySiteView في الباك — SITE_ACCESS + عرض مشاريع الدراسات وكتابة الطلب */
+export const SITE_PICK_ACCESS: readonly AppPermissionName[] = [...SITE_PAGE_ACCESS, AppPermission.CreateStudyRequest, AppPermission.EditStudyRequest];
 /** مركز التقارير: صلاحية سحب أي تقرير (نفس سياسة AnyReportExport في الباكاند) */
 export const REPORT_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ExportVacationsReport, AppPermission.ExportVacationUsageReport, AppPermission.ExportUsersReport, AppPermission.ExportStructureReport,
@@ -163,23 +170,6 @@ export const STUDY_SIGN: readonly AppPermissionName[] = [
   AppPermission.SignStudyAsFollowingDepartment, AppPermission.SignStudyAsPlanning, AppPermission.SignStudyAsCompetentDepartment,
   AppPermission.SignStudyAsBranchHead, AppPermission.SignStudyAsSendingDepartment, AppPermission.SignStudyAsDesignManagement,
   AppPermission.SignStudyAsQualityControl, AppPermission.SignStudyAsProjectManagement
-];
-/** من يرى أي مستند دراسة (نفس سياسة AnyStudyView): المرفقات والتواقيع وأنواع المرفقات */
-export const STUDY_VIEW: readonly AppPermissionName[] = [
-  AppPermission.ViewStudyRequests, AppPermission.ViewStudyAssignments, AppPermission.ViewStudyResponses, AppPermission.ViewStudyStartOrders,
-  AppPermission.ViewStudyProjects, AppPermission.ViewStudyDrawings, AppPermission.ViewStudyActivityLog
-];
-/** صفحة مهمة مرحلة: من يرى مشاريع فرعه أو المكلَّف بها (نفس سياسة AnyStudyTaskView) */
-export const STUDY_TASK_VIEW: readonly AppPermissionName[] = [AppPermission.ViewStudyProjects, AppPermission.UpdateStudyTaskProgress];
-/** قائمة موظفي فرع الدراسة لاختيار مدير المشروع والمهندسين وأعضاء الفريق (نفس سياسة AnyStudyEmployeePick) */
-export const STUDY_EMPLOYEE_PICK: readonly AppPermissionName[] = [
-  AppPermission.CreateStudyResponse, AppPermission.EditStudyResponse, AppPermission.CreateStudyStartOrder,
-  AppPermission.EditStudyStartOrder, AppPermission.EditStudyProject, AppPermission.AddStudyProjectMember
-];
-/** رفع مرفق دراسة أو حذفه: صلاحية تعديل صاحبه (نفس سياسة AnyStudyAttachmentWrite) */
-export const STUDY_ATTACHMENT_WRITE: readonly AppPermissionName[] = [
-  AppPermission.EditStudyRequest, AppPermission.EditStudyAssignment, AppPermission.EditStudyResponse, AppPermission.EditStudyStartOrder,
-  AppPermission.EditStudyProject, AppPermission.EditStudyDrawing, AppPermission.EditArchitecturalVersion
 ];
 
 /** أي لوحة متابعة (الصفحة الرئيسية) */

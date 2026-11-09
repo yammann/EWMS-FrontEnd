@@ -1,6 +1,7 @@
 <section class="map-block" aria-labelledby="branch-map-title">
  <!-- الجزء المثبّت في رأس الصفحة: ينغلق (يصغر ويخفت) بينما تنزلق الصفحة فوقه أثناء السكرول -->
- <div #pinned class="map-pinned">
+ <app-pinned-map>
+ <div pinned class="pin-contents">
   <header class="map-head">
     <div class="title">
       <h2 id="branch-map-title">{{ focus() ? 'محافظة ' + focusName() : 'خريطة الفروع' }} — {{ data()?.branchName || '…' }}</h2>
@@ -45,7 +46,6 @@
  </div>
 
  <!-- الصفحة تنزلق فوق الخريطة: رأس الصفحة (.page-header) ثم ملخص الخريطة ثم باقي محتوى اللوحة -->
- <div #sheet class="map-sheet">
   <ng-content select=".page-header" />
 
   @if (hasData()) {
@@ -60,7 +60,7 @@
             <tbody>
               @for (s of sitesInFocus(); track s.id) {
                 <tr>
-                  <td><a class="cell-link" [routerLink]="['/devices/sites', s.id]">{{ s.name }}</a></td>
+                  <td><button type="button" class="cell-link" (click)="openSite(s.id)">{{ s.name }}</button></td>
                   <td class="wrap">{{ s.description || '—' }}</td>
                   <td class="wrap">
                     @for (l of s.layers; track l.key) {
@@ -94,5 +94,6 @@
   }
 
   <ng-content />
- </div>
+ </app-pinned-map>
+
 </section>

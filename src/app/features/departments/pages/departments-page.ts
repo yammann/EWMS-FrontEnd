@@ -9,6 +9,8 @@ import { Branch, Department } from '@core/models/ewms.models';
 import { AuthService } from '@core/services/auth.service';
 import { LookupsService } from '@core/services/lookups.service';
 import { Pagination } from '@core/utils/pagination';
+import { searchMatcher } from '@core/utils/text-search';
+import { ListSearch } from '@shared/ui/list-search';
 import { AdminHeader } from '@shared/ui/admin-header';
 import { CrudMode, CrudPage } from '@shared/ui/crud-page';
 import { EntityForm } from '@shared/ui/entity-form';
@@ -23,7 +25,7 @@ import { Icon } from '@shared/ui/icon';
 @Component({
   selector: 'app-departments-page',
   standalone: true,
-  imports: [Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './departments-page.html',
   styleUrl: './departments-page.scss'
 })
@@ -71,7 +73,14 @@ export class DepartmentsPage {
   });
 
   departments = this.crud.items;
-  pager = new Pagination(() => this.departments());
+  search = signal('');
+  /** البحث باسم القسم أو وصفه أو فرعه */
+  filtered = computed(() => {
+    const match = searchMatcher(this.search());
+    return this.departments().filter(d => match(d.name, d.description, d.branchName));
+  });
+  pager = new Pagination(() => this.filtered());
+  setSearch(text: string) { this.search.set(text); this.pager.reset(); }
 
   stats = computed(() => {
     const departments = this.departments();

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { GovernorateCollection, GovernorateFeature, governorateOf, pointInFeature, projectSyria } from '@core/utils/geo';
+import { GovernorateCollection, GovernorateFeature, formatCoords, governorateOf, pointInFeature, projectSyria } from '@core/utils/geo';
 
 describe('SVG projection', () => {
   const file = resolve(process.cwd(), 'public/maps/syria-governorates.geojson');
@@ -64,5 +64,12 @@ describe('Point in governorate', () => {
     const features = (JSON.parse(readFileSync(file, 'utf8')) as GovernorateCollection).features;
     expect(governorateOf(34.8936, 35.8852, features)?.properties.nameAr).toBe('طرطوس');
     expect(governorateOf(34.7, 32.0, features)).toBeNull();
+  });
+});
+
+describe('formatCoords', () => {
+  it('formats coordinates and leaves missing ones empty', () => {
+    expect(formatCoords(33.513812, 36.276512)).toBe('33.51381, 36.27651');
+    expect(formatCoords(null, 36.2)).toBe('');
   });
 });

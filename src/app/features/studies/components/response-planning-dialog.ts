@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, input, output, signal } from '@ang
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { orEmpty } from '@core/http/or-empty';
+import { integer } from '@core/utils/validators';
 import { Alert } from '@shared/ui/alert';
 import { FormActions } from '@shared/ui/form-actions';
 import { Icon } from '@shared/ui/icon';
@@ -98,7 +99,7 @@ export class StudyResponsePlanningDialog implements OnInit {
   disciplines = signal<StudyLookup[]>([]);
 
   form = this.fb.nonNullable.group({
-    requiredDays: [null as number | null, [Validators.min(1), Validators.max(3650)]],
+    requiredDays: [null as number | null, [Validators.min(1), Validators.max(3650), integer]],
     staffEstimates: this.fb.array<StaffRow>([]),
     logisticItems: this.fb.array<ItemRow>([])
   });
@@ -129,7 +130,7 @@ export class StudyResponsePlanningDialog implements OnInit {
   private staffRow(disciplineId = 0, staffCount = 1): StaffRow {
     return this.fb.nonNullable.group({
       disciplineId: [disciplineId, Validators.min(1)],
-      staffCount: [staffCount, [Validators.required, Validators.min(0), Validators.max(1000)]]
+      staffCount: [staffCount, [Validators.required, Validators.min(0), Validators.max(1000), integer]]
     });
   }
 

@@ -27,8 +27,13 @@
         <h2>قائمة الأقسام</h2>
         <p>اضغط أيقونة التعديل لتحديث بيانات قسم، أو الحذف لإزالته.</p>
       </div>
-      <span class="pill">{{ departments().length }} قسم</span>
+      <span class="pill">{{ search() ? filtered().length + ' من ' + departments().length : departments().length }} قسم</span>
     </div>
+
+    @if (!crud.loading() && departments().length) {
+      <app-list-search [value]="search()" (valueChange)="setSearch($event)" label="بحث في الأقسام"
+        placeholder="بحث باسم القسم أو الفرع أو الوصف…" />
+    }
 
     @if (crud.loading()) {
       <div class="skeleton-list">
@@ -37,6 +42,12 @@
             <span></span><span></span><span></span><span></span>
           </div>
         }
+      </div>
+    } @else if (departments().length && !filtered().length) {
+      <div class="empty-state">
+        <div class="empty-icon"><app-icon name="search" /></div>
+        <h3>لا توجد نتائج</h3>
+        <p>لا يطابق أي قسم «{{ search() }}».</p>
       </div>
     } @else if (departments().length) {
       <div class="table-wrap">

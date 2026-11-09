@@ -120,18 +120,20 @@ function iconOf(a: StudyAttachment): IconName {
                 <td class="mono">{{ size(a.size) }}</td>
                 <td>{{ a.uploadedByName }}<small class="when">{{ a.uploadedAt | utc | date:'yyyy/MM/dd' }}</small></td>
                 <td class="actions">
-                  @if (downloading()[a.id] !== undefined) {
-                    <small class="pct">{{ downloading()[a.id] === null ? '…' : downloading()[a.id] + '%' }}</small>
-                    <button type="button" class="btn btn-ghost btn-sm" (click)="cancelDownload(a.id)">إلغاء</button>
-                  } @else {
-                    @if (a.previewable) { <button type="button" class="btn btn-ghost btn-sm" (click)="preview(a)">معاينة</button> }
-                    <button type="button" class="btn btn-ghost btn-sm" (click)="download(a)">تنزيل</button>
-                    @if (a.canDelete && canWrite()) {
-                      <button type="button" class="btn btn-ghost btn-sm del" (click)="remove(a)" [disabled]="removingId() === a.id" [attr.aria-label]="'حذف ' + a.fileName">
-                        <app-icon name="trash" [size]="15" />
-                      </button>
+                  <div class="cell-actions">
+                    @if (downloading()[a.id] !== undefined) {
+                      <small class="pct">{{ downloading()[a.id] === null ? '…' : downloading()[a.id] + '%' }}</small>
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="cancelDownload(a.id)">إلغاء</button>
+                    } @else {
+                      @if (a.previewable) { <button type="button" class="btn btn-ghost btn-sm" (click)="preview(a)">معاينة</button> }
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="download(a)">تنزيل</button>
+                      @if (a.canDelete && canWrite()) {
+                        <button type="button" class="btn btn-ghost btn-sm del" (click)="remove(a)" [disabled]="removingId() === a.id" [attr.aria-label]="'حذف ' + a.fileName">
+                          <app-icon name="trash" [size]="15" />
+                        </button>
+                      }
                     }
-                  }
+                  </div>
                 </td>
               </tr>
             }
@@ -177,7 +179,7 @@ function iconOf(a: StudyAttachment): IconName {
     .file { display: inline-flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%; color: var(--brand-700); }
     .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-900); font-weight: 600; }
     .actions-col { width: 1%; }
-    .actions { white-space: nowrap; text-align: end; }
+    .cell-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap; }
     .del { color: var(--danger-700); }
     .when { display: block; color: var(--ink-500); font-size: 12px; }
     .viewer { display: grid; place-items: center; min-height: 320px; }

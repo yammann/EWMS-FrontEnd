@@ -2,48 +2,16 @@ import { Component, DestroyRef, ElementRef, computed, effect, inject, input, sig
 import { RouterLink } from '@angular/router';
 import { SelectValue } from '@shared/ui/select-value';
 import { ProjectStage, StageTask } from '../data-access/studies.models';
+import {
+  FOOT_H, HEAD_H, Month, Placed, Row, Tick, Zoom, axisRange, buildRows, dateText, dayWidth, fridayXs, monthBands, placeRows, rightEdge,
+  splitLatinTail, toDay, todayDay, visibleRows, weekTicks
+} from '../utils/gantt-layout';
 
-const DAY = 86_400_000;
-/** عرض اليوم بالبكسل لكل مستوى تكبير: أسبوع (مقرّب)، شهر، ربع (مبعَّد) */
-const ZOOM_W = { week: 28, month: 10, quarter: 4 } as const;
-type Zoom = keyof typeof ZOOM_W;
 const ZOOMS: { key: Zoom; label: string }[] = [{ key: 'week', label: 'أسبوع' }, { key: 'month', label: 'شهر' }, { key: 'quarter', label: 'ربع' }];
-const HEAD_H = 52;
-const FOOT_H = 30;
-const ROW_H = { milestone: 28, stage: 36, task: 28 } as const;
-/** أقل عرض شريط يتسع لنسبة الإنجاز داخله */
-const MIN_PERCENT_W = 34;
 const TIP_W = 250;
 const COMPACT_QUERY = '(max-width: 640px)';
-
-type RowKind = 'milestone' | 'stage' | 'task';
-type BarState = 'closed' | 'active' | 'todo' | 'late';
-
-interface Row {
-  key: string; kind: RowKind; stageId: number; label: string; sub: string; dept: string; statusName: string;
-  start: number | null; end: number | null; progress: number; state: BarState; lateDays: number; hasTasks: boolean; taskCount: number;
-}
-interface Placed extends Row {
-  y: number; h: number; cy: number;
-  /** الشريط: الحافة اليمنى (الأبكر)، العرض، عرض الإنجاز */
-  right: number; w: number; fillW: number;
-  /** نسبة الإنجاز داخل الشريط (إن اتسع) */
-  pct: { x: number; text: string; onFill: boolean } | null;
-}
-interface Month { x: number; w: number; text: string; }
-interface Tick { x: number; text: string; }
-
-/** التاريخ (yyyy-MM-dd) كعدد أيام من 1970 بلا انزياح المناطق */
-const toDay = (value: string | null | undefined) => {
-  if (!value) return null;
-  const [y, m, d] = value.slice(0, 10).split('-').map(Number);
-  return Math.round(Date.UTC(y, m - 1, d) / DAY);
-};
-const todayDay = () => { const n = new Date(); return Math.round(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) / DAY); };
-const LOCALE = 'ar-SY-u-ca-gregory-nu-latn';
-const monthName = new Intl.DateTimeFormat(LOCALE, { month: 'long', timeZone: 'UTC' });
-const dayMonth = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long', timeZone: 'UTC' });
-const fmtDay = (d: number) => dayMonth.format(new Date(d * DAY));
+/** مشروع بمهام أكثر من هذا يُفتح بمراحله مطويّة (رسم آلاف الصفوف في SVG يثقل الصفحة): يفتح المستخدم ما يريد */
+const AUTO_COLLAPSE_TASKS = 200;
 
 /**
  * مخطط Gantt للمشروع (SVG يدوي، RTL): الأسماء في عمود ثابت لا يتحرك مع التمرير الأفقي، والزمن يجري من اليمين إلى اليسار.
@@ -327,7 +295,7 @@ const fmtDay = (d: number) => dayMonth.format(new Date(d * DAY));
     .note { margin: 10px 0 0; font-size: 13px; }
 
     /* الطباعة: بلا تمرير ولا ظلال، وخلفية بيضاء */
-    .wrap.print { background: #fff; border-radius: 0; overflow: visible; }
+    .wrap.print { background: #fff; border-radius: 0; overflow: visible; } /* raw-color-ok: ورق الطباعة أبيض دائماً */
     .wrap.print .scroller { overflow: visible; }
     @media (prefers-reduced-motion: reduce) { .chev, .m-fill { transition: none; } .grow { animation: none; } }
     @media print { .grow { animation: none; } .wrap { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
@@ -365,6 +333,7 @@ export class StudyGantt {
   tip = signal<{ row: Placed; x: number; y: number } | null>(null);
   private scrolled = false;
   private compactInit = false;
+  private largeInit = false;
 
   isCollapsed = (stageId: number) => this.collapsed().has(stageId);
   toggle(stageId: number) {
@@ -372,42 +341,7 @@ export class StudyGantt {
   }
 
   /** كل الصفوف قبل الطي والفلاتر: معلم لكل مرحلة مستند، مرحلة عمل ثم مهامها */
-  all = computed<Row[]>(() => {
-    const today = todayDay();
-    const byStage = new Map<number, StageTask[]>();
-    for (const t of this.tasks()) (byStage.get(t.stageId) ?? byStage.set(t.stageId, []).get(t.stageId)!).push(t);
-    const rows: Row[] = [];
-    for (const s of this.stages()) {
-      const tasks = byStage.get(s.id) ?? [];
-      const dept = s.responsibleDepartmentName ?? '';
-      if (s.linkedDocument) {
-        rows.push({
-          key: 's' + s.id, kind: 'milestone', stageId: s.id, label: s.stageTypeName, sub: '', dept, statusName: s.statusName,
-          start: toDay(s.plannedStartDate) ?? toDay(s.actualStartDate) ?? toDay(s.plannedEndDate), end: null, progress: 100, state: 'closed', lateDays: 0, hasTasks: false, taskCount: 0
-        });
-        continue;
-      }
-      const end = toDay(s.plannedEndDate);
-      const late = s.status !== 3 && end != null && end < today && s.progress < 100;
-      rows.push({
-        key: 's' + s.id, kind: 'stage', stageId: s.id, label: s.stageTypeName, sub: dept, dept, statusName: s.statusName,
-        start: toDay(s.plannedStartDate), end, progress: s.progress,
-        state: s.status === 3 ? 'closed' : late ? 'late' : s.progress > 0 || s.status === 2 ? 'active' : 'todo',
-        lateDays: late && end != null ? today - end : 0, hasTasks: tasks.length > 0, taskCount: tasks.length
-      });
-      for (const t of tasks) {
-        const e = toDay(t.plannedEndDate);
-        const tl = t.status !== 3 && e != null && e < today;
-        rows.push({
-          key: 't' + t.id, kind: 'task', stageId: s.id, label: t.title, sub: `${t.targetTypeName}: ${t.targetName}`, dept, statusName: t.statusName,
-          start: toDay(t.plannedStartDate), end: e, progress: t.progress,
-          state: t.status === 3 ? 'closed' : tl ? 'late' : t.progress > 0 || t.status === 2 ? 'active' : 'todo',
-          lateDays: tl && e != null ? today - e : 0, hasTasks: false, taskCount: 0
-        });
-      }
-    }
-    return rows;
-  });
+  all = computed<Row[]>(() => buildRows(this.stages(), this.tasks(), todayDay()));
 
   /** الأقسام المسؤولة عن المراحل (لفلتر «حسب القسم») */
   depts = computed(() => [...new Set(this.all().filter(r => r.kind === 'stage' && r.dept).map(r => r.dept))].sort((a, b) => a.localeCompare(b, 'ar')));
@@ -418,25 +352,7 @@ export class StudyGantt {
    * الصفوف الظاهرة: الفلاتر ثم الطي. فلتر القسم يُبقي مراحل ذلك القسم بمهامها؛ و«المتأخر فقط» يُبقي المرحلة المتأخرة
    * أو التي فيها مهمة متأخرة (والمتأخر من مهامها). وأي فلتر فعّال يُخفي معالم المستندات ليتركّز العرض.
    */
-  rows = computed<Row[]>(() => {
-    const all = this.all(), dept = this.dept(), lateOnly = this.lateOnly(), collapsed = this.collapsed(), tasksVisible = this.tasksVisible();
-    const out: Row[] = [];
-    for (let i = 0; i < all.length;) {
-      const r = all[i];
-      if (r.kind === 'milestone') { if (!dept && !lateOnly) out.push(r); i++; continue; }
-      const tasks: Row[] = [];
-      let j = i + 1;
-      while (j < all.length && all[j].kind === 'task' && all[j].stageId === r.stageId) tasks.push(all[j++]);
-      i = j;
-      if (dept && r.dept !== dept) continue;
-      const lateTasks = tasks.filter(t => t.state === 'late');
-      if (lateOnly && r.state !== 'late' && !lateTasks.length) continue;
-      out.push(r);
-      if (!tasksVisible || collapsed.has(r.stageId)) continue;
-      out.push(...(lateOnly ? lateTasks : tasks));
-    }
-    return out;
-  });
+  rows = computed<Row[]>(() => visibleRows(this.all(), { dept: this.dept(), lateOnly: this.lateOnly(), collapsed: this.collapsed(), tasksVisible: this.tasksVisible() }));
   anyTasks = computed(() => this.all().some(r => r.kind === 'task'));
   allCollapsed = computed(() => {
     const ids = this.all().filter(r => r.kind === 'stage' && r.hasTasks).map(r => r.stageId);
@@ -448,55 +364,19 @@ export class StudyGantt {
   }
 
   /** مدى المحور: أبكر تاريخ إلى أبعده (مع هامش)، ويشمل اليوم إن كان قريباً من المدى */
-  private range = computed(() => {
-    const days = this.all().flatMap(r => [r.start, r.end]).concat([toDay(this.projectStart()), toDay(this.projectEnd())]).filter((d): d is number => d != null);
-    if (!days.length) return null;
-    let min = Math.min(...days) - 3, max = Math.max(...days) + 3;
-    const today = todayDay();
-    if (today >= min - 30 && today <= max + 30) { min = Math.min(min, today - 3); max = Math.max(max, today + 3); }
-    return { min, max, span: Math.max(14, max - min + 1) };
-  });
+  private range = computed(() => axisRange(this.all(), toDay(this.projectStart()), toDay(this.projectEnd()), todayDay()));
   /** عرض اليوم: من التكبير المختار، أو يُحسب ليتسع المحور في عرض الورقة عند الطباعة */
-  dayW = computed(() => {
-    const fit = this.fit(), span = this.range()?.span ?? 14;
-    return fit && this.printMode() ? Math.max(2, Math.min(14, Math.floor(fit / span))) : ZOOM_W[this.zoom()];
-  });
+  dayW = computed(() => dayWidth(this.zoom(), this.range()?.span ?? 14, this.fit(), this.printMode()));
   W = computed(() => (this.range()?.span ?? 14) * this.dayW());
   labelW = computed(() => (this.printMode() ? 190 : 250));
 
   /** يفصل الذيل اللاتيني الأخير («(Concept)» أو «BIM») عن بقية الاسم ليبقى كاملاً عند الاقتطاع */
-  parts(label: string): { head: string; tail: string } {
-    const m = /^(.*?)\s*(\([^()]*[A-Za-z][^()]*\)|[A-Za-z][A-Za-z0-9 .-]*)$/.exec(label);
-    return m && m[1] ? { head: m[1], tail: m[2] } : { head: label, tail: '' };
-  }
+  parts(label: string) { return splitLatinTail(label); }
 
   /** الحافة اليمنى لخلية يوم (الزمن يجري يميناً ← يساراً) */
-  private xr(day: number) { return this.W() - (day - this.range()!.min) * this.dayW(); }
+  private xr(day: number) { return rightEdge(this.range()!, this.W(), this.dayW(), day); }
 
-  placed = computed<Placed[]>(() => {
-    const r = this.range();
-    if (!r) return [];
-    const dw = this.dayW();
-    let y = HEAD_H;
-    return this.rows().map(row => {
-      const h = ROW_H[row.kind];
-      const out: Placed = { ...row, y, h, cy: y + h / 2, right: 0, w: 0, fillW: 0, pct: null };
-      y += h;
-      if (row.start == null) return out;
-      if (row.kind === 'milestone') { out.right = this.xr(row.start) - dw / 2; return out; }
-      const end = row.end ?? row.start;
-      out.right = this.xr(row.start);
-      out.w = Math.max(10, (Math.max(end, row.start) - row.start + 1) * dw);
-      out.fillW = row.state === 'closed' ? out.w : (out.w * Math.max(0, Math.min(100, row.progress))) / 100;
-      // نسبة الإنجاز داخل الشريط: على التعبئة إن اتسعت، وإلا في الجزء الفارغ، وإلا لا شيء
-      const text = `${Math.round(row.state === 'closed' ? 100 : row.progress)}%`;
-      if (row.state !== 'todo' && row.progress + (row.state === 'closed' ? 100 : 0) > 0) {
-        if (out.fillW >= MIN_PERCENT_W) out.pct = { x: out.right - 6, text, onFill: true };
-        else if (out.w - out.fillW >= MIN_PERCENT_W) out.pct = { x: out.right - out.fillW - 6, text, onFill: false };
-      }
-      return out;
-    });
-  });
+  placed = computed<Placed[]>(() => { const r = this.range(); return r ? placeRows(this.rows(), r, this.W(), this.dayW()) : []; });
   bodyH = computed(() => this.placed().reduce((s, p) => s + p.h, 0));
   bodyBottom = computed(() => HEAD_H + this.bodyH());
   totalH = computed(() => this.bodyBottom() + FOOT_H);
@@ -509,44 +389,13 @@ export class StudyGantt {
     return r && t >= r.min && t <= r.max ? this.xr(t) - this.dayW() / 2 : null;
   });
 
-  months = computed<Month[]>(() => {
-    const r = this.range();
-    if (!r) return [];
-    const dw = this.dayW();
-    const out: Month[] = [];
-    let d = r.min;
-    while (d <= r.max) {
-      const date = new Date(d * DAY);
-      const next = Math.round(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1) / DAY);
-      const end = Math.min(next - 1, r.max);
-      const first = out.length === 0 || date.getUTCMonth() === 0;
-      out.push({ x: this.xr(end) - dw, w: (end - d + 1) * dw, text: monthName.format(date) + (first ? ' ' + date.getUTCFullYear() : '') });
-      d = end + 1;
-    }
-    return out;
-  });
+  months = computed<Month[]>(() => { const r = this.range(); return r ? monthBands(r, this.W(), this.dayW()) : []; });
   /** بدايات الأسابيع (الأحد) برقم اليوم من الشهر */
-  weeks = computed<Tick[]>(() => {
-    const r = this.range();
-    if (!r) return [];
-    const out: Tick[] = [];
-    for (let d = r.min; d <= r.max; d++) if (new Date(d * DAY).getUTCDay() === 0) out.push({ x: this.xr(d), text: String(new Date(d * DAY).getUTCDate()) });
-    return out;
-  });
-  fridays = computed(() => {
-    const r = this.range();
-    if (!r) return [];
-    const out: number[] = [];
-    for (let d = r.min; d <= r.max; d++) if (new Date(d * DAY).getUTCDay() === 5) out.push(this.xr(d) - this.dayW());
-    return out;
-  });
+  weeks = computed<Tick[]>(() => { const r = this.range(); return r ? weekTicks(r, this.W(), this.dayW()) : []; });
+  fridays = computed(() => { const r = this.range(); return r ? fridayXs(r, this.W(), this.dayW()) : []; });
   undated = computed(() => this.all().filter(r => r.kind === 'stage' && (r.start == null || r.end == null)).map(r => r.label));
 
-  dateText(r: Row) {
-    if (r.start == null) return 'بلا تاريخ';
-    if (r.kind === 'milestone' || r.end == null || r.end === r.start) return fmtDay(r.start);
-    return `${fmtDay(r.start)} ← ${fmtDay(r.end)}`;
-  }
+  dateText = dateText;
 
   // ─────────── بطاقة التلميح ───────────
   showTip(row: Placed, ev: MouseEvent) { if (!this.printMode()) this.tip.set({ row, ...this.tipPos(ev.clientX, ev.clientY) }); }
@@ -581,6 +430,13 @@ export class StudyGantt {
     mq?.addEventListener('change', apply);
     inject(DestroyRef).onDestroy(() => mq?.removeEventListener('change', apply));
     effect(() => { this.all(); untracked(apply); });
+    // مشروع كبير: المراحل مطويّة أولاً (مرة واحدة) فلا تُرسم كل المهام دفعة واحدة
+    effect(() => {
+      const rows = this.all();
+      if (this.largeInit || this.printMode() || rows.filter(r => r.kind === 'task').length <= AUTO_COLLAPSE_TASKS) return;
+      this.largeInit = true;
+      untracked(() => this.collapsed.set(new Set(rows.filter(r => r.kind === 'stage' && r.hasTasks).map(r => r.stageId))));
+    });
 
     effect(() => {
       const el = this.scroller()?.nativeElement;

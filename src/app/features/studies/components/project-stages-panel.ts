@@ -77,9 +77,11 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
                         <td><app-study-progress [percent]="t.progress" /></td>
                         <td><app-study-status-chip kind="progress" [status]="t.status" [name]="t.statusName" /></td>
                         <td class="row-end">
-                          @if (t.canUpdateProgress) { <button type="button" class="btn btn-sm" (click)="progressDialog.set(t)">تحديث الإنجاز</button> }
-                          @if (t.canEdit && can().editTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: t })">تعديل</button> }
-                          @if (t.canEdit && can().deleteTask) { <button type="button" class="icon-btn del" aria-label="حذف المهمة" (click)="removeTask(t)"><app-icon name="trash" [size]="15" /></button> }
+                          <div class="cell-actions">
+                            @if (t.canUpdateProgress) { <button type="button" class="btn btn-sm" (click)="progressDialog.set(t)">تحديث الإنجاز</button> }
+                            @if (t.canEdit && can().editTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: t })">تعديل</button> }
+                            @if (t.canEdit && can().deleteTask) { <button type="button" class="icon-btn del" aria-label="حذف المهمة" (click)="removeTask(t)"><app-icon name="trash" [size]="15" /></button> }
+                          </div>
                         </td>
                       </tr>
                     }
@@ -93,13 +95,13 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
     </section>
 
     @if (stageDialog(); as d) {
-      <app-study-stage-form-dialog [project]="project()" [stage]="d.stage" (closed)="stageDialog.set(null)" (saved)="done('حُفظت المرحلة'); stageDialog.set(null)" />
+      @defer (on immediate) { <app-study-stage-form-dialog [project]="project()" [stage]="d.stage" (closed)="stageDialog.set(null)" (saved)="done('حُفظت المرحلة'); stageDialog.set(null)" /> }
     }
     @if (taskDialog(); as d) {
-      <app-study-task-form-dialog [project]="project()" [stage]="d.stage" [task]="d.task" (closed)="taskDialog.set(null)" (saved)="done('حُفظت المهمة'); taskDialog.set(null)" />
+      @defer (on immediate) { <app-study-task-form-dialog [project]="project()" [stage]="d.stage" [task]="d.task" (closed)="taskDialog.set(null)" (saved)="done('حُفظت المهمة'); taskDialog.set(null)" /> }
     }
     @if (progressDialog(); as t) {
-      <app-study-task-progress-dialog [task]="t" (closed)="progressDialog.set(null)" (saved)="done('حُدّث الإنجاز'); progressDialog.set(null)" />
+      @defer (on immediate) { <app-study-task-progress-dialog [task]="t" (closed)="progressDialog.set(null)" (saved)="done('حُدّث الإنجاز'); progressDialog.set(null)" /> }
     }
   `,
   styles: [`
@@ -114,7 +116,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
     .del { color: var(--danger-700); }
     .none { margin: 0; font-size: 13px; }
     td small { display: block; color: var(--ink-500); font-size: 12px; }
-    .row-end { white-space: nowrap; text-align: end; }
+    .cell-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap; }
     @media (max-width: 760px) { header { grid-template-columns: 32px minmax(0, 1fr); } header app-study-progress { grid-column: 1 / -1; } }
   `]
 })

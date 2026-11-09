@@ -8,9 +8,11 @@ import { Pager } from '@shared/ui/pager';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { formatPhone, isValidPhone, normalizePhone } from '@core/utils/phone';
+import { formatPhone, isValidPhone } from '@core/utils/phone';
 import { PASSWORD_HINT, passwordValidator } from '@core/utils/password';
 import { utcDate } from '@core/utils/format';
+import { searchMatcher } from '@core/utils/text-search';
+import { ListSearch } from '@shared/ui/list-search';
 import { forkJoin, map } from 'rxjs';
 import { orEmpty } from '@core/http/or-empty';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -21,14 +23,12 @@ import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
 import { Icon } from '@shared/ui/icon';
-
-/** أي حقول المكان تُعرض في نموذج الموظف */
-type UserPlacement = { needsBranch: boolean; needsDepartment: boolean; needsOffice: boolean };
+import { UserPlacement, buildUserFormData, hasAssignmentConflict, placementForRole } from '../utils/user-form';
 
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss'
 })
@@ -110,7 +110,14 @@ export class UsersPage {
   });
 
   users = this.crud.items;
-  pager = new Pagination(() => this.users());
+  search = signal('');
+  /** البحث بالاسم أو البريد أو الرقم الذاتي أو الهاتف أو الدور أو المكتب أو القسم أو الفرع */
+  filtered = computed(() => {
+    const match = searchMatcher(this.search());
+    return this.users().filter(u => match(u.fullName, u.email, u.personalIdNumber, u.phoneNumber, u.roleName, u.officeName, u.departmentName, u.branchName));
+  });
+  pager = new Pagination(() => this.filtered());
+  setSearch(text: string) { this.search.set(text); this.pager.reset(); }
   /** نوع النافذة المفتوحة */
   mode = computed(() => this.crud.dialog()?.mode ?? null);
 
@@ -179,32 +186,12 @@ export class UsersPage {
 
   create() {
     if (this.createForm.invalid || this.crud.saving() || !this.validAssignment()) return;
-    const v = this.createForm.value;
-    const form = new FormData();
-    form.append('FullName', v.fullName ?? '');
-    form.append('Email', v.email ?? '');
-    form.append('PersonalIdNumber', (v.personalIdNumber ?? '').trim().toUpperCase());
-    form.append('PhoneNumber', normalizePhone(v.phoneNumber));
-    form.append('Password', v.password ?? '');
-    form.append('RoleId', v.roleId ?? '');
-    this.appendPlacement(form, this.createForm);
-    this.crud.save(form);
+    this.crud.save(buildUserFormData(this.createForm.value, this.placementOf(this.createForm), { editing: false }));
   }
 
   update() {
     if (this.editForm.invalid || this.crud.saving() || !this.validAssignment()) return;
-    const v = this.editForm.value;
-    const form = new FormData();
-    form.append('FullName', v.fullName ?? '');
-    form.append('Email', v.email ?? '');
-    form.append('PersonalIdNumber', (v.personalIdNumber ?? '').trim().toUpperCase());
-    form.append('PhoneNumber', normalizePhone(v.phoneNumber));
-    form.append('RoleId', v.roleId ?? '');
-    this.appendPlacement(form, this.editForm);
-    form.append('IsActive', String(this.editForm.getRawValue().isActive ?? true));
-    // كلمة المرور تُرسَل فقط إن أراد المستخدم تغييرها
-    if (v.password) form.append('Password', v.password);
-    this.crud.save(form);
+    this.crud.save(buildUserFormData(this.editForm.value, this.placementOf(this.editForm), { editing: true, isActive: this.editForm.getRawValue().isActive ?? true }));
   }
 
   /* =====================================================
@@ -234,20 +221,15 @@ export class UsersPage {
     form.patchValue({ officeId: '' });
   }
 
-  /* =====================================================
-   * مكان الموظف (فرع / قسم / مكتب): يُحدَّد هنا لا في الدور، وكلها اختيارية —
-   * مدير النظام (SuperAdmin) وحده لا يتبع لوحدة. الباكاند يشتق الأعلى من الأدق ويرفض التعارض.
-   * ===================================================== */
+  /* مكان الموظف (فرع / قسم / مكتب): القواعد في utils/user-form.ts */
   private activeForm(): FormGroup {
     return this.mode() === 'create' ? this.createForm : this.editForm;
   }
 
-  /** "needs…" هنا تعني: يُعرض الحقل (لا يُلزم) */
+  /** قيمة حقل الدور نفسه وليس form.value: داخل valueChanges للدور لم تُحدَّث قيمة النموذج بعد */
   private placementOf(form: FormGroup): UserPlacement {
-    // قيمة الحقل نفسه وليس form.value: داخل valueChanges للدور لم تُحدَّث قيمة النموذج بعد
     const role = this.roleList().find(r => String(r.id) === String(form.get('roleId')?.value));
-    const placed = role?.name?.toLowerCase() !== 'superadmin';
-    return { needsBranch: placed, needsDepartment: placed, needsOffice: placed };
+    return placementForRole(role?.name);
   }
 
   placement(): UserPlacement {
@@ -270,27 +252,10 @@ export class UsersPage {
     }
   }
 
-  private appendPlacement(data: FormData, form: FormGroup) {
-    const placement = this.placementOf(form);
-    if (!placement.needsBranch) return;
-    // الفارغ لا يُرسل: الباكاند يعتبره بلا وحدة
-    for (const [key, value] of [['BranchId', form.value.branchId], ['DepartmentId', form.value.departmentId], ['OfficeId', form.value.officeId]]) {
-      if (value) data.append(key, String(value));
-    }
-  }
-
   /** التعارض فقط (قسم خارج الفرع المختار، أو مكتب خارج القسم المختار) — الفراغ مسموح */
   private validAssignment(): boolean {
-    const value = this.activeForm().value;
-    const department = this.departments().find(d => d.id === Number(value.departmentId));
-    const office = this.offices().find(o => o.id === Number(value.officeId));
-    const invalid =
-      (value.branchId && department && department.branchId !== Number(value.branchId))
-      || (value.departmentId && office && office.departmentId !== Number(value.departmentId));
-    if (invalid) {
-      this.crud.fail('تحقق من تبعية القسم للفرع والمكتب للقسم');
-      return false;
-    }
-    return true;
+    if (!hasAssignmentConflict(this.activeForm().value, this.departments(), this.offices())) return true;
+    this.crud.fail('تحقق من تبعية القسم للفرع والمكتب للقسم');
+    return false;
   }
 }
