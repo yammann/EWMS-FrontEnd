@@ -1,0 +1,9 @@
+.title { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.title .mono { font-size: inherit; }
+.state-note { margin: 0; display: flex; align-items: center; gap: 8px; }
+.summary { display: grid; gap: 18px; }
+.overall { display: grid; gap: 6px; max-width: 420px; }
+.segmented { justify-self: start; flex-wrap: wrap; }
+.danger-zone { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.danger-zone h2 { font-size: 16px; margin: 0 0 4px; }
+.danger-zone p { margin: 0; font-size: 13px; color: var(--ink-500); }

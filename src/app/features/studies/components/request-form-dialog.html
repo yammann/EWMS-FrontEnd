@@ -1,0 +1,81 @@
+<app-modal size="lg" [heading]="request() ? 'تعديل طلب تجهيز الدراسة' : 'طلب تجهيز دراسة جديد'"
+           [subheading]="request()?.requestNumber ?? 'يُرقَّم تلقائياً عند الحفظ ويبقى مسودة حتى تسجيله نهائياً'"
+           [busy]="saving()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body form-stack">
+      <app-alert [message]="error()" />
+      @if (missing()) { <p class="alert alert-warning" role="status">{{ missing() }}</p> }
+
+      <section class="form-section">
+        <h3>بيانات الطلب</h3>
+        <div class="form-grid-3">
+          @if (chooseBranch()) {
+            <label class="form-field"><span class="form-label">الفرع</span>
+              <select formControlName="branchId">
+                <option [ngValue]="0" disabled>اختر الفرع…</option>
+                @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
+              </select>
+              @if (form.controls.branchId.touched && form.controls.branchId.invalid) { <small class="form-error">اختر الفرع</small> }
+            </label>
+          }
+          <label class="form-field"><span class="form-label">تاريخ الطلب</span><input type="date" formControlName="requestDate"></label>
+          <label class="form-field"><span class="form-label">الاستعجال</span>
+            <select formControlName="urgency">@for (u of urgencies; track u.value) { <option [ngValue]="u.value">{{ u.label }}</option> }</select></label>
+          <label class="form-field"><span class="form-label">إنشاء / صيانة وترميم</span>
+            <select formControlName="workType">@for (w of workTypes; track w.value) { <option [ngValue]="w.value">{{ w.label }}</option> }</select></label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>الأرشيف</h3>
+        <div class="form-grid-3">
+          <label class="form-field"><span class="form-label">رقم الطلب من الديوان المركزي</span><input formControlName="diwanRequestNumber" maxlength="50"></label>
+          <label class="form-field"><span class="form-label">رقم أرشيف ديوان الوزارة</span><input formControlName="ministryArchiveNumber" maxlength="50"></label>
+          <label class="form-field"><span class="form-label">تاريخ أرشيف ديوان الوزارة</span><input type="date" formControlName="ministryArchiveDate"></label>
+          <label class="form-field"><span class="form-label">رقم أرشيف الجهة المستفيدة</span><input formControlName="beneficiaryArchiveNumber" maxlength="50"></label>
+          <label class="form-field"><span class="form-label">رقم أرشيف ديوان الإدارة</span><input formControlName="adminArchiveNumber" maxlength="50"></label>
+          <label class="form-field"><span class="form-label">تاريخ أرشيف ديوان الإدارة</span><input type="date" formControlName="adminArchiveDate"></label>
+          <label class="form-field"><span class="form-label">تاريخ الإضافة</span><input type="date" formControlName="addedDate"></label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>الجهة المستفيدة والموقع</h3>
+        <div class="form-grid-3">
+          <label class="form-field full"><span class="form-label">الجهة المستفيدة الرئيسية</span><input formControlName="mainBeneficiary" maxlength="200">
+            @if (form.controls.mainBeneficiary.touched && form.controls.mainBeneficiary.invalid) { <small class="form-error">الجهة المستفيدة الرئيسية مطلوبة</small> }</label>
+          <label class="form-field"><span class="form-label">اسم الجهة الفرعية (اللواء — الإدارة)</span><input formControlName="subBeneficiary" maxlength="200"></label>
+          <label class="form-field"><span class="form-label">رمز الجهة</span><input formControlName="entityCode" maxlength="30" dir="auto"></label>
+          <label class="form-field"><span class="form-label">طبيعة العقار</span><input formControlName="propertyNature" maxlength="100"></label>
+          <label class="form-field"><span class="form-label">المحافظة</span>
+            <select formControlName="governorateCode">
+              <option value="" disabled>اختر المحافظة…</option>
+              @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
+            </select>
+            @if (form.controls.governorateCode.touched && form.controls.governorateCode.invalid) { <small class="form-error">اختر المحافظة</small> }</label>
+          @if (canPickSite) {
+            <label class="form-field"><span class="form-label">الموقع على الخريطة <small class="hint">(اختياري)</small></span>
+              <select formControlName="siteId">
+                <option [ngValue]="0">— بلا موقع —</option>
+                @for (s of siteOptions(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+              </select>
+              <small class="hint">بدون موقع لا يظهر مشروع هذه الدراسة على خريطة الفرع.</small></label>
+          }
+          <label class="form-field"><span class="form-label">المنطقة</span><input formControlName="area" maxlength="100"></label>
+          <label class="form-field"><span class="form-label">المدينة / القرية</span><input formControlName="cityOrVillage" maxlength="100"></label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>المتابعة</h3>
+        <div class="form-grid-2">
+          <label class="form-field"><span class="form-label">اسم المتابع لدى الجهة</span><input formControlName="followerName" maxlength="150"></label>
+          <label class="form-field"><span class="form-label">رقم تواصل المتابع</span><input formControlName="followerPhone" dir="ltr" inputmode="tel" maxlength="20">
+            @if (form.controls.followerPhone.touched && form.controls.followerPhone.invalid) { <small class="form-error">رقم هاتف سوري غير صالح</small> }</label>
+          <label class="form-field full"><span class="form-label">ملاحظات عامة</span><textarea formControlName="notes" rows="3" maxlength="2000"></textarea></label>
+        </div>
+      </section>
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>

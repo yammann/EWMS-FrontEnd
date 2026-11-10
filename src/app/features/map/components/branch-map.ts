@@ -1,10 +1,14 @@
-import { Component, DestroyRef, ElementRef, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { DeviceService, formatCoords } from '@features/devices';
-import { BranchMap, MapBranchOption, MapLayer, MapSite } from '@features/devices';
+import { formatCoords } from '@core/utils/geo';
+import { SITE_PAGE_ACCESS } from '@core/constants/access';
+import { AuthService } from '@core/services/auth.service';
+import { MapService } from '../data-access/map.service';
+import { BranchMap, MapBranchOption, MapLayer, MapSite } from '../data-access/map.models';
 import { GovernorateFeature } from '@core/utils/geo';
 import { ToastService } from '@shared/ui/toast.service';
 import { MapPoint, SyriaSvgMap } from './syria-svg-map';
+import { PinnedMap } from './pinned-map';
 import { latestRequest } from '@shared/ui/track-request';
 import { SelectValue } from '@shared/ui/select-value';
 import { Icon } from '@shared/ui/icon';
@@ -74,19 +78,17 @@ export function layerTotals(sites: readonly MergedSite[]): { key: string; title:
  * أثناء السكرول بينما تصغر وتخفت تدريجياً حتى تنغلق.
  */
 @Component({
-  selector: 'app-branch-map', standalone: true, imports: [Icon, SelectValue, RouterLink, SyriaSvgMap],
+  selector: 'app-branch-map', standalone: true, imports: [Icon, SelectValue, RouterLink, SyriaSvgMap, PinnedMap],
   templateUrl: './branch-map.html',
   styleUrl: './branch-map.scss'
 })
 export class BranchMapComponent {
   /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
   private latest = latestRequest();
-  private service = inject(DeviceService);
+  private service = inject(MapService);
+  private auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
-  private destroyRef = inject(DestroyRef);
-  private pinned = viewChild<ElementRef<HTMLElement>>('pinned');
-  private sheet = viewChild<ElementRef<HTMLElement>>('sheet');
 
   branches = signal<MapBranchOption[]>([]);
   branchId = signal(0);
@@ -167,8 +169,6 @@ export class BranchMapComponent {
   withoutCoordinates = computed(() => this.sites().filter(s => s.latitude == null || s.longitude == null).length);
 
   constructor() {
-    afterNextRender(() => this.trackCollapse());
-
     this.service.mapBranches().subscribe({
       next: list => {
         this.branches.set(list);
@@ -178,30 +178,6 @@ export class BranchMapComponent {
         else if (first) this.selectBranch(first.id);
       },
       error: e => this.error.set(e.message)
-    });
-  }
-
-  /** مقدار انغلاق الخريطة (0 → 1) = نسبة ما غطّته الصفحة المنزلقة منها؛ يُكتب كمتغير CSS بدون إعادة رسم Angular */
-  private trackCollapse() {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const pin = this.pinned()?.nativeElement; const sheet = this.sheet()?.nativeElement;
-      if (!pin || !sheet) return;
-      // التصغير حول الحافة العليا لا يغيّر top، وoffsetHeight لا يتأثر بالـ transform — فلا توجد حلقة تغذية راجعة
-      const covered = pin.getBoundingClientRect().top + pin.offsetHeight - sheet.getBoundingClientRect().top;
-      const p = Math.min(1, Math.max(0, covered / pin.offsetHeight));
-      pin.style.setProperty('--p', p.toFixed(3));
-      pin.classList.toggle('closing', p > .35);
-    };
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
-    addEventListener('scroll', schedule, { passive: true });
-    addEventListener('resize', schedule);
-    update();
-    this.destroyRef.onDestroy(() => {
-      removeEventListener('scroll', schedule);
-      removeEventListener('resize', schedule);
-      cancelAnimationFrame(frame);
     });
   }
 
@@ -225,10 +201,13 @@ export class BranchMapComponent {
     lastView = { branchId: this.branchId(), focus: code };
   }
 
-  /** صفحة تفاصيل الموقع — لمن يرى سجل المواقع (الخريطة وحدها لا تكفي لفتحها) */
+  /**
+   * النقر على موقع يفتح صفحته مباشرة لكل من يملك أيّاً من صلاحيات صفحة الموقع (السجل أو الأجهزة أو الطبقات أو مشاريع الدراسات).
+   * وفي الصفحة تُعرض كل بطاقة بصلاحيتها، فالخريطة وحدها لا تكفي ومن لا يملك شيئاً يُخبَر بذلك.
+   */
   openSite(id: number) {
-    if (!this.service.siteAccess().canView) {
-      this.toast.info('تفاصيل المواقع تحتاج صلاحية عرض المواقع أو توثيق الأجهزة أو سجلات طبقات الفرع');
+    if (!this.auth.hasAnyPermission(SITE_PAGE_ACCESS)) {
+      this.toast.info('تفاصيل المواقع تحتاج صلاحية عرض المواقع أو توثيق الأجهزة أو سجلات طبقات الفرع أو عرض مشاريع الدراسات');
       return;
     }
     this.router.navigate(['/devices/sites', id]);

@@ -1,0 +1,52 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">فرع الدراسات · اعتماد المخططات الأولي</span>
+      <h1 class="title">
+        @if (cda(); as d) { <span class="mono">{{ d.cdaNumber }}</span> <app-study-status-chip [kind]="decisionKind" [status]="d.decision" [name]="d.decisionName" /> }
+        @else { {{ loading() ? 'جارٍ التحميل…' : 'CDA' }} }
+      </h1>
+      @if (cda(); as d) { <p class="muted">{{ d.drawingName }} · {{ d.versionLabel }}</p> }
+    </div>
+    <div class="header-actions">
+      @if (cda(); as d) {
+        <a class="btn btn-ghost" [routerLink]="['/studies/drawings', d.drawingId]">المخطط</a>
+        @if (canPrint()) { <a class="btn btn-ghost" [routerLink]="['/studies/print/design-approvals', d.id]"><app-icon name="printer" [size]="16" /> طباعة</a> }
+        @if (d.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="editing.set(true)">تعديل</button> }
+      }
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+  <app-alert [message]="actionError()" />
+
+  @if (cda(); as d) {
+    <section class="panel">
+      <div class="panel-heading"><div><h2>بيانات الاعتماد</h2></div></div>
+      <dl class="facts">
+        <div><dt>الرقم</dt><dd class="mono">{{ d.cdaNumber }}</dd></div>
+        <div><dt>تاريخ الاعتماد</dt><dd>{{ d.cdaDate | date:'yyyy/MM/dd' }}</dd></div>
+        <div><dt>المشروع</dt><dd><a class="mono" [routerLink]="['/studies/projects', d.projectId]">{{ d.projectCode }}</a></dd></div>
+        <div><dt>المخطط</dt><dd><a [routerLink]="['/studies/drawings', d.drawingId]">{{ d.drawingName }}</a> — {{ d.versionLabel }}</dd></div>
+        <div><dt>أنشأه</dt><dd>{{ d.createdByName }} · {{ d.createdAt | utc | date:'yyyy/MM/dd' }}</dd></div>
+        <div class="wide"><dt>المحتوى</dt><dd class="pre">{{ d.content || '—' }}</dd></div>
+        <div class="wide"><dt>الملاحظات الفنية</dt><dd class="pre">{{ d.technicalNotes || '—' }}</dd></div>
+      </dl>
+    </section>
+
+    <app-study-approvals-panel [approvals]="d.approvals" [documentLabel]="d.cdaNumber" (decided)="decided()" />
+
+    @if (canDelete()) {
+      <section class="panel danger-zone">
+        <div><h2>حذف الاعتماد</h2><p>قبل أول توقيع فقط؛ تعود النسخة المعمارية قيد الإعداد.</p></div>
+        <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="remove()">حذف</button>
+      </section>
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (editing() && cda(); as d) {
+  <app-study-design-approval-form-dialog [approval]="d" (closed)="editing.set(false)" (saved)="edited($event)" />
+}

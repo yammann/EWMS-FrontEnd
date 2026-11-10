@@ -17,7 +17,7 @@ export const FIELD_TYPES: { value: MapFieldType; label: string }[] = [
 export const fieldTypeLabel = (t: number) => FIELD_TYPES.find(x => x.value === t)?.label ?? '';
 
 /** ألوان مقترحة لنقاط الطبقات على الخريطة (يمكن اختيار أي لون) */
-export const LAYER_COLORS = ['#2563EB', '#16A34A', '#DC2626', '#D97706', '#7C3AED', '#0891B2', '#DB2777', '#4B5563'];
+export const LAYER_COLORS = ['#2563EB', '#16A34A', '#DC2626', '#D97706', '#7C3AED', '#0891B2', '#DB2777', '#4B5563']; // raw-color-ok: ألوان يختارها المستخدم لطبقاته
 
 export interface MapLayerField {
   id: number;

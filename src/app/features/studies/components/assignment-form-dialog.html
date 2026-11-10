@@ -1,0 +1,53 @@
+<app-modal size="lg" [heading]="assignment() ? 'تعديل التكليف الداخلي' : 'تكليف داخلي جديد (IPA)'"
+           [subheading]="assignment()?.assignmentNumber ?? 'يُرقَّم تلقائياً، ويُرسل لتوقيع رئيس الفرع'"
+           [busy]="saving()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body form-stack">
+      <app-alert [message]="error()" />
+      @if (missing()) { <p class="alert alert-warning" role="status">{{ missing() }}</p> }
+      <p class="context">الطلب <strong class="mono">{{ parent().requestNumber }}</strong> — {{ parent().mainBeneficiary }}</p>
+
+      <section class="form-section">
+        <h3>بيان أمر التكليف</h3>
+        <div class="form-grid-3">
+          <label class="form-field"><span class="form-label">القسم المتابع</span>
+            <select formControlName="followingDepartmentId">
+              <option [ngValue]="0" disabled>اختر القسم…</option>
+              @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
+            </select>
+            @if (form.controls.followingDepartmentId.touched && form.controls.followingDepartmentId.invalid) { <small class="form-error">اختر القسم المتابع</small> }</label>
+          <label class="form-field"><span class="form-label">تاريخ التكليف</span><input type="date" formControlName="assignmentDate"></label>
+          <label class="form-field"><span class="form-label">كود المشروع <small class="hint">(اختياري)</small></span><input formControlName="projectCode" maxlength="50" dir="auto"></label>
+          <label class="form-field"><span class="form-label">الميزانية المرصودة <small class="hint">(ل.س، اختياري)</small></span>
+            <input type="number" formControlName="allocatedBudget" min="0" step="any"></label>
+          <label class="form-field full"><span class="form-label">ملخص نطاق العمل والمتطلبات الخاصة بالعمل</span>
+            <textarea formControlName="scopeSummary" rows="4" maxlength="4000"></textarea>
+            @if (form.controls.scopeSummary.touched && form.controls.scopeSummary.invalid) { <small class="form-error">ملخص النطاق مطلوب</small> }</label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>نطاق التكليف والمخرجات المطلوبة</h3>
+        <div class="checks">
+          <label class="check"><input type="checkbox" formControlName="needsTechnicalEvaluation"> التقييم الفني الأولي وقابلية التنفيذ</label>
+          <label class="check"><input type="checkbox" formControlName="needsResourceEstimate"> تقدير الموارد والكوادر الهندسية والمدة</label>
+          <label class="check"><input type="checkbox" formControlName="needsPreliminaryBudget"> الميزانية التقديرية المبدئية للمشروع</label>
+          <label class="check"><input type="checkbox" formControlName="needsFinalRecommendation"> التوصية الفنية النهائية للقسم (قبول / تعديل / عدم إتاحة)</label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>المحددات الزمنية والأولوية</h3>
+        <div class="form-grid-3">
+          <label class="form-field"><span class="form-label">تاريخ الإحالة الداخلي</span><input type="date" formControlName="referralDate"></label>
+          <label class="form-field"><span class="form-label">الحد الأقصى للرد</span><input type="date" formControlName="responseDeadline">
+            @if (form.controls.responseDeadline.touched && form.controls.responseDeadline.invalid) { <small class="form-error">الحد الأقصى للرد مطلوب</small> }
+            @else if (form.hasError('deadline')) { <small class="form-error">لا يسبق تاريخ الإحالة</small> }</label>
+          <label class="form-field"><span class="form-label">درجة الأهمية</span>
+            <select formControlName="priority">@for (p of priorities; track p.value) { <option [ngValue]="p.value">{{ p.label }}</option> }</select></label>
+        </div>
+      </section>
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>

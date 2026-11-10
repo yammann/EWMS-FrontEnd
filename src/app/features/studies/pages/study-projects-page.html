@@ -1,0 +1,52 @@
+<div class="page">
+  <app-page-header eyebrow="فرع الدراسات" heading="مشاريع الدراسات" subtitle="المراحل والمهام والفريق ونسبة الإنجاز">
+    <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <div class="filters">
+    <div class="filters-row">
+      <input #q class="search" type="search" dir="auto" placeholder="بحث بالكود أو اسم المشروع…" aria-label="بحث"
+             [value]="search()" (input)="search.set(q.value); changed()">
+      <select #s (change)="status.set(+s.value); changed()" aria-label="الحالة">
+        <option value="0" [selected]="!status()">كل الحالات</option>
+        @for (x of statuses; track x.value) { <option [value]="x.value" [selected]="x.value === status()">{{ x.label }}</option> }
+      </select>
+      @if (orgWide() && branches().length) {
+        <select #b (change)="branchId.set(+b.value); changed()" aria-label="الفرع">
+          <option value="0" [selected]="!branchId()">كل الفروع</option>
+          @for (x of branches(); track x.id) { <option [value]="x.id" [selected]="x.id === branchId()">{{ x.name }}</option> }
+        </select>
+      }
+      @if (hasFilter()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clear()">مسح الفلاتر</button> }
+    </div>
+  </div>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  <section class="panel">
+    @if (loading() && !rows().length) {
+      <app-empty-state>جارٍ التحميل…</app-empty-state>
+    } @else if (!rows().length && !error()) {
+      <div class="empty-state"><h3>{{ hasFilter() ? 'لا توجد نتائج مطابقة' : 'لا مشاريع بعد' }}</h3>
+        <p>{{ hasFilter() ? 'جرّب تعديل البحث أو الفلاتر.' : 'يُنشأ المشروع من صفحة أمر البدء المعتمد بزر «إنشاء مشروع».' }}</p></div>
+    } @else if (rows().length) {
+      <div class="table-wrap" [class.dim]="loading()"><table>
+        <thead><tr><th>الكود</th><th>المشروع</th><th>المدير</th><th>التخطيط</th><th>الإنجاز</th>@if (orgWide()) { <th>الفرع</th> }<th>الحالة</th></tr></thead>
+        <tbody>
+          @for (p of rows(); track p.id) {
+            <tr>
+              <td><a class="mono cell-strong" [routerLink]="['/studies/projects', p.id]">{{ p.code }}</a></td>
+              <td><span class="cell-strong">{{ p.name }}</span><small>أمر البدء {{ p.startOrderNumber }}</small></td>
+              <td>{{ p.managerName }}</td>
+              <td class="nowrap">{{ fmt(p.plannedStartDate) }} ← {{ fmt(p.plannedEndDate) }}</td>
+              <td><app-study-progress [percent]="p.progress" /></td>
+              @if (orgWide()) { <td>{{ p.branchName }}</td> }
+              <td><app-study-status-chip kind="project" [status]="p.status" [name]="p.statusName" /></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+    }
+  </section>
+</div>

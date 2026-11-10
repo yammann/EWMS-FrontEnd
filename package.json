@@ -13,6 +13,9 @@
     "e2e:ui": "playwright test --ui",
     "metrics:duplicates": "jscpd src/app --format typescript,scss,markup --min-lines 10 --min-tokens 70 --reporters console --silent",
     "check:cycles": "node scripts/check-cycles.mjs",
+    "check:unused": "node scripts/check-unused.mjs",
+    "check:colors": "node scripts/check-colors.mjs",
+    "verify": "npm run lint && npm run check:cycles && npm run check:unused && npm run check:colors && ng test --watch=false && ng build",
     "fonts:woff2": "node scripts/fonts-woff2.mjs",
     "icons": "node scripts/build-icons.mjs"
   },

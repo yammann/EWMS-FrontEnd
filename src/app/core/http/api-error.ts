@@ -25,5 +25,15 @@ export function toApiError(error: HttpErrorResponse): ApiError {
     message = 'ليس لديك صلاحية للوصول';
   }
 
-  return { status: error.status, message };
+  return { status: error.status, message: arabicOrFallback(message, error.status) };
+}
+
+/** الواجهة عربية دائماً: نص خادم بلا حرف عربي (استثناء تقني أو رسالة إطار عمل) يُستبدل بنص عام حسب الحالة */
+function arabicOrFallback(message: string, status: number): string {
+  if (/[ء-ي]/.test(message)) return message;
+  if (status === 400) return 'بيانات غير صحيحة — تحقق من الحقول المُدخلة';
+  if (status === 403) return 'ليس لديك صلاحية لهذا الإجراء';
+  if (status === 404) return 'العنصر المطلوب غير موجود';
+  if (status >= 500) return 'حدث خطأ في الخادم، يرجى المحاولة لاحقاً';
+  return 'حدث خطأ غير متوقع';
 }

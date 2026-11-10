@@ -13,6 +13,7 @@ import { OFFICES_ROUTES } from '@features/offices/offices.routes';
 import { PROFILE_ROUTES } from '@features/profile/profile.routes';
 import { REPORT_PRINT_ROUTES, REPORTS_ROUTES } from '@features/reports/reports.routes';
 import { ROLES_ROUTES } from '@features/roles/roles.routes';
+import { STUDIES_ROUTES, STUDY_PRINT_PAGE_ROUTES } from '@features/studies/studies.routes';
 import { TASK_BOARD_ROUTES } from '@features/task-board/task-board.routes';
 import { TODO_ROUTES } from '@features/todo/todo.routes';
 import { USERS_ROUTES } from '@features/users/users.routes';
@@ -30,6 +31,7 @@ export const routes: Routes = [
   ...MAINTENANCE_PRINT_ROUTES,
   ...VACATION_PRINT_ROUTES,
   ...REPORT_PRINT_ROUTES,
+  ...STUDY_PRINT_PAGE_ROUTES,
   {
     path: '',
     component: MainLayout,
@@ -47,6 +49,7 @@ export const routes: Routes = [
       ...MAINTENANCE_ROUTES,
       ...VACATIONS_ROUTES,
       ...REPORTS_ROUTES,
+      ...STUDIES_ROUTES,
       // إدارة الهيكل والمستخدمين
       ...BRANCHES_ROUTES,
       ...DEPARTMENTS_ROUTES,

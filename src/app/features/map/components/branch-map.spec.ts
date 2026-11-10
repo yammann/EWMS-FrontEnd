@@ -1,4 +1,4 @@
-import { MapLayer, MapSite } from '@features/devices';
+import { MapLayer, MapSite } from '../data-access/map.models';
 import { describeLayers, layerTotals, mergeLayers } from './branch-map';
 
 const site = (id: number, count: number, extra: Partial<MapSite> = {}): MapSite => ({

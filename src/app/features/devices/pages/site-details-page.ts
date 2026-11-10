@@ -5,26 +5,31 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { PagedResult } from '@core/models/paged-result.model';
-import { DeviceService, formatCoords } from '../data-access/device.service';
+import { DeviceService } from '../data-access/device.service';
+import { formatCoords } from '@core/utils/geo';
 import { DeviceSite, Site } from '../data-access/device.models';
 import { StatTile } from '@shared/ui/stat-tile';
-import { MapPoint, SyriaSvgMap } from '@features/map';
+import { MapPoint, PinnedMap, SyriaSvgMap } from '@features/map';
 import { CopyText } from '@shared/ui/secret-text';
 import { formatPhone } from '@core/utils/phone';
 import { deviceUrl } from '@core/utils/network';
 import { DeviceHistory, DevicePassword, InstallStatus } from '../components/device-ui';
 import { LinkedTasks } from '@features/task-board';
+import { SiteStudiesPanel } from '@features/studies';
+import { AppPermission } from '@core/constants/access';
+import { AuthService } from '@core/services/auth.service';
 import { MapLayersService, SiteEntriesPanel } from '@features/map-layers';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { Icon } from '@shared/ui/icon';
 
 /**
- * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع):
- * معلومات الموقع، مكانه على خريطة المحافظة مع المواقع المجاورة، وكل الأجهزة المركّبة فيه.
+ * صفحة تفاصيل موقع (تُفتح بالنقر على نقطة الموقع في خريطة لوحة المتابعة أو من صفحة المواقع).
+ * كل بطاقة بصلاحيتها فيرى كل مستخدم ما مُنح فقط: معلومات الموقع وخريطته لكل من يفتح الصفحة،
+ * والتركيبات وأنواع الأجهزة بصلاحيات الأجهزة، ومشاريع الدراسات بـ ViewStudyProjects، ومعلومات الفروع بسجلات الطبقات.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [Icon, EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, Pager],
+  selector: 'app-site-details-page', standalone: true, imports: [Icon, EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, PinnedMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, SiteStudiesPanel, Pager],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', './site-details-page.scss'],
   templateUrl: './site-details-page.html',
   
@@ -36,6 +41,11 @@ export class SiteDetailsPage {
   private router = inject(Router);
 
   access = this.service.access;
+  private auth = inject(AuthService);
+  /** بطاقة مشاريع الدراسات */
+  canViewStudies = computed(() => this.auth.hasPermission(AppPermission.ViewStudyProjects));
+  /** سجل الموقع وإدارته: صلاحيات سجل المواقع (لا مشاريع الدراسات وحدها) */
+  canViewSiteRegistry = computed(() => this.service.siteAccess().canView);
   /** معلومات الفروع (طبقاتها) على الموقع — لمن يملك أي صلاحية سجلات */
   private layersAccess = inject(MapLayersService).access;
   canViewEntries = computed(() => this.layersAccess().canViewEntries);
@@ -65,6 +75,9 @@ export class SiteDetailsPage {
       { id: s.id, latitude: s.latitude, longitude: s.longitude, label: s.name, sub: 'الموقع الحالي', selected: true }
     ];
   });
+
+  /** الخريطة المثبّتة في رأس الصفحة تحتاج إحداثيات الموقع */
+  hasMap = computed(() => { const s = this.site(); return !!s && s.latitude != null && s.longitude != null; });
 
   governorateSites = computed(() => this.allSites().filter(s => s.governorateCode === this.site()?.governorateCode));
 

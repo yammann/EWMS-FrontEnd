@@ -103,11 +103,13 @@ crud = new CrudPage<Item, Body>({
 ## الاختبارات
 - `npm test` — vitest (وحدة): خدمات، pagination، CrudPage، SelectValue، trackRequest، LookupsService، interceptor، المكوّنات المشتركة، **حارس ربط المخرجات** (`template-outputs.spec.ts`: ربط `(event)` على مكوّن لا يملك هذا المخرج يصير مستمع DOM صامتاً بلا خطأ بناء).
 - `npm run lint` — ESLint (typescript-eslint + angular-eslint + حدود الطبقات).
+- **`npm run verify` — كل الفحوص بأمر واحد قبل أي commit:** lint ثم `check:cycles` (دورات الاستيراد) ثم `check:unused` (تصديرات ماتت بعد تعديل) ثم `check:colors` (ألوان خام خارج رموز التصميم؛ التعليق `raw-color-ok` لبيانات لون مقصودة) ثم الاختبارات ثم البناء.
+- اختبارات العقد داخل الواجهة: `permission-sections.spec.ts` (كل صلاحية في AppPermission تقع في مجموعة من صفحة الأدوار، لا اسم مجهول ولا تكرار).
 - `npm run e2e` — Playwright بـ Chrome المثبّت: يحتاج API على 7181 وخادم الواجهة و`E2E_ADMIN_PASSWORD` (لا تُحفظ في الشيفرة)؛ `E2E_BASE_URL` لتغيير العنوان (الافتراضي 4200).
   - `smoke.spec.ts`: 27 صفحة بلا أخطاء كونسول/5xx. `flows.spec.ts`: تدفقات (مفكرتي، الفروع، الأدوار، الرجوع، النوافذ).
   - `crud.spec.ts`: إضافة/تعديل/حذف وأخطاء الخادم لكل صفحات الإدارة (أنواع الإجازات، العطل، مهام العمل، الكتالوج، المواقع، إعدادات الصيانة، الهيكل، المستخدمون، الأدوار، أجهزة الصيانة، قطع الغيار). كل سجل باسم «e2e …»، و`cleanup.teardown.ts` يحذف ما تبقّى بعد كل تشغيل.
   - `visual-parity.spec.ts`: تطابق الشكل مع لقطات مرجعية (راجع تعليق الملف لتوليد المرجع من الكود الأصلي).
 - الاختبارات التي تحتاج الباكاند الحي تُشغَّل يدوياً؛ الباقي بلا خادم.
 
-## أدوات الترحيل (scripts/)
-سكربتات node استُعملت في إعادة الهيكلة وتبقى مرجعاً (`phase*-*.mjs`): نقل الملفات وإعادة كتابة الاستيرادات وتوليد `index.ts` (`phase3-restructure.mjs`)، وتوحيد الأنماط المكرَّرة (alert/empty-state/page-header/form-actions/trackRequest/…). تحذير: heredoc الـ bash يلتهم الشرطات المائلة العكسية — اكتب السكربتات المعتمدة على regex بأداة الكتابة لا بـ `cat <<EOF`.
+## سكربتات (scripts/)
+فحوص: `check-cycles` و`check-unused` و`check-colors`. توليد: `build-icons` (الأيقونات) و`fonts-woff2` و`prepare-stamps` (الأختام). أدوات عامة لإعادة الهيكلة: `codemod-move` (نقل رموز بين الملفات مع تعديل الاستيرادات) و`codemod-aliases` (استيرادات نسبية → مسارات مستعارة) و`fix-unused-imports`. (حُذفت سكربتات `phase*` التي كانت لإعادة الهيكلة الأولى 2026-10: بقيت في تاريخ Git.) تحذير: heredoc الـ bash يلتهم الشرطات المائلة العكسية — اكتب السكربتات المعتمدة على regex بأداة الكتابة لا بـ `cat <<EOF`.

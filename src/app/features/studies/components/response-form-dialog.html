@@ -1,0 +1,76 @@
+<app-modal size="lg" [heading]="response() ? 'تعديل إشعار الرد — القسم المتابع' : 'إشعار الرد على أمر التكليف'"
+           [subheading]="'التكليف ' + parent().assignmentNumber + ' — ' + parent().followingDepartmentName"
+           [busy]="saving()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body form-stack">
+      <app-alert [message]="error()" />
+      @if (missing().length) { <p class="alert alert-warning" role="status">لم تُحمَّل: {{ missing().join('، ') }}.</p> }
+      <p class="context">هذا جزء <strong>القسم المتابع</strong>. بعد إرساله وتوقيعه يُفتح جزء <strong>التخطيط وإدارة المشاريع</strong> (المدة والكوادر والموارد اللوجستية) لصاحبه.</p>
+
+      <section class="form-section">
+        <h3>القسم المتابع</h3>
+        <div class="form-grid-3">
+          <label class="form-field"><span class="form-label">تاريخ الرد</span><input type="date" formControlName="responseDate"></label>
+          <label class="form-field"><span class="form-label">مدير المشروع المقترح <small class="hint">(اختياري)</small></span>
+            <select formControlName="proposedManagerUserId">
+              <option [ngValue]="0">— بلا اقتراح —</option>
+              @for (e of employees(); track e.id) { <option [ngValue]="e.id">{{ e.fullName }}{{ e.departmentName ? ' — ' + e.departmentName : '' }}</option> }
+            </select></label>
+          <label class="form-field"><span class="form-label">التوصية الفنية النهائية</span>
+            <select formControlName="recommendation">@for (r of recommendations; track r.value) { <option [ngValue]="r.value">{{ r.label }}</option> }</select>
+            @if (form.controls.recommendation.value === 3) { <small class="hint">«غير متاح»: لا يُصدر بعد هذا الرد أمر بدء.</small> }</label>
+        </div>
+      </section>
+
+      <section class="form-section" formArrayName="buildings">
+        <h3>المباني</h3>
+        <p class="hint">المساحة الإجمالية للمباني = عدد الطوابق × المساحة الطابقية.</p>
+        <div class="rows">
+          @for (b of form.controls.buildings.controls; track $index; let i = $index) {
+            <div class="row building" [formGroupName]="i">
+              <label class="check"><input type="checkbox" formControlName="included"> <strong>{{ buildingTypes[i].label }}</strong></label>
+              @if (b.controls.included.value) {
+                <div class="form-grid-3">
+                  <label class="form-field"><span class="form-label">عدد المباني</span><input type="number" formControlName="buildingCount" min="0" step="1">
+                    @if (b.controls.buildingCount.invalid) { <small class="form-error">عدد صحيح (بلا كسور)</small> }</label>
+                  <label class="form-field"><span class="form-label">المساحة الإجمالية للمباني (م²)</span><input type="number" formControlName="buildingsArea" min="0" step="any"></label>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- خارج formArrayName: وإلا بحث Angular عن الحقلين داخل مصفوفة المباني ولم يربطهما بالنموذج فضاعت قيمتهما -->
+      <section class="form-section">
+        <h3>الموقع والتكلفة المبدئية</h3>
+        <div class="form-grid-3">
+          <label class="form-field"><span class="form-label">مساحة الموقع العام (م²)</span><input type="number" formControlName="siteArea" min="0" step="any"></label>
+          <label class="form-field"><span class="form-label">التكلفة المبدئية (ل.س)</span><input type="number" formControlName="initialCost" min="0" step="any"></label>
+        </div>
+      </section>
+
+      <section class="form-section" formArrayName="costItems">
+        <h3>الجدول التفصيلي للتكلفة المبدئية</h3>
+        @if (!form.controls.costItems.length) { <p class="rows-empty">لا بنود بعد.</p> }
+        <div class="rows">
+          @for (c of form.controls.costItems.controls; track c; let i = $index) {
+            <div class="row cost-row" [formGroupName]="i">
+              <label class="form-field"><span class="form-label">البند</span><input formControlName="description" maxlength="500"></label>
+              <label class="form-field"><span class="form-label">الوحدة</span><input formControlName="unit" maxlength="30"></label>
+              <label class="form-field"><span class="form-label">الكمية</span><input type="number" formControlName="quantity" min="0" step="any"></label>
+              <label class="form-field"><span class="form-label">سعر الوحدة</span><input type="number" formControlName="unitPrice" min="0" step="any"></label>
+              <span class="form-field"><span class="form-label">المجموع</span><span class="mono line-total">{{ money(rowTotal(c)) }}</span></span>
+              <button type="button" class="icon-btn row-remove" aria-label="حذف البند" (click)="remove(form.controls.costItems, i)"><app-icon name="trash" [size]="16" /></button>
+            </div>
+          }
+        </div>
+        <div class="rows-foot">
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addCost()">+ بند تكلفة</button>
+          <span class="total">إجمالي الجدول: <strong>{{ money(costTotal()) }}</strong></span>
+        </div>
+      </section>
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>

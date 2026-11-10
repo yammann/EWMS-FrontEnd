@@ -7,6 +7,6 @@
 .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
 .size { color: var(--ink-500); font-weight: 400; }
 .viewer { display: grid; place-items: center; min-height: 320px; }
-.viewer iframe { width: 100%; height: 70vh; border: 0; border-radius: var(--radius-md); background: #fff; }
+.viewer iframe { width: 100%; height: 70vh; border: 0; border-radius: var(--radius-md); background: #fff; } /* raw-color-ok: ورق ملف PDF */
 .viewer img { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); }
 .muted { color: var(--ink-500); }

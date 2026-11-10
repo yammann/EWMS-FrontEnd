@@ -20,6 +20,10 @@ function kindOf(type: string): Kind {
   if (type.startsWith('ToDo')) return { icon: 'note', tone: type.includes('Overdue') ? 'red' : 'purple' };
   if (type === 'TaskOverdue') return { icon: 'alarm', tone: 'red' };
   if (type === 'TaskDueSoon') return { icon: 'hourglass', tone: 'orange' };
+  if (type === 'StudyApprovalRequested') return { icon: 'pencil', tone: 'orange' };
+  if (type === 'StudyNextStepReady') return { icon: 'forward', tone: 'green' };
+  if (type === 'StudyTaskAssigned') return { icon: 'clipboard', tone: 'blue' };
+  if (type.startsWith('Study')) return { icon: 'docText', tone: 'blue' };
   if (type.startsWith('Task') || type === 'WorkTaskAssigned') return { icon: 'clipboard', tone: 'blue' };
   if (type === 'LoginLocked') return { icon: 'lock', tone: 'red' };
   if (type === 'SparePartLowStock') return { icon: 'box', tone: 'orange' };

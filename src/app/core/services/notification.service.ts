@@ -162,11 +162,20 @@ export class NotificationService {
   }
 }
 
+/** صفحة كل مستند دراسة يشير إليه إشعار (RelatedEntityType = «Study» + نوع المستند) */
+const STUDY_PAGES: Record<string, string> = {
+  StudyRequest: '/studies/requests', StudyAssignment: '/studies/assignments', StudyResponse: '/studies/responses',
+  StudyStartOrder: '/studies/start-orders', StudyDesignApproval: '/studies/design-approvals', StudyProject: '/studies/projects'
+};
+
 /** الوجهة عند فتح الإشعار: طلبات تنتظر قرار المدير → المراجعة، وبقية إشعارات الإجازات → «إجازاتي»، وغيرها → الملف الشخصي */
 export function notificationRoute(n: AppNotification, canReview: boolean): string {
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
+  if (n.relatedEntityType === 'StudyTask') return '/studies/my-tasks';
+  const study = n.relatedEntityType ? STUDY_PAGES[n.relatedEntityType] : undefined;
+  if (study && n.relatedEntityId) return `${study}/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'ToDoList' && n.relatedEntityId) return `/todo-lists/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MaintenanceRequest' && n.relatedEntityId) return `/maintenance/requests/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'MyMaintenanceRequest' && n.relatedEntityId) return `/maintenance/mine?request=${n.relatedEntityId}`;

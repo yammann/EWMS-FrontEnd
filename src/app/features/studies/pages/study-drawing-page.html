@@ -1,0 +1,116 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">فرع الدراسات · مخطط</span>
+      <h1 class="title">
+        @if (drawing(); as d) { <span class="mono">{{ d.drawingNumber }}</span> <app-study-status-chip [status]="d.status" [name]="d.statusName" /> }
+        @else { {{ loading() ? 'جارٍ التحميل…' : 'مخطط' }} }
+      </h1>
+      @if (drawing(); as d) { <p class="muted">{{ d.name }} · {{ d.kindName }}</p> }
+    </div>
+    <div class="header-actions">
+      @if (drawing(); as d) {
+        <a class="btn btn-ghost" [routerLink]="['/studies/projects', d.projectId]" [queryParams]="{ tab: 'drawings' }">المشروع {{ d.projectCode }}</a>
+        @if (d.canEdit && access().viewDrawings) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="openEdit()">تعديل</button> }
+        @if (d.canReview) { <button class="btn" type="button" [disabled]="busy()" (click)="actionError.set(''); dialog.set('review')">مراجعة المخطط</button> }
+      }
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+  <app-alert [message]="actionError()" />
+
+  @if (drawing(); as d) {
+    @if (d.status === 4) {
+      <p class="alert alert-warning state-note" role="status">
+        <app-icon name="warning" [size]="16" />
+        <span>رُفض المخطط@if (rejection(); as r) { من {{ r.userName }}: «{{ r.details || 'بلا ملاحظة' }}» }.@if (d.canEdit) { عدّله وأرسله للمراجعة من جديد. }</span>
+      </p>
+    }
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>بيانات المخطط</h2></div></div>
+      <dl class="facts">
+        <div><dt>النوع</dt><dd>{{ d.kindName }}</dd></div>
+        <div><dt>تاريخ المخطط</dt><dd>{{ d.drawingDate | date:'yyyy/MM/dd' }}</dd></div>
+        <div><dt>القسم المُصدِر</dt><dd>{{ d.departmentName }}@if (d.officeName) { · {{ d.officeName }} }</dd></div>
+        <div><dt>أعدّه</dt><dd>{{ d.preparedByName }}</dd></div>
+        <div><dt>أُنشئ</dt><dd>{{ d.createdAt | utc | date:'yyyy/MM/dd' }}</dd></div>
+        @if (d.basedOnVersionLabel) { <div><dt>مبني على</dt><dd>{{ d.basedOnVersionLabel }}</dd></div> }
+        @if (d.description) { <div class="wide"><dt>الوصف</dt><dd class="pre">{{ d.description }}</dd></div> }
+      </dl>
+      @if (!isArchitectural() && d.status === 1 && d.canEdit) {
+        <p class="muted note">أرسله للمراجعة من «تعديل» ← الحالة «بانتظار المراجعة» ليعتمده المراجع.</p>
+      }
+    </section>
+
+    @if (isArchitectural()) {
+      <section class="panel">
+        <div class="panel-heading">
+          <div><h2>النسخ</h2><p>نسخة واحدة قيد الإعداد في كل وقت؛ تُعتمد بإصدار CDA لها (ثلاثة تواقيع).</p></div>
+          @if (canEditVersions() && access().createVersion && !hasOpenVersion()) {
+            <button type="button" class="btn" [disabled]="busy()" (click)="editingVersion.set(null); dialog.set('version')">+ نسخة جديدة</button>
+          }
+        </div>
+        @if (!d.versions.length) { <p class="muted">لا نسخ بعد.</p> } @else {
+          <div class="table-wrap"><table>
+            <thead><tr><th>النسخة</th><th>التاريخ</th><th>المحتوى</th><th>الحالة</th><th>CDA</th><th></th></tr></thead>
+            <tbody>
+              @for (v of d.versions; track v.id) {
+                <tr>
+                  <td class="cell-strong">{{ v.label }}</td>
+                  <td class="nowrap">{{ v.versionDate | date:'yyyy/MM/dd' }}</td>
+                  <td class="pre">{{ v.content || '—' }}</td>
+                  <td><app-study-status-chip [status]="v.status" [name]="v.statusName" /></td>
+                  <td>
+                    @if (v.designApprovalId) { <a class="mono" [routerLink]="['/studies/design-approvals', v.designApprovalId]">{{ v.designApprovalNumber }}</a> }
+                    @else if (v.status === 1 && canEditVersions() && access().createDesignApproval) { <button type="button" class="btn btn-sm" [disabled]="busy()" (click)="openCda(v)">إصدار CDA</button> }
+                    @else { — }
+                  </td>
+                  <td class="row-end">
+                    <div class="cell-actions">
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="filesOf.set(filesOf() === v.id ? null : v.id)">المرفقات</button>
+                      @if (v.status === 1 && canEditVersions()) { <button type="button" class="btn btn-ghost btn-sm" (click)="editingVersion.set(v); dialog.set('version')">تعديل</button> }
+                      @if (v.status === 1 && canEditVersions() && access().deleteVersion) { <button type="button" class="icon-btn del" aria-label="حذف النسخة" (click)="removeVersion(v)"><app-icon name="trash" [size]="15" /></button> }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table></div>
+        }
+      </section>
+      @if (filesOf(); as vid) {
+        <app-study-attachments [ownerType]="versionOwner" [ownerId]="vid" [canWrite]="canEditVersions()" />
+      }
+    }
+
+    <app-study-attachments [ownerType]="drawingOwner" [ownerId]="d.id" [canWrite]="canAttach()" />
+
+    @if (access().viewActivityLog && project()?.chain; as chain) {
+      <app-study-activity [requestId]="chain.requestId" [reloadKey]="drawing()" heading="سجل المخطط" subtitle="الإنشاء والتعديل والمراجعة والاعتماد لهذا المخطط ونسخه، من الأحدث إلى الأقدم." [filter]="logFilter()" />
+    }
+
+    @if (d.canEdit && access().deleteDrawing && d.status !== 3) {
+      <section class="panel danger-zone">
+        <div><h2>حذف المخطط</h2><p>يُحذف المخطط قبل اعتماده فقط (والخادم يرفض ما له نسخ معتمدة).</p></div>
+        <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="remove()">حذف</button>
+      </section>
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (drawing(); as d) {
+  @switch (dialog()) {
+    @case ('edit') {
+      @if (project(); as p) { <app-study-drawing-form-dialog [project]="p" [drawing]="d" [basis]="basis()" (closed)="dialog.set(null)" (saved)="set($event, 'تم الحفظ')" /> }
+    }
+    @case ('version') { <app-study-version-form-dialog [drawing]="d" [version]="editingVersion()" (closed)="dialog.set(null)" (saved)="set($event, 'حُفظت النسخة')" /> }
+    @case ('cda') { <app-study-design-approval-form-dialog [version]="cdaFor()" (closed)="dialog.set(null)" (saved)="cdaCreated($event.id)" /> }
+    @case ('review') {
+      <app-study-drawing-review-dialog [subheading]="d.drawingNumber" [busy]="busy()" [error]="actionError()" (closed)="dialog.set(null)" (decided)="review($event.approve, $event.note)" />
+    }
+  }
+}

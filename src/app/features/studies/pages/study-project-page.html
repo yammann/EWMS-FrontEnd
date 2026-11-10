@@ -1,0 +1,100 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">فرع الدراسات · مشروع</span>
+      <h1 class="title">
+        @if (project(); as p) { <span class="mono">{{ p.code }}</span> <app-study-status-chip kind="project" [status]="p.status" [name]="p.statusName" /> }
+        @else { {{ loading() ? 'جارٍ التحميل…' : 'مشروع' }} }
+      </h1>
+      @if (project(); as p) { <p class="muted">{{ p.name }} · {{ p.branchName }}</p> }
+    </div>
+    <div class="header-actions">
+      <a class="btn btn-ghost" routerLink="/studies/projects">كل المشاريع</a>
+      @if (project(); as p) {
+        @if (p.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')">تعديل</button> }
+        @if (p.canRequestCompletion) { <button class="btn" type="button" [disabled]="busy()" (click)="requestCompletion()">طلب اعتماد الإنجاز</button> }
+      }
+    </div>
+  </header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+  <app-alert [message]="actionError()" />
+
+  @if (project(); as p) {
+    @if (p.status === 4) {
+      <p class="alert state-note" role="status"><app-icon name="lock" [size]="16" /> المشروع ملغى ويبقى للأرشيف فقط.</p>
+    } @else if (p.status === 3) {
+      <p class="alert state-note" role="status"><app-icon name="checkmark" [size]="16" /> المشروع مكتمل.</p>
+    } @else if (p.status === 2) {
+      <p class="alert alert-warning state-note" role="status"><app-icon name="warning" [size]="16" /> المشروع معلّق: لا تُضاف مراحل ومهام جديدة حتى يُستأنف.</p>
+    }
+
+    @if (p.chain) { <section class="panel"><app-study-chain [chain]="p.chain" current="project" [responseNumber]="responseNumber()" /></section> }
+
+    <section class="panel summary">
+      <div class="overall"><span class="muted">نسبة إنجاز المشروع</span><app-study-progress [percent]="p.progress" label="نسبة إنجاز المشروع" /></div>
+      <dl class="facts">
+        <div><dt>مدير المشروع</dt><dd>{{ p.managerName }}</dd></div>
+        <div><dt>أمر البدء</dt><dd>@if (p.chain?.startOrderId) { <a class="mono" [routerLink]="['/studies/start-orders', p.chain!.startOrderId]">{{ p.startOrderNumber }}</a> } @else { {{ p.startOrderNumber }} }</dd></div>
+        <div><dt>المراحل</dt><dd>{{ p.stages.length }}</dd></div>
+        <div><dt>التخطيط</dt><dd>{{ fmt(p.plannedStartDate) }} ← {{ fmt(p.plannedEndDate) }}</dd></div>
+        <div><dt>الفعلي</dt><dd>{{ fmt(p.actualStartDate) }} ← {{ fmt(p.actualEndDate) }}</dd></div>
+        <div><dt>أنشأه</dt><dd>{{ p.createdByName }} · {{ p.createdAt | utc | date:'yyyy/MM/dd' }}</dd></div>
+      </dl>
+    </section>
+
+    @if (tasksTruncated(); as total) {
+      <p class="alert alert-warning state-note" role="status"><app-icon name="warning" [size]="16" />
+        لهذا المشروع {{ total }} مهمة وتُعرض أول 2000 فقط، فقد تنقص المراحل والمخطط الزمني بعض المهام.</p>
+    }
+
+    <nav class="segmented" role="tablist" aria-label="أقسام المشروع">
+      @for (t of visibleTabs(); track t.key) {
+        <button type="button" role="tab" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" (click)="setTab(t.key)">{{ t.label }}</button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('stages') { <app-study-project-stages-panel [project]="p" [tasks]="tasks()" (changed)="reload()" /> }
+      @case ('gantt') {
+        <section class="panel">
+          <div class="panel-heading"><div><h2>المخطط الزمني</h2><p>الفترات المخططة للمراحل ومهامها، وتعبئتها بنسبة الإنجاز.</p></div></div>
+          <app-study-gantt [projectId]="p.id" [stages]="p.stages" [tasks]="tasks()" [projectStart]="p.plannedStartDate" [projectEnd]="p.plannedEndDate" />
+        </section>
+      }
+      @case ('team') { <app-study-project-team-panel [project]="p" (updated)="teamUpdated($event)" /> }
+      @case ('drawings') { <app-study-project-drawings-panel [project]="p" /> }
+      @case ('more') {
+        <app-study-approvals-panel [approvals]="p.approvals" [documentLabel]="p.code" (decided)="decided()" />
+        <app-study-attachments [ownerType]="ownerType" [ownerId]="p.id" [canWrite]="canAttach()" (changed)="logVersion.set(logVersion() + 1)" />
+        @if (access().viewActivityLog && p.chain) { <app-study-activity [requestId]="p.chain.requestId" [reloadKey]="logKey()" /> }
+      }
+    }
+
+    @if (p.canCancel || p.canDelete) {
+      <section class="panel danger-zone">
+        <div>
+          <h2>{{ p.canDelete ? 'حذف أو إلغاء المشروع' : 'إلغاء المشروع' }}</h2>
+          <p>الحذف لمشروع بلا مهام ولا مخططات ولا مرفقات؛ وغيره يُلغى بسبب ويبقى في الأرشيف.</p>
+        </div>
+        <div class="header-actions">
+          @if (p.canCancel) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="actionError.set(''); dialog.set('cancel')">إلغاء المشروع</button> }
+          @if (p.canDelete) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="remove()">حذف</button> }
+        </div>
+      </section>
+    }
+  } @else if (loading()) {
+    <app-empty-state>جارٍ التحميل…</app-empty-state>
+  }
+</div>
+
+@if (project(); as p) {
+  @switch (dialog()) {
+    @case ('edit') { @defer (on immediate) { <app-study-project-form-dialog [project]="p" (closed)="dialog.set(null)" (saved)="edited($event)" /> } }
+    @case ('cancel') {
+      @defer (on immediate) { <app-study-reason-dialog heading="إلغاء المشروع" [subheading]="p.code" label="سبب الإلغاء" confirmLabel="إلغاء المشروع"
+        hint="يبقى المشروع للأرشيف ويُسجَّل السبب في سجل الدراسة."
+        [busy]="busy()" [error]="actionError()" (closed)="dialog.set(null)" (submitted)="cancelProject($event)" /> }
+    }
+  }
+}

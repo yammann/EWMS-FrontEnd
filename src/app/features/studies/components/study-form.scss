@@ -1,0 +1,37 @@
+// نماذج مستندات الدراسة: أقسام بعناوين كأقسام النموذج الورقي، وشبكات حقول، وجداول بنود قابلة للإضافة
+.form-section { display: grid; gap: 14px; padding-top: 14px; border-top: 1px solid var(--separator); }
+.form-section:first-of-type { padding-top: 0; border-top: 0; }
+.form-section > h3 { margin: 0; font-size: 14px; color: var(--ink-700); }
+.form-section > .hint { margin: -8px 0 0; }
+
+.form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.form-grid-3 .full, .form-grid-2 .full { grid-column: 1 / -1; }
+@media (max-width: 760px) { .form-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .form-grid-3 { grid-template-columns: minmax(0, 1fr); } }
+
+.context { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--fill); font-size: 13px; color: var(--ink-700); }
+.context strong { color: var(--ink-900); }
+
+.checks { display: grid; gap: 8px; }
+.check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 14px; }
+.check input { margin-top: 3px; }
+
+// جدول بنود: كل سطر حقول + زر حذف
+.rows { display: grid; gap: 8px; }
+.row { display: grid; gap: 8px; align-items: start; padding: 10px; border-radius: 10px; background: var(--fill); }
+.row .form-field { gap: 4px; }
+.row .form-label { font-size: 12px; }
+.row-remove { align-self: end; }
+.rows-empty { margin: 0; font-size: 13px; color: var(--ink-500); }
+.rows-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.total { font-variant-numeric: tabular-nums; font-size: 14px; }
+
+.cost-row { grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto; }
+.item-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr) auto; }
+.staff-row, .engineer-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) auto; }
+.building { gap: 12px; }
+.line-total { display: block; padding: 10px 0; font-size: 13px; }
+@media (max-width: 760px) {
+  .cost-row, .item-row, .staff-row, .engineer-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cost-row > :first-child, .item-row > :first-child { grid-column: 1 / -1; }
+}

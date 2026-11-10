@@ -168,3 +168,8 @@ export function governorateOf(lat: number | null | undefined, lng: number | null
   }
   return nearest;
 }
+
+/** تنسيق الإحداثيات للعرض */
+export function formatCoords(lat: number | null | undefined, lng: number | null | undefined): string {
+  return lat == null || lng == null ? '' : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+}

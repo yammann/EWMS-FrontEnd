@@ -52,7 +52,7 @@ export class MaintenanceSettingsPage {
   form = inject(FormBuilder).nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', Validators.maxLength(500)],
-    color: ['#3B82F6'],
+    color: ['#3B82F6'], // raw-color-ok: لون افتراضي لحالة يختارها المستخدم
     stage: [2 as MaintenanceStage]
   });
   private stageValue = toSignal(this.form.controls.stage.valueChanges, { initialValue: this.form.controls.stage.value });
@@ -66,7 +66,7 @@ export class MaintenanceSettingsPage {
     update: (id, body) => this.service.updateLookup(this.kind(), id, body),
     remove: item => this.service.deleteLookup(this.kind(), item.id),
     can: { create: () => this.can().createLookup, edit: () => this.can().editLookup, delete: () => this.can().deleteLookup },
-    onOpen: item => this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6', stage: item?.stage ?? 2 }),
+    onOpen: item => this.form.reset({ name: item?.name ?? '', description: item?.description ?? '', color: item?.color || '#3B82F6', stage: item?.stage ?? 2 }), // raw-color-ok
     messages: {
       saved: 'تم الحفظ', deleted: 'تم الحذف', plural: 'القوائم',
       confirmDelete: item => `حذف «${item.name}» من ${this.meta().label}؟`

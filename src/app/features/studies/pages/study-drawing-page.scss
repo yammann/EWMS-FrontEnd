@@ -1,0 +1,10 @@
+.title { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.title .mono { font-size: inherit; }
+.note { margin: 12px 0 0; font-size: 13px; }
+.pre { white-space: pre-line; overflow-wrap: anywhere; }
+.cell-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap; }
+.del { color: var(--danger-700); }
+.danger-zone { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.danger-zone h2 { font-size: 16px; margin: 0 0 4px; }
+.danger-zone p { margin: 0; font-size: 13px; color: var(--ink-500); }
+.state-note { margin: 0; display: flex; align-items: center; gap: 8px; }

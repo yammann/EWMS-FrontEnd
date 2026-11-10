@@ -39,9 +39,28 @@ function dfs(n) {
 }
 for (const f of files) if (!state.has(f)) dfs(f);
 
+// دورات على مستوى الميزات (ميزة تستورد أخرى وتستوردها الأخرى): تمرّ من فحص الملفات لكنها تربط الميزتين بعروة واحدة
+const featureOf = f => { const parts = path.relative(root, f).split(path.sep); return parts[0] === 'features' ? parts[1] : null; };
+const featureGraph = new Map();
+for (const [f, deps] of graph) {
+  const from = featureOf(f);
+  if (!from) continue;
+  for (const d of deps) { const to = featureOf(d); if (to && to !== from) (featureGraph.get(from) ?? featureGraph.set(from, new Set()).get(from)).add(to); }
+}
+const featureCycles = new Set();
+const walkFeature = (n, trail) => { for (const m of featureGraph.get(n) ?? []) { const at = trail.indexOf(m); if (at >= 0) featureCycles.add([...trail.slice(at), m].join(' → ')); else if (trail.length < 8) walkFeature(m, [...trail, m]); } };
+for (const n of featureGraph.keys()) walkFeature(n, [n]);
+// كل دورة تظهر بعدد مداخل بعدد عقدها: تُوحَّد بالمجموعة
+const unique = new Map(); for (const c of featureCycles) unique.set([...new Set(c.split(' → '))].sort().join(','), c);
+
 if (cycles.length) {
   console.error(`وُجدت ${cycles.length} دورة اعتماد:`);
   for (const c of cycles) console.error('  ' + c.map(f => path.relative(root, f)).join(' → '));
   process.exit(1);
 }
-console.log(`لا دورات اعتماد (${files.length} ملفاً).`);
+if (unique.size) {
+  console.error(`وُجدت ${unique.size} دورة بين الميزات (أنشئ اعتماداً باتجاه واحد: انقل المشترك إلى core/shared أو إلى الميزة التي تملكه):`);
+  for (const c of unique.values()) console.error('  ' + c);
+  process.exit(1);
+}
+console.log(`لا دورات اعتماد (${files.length} ملفاً، ${featureGraph.size} ميزة تستورد غيرها).`);

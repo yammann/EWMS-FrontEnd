@@ -27,8 +27,13 @@
         <h2>قائمة المستخدمين</h2>
         <p>اضغط أيقونة التعديل لتحديث بيانات مستخدم، أو الحذف لإزالته.</p>
       </div>
-      <span class="pill">{{ users().length }} مستخدم</span>
+      <span class="pill">{{ search() ? filtered().length + ' من ' + users().length : users().length }} مستخدم</span>
     </div>
+
+    @if (!crud.loading() && users().length) {
+      <app-list-search [value]="search()" (valueChange)="setSearch($event)" label="بحث في المستخدمين"
+        placeholder="بحث بالاسم أو البريد أو الرقم الذاتي أو الهاتف أو الدور أو القسم…" />
+    }
 
     @if (crud.loading()) {
       <div class="skeleton-list">
@@ -37,6 +42,12 @@
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         }
+      </div>
+    } @else if (users().length && !filtered().length) {
+      <div class="empty-state">
+        <div class="empty-icon"><app-icon name="search" /></div>
+        <h3>لا توجد نتائج</h3>
+        <p>لا يطابق أي مستخدم «{{ search() }}».</p>
       </div>
     } @else if (users().length) {
       <div class="table-wrap">

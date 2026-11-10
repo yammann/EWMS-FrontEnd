@@ -1,0 +1,80 @@
+<app-modal size="lg" [heading]="order() ? 'تعديل أمر البدء' : 'أمر بدء دراسة مشروع (PIO)'"
+           [subheading]="order()?.orderNumber ?? ('التكليف المرجعي ' + parent().assignmentNumber)"
+           [busy]="saving()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body form-stack">
+      <app-alert [message]="error()" />
+      @if (missing().length) { <p class="alert alert-warning" role="status">لم تُحمَّل: {{ missing().join('، ') }}.</p> }
+
+      <section class="form-section">
+        <h3>بيان أمر البدء</h3>
+        <div class="form-grid-3">
+          <label class="form-field"><span class="form-label">تاريخ الأمر</span><input type="date" formControlName="orderDate"></label>
+          <label class="form-field"><span class="form-label">القسم المختص</span>
+            <select formControlName="competentDepartmentId">
+              <option [ngValue]="0" disabled>اختر القسم…</option>
+              @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
+            </select>
+            @if (form.controls.competentDepartmentId.touched && form.controls.competentDepartmentId.invalid) { <small class="form-error">اختر القسم المختص</small> }</label>
+          <label class="form-field"><span class="form-label">مدير المشروع</span>
+            <select formControlName="projectManagerUserId">
+              <option [ngValue]="0" disabled>اختر…</option>
+              @for (e of employees(); track e.id) { <option [ngValue]="e.id">{{ e.fullName }}{{ e.departmentName ? ' — ' + e.departmentName : '' }}</option> }
+            </select>
+            @if (form.controls.projectManagerUserId.touched && form.controls.projectManagerUserId.invalid) { <small class="form-error">اختر مدير المشروع</small> }</label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>المحددات الزمنية</h3>
+        <div class="form-grid-3">
+          <label class="form-field"><span class="form-label">تاريخ بدء الدراسة</span><input type="date" formControlName="studyStartDate"></label>
+          <label class="form-field"><span class="form-label">الحد الأقصى للإنهاء (Deadline)</span><input type="date" formControlName="studyDeadline">
+            @if (form.controls.studyDeadline.touched && form.controls.studyDeadline.invalid) { <small class="form-error">الحد الأقصى للإنهاء مطلوب</small> }
+            @else if (form.hasError('deadline')) { <small class="form-error">لا يسبق تاريخ البدء</small> }</label>
+        </div>
+      </section>
+
+      <section class="form-section" formArrayName="resources">
+        <h3>الموارد المخصصة لإعداد الدراسة</h3>
+        @if (!form.controls.resources.length) { <p class="rows-empty">لا موارد بعد.</p> }
+        <div class="rows">
+          @for (r of form.controls.resources.controls; track r; let i = $index) {
+            <div class="row item-row" [formGroupName]="i">
+              <label class="form-field"><span class="form-label">المورد</span><input formControlName="item" maxlength="200"></label>
+              <label class="form-field"><span class="form-label">الكمية</span><input type="number" formControlName="quantity" min="0" step="any"></label>
+              <label class="form-field"><span class="form-label">ملاحظة</span><input formControlName="note" maxlength="500"></label>
+              <button type="button" class="icon-btn row-remove" aria-label="حذف المورد" (click)="remove(form.controls.resources, i)"><app-icon name="trash" [size]="16" /></button>
+            </div>
+          }
+        </div>
+        <div class="rows-foot"><button type="button" class="btn btn-ghost btn-sm" (click)="addResource()">+ مورد</button></div>
+      </section>
+
+      <section class="form-section" formArrayName="engineers">
+        <h3>الكوادر الهندسية المخصصة لإعداد الدراسة</h3>
+        @if (!form.controls.engineers.length) { <p class="rows-empty">لا مهندسين بعد.</p> }
+        <div class="rows">
+          @for (e of form.controls.engineers.controls; track e; let i = $index) {
+            <div class="row engineer-row" [formGroupName]="i">
+              <label class="form-field"><span class="form-label">المهندس</span>
+                <select formControlName="engineerUserId">
+                  <option [ngValue]="0" disabled>اختر…</option>
+                  @for (u of employees(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}{{ u.departmentName ? ' — ' + u.departmentName : '' }}</option> }
+                </select></label>
+              <label class="form-field"><span class="form-label">الاختصاص</span>
+                <select formControlName="disciplineId">
+                  <option [ngValue]="0" disabled>اختر…</option>
+                  @for (d of disciplines(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
+                </select></label>
+              <button type="button" class="icon-btn row-remove" aria-label="حذف المهندس" (click)="remove(form.controls.engineers, i)"><app-icon name="trash" [size]="16" /></button>
+            </div>
+          }
+        </div>
+        @if (duplicateEngineer()) { <small class="form-error">كل مهندس مرة واحدة في الأمر</small> }
+        <div class="rows-foot"><button type="button" class="btn btn-ghost btn-sm" (click)="addEngineer()" [disabled]="!employees().length || !disciplines().length">+ مهندس</button></div>
+      </section>
+    </div>
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid || duplicateEngineer()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+  </form>
+</app-modal>

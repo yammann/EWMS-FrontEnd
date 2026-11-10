@@ -4,8 +4,8 @@ import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission, AppPermissionName, MAP_ENTRY_ACCESS } from '@core/constants/access';
 import {
-  BranchMap, Device, DeviceAccess, DeviceInventoryLog, DeviceSite, ImportReport, InstallationFilter, InstallationStatus, IpInUse,
-  MapBranchOption, NearbySite, Site, SiteAccess
+  Device, DeviceAccess, DeviceInventoryLog, DeviceSite, ImportReport, InstallationFilter, InstallationStatus, IpInUse,
+  NearbySite, Site, SiteAccess
 } from './device.models';
 import { PagedResult } from '@core/models/paged-result.model';
 
@@ -108,10 +108,6 @@ export class DeviceService {
     body.append('file', file);
     return this.api.post<ImportReport>('/DeviceSites/Import' + query({ dryRun, departmentId }), body);
   }
-
-  /** خريطة الفرع */
-  branchMap(branchId: number) { return this.api.get<BranchMap>(`/Map/Branch/${branchId}`); }
-  mapBranches() { return this.api.get<MapBranchOption[]>('/Map/Branches'); }
 }
 
 export interface SiteInput {
@@ -128,9 +124,4 @@ export interface InstallationInput {
   /** القسم المالك (لمن يملك canChooseUnit) — null = قسم من يضيف */
   departmentId?: number | null;
   rowVersion?: string | null;
-}
-
-/** تنسيق الإحداثيات للعرض */
-export function formatCoords(lat: number | null | undefined, lng: number | null | undefined): string {
-  return lat == null || lng == null ? '' : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 }

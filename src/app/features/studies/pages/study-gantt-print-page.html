@@ -1,0 +1,40 @@
+<div class="bar no-print">
+  <app-back-button />
+  <div class="actions">
+    @if (hasTasks()) {
+      @if (withTasks() && truncated()) { <span class="hint">المهام مقطوعة عند 2000: المخطط غير كامل</span> }
+      @if (withTasks() && tooTall()) { <span class="hint">المخطط كبير: سيمتد على أكثر من صفحة</span> }
+      <label class="check"><input type="checkbox" [checked]="withTasks()" (change)="withTasks.set($any($event.target).checked)"> مع المهام</label>
+    }
+    <button type="button" class="btn" (click)="print()" [disabled]="!project()"><app-icon name="printer" [size]="16" /> طباعة</button>
+  </div>
+</div>
+
+@if (error()) { <p class="alert alert-error no-print" role="alert">{{ error() }}</p> }
+@if (project(); as p) {
+  <article class="sheet" dir="rtl">
+    <header class="head">
+      <div class="side right">
+        <strong>{{ header.countryAr }}</strong>
+        <strong class="branch">{{ p.branchName }}</strong>
+      </div>
+      <div class="center"><app-logo class="emblem" /></div>
+      <div class="side left" dir="ltr"><strong>{{ header.countryEn }}</strong></div>
+    </header>
+
+    <div class="title-row">
+      <h1>المخطط الزمني للمشروع</h1>
+      <table class="ref"><tbody>
+        <tr><th>المشروع:</th><td class="ltr">{{ p.code }}</td></tr>
+        <tr><th>الحالة:</th><td>{{ p.statusName }} — {{ p.progress }}%</td></tr>
+        <tr><th>طُبع في:</th><td class="ltr">{{ today | date:'yyyy/M/d' }}</td></tr>
+      </tbody></table>
+    </div>
+    <p class="name">{{ p.name }}</p>
+
+    <div #content class="gantt-box" [style.zoom]="scale()">
+      <app-study-gantt [stages]="p.stages" [tasks]="tasks()" [projectStart]="p.plannedStartDate" [projectEnd]="p.plannedEndDate"
+                       [printMode]="true" [fit]="axisW" [tasksVisible]="withTasks()" />
+    </div>
+  </article>
+} @else if (!error()) { <p class="loading no-print" role="status">جارٍ التحميل…</p> }
