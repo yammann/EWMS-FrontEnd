@@ -4,5 +4,5 @@ import { AppPermission } from '@core/constants/access';
 
 /** الصفحة تُفتح بصلاحية العرض، وأزرار الإضافة/التعديل/الحذف كلٌّ بصلاحيته */
 export const USERS_ROUTES: Routes = [
-  { path: 'users', canActivate: [permissionGuard], data: { permission: AppPermission.ViewUsers }, loadComponent: () => import('./pages/users-page').then(m => m.UsersPage) }
+  { path: 'users', canActivate: [permissionGuard], data: { permission: AppPermission.ViewUsers }, loadComponent: () => import('./pages/users-page/users-page').then(m => m.UsersPage) }
 ];

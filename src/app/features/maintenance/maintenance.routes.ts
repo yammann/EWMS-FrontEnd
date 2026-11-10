@@ -6,7 +6,7 @@ import { AppPermission, MANAGE_MAINTENANCE_LOOKUPS } from '@core/constants/acces
 export const MAINTENANCE_PRINT_ROUTES: Routes = [
   {
     path: 'maintenance/print/:id/:kind', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests, back: '/maintenance/requests', noPreload: true },
-    loadComponent: () => import('./pages/request-print-page').then(m => m.MaintenancePrintPage)
+    loadComponent: () => import('./pages/request-print-page/request-print-page').then(m => m.MaintenancePrintPage)
   }
 ];
 
@@ -18,39 +18,39 @@ export const MAINTENANCE_ROUTES: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'requests' },
       {
         path: 'requests', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests },
-        loadComponent: () => import('./pages/requests-page').then(m => m.MaintenanceRequestsPage)
+        loadComponent: () => import('./pages/requests-page/requests-page').then(m => m.MaintenanceRequestsPage)
       },
       {
         path: 'requests/:id', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceRequests, back: '/maintenance/requests' },
-        loadComponent: () => import('./pages/request-details-page').then(m => m.MaintenanceRequestDetailsPage)
+        loadComponent: () => import('./pages/request-details-page/request-details-page').then(m => m.MaintenanceRequestDetailsPage)
       },
       {
         path: 'mine', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMyMaintenanceRequests },
-        loadComponent: () => import('./pages/my-requests-page').then(m => m.MaintenanceMyRequestsPage)
+        loadComponent: () => import('./pages/my-requests-page/my-requests-page').then(m => m.MaintenanceMyRequestsPage)
       },
       {
         path: 'devices', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceDevices },
-        loadComponent: () => import('./pages/devices-page').then(m => m.MaintenanceDevicesPage)
+        loadComponent: () => import('./pages/devices-page/devices-page').then(m => m.MaintenanceDevicesPage)
       },
       {
         path: 'parts', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSpareParts },
-        loadComponent: () => import('./pages/spare-parts-page').then(m => m.MaintenanceSparePartsPage)
+        loadComponent: () => import('./pages/spare-parts-page/spare-parts-page').then(m => m.MaintenanceSparePartsPage)
       },
       {
         path: 'parts/report', canActivate: [permissionGuard], data: { permission: AppPermission.ViewSparePartReports, back: '/maintenance/parts' },
-        loadComponent: () => import('./pages/spare-parts-report-page').then(m => m.MaintenanceSparePartsReportPage)
+        loadComponent: () => import('./pages/spare-parts-report-page/spare-parts-report-page').then(m => m.MaintenanceSparePartsReportPage)
       },
       {
         path: 'tasks', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceTasks },
-        loadComponent: () => import('./pages/tasks-page').then(m => m.MaintenanceTasksPage)
+        loadComponent: () => import('./pages/tasks-page/tasks-page').then(m => m.MaintenanceTasksPage)
       },
       {
         path: 'stats', canActivate: [permissionGuard], data: { permission: AppPermission.ViewMaintenanceStats },
-        loadComponent: () => import('./pages/stats-page').then(m => m.MaintenanceStatsPage)
+        loadComponent: () => import('./pages/stats-page/stats-page').then(m => m.MaintenanceStatsPage)
       },
       {
         path: 'settings', canActivate: [permissionGuard], data: { anyPermission: MANAGE_MAINTENANCE_LOOKUPS },
-        loadComponent: () => import('./pages/settings-page').then(m => m.MaintenanceSettingsPage)
+        loadComponent: () => import('./pages/settings-page/settings-page').then(m => m.MaintenanceSettingsPage)
       }
     ]
   }

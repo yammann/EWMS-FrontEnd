@@ -70,6 +70,18 @@ export default tseslint.config(
     }
   },
   {
+    // صفحة في مجلد خاص بها (pages/<صفحة>/): ../../ يصل إلى مجلدات الميزة نفسها (components / data-access / utils)، وما فوقه بالمسارات المستعارة
+    files: ['src/app/features/*/pages/*/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          { group: ['@features/*/*'], message: 'استورد من الواجهة العامة للميزة (@features/<ميزة>) لا من ملف داخلها.' },
+          { group: ['../../../*'], message: 'استعمل @core / @shared / @features بدل الصعود أكثر من مستويين من مجلد الصفحة.' }
+        ]
+      }]
+    }
+  },
+  {
     files: ['src/app/**/*.spec.ts', 'e2e/**/*.ts'],
     rules: { '@typescript-eslint/no-explicit-any': 'off', 'no-restricted-imports': 'off' }
   },

@@ -1,0 +1,97 @@
+import { CommonModule } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin, map } from 'rxjs';
+import { Alert } from '@shared/ui/alert';
+import { orEmpty } from '@core/http/or-empty';
+import { AppPermission } from '@core/constants/access';
+import { Department, Office } from '@core/models/ewms.models';
+import { AuthService } from '@core/services/auth.service';
+import { LookupsService } from '@core/services/lookups.service';
+import { Pagination } from '@core/utils/pagination';
+import { searchMatcher } from '@core/utils/text-search';
+import { ListSearch } from '@shared/ui/list-search';
+import { AdminHeader } from '@shared/ui/admin-header';
+import { CrudMode, CrudPage } from '@shared/ui/crud-page';
+import { EntityForm } from '@shared/ui/entity-form';
+import { Modal } from '@shared/ui/modal';
+import { Pager } from '@shared/ui/pager';
+import { RowActions } from '@shared/ui/row-actions';
+import { OfficeService } from '../../data-access/office.service';
+import { Icon } from '@shared/ui/icon';
+
+/** المكاتب — النمط الموحّد لصفحات الإدارة (CrudPage) */
+@Component({
+  selector: 'app-offices-page',
+  standalone: true,
+  imports: [Icon, Alert, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
+  templateUrl: './offices-page.html',
+  styleUrl: './offices-page.scss'
+})
+export class OfficesPage {
+  private auth = inject(AuthService);
+  private service = inject(OfficeService);
+  private lookups = inject(LookupsService);
+
+  /** زر لكل صلاحية: الصفحة تُفتح بالعرض، والأزرار تظهر حسب الإضافة/التعديل/الحذف */
+  can = computed(() => ({
+    create: this.auth.hasPermission(AppPermission.CreateOffice),
+    edit: this.auth.hasPermission(AppPermission.EditOffice),
+    delete: this.auth.hasPermission(AppPermission.DeleteOffice)
+  }));
+
+  departments = signal<Department[]>([]);
+  /** قائمة الأقسام لم تُحمَّل (نقص «عرض الأقسام»): الجدول يبقى، والنموذج يقول ذلك ويُبقي قسم المكتب الحالي عند التعديل */
+  departmentsMissing = signal(false);
+  departmentList = computed<Department[]>(() => {
+    const d = this.crud.dialog();
+    return this.departments().length || d?.mode !== 'edit' || !d.item ? this.departments()
+      : [{ id: d.item.departmentId, name: d.item.departmentName, branchId: d.item.branchId, branchName: d.item.branchName, description: '' }];
+  });
+
+  form = inject(FormBuilder).group({
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    description: ['', Validators.maxLength(500)],
+    departmentId: ['', Validators.required]
+  });
+
+  crud = new CrudPage<Office, FormData>({
+    load: () => {
+      this.departmentsMissing.set(false);
+      return forkJoin({ offices: this.service.getAll(), departments: this.lookups.departments().pipe(orEmpty(() => this.departmentsMissing.set(true))) })
+        .pipe(map(r => { this.departments.set(r.departments); return r.offices; }));
+    },
+    create: body => this.service.create(body),
+    update: (id, body) => this.service.update(id, body),
+    remove: o => this.service.delete(o.id),
+    can: { create: () => this.can().create, edit: () => this.can().edit, delete: () => this.can().delete },
+    onOpen: o => this.form.reset({ name: o?.name ?? '', description: o?.description ?? '', departmentId: o ? String(o.departmentId) : '' }),
+    onRefresh: () => this.lookups.invalidate(),
+    messages: {
+      saved: (_, mode) => mode === 'create' ? 'تم إنشاء المكتب بنجاح' : 'تم تعديل المكتب بنجاح',
+      deleted: 'تم حذف المكتب بنجاح', plural: 'المكاتب', confirmLabel: 'تأكيد الحذف',
+      confirmDelete: o => `هل أنت متأكد من حذف المكتب "${o.name}"؟ لا يمكن حذف مكتب مرتبط بموظفين، ولا يمكن التراجع عن هذا الإجراء.`
+    }
+  });
+
+  items = this.crud.items;
+  search = signal('');
+  /** البحث باسم المكتب أو وصفه أو قسمه أو فرعه */
+  filtered = computed(() => {
+    const match = searchMatcher(this.search());
+    return this.items().filter(o => match(o.name, o.description, o.departmentName, o.branchName));
+  });
+  pager = new Pagination(() => this.filtered());
+  setSearch(text: string) { this.search.set(text); this.pager.reset(); }
+
+  title(mode: CrudMode) { return mode === 'create' ? 'إنشاء مكتب جديد' : 'تعديل المكتب'; }
+
+  save() {
+    if (this.form.invalid) return;
+    const v = this.form.getRawValue();
+    if ((v.name ?? '').trim().length < 2) return this.crud.fail('أدخل اسماً صحيحاً للمكتب');
+    const f = new FormData();
+    f.append('Name', (v.name ?? '').trim()); f.append('Description', (v.description ?? '').trim()); f.append('DepartmentId', v.departmentId ?? '');
+    this.crud.save(f);
+  }
+}

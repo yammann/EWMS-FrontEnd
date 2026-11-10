@@ -6,7 +6,7 @@ import { AppPermission, REPORT_ACCESS } from '@core/constants/access';
 export const REPORT_PRINT_ROUTES: Routes = [
   {
     path: 'reports/print/:key', canActivate: [permissionGuard], data: { anyPermission: REPORT_ACCESS, back: '/reports', noPreload: true },
-    loadComponent: () => import('./pages/report-print-page').then(m => m.ReportPrintPage)
+    loadComponent: () => import('./pages/report-print-page/report-print-page').then(m => m.ReportPrintPage)
   }
 ];
 
@@ -14,14 +14,14 @@ export const REPORT_PRINT_ROUTES: Routes = [
 export const REPORTS_ROUTES: Routes = [
   {
     path: 'reports', canActivate: [permissionGuard], data: { anyPermission: REPORT_ACCESS },
-    loadComponent: () => import('./pages/reports-page').then(m => m.ReportsPage)
+    loadComponent: () => import('./pages/reports-page/reports-page').then(m => m.ReportsPage)
   },
   {
     path: 'reports/log', canActivate: [permissionGuard], data: { permission: AppPermission.ViewReportLog },
-    loadComponent: () => import('./pages/report-log-page').then(m => m.ReportLogPage)
+    loadComponent: () => import('./pages/report-log-page/report-log-page').then(m => m.ReportLogPage)
   },
   {
     path: 'reports/:key', canActivate: [permissionGuard], data: { anyPermission: REPORT_ACCESS, back: '/reports' },
-    loadComponent: () => import('./pages/report-page').then(m => m.ReportPage)
+    loadComponent: () => import('./pages/report-page/report-page').then(m => m.ReportPage)
   }
 ];

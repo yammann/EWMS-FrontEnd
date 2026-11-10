@@ -14,10 +14,10 @@ src/app/
 ├─ shared/      واجهة قابلة لإعادة الاستعمال: ui/ (مكوّنات)، pipes/، styles/ (SCSS مشترك)
 └─ features/<الميزة>/
      ├─ <الميزة>.routes.ts   مسارات الميزة (loadComponent لكل صفحة)
-     ├─ pages/               المكوّنات التي يفتحها الراوتر
+     ├─ pages/<صفحة>/        مجلد لكل صفحة يفتحها الراوتر: <صفحة>.ts و.html و.scss و.spec.ts (والملفات الخاصة بها وحدها)
      ├─ components/          مكوّنات الميزة (نوافذ، لوحات، عناصر)
      ├─ data-access/         خدمات الميزة ونماذجها (HTTP)
-     ├─ utils/  styles/      منطق صرف وأنماط خاصة بالميزة
+     ├─ utils/  styles/      منطق صرف وأنماط خاصة بالميزة (وأي أنماط تشترك فيها عدة صفحات تُوضع في styles/ لا داخل مجلد صفحة)
      └─ index.ts             الواجهة العامة (ما يجوز لميزة أخرى استيراده)
 ```
 
@@ -25,7 +25,7 @@ src/app/
 - `core` لا يستورد من `features` ولا من `shared/ui`.
 - `shared` لا يستورد من `features`.
 - الميزة لا تستورد ميزة أخرى إلا عبر `@features/<الميزة>` (index.ts)، لا من ملف داخلها.
-- لا استيراد نسبي صاعد أكثر من مستوى: استعمل الأسماء المستعارة `@core/*` `@shared/*` `@features/*` `@env/*`.
+- لا استيراد نسبي صاعد أكثر من مستوى: استعمل الأسماء المستعارة `@core/*` `@shared/*` `@features/*` `@env/*`. **استثناء صفحات `pages/<صفحة>/`:** يجوز `../../` فقط للوصول إلى مجلدات الميزة نفسها (`components` و`data-access` و`utils` و`styles`)، وما فوق ذلك بالأسماء المستعارة.
 - الاستثناء الوحيد: `app.routes.ts` يستورد `*.routes.ts` للميزات.
 
 ## اللبنات المشتركة (لا تعِد كتابتها في الصفحات)
@@ -94,7 +94,7 @@ crud = new CrudPage<Item, Body>({
 
 ## كيف أضيف…
 
-**صفحة جديدة:** ملف في `features/<ميزة>/pages/`، ثم مسار في `<ميزة>.routes.ts` بـ `canActivate: [permissionGuard]` و`data.permission`/`anyPermission` (ومعها `back` إن كانت فرعية). أضف رابطها في `sections` داخل `main-layout.ts`.
+**صفحة جديدة:** مجلد `features/<ميزة>/pages/<صفحة>/` فيه ملف الصفحة (`<صفحة>.ts`، ومعه `.html` و`.scss` إن وُجدا)، ثم مسار في `<ميزة>.routes.ts` بـ `canActivate: [permissionGuard]` و`data.permission`/`anyPermission` (ومعها `back` إن كانت فرعية). أضف رابطها في `sections` داخل `main-layout.ts`.
 
 **ميزة جديدة:** مجلد بنفس البنية، `<ميزة>.routes.ts` يُضاف إلى `app.routes.ts`، و`index.ts` بما تُصدّره لغيرها فقط.
 
