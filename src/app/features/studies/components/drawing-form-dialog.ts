@@ -14,7 +14,7 @@ import { dateOnly } from '../utils/document-meta';
 import { optional } from '../utils/form-rows';
 
 /**
- * مخطط في المشروع (معماري، إنشائي، كهرباء وميكانيك، تصميم داخلي، تقني): الاسم والرقم والتاريخ والوصف والمكتب.
+ * مخطط في المشروع (معماري، إنشائي، كهرباء وميكانيك، تصميم داخلي، تقني): الاسم والرقم والتاريخ والوصف.
  * غير المعماري «مبني على» نسخة معمارية معتمدة من المشروع. عند التعديل تُرسل الحالة (قيد الإعداد أو بانتظار المراجعة)؛
  * الاعتماد بالمراجعة أو CDA. من يتصفح المؤسسة يختار القسم المُصدِر، وغيره يصدر المخطط باسم قسمه.
  */
@@ -43,11 +43,6 @@ import { optional } from '../utils/form-rows';
                   @for (d of project().departments; track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
                 </select></label>
             }
-            <label class="form-field"><span class="form-label">المكتب <small class="hint">(اختياري)</small></span>
-              <select formControlName="officeId">
-                <option [ngValue]="0">— بلا —</option>
-                @for (o of offices(); track o.id) { <option [ngValue]="o.id">{{ o.name }}</option> }
-              </select></label>
             @if (!isArchitectural()) {
               <label class="form-field full"><span class="form-label">مبني على النسخة المعمارية المعتمدة</span>
                 <select formControlName="basedOnVersionId">
@@ -94,26 +89,19 @@ export class StudyDrawingFormDialog implements OnInit {
     drawingDate: [localDateInput(), Validators.required],
     description: [''],
     departmentId: [0],
-    officeId: [0],
     basedOnVersionId: [0],
     status: [1 as 1 | 2]
   });
 
   private values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
   isArchitectural = computed(() => (this.values().kind ?? 1) === 1);
-  /** مكاتب القسم المُصدِر (المختار للمؤسسة، وإلا مكاتب كل الأقسام المشاركة) */
-  offices = computed(() => {
-    const departments = this.project().departments;
-    const chosen = this.values().departmentId;
-    return (chosen ? departments.filter(d => d.departmentId === chosen) : departments).flatMap(d => d.offices);
-  });
 
   ngOnInit() {
     const d = this.drawing();
     if (!d) return;
     this.form.patchValue({
       kind: d.kind, name: d.name, drawingNumber: d.drawingNumber, drawingDate: dateOnly(d.drawingDate), description: d.description ?? '',
-      officeId: d.officeId ?? 0, basedOnVersionId: d.basedOnVersionId ?? 0, status: d.status === 2 ? 2 : 1
+      basedOnVersionId: d.basedOnVersionId ?? 0, status: d.status === 2 ? 2 : 1
     });
     this.form.controls.kind.disable();
   }
@@ -126,7 +114,7 @@ export class StudyDrawingFormDialog implements OnInit {
     if (v.kind !== 1 && !v.basedOnVersionId) return;
     const body: StudyDrawingInput = {
       projectId: this.project().id, kind: v.kind, name: v.name.trim(), drawingNumber: v.drawingNumber.trim(), drawingDate: v.drawingDate,
-      description: optional(v.description), officeId: v.officeId || null,
+      description: optional(v.description),
       basedOnVersionId: v.kind === 1 ? null : v.basedOnVersionId,
       ...(d ? { status: v.status, rowVersion: d.rowVersion } : { departmentId: v.departmentId || null })
     };

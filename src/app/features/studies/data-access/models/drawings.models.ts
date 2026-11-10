@@ -23,7 +23,7 @@ export interface StudyDrawing {
 /** غير المعماري يُبنى على نسخة معمارية معتمدة (basedOnVersionId) */
 export interface StudyDrawingInput {
   projectId: number; kind: DrawingKind; name: string; drawingNumber: string; drawingDate: string;
-  description?: string | null; officeId?: number | null; departmentId?: number | null; basedOnVersionId?: number | null;
+  description?: string | null; departmentId?: number | null; basedOnVersionId?: number | null;
   status?: DrawingStatus | null; rowVersion?: string | null;
 }
 /** نسخة معمارية معتمدة يُبنى عليها مخطط غير معماري */

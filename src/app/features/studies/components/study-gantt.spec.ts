@@ -9,7 +9,7 @@ const day = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); r
 const stage = (id: number, over: Partial<ProjectStage> = {}): ProjectStage => ({
   id, projectId: 1, stageTypeId: id, stageTypeName: 'مرحلة ' + id, linkedDocument: 0, sortOrder: id, weight: 10,
   plannedStartDate: day(-20), plannedEndDate: day(10), actualStartDate: null, actualEndDate: null, status: 2, statusName: 'قيد التنفيذ', progress: 40,
-  responsibleDepartmentId: 1, responsibleDepartmentName: 'قسم أ', closedByName: null, closedAt: null, tasksTotal: 0, tasksDone: 0, rowVersion: 'x', ...over
+  responsibleDepartmentId: 1, responsibleDepartmentName: 'قسم أ', closedByName: null, closedAt: null, tasksTotal: 0, tasksDone: 0, rowVersion: 'x', canAddTask: false, ...over
 } as ProjectStage);
 const task = (id: number, stageId: number, over: Partial<StageTask> = {}): StageTask => ({
   id, stageId, stageName: '', projectId: 1, projectCode: 'P', projectName: 'P', targetType: 1, targetTypeName: 'قسم', targetName: 'قسم أ', departmentId: 1, officeId: null, assigneeUserId: null,

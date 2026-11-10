@@ -1,0 +1,91 @@
+<div class="page">
+  <app-page-header eyebrow="فرع الدراسات" heading="مهامي" subtitle="المهام المسندة إليّ أو إلى مكتبي أو قسمي في مشاريع الدراسات — اسحب البطاقة بين الأعمدة لتحديث إنجازها">
+    <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  <section class="dash-stats" aria-label="ملخص المهام">
+    <app-stat-tile label="لم تبدأ" [value]="counts().todo" icon="stack" tone="blue" />
+    <app-stat-tile label="قيد التنفيذ" [value]="counts().progress" icon="gear" tone="purple" />
+    <app-stat-tile label="منجزة" [value]="counts().done" icon="target" tone="green" />
+    <app-stat-tile label="متأخرة" [value]="counts().late" icon="alarm" tone="red" [alert]="counts().late > 0" hint="تجاوزت نهاية الفترة المخططة" />
+  </section>
+
+  <div class="toolbar">
+    <label class="search">
+      <span class="sr-only">بحث</span>
+      <input #q type="search" placeholder="بحث بالمهمة أو المشروع أو المرحلة أو الجهة…" [value]="search()" (input)="setSearch(q.value)">
+    </label>
+    <label class="check"><input #o type="checkbox" [checked]="lateOnly()" (change)="setLateOnly(o.checked)"> المتأخرة فقط</label>
+    <div class="view-switch" role="group" aria-label="طريقة العرض">
+      <button type="button" [class.on]="view() === 'board'" [attr.aria-pressed]="view() === 'board'" (click)="setView('board')">اللوحة</button>
+      <button type="button" [class.on]="view() === 'calendar'" [attr.aria-pressed]="view() === 'calendar'" (click)="setView('calendar')">التقويم</button>
+    </div>
+  </div>
+
+  @if (truncated()) {
+    <p class="note" role="status">تُعرض أول {{ rows().length }} مهمة من {{ total() }}: المفتوحة أولاً، وقد لا تظهر المنجزة الأقدم.</p>
+  }
+
+  @if (loading() && !rows().length) {
+    <app-empty-state panel>جارٍ تحميل المهام…</app-empty-state>
+  } @else if (!rows().length && !error()) {
+    <div class="panel empty-state"><h3>لا مهام</h3><p>تظهر هنا المهام التي تُسنَد إليك في مشاريع الدراسات.</p></div>
+  } @else if (view() === 'calendar') {
+    <app-month-calendar [events]="events()" label="تقويم مهامي" noDateText="مهمة بلا فترة مخططة لا تظهر هنا" (pick)="openById($event)" />
+  } @else {
+    <div class="board" [class.dim]="loading()" cdkDropListGroup>
+      @for (col of columns; track col.status) {
+        <section class="column c-{{ col.status }}" [attr.aria-label]="col.label">
+          <header class="col-head">
+            <span class="col-dot" aria-hidden="true"></span>
+            <h2>{{ col.label }}</h2>
+            <span class="col-count">{{ byStatus()[col.status].length }}</span>
+            <small>{{ col.hint }}</small>
+          </header>
+
+          <div class="col-body" cdkDropList [id]="'col-' + col.status" [cdkDropListData]="col.status"
+               [cdkDropListEnterPredicate]="canDrop" (cdkDropListDropped)="drop($event)">
+            @for (t of visible(col.status); track t.id) {
+              <article class="card" [class.late]="dueState(t) === 'late'" [class.soon]="dueState(t) === 'soon'" [class.finished]="t.status === 3"
+                       cdkDrag [cdkDragData]="t" [cdkDragDisabled]="!t.canUpdateProgress" [class.draggable]="t.canUpdateProgress"
+                       tabindex="0" role="button" (click)="openCard(t)" (keydown.enter)="openCard(t)" [attr.aria-label]="t.title + ' — ' + t.statusName">
+                <div class="card-top">
+                  <a class="code" [routerLink]="['/studies/projects', t.projectId]" (click)="$event.stopPropagation()">{{ t.projectCode }}</a>
+                  @if (dueState(t); as due) {
+                    <span class="due {{ due }}">{{ due === 'late' ? 'متأخرة' : 'قريباً' }} · {{ short(t.plannedEndDate) }}</span>
+                  } @else if (t.plannedEndDate) {
+                    <span class="due">{{ fmt(t.plannedEndDate) }}</span>
+                  }
+                </div>
+                <h3>{{ t.title }}</h3>
+                <p class="target">{{ t.stageName }}</p>
+                <p class="target">{{ t.targetTypeName }}: {{ t.targetName }}</p>
+                <app-study-progress [percent]="t.progress" />
+                <footer class="card-foot">
+                  <small>{{ fmt(t.plannedStartDate) }} ← {{ fmt(t.plannedEndDate) }}</small>
+                </footer>
+                <div class="drop-ghost" *cdkDragPlaceholder></div>
+              </article>
+            } @empty {
+              <p class="col-empty">لا توجد مهام</p>
+            }
+          </div>
+
+          @if (pagesOf(col.status) > 1) {
+            <nav class="col-pager" [attr.aria-label]="'صفحات ' + col.label">
+              <button type="button" (click)="goPage(col.status, pageOf(col.status) - 1)" [disabled]="pageOf(col.status) <= 1" aria-label="الصفحة السابقة">‹</button>
+              <small>{{ pageOf(col.status) }} / {{ pagesOf(col.status) }}</small>
+              <button type="button" (click)="goPage(col.status, pageOf(col.status) + 1)" [disabled]="pageOf(col.status) >= pagesOf(col.status)" aria-label="الصفحة التالية">›</button>
+            </nav>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>
+
+@if (editing(); as t) {
+  <app-study-task-progress-dialog [task]="t" (closed)="editing.set(null)" (saved)="saved()" />
+}

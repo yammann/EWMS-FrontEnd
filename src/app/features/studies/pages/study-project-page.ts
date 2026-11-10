@@ -82,6 +82,12 @@ export class StudyProjectPage {
   /** المخططات: تظهر لمن يملك عرضها فقط */
   visibleTabs = computed(() => TABS.filter(t => t.key !== 'drawings' || this.access().viewDrawings));
 
+  /** يشرح لمن لا يرى المشروع كاملاً ما يُعرض له (مستوى الرؤية من الخادم، وتُمنح صلاحياته من صفحة الأدوار) */
+  viewNote = computed(() => {
+    const what = { 2: 'مراحل قسمك ومهامها وفريق قسمك', 3: 'مهام مكتبك وموظفيه وفريق مكتبك، ومراحل قسمك' }[this.project()?.viewLevel as 2 | 3] ?? 'مراحل قسمك ومهامك وزملاء مكتبك';
+    return `تُعرض لك في هذا المشروع ${what} فقط. الرؤية الكاملة بصلاحية «رؤية المشروع كاملاً».`;
+  });
+
   /** الإرفاق: تعديل المشروع، وأن لا يكون ملغى */
   canAttach = computed(() => {
     const p = this.project();

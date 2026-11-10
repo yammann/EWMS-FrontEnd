@@ -54,7 +54,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
             <div class="stage-actions">
               @if (can().closeStage && s.status !== 3 && !busy()) { <button type="button" class="btn btn-sm" (click)="close(s)">إغلاق المرحلة</button> }
               @if (can().closeStage && s.status === 3 && !s.linkedDocument && last) { <button type="button" class="btn btn-ghost btn-sm" (click)="reopen(s)">إعادة فتح</button> }
-              @if (can().createTask && s.status !== 3 && project().status === 1) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: null })">+ مهمة</button> }
+              @if (s.canAddTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: null })">+ مهمة</button> }
               @if (can().editStage && s.status !== 3 && !s.linkedDocument) { <button type="button" class="btn btn-ghost btn-sm" (click)="stageDialog.set({ stage: s })">تعديل</button> }
               @if (can().editStage && !s.linkedDocument && s.status !== 3) {
                 <button type="button" class="icon-btn" aria-label="تقديم المرحلة" [disabled]="first || busy()" (click)="move(s, -1)"><app-icon name="turnUp" [size]="15" /></button>
@@ -87,7 +87,10 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
                     }
                   </tbody>
                 </table></div>
-              } @else if (!s.linkedDocument) { <p class="muted none">لا مهام في هذه المرحلة.</p> }
+              } @else if (!s.linkedDocument) {
+                <p class="muted none">{{ hidden(s) ? s.tasksTotal + ' مهمة في هذه المرحلة، لا تظهر لك تفاصيلها.' : 'لا مهام في هذه المرحلة.' }}</p>
+              }
+              @if (list.length && hidden(s)) { <p class="muted none">تظهر لك {{ list.length }} من {{ s.tasksTotal }} مهمة في هذه المرحلة.</p> }
             }
           </li>
         }
@@ -144,6 +147,8 @@ export class StudyProjectStagesPanel {
     return map;
   });
   tasksOf(stageId: number) { return this.byStage().get(stageId) ?? []; }
+  /** مهام في المرحلة لا تظهر لي (عددها الكلي أكبر مما يصلني) — لا يكون إلا لمن لا يرى المشروع كاملاً */
+  hidden(s: ProjectStage) { return !this.project().canViewFull && s.tasksTotal > this.tasksOf(s.id).length; }
 
   done(message: string) { this.toast.success(message); this.changed.emit(); }
 

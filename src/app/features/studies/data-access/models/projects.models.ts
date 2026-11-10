@@ -29,7 +29,10 @@ export interface ProjectStage {
   status: StudyStageStatus; statusName: string; progress: number;
   responsibleDepartmentId: number | null; responsibleDepartmentName: string | null;
   closedByName: string | null; closedAt: string | null;
+  /** العدد الكلي ونسبة المرحلة كاملان وإن لم تظهر لي كل مهامها */
   tasksTotal: number; tasksDone: number; rowVersion: string;
+  /** إضافة مهمة: للقسم المسؤول عن المرحلة (أو مدير النظام) والمشروع والمرحلة مفتوحان */
+  canAddTask: boolean;
 }
 
 export interface StudyProject {
@@ -39,6 +42,8 @@ export interface StudyProject {
   status: StudyProjectStatus; statusName: string; progress: number;
   createdByName: string; createdAt: string; updatedAt: string | null; rowVersion: string;
   canEdit: boolean; canDelete: boolean; canCancel: boolean;
+  /** أرى المشروع كاملاً؛ وإلا فمراحلي ومهامي وفريقي بحسب viewLevel (1 كاملة، 2 مهام القسم، 3 مهام المكتب، 4 مهامي) */
+  canViewFull: boolean; viewLevel: 1 | 2 | 3 | 4; viewLevelName: string;
   /** كل المراحل مغلقة ولا طلب إنجاز معلّق */
   canRequestCompletion: boolean;
   /** في التفاصيل فقط */

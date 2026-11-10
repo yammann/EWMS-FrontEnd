@@ -12,7 +12,8 @@ import { optional } from '../utils/form-rows';
 
 /**
  * مهمة في مرحلة: توجَّه إلى قسم مشارك، أو مكتب من قسم مشارك، أو عضو في الفريق (جهة واحدة فقط).
- * الاختيارات من تفاصيل المشروع نفسها (الأقسام ومكاتبها وأعضاؤها) فلا تحتاج قوائم الهيكل.
+ * الاختيارات من تفاصيل المشروع نفسها (الأقسام ومكاتبها وأعضاؤها) فلا تحتاج قوائم الهيكل، وتقتصر على القسم المسؤول عن المرحلة
+ * (قسمه ومكاتبه وأعضاؤه) إن كان لها قسم مسؤول؛ الباكاند يسمح بأي قسم مشارك.
  * تحديث نسبة الإنجاز للمكلَّف وحده من نافذته (TaskProgressDialog).
  */
 @Component({
@@ -26,6 +27,7 @@ import { optional } from '../utils/form-rows';
         <div class="modal-body form-stack">
           <app-alert [message]="error()" />
           @if (!project().departments.length) { <p class="alert alert-warning" role="status">أضف قسماً مشاركاً للمشروع أولاً ثم أسند المهام.</p> }
+          @else if (!departments().length) { <p class="alert alert-warning" role="status">القسم المسؤول عن المرحلة ({{ stage().responsibleDepartmentName }}) ليس مشاركاً في المشروع: أضفه أولاً ثم أسند المهام.</p> }
           <div class="form-grid-2">
             <label class="form-field full"><span class="form-label">عنوان المهمة</span><input formControlName="title" maxlength="200">
               @if (form.controls.title.touched && form.controls.title.invalid) { <small class="form-error">العنوان مطلوب</small> }</label>
@@ -39,15 +41,17 @@ import { optional } from '../utils/form-rows';
                 <label class="form-field"><span class="form-label">القسم المشارك</span>
                   <select formControlName="departmentId">
                     <option [ngValue]="0" disabled>اختر…</option>
-                    @for (d of project().departments; track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
+                    @for (d of departments(); track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
                   </select></label>
               }
               @case (2) {
-                <label class="form-field"><span class="form-label">القسم</span>
-                  <select formControlName="officeDepartmentId">
-                    <option [ngValue]="0" disabled>اختر…</option>
-                    @for (d of project().departments; track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
-                  </select></label>
+                @if (departments().length > 1) {
+                  <label class="form-field"><span class="form-label">القسم</span>
+                    <select formControlName="officeDepartmentId">
+                      <option [ngValue]="0" disabled>اختر…</option>
+                      @for (d of departments(); track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
+                    </select></label>
+                }
                 <label class="form-field"><span class="form-label">المكتب</span>
                   <select formControlName="officeId">
                     <option [ngValue]="0" disabled>اختر…</option>
@@ -61,7 +65,7 @@ import { optional } from '../utils/form-rows';
                     <option [ngValue]="0" disabled>اختر…</option>
                     @for (m of members(); track m.userId) { <option [ngValue]="m.userId">{{ m.fullName }} — {{ m.department }}</option> }
                   </select>
-                  @if (!members().length) { <small class="hint">لا أعضاء في الفريق بعد — يضيفهم رئيس كل قسم مشارك.</small> }</label>
+                  @if (!members().length) { <small class="hint">لا أعضاء {{ scoped() ? 'من القسم المسؤول عن المرحلة ' : '' }}في الفريق بعد — يضيفهم رئيس القسم.</small> }</label>
               }
             }
 
@@ -109,8 +113,25 @@ export class StudyTaskFormDialog implements OnInit {
 
   private values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
   target = computed(() => this.values().targetType ?? StudyTaskTarget.Department);
+  /** القسم المسؤول عن المرحلة يقسّم مرحلته إلى مهام لقسمه ومكاتبه وموظفيه، فلا تُعرض غيره إلا إن كانت المرحلة بلا قسم مسؤول */
+  scoped = computed(() => !!this.stage().responsibleDepartmentId);
+  /** الأقسام المعروضة: القسم المسؤول وحده (إن كان مشاركاً)، وعند تعديل مهمة مسندة لقسم آخر يبقى ذلك القسم كي لا تضيع قيمتها */
+  departments = computed(() => {
+    const all = this.project().departments;
+    if (!this.scoped()) return all;
+    const keep = new Set([this.stage().responsibleDepartmentId, ...this.taskDepartmentIds()]);
+    return all.filter(d => keep.has(d.departmentId));
+  });
   offices = computed(() => this.project().departments.find(d => d.departmentId === this.values().officeDepartmentId)?.offices ?? []);
-  members = computed(() => this.project().departments.flatMap(d => d.members.map(m => ({ ...m, department: d.departmentName }))));
+  members = computed(() => this.departments().flatMap(d => d.members.map(m => ({ ...m, department: d.departmentName }))));
+  /** أقسام الهدف الحالي للمهمة المعدَّلة (قسمها أو قسم مكتبها أو قسم موظفها) */
+  private taskDepartmentIds = computed(() => {
+    const t = this.task();
+    if (!t) return [];
+    return this.project().departments
+      .filter(d => d.departmentId === t.departmentId || d.offices.some(o => o.id === t.officeId) || d.members.some(m => m.userId === t.assigneeUserId))
+      .map(d => d.departmentId);
+  });
   /** الجهة المطلوبة لنوع الهدف المختار مملوءة */
   targetChosen = computed(() => {
     const v = this.values();
@@ -119,7 +140,12 @@ export class StudyTaskFormDialog implements OnInit {
 
   ngOnInit() {
     const t = this.task();
-    if (!t) return;
+    if (!t) {
+      // مهمة جديدة: القسم المسؤول عن المرحلة معبّأ مسبقاً (وحده إن كان الخيار الوحيد)
+      const resp = this.stage().responsibleDepartmentId;
+      if (resp && this.departments().some(d => d.departmentId === resp)) this.form.patchValue({ departmentId: resp, officeDepartmentId: resp });
+      return;
+    }
     const officeDepartment = t.officeId ? this.project().departments.find(d => d.offices.some(o => o.id === t.officeId))?.departmentId ?? 0 : 0;
     this.form.patchValue({
       title: t.title, description: t.description ?? '', targetType: t.targetType,

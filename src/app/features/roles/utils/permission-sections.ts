@@ -38,7 +38,8 @@ export const PERMISSION_SECTIONS: PermissionSectionDef[] = [
       'SignStudyAsFollowingDepartment', 'SignStudyAsPlanning', 'SignStudyAsCompetentDepartment', 'SignStudyAsBranchHead',
       'SignStudyAsSendingDepartment', 'SignStudyAsDesignManagement', 'SignStudyAsQualityControl', 'SignStudyAsProjectManagement'] },
     { key: 'study-projects', title: 'المشاريع والفريق', names: [
-      'ViewStudyProjects', 'CreateStudyProject', 'EditStudyProject', 'DeleteStudyProject',
+      'ViewStudyProjects', 'ViewFullStudyProject', 'ViewDepartmentStudyTasks', 'ViewOfficeStudyTasks',
+      'CreateStudyProject', 'EditStudyProject', 'DeleteStudyProject',
       'AddStudyProjectDepartment', 'RemoveStudyProjectDepartment', 'AddStudyProjectMember', 'RemoveStudyProjectMember'] },
     { key: 'study-stages', title: 'المراحل والمهام', names: [
       'CreateStudyStage', 'EditStudyStage', 'DeleteStudyStage', 'CloseStudyStage',

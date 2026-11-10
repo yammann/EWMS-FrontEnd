@@ -96,6 +96,8 @@ export const AppPermission = {
   SignStudyAsCompetentDepartment: 'SignStudyAsCompetentDepartment', SignStudyAsBranchHead: 'SignStudyAsBranchHead',
   SignStudyAsSendingDepartment: 'SignStudyAsSendingDepartment', SignStudyAsDesignManagement: 'SignStudyAsDesignManagement',
   SignStudyAsQualityControl: 'SignStudyAsQualityControl', SignStudyAsProjectManagement: 'SignStudyAsProjectManagement',
+  /** حدّ رؤية تفاصيل المشروع: الكاملة، أو مهام قسمي، أو مهام مكتبي (وبلا شيء منها مهامي فقط) */
+  ViewFullStudyProject: 'ViewFullStudyProject', ViewDepartmentStudyTasks: 'ViewDepartmentStudyTasks', ViewOfficeStudyTasks: 'ViewOfficeStudyTasks',
   ViewStudyProjects: 'ViewStudyProjects', CreateStudyProject: 'CreateStudyProject', EditStudyProject: 'EditStudyProject', DeleteStudyProject: 'DeleteStudyProject',
   AddStudyProjectDepartment: 'AddStudyProjectDepartment', RemoveStudyProjectDepartment: 'RemoveStudyProjectDepartment',
   AddStudyProjectMember: 'AddStudyProjectMember', RemoveStudyProjectMember: 'RemoveStudyProjectMember',

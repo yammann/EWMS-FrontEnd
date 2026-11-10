@@ -29,6 +29,10 @@
       <p class="alert alert-warning state-note" role="status"><app-icon name="warning" [size]="16" /> المشروع معلّق: لا تُضاف مراحل ومهام جديدة حتى يُستأنف.</p>
     }
 
+    @if (!p.canViewFull) {
+      <p class="alert state-note" role="status"><app-icon name="lock" [size]="16" /> {{ viewNote() }}</p>
+    }
+
     @if (p.chain) { <section class="panel"><app-study-chain [chain]="p.chain" current="project" [responseNumber]="responseNumber()" /></section> }
 
     <section class="panel summary">
@@ -36,7 +40,7 @@
       <dl class="facts">
         <div><dt>مدير المشروع</dt><dd>{{ p.managerName }}</dd></div>
         <div><dt>أمر البدء</dt><dd>@if (p.chain?.startOrderId) { <a class="mono" [routerLink]="['/studies/start-orders', p.chain!.startOrderId]">{{ p.startOrderNumber }}</a> } @else { {{ p.startOrderNumber }} }</dd></div>
-        <div><dt>المراحل</dt><dd>{{ p.stages.length }}</dd></div>
+        <div><dt>{{ p.canViewFull ? 'المراحل' : 'مراحلك' }}</dt><dd>{{ p.stages.length }}</dd></div>
         <div><dt>التخطيط</dt><dd>{{ fmt(p.plannedStartDate) }} ← {{ fmt(p.plannedEndDate) }}</dd></div>
         <div><dt>الفعلي</dt><dd>{{ fmt(p.actualStartDate) }} ← {{ fmt(p.actualEndDate) }}</dd></div>
         <div><dt>أنشأه</dt><dd>{{ p.createdByName }} · {{ p.createdAt | utc | date:'yyyy/MM/dd' }}</dd></div>
@@ -65,7 +69,7 @@
       @case ('team') { <app-study-project-team-panel [project]="p" (updated)="teamUpdated($event)" /> }
       @case ('drawings') { <app-study-project-drawings-panel [project]="p" /> }
       @case ('more') {
-        <app-study-approvals-panel [approvals]="p.approvals" [documentLabel]="p.code" (decided)="decided()" />
+        @if (p.canViewFull || p.approvals.length) { <app-study-approvals-panel [approvals]="p.approvals" [documentLabel]="p.code" (decided)="decided()" /> }
         <app-study-attachments [ownerType]="ownerType" [ownerId]="p.id" [canWrite]="canAttach()" (changed)="logVersion.set(logVersion() + 1)" />
         @if (access().viewActivityLog && p.chain) { <app-study-activity [requestId]="p.chain.requestId" [reloadKey]="logKey()" /> }
       }

@@ -11,7 +11,7 @@ const d = (iso: string) => toDay(iso)!;
 const stage = (id: number, over: Partial<ProjectStage> = {}): ProjectStage => ({
   id, projectId: 1, stageTypeId: id, stageTypeName: 'مرحلة ' + id, linkedDocument: 0, sortOrder: id, weight: 10,
   plannedStartDate: '2026-11-01', plannedEndDate: '2026-11-30', actualStartDate: null, actualEndDate: null, status: 2, statusName: 'قيد التنفيذ', progress: 40,
-  responsibleDepartmentId: 1, responsibleDepartmentName: 'قسم أ', closedByName: null, closedAt: null, tasksTotal: 0, tasksDone: 0, rowVersion: 'x', ...over
+  responsibleDepartmentId: 1, responsibleDepartmentName: 'قسم أ', closedByName: null, closedAt: null, tasksTotal: 0, tasksDone: 0, rowVersion: 'x', canAddTask: false, ...over
 } as ProjectStage);
 const task = (id: number, stageId: number, over: Partial<StageTask> = {}): StageTask => ({
   id, stageId, targetTypeName: 'قسم', targetName: 'قسم أ', title: 'مهمة ' + id, plannedStartDate: '2026-11-02', plannedEndDate: '2026-11-20',
