@@ -34,13 +34,15 @@
 .c-Done .col-dot { background: var(--brand-600); }
 .col-count { min-width: 26px; height: 22px; padding: 0 8px; display: grid; place-items: center; border-radius: var(--radius-full); background: var(--surface); border: 1px solid var(--border); font-size: 12px; font-weight: 800; color: var(--ink-700); }
 
-.col-body { display: grid; align-content: start; gap: 10px; min-height: 260px; padding: 6px 12px 14px; transition: background .15s ease; }
+/* مسار واحد بعرض العمود: بلا minmax(0, 1fr) يتّسع المسار التلقائي لأطول نص بلا التفاف (مسار الجهة الطويل) فتخرج بطاقات العمود من إطاره */
+.col-body { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 10px; min-height: 260px; padding: 6px 12px 14px; transition: background .15s ease; }
 .col-body.cdk-drop-list-receiving { background: var(--brand-50); border-radius: 0 0 var(--radius-xl) var(--radius-xl); }
 .col-empty { margin: 0; padding: 26px 8px; text-align: center; font-size: 12px; color: var(--ink-400); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); }
 
 /* ─────────── البطاقة ─────────── */
 .card {
-  display: grid; gap: 8px; padding: 14px; cursor: pointer;
+  /* مسار الشبكة الداخلي بعرض البطاقة: بدونه يتسع لأطول نص بلا التفاف فيخرج التاريخ والنص من البطاقة */
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 14px; cursor: pointer; min-width: 0;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
   border-inline-start: 4px solid var(--ink-300); box-shadow: var(--shadow-sm);
   transition: border-color .15s ease, box-shadow .15s ease;
