@@ -10,6 +10,8 @@ import { Pager } from '@shared/ui/pager';
 import { Icon, IconName } from '@shared/ui/icon';
 import { Alert } from '@shared/ui/alert';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
+import { UtcPipe } from '@shared/pipes/format.pipes';
+import { ago, dayLabel } from '../../utils/notification-time';
 
 type Tone = 'green' | 'blue' | 'orange' | 'purple' | 'red';
 interface Kind { icon: IconName; tone: Tone; }
@@ -31,28 +33,13 @@ function kindOf(type: string): Kind {
   return { icon: 'bell', tone: 'blue' };
 }
 
-const DAY = 86_400_000;
-const dayLabel = (iso: string) => {
-  const days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(iso).setHours(0, 0, 0, 0)) / DAY);
-  return days <= 0 ? 'اليوم' : days === 1 ? 'أمس' : 'أقدم';
-};
-/** «منذ 5 دقائق» للأحدث، وإلا التاريخ والوقت */
-function ago(iso: string): string {
-  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (mins < 1) return 'الآن';
-  if (mins < 60) return `منذ ${mins} ${mins === 1 ? 'دقيقة' : mins === 2 ? 'دقيقتين' : mins <= 10 ? 'دقائق' : 'دقيقة'}`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `منذ ${hours} ${hours === 1 ? 'ساعة' : hours === 2 ? 'ساعتين' : hours <= 10 ? 'ساعات' : 'ساعة'}`;
-  return '';
-}
-
 /**
  * مركز الإشعارات: رأس بأيقونة وحبّة غير المقروء، حبّات «الكل / غير المقروءة»، وبطاقات مجمّعة باليوم
  * (أيقونة ملوّنة حسب النوع، النص بمحاذاة بداية السطر، نقطة وتظليل لغير المقروء، ووقت نسبي).
  * التقسيم من الخادم (Notifications/Page)، والإشعار اللحظي يُضاف أعلى الصفحة الأولى.
  */
 @Component({
-  selector: 'app-notifications-page', standalone: true, imports: [Alert, DatePipe, Pager, Icon],
+  selector: 'app-notifications-page', standalone: true, imports: [Alert, DatePipe, UtcPipe, Pager, Icon],
   styleUrls: ['../../../../shared/styles/page-base.scss', './notifications-page.scss'],
   templateUrl: './notifications-page.html',
   

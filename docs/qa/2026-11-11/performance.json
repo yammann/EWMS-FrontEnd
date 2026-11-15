@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-11",
+  "mode": "Local HTTP API; one short wave; 100 different accounts; login excluded",
+  "unit": "ms",
+  "sessions": 100,
+  "peakInFlight": 100,
+  "errors": {},
+  "endpoints": [
+    {
+      "path": "AssignedTasks/Board",
+      "count": 100,
+      "p50": 154,
+      "p95": 270,
+      "max": 327
+    },
+    {
+      "path": "MaintenanceRequests/GetAll?pageSize=20",
+      "count": 100,
+      "p50": 143,
+      "p95": 316,
+      "max": 333
+    },
+    {
+      "path": "Reports/Preview/vacations",
+      "count": 100,
+      "p50": 166,
+      "p95": 326,
+      "max": 348
+    }
+  ]
+}

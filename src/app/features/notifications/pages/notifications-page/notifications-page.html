@@ -43,7 +43,7 @@
                 <span class="n-text">
                   <strong>{{ n.title }}</strong>
                   <span class="msg">{{ n.message }}</span>
-                  <small>{{ ago(n.createdAt) || (n.createdAt | date:'yyyy/MM/dd HH:mm') }}</small>
+                  <small>{{ ago(n.createdAt) || (n.createdAt | utc | date:'yyyy/MM/dd HH:mm') }}</small>
                 </span>
                 @if (!n.isRead) { <span class="n-unread" aria-label="غير مقروء"></span> }
               </button>

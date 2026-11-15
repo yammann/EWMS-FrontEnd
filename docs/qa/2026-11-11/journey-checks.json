@@ -1,0 +1,274 @@
+[
+  {
+    "check": "VAC-01",
+    "facts": {
+      "approved": 10,
+      "rejected": 11,
+      "workingDays": 2
+    },
+    "run": "journeys.log"
+  },
+  {
+    "check": "PERM-01",
+    "facts": {
+      "branchB": 4,
+      "studyA": 23,
+      "studyB": 24
+    },
+    "run": "journeys.log"
+  },
+  {
+    "check": "STD-02 concurrency and STD-01 submission",
+    "facts": {
+      "request": 23
+    },
+    "run": "journeys.log"
+  },
+  {
+    "check": "AUTH-01",
+    "facts": {
+      "user": 4,
+      "independentSession": true
+    },
+    "run": "journeys.log"
+  },
+  {
+    "check": "RPT-01",
+    "facts": {
+      "id": "VAC-2026-00010",
+      "rows": 1,
+      "days": 2,
+      "bytes": 7822
+    },
+    "run": "qa2.log"
+  },
+  {
+    "check": "MNT-01",
+    "facts": {
+      "request": 1,
+      "part": 1,
+      "finalBalance": 3
+    },
+    "run": "qa2.log"
+  },
+  {
+    "check": "STD-01 project completion",
+    "facts": {
+      "request": 23,
+      "assignment": 19,
+      "response": 14,
+      "order": 10,
+      "project": 8
+    },
+    "run": "qa3.log"
+  },
+  {
+    "check": "STD-02 unavailable",
+    "facts": {
+      "request": 25,
+      "response": 15
+    },
+    "run": "qa3.log"
+  },
+  {
+    "check": "HOME-01",
+    "facts": {
+      "department": 15,
+      "branchDelta": 1,
+      "orgDelta": 1
+    },
+    "run": "qa4.log"
+  },
+  {
+    "check": "NTF-01",
+    "facts": {
+      "connected": 116,
+      "reconnected": 117,
+      "recipient": 5
+    },
+    "run": "qa5.log"
+  },
+  {
+    "check": "ERR-01 forms and attachment",
+    "facts": {
+      "task": 116
+    },
+    "run": "qa5.log"
+  },
+  {
+    "check": "TSK-01",
+    "facts": {
+      "task": 119,
+      "spawned": 120,
+      "attachment": 2
+    },
+    "run": "qa6.log"
+  },
+  {
+    "check": "ERR-01 forms and attachment",
+    "facts": {
+      "task": 121
+    },
+    "run": "qa6.log"
+  },
+  {
+    "check": "MAP-01 data",
+    "facts": {
+      "site": 5,
+      "device": 2,
+      "installation": 1
+    },
+    "run": "qa6.log"
+  },
+  {
+    "check": "ORG-01",
+    "facts": {
+      "branch": 8,
+      "dept": 18,
+      "office": 42,
+      "user": 196
+    },
+    "run": "orgfinal.log"
+  },
+  {
+    "check": "chrome1440 vacation keyboard",
+    "facts": {
+      "width": 1440
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "chrome1440 maintenance table",
+    "facts": {
+      "width": 1440,
+      "rows": 1
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "chrome1440 reviewer",
+    "facts": {
+      "width": 1440
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "chrome1440 print",
+    "facts": {
+      "request": 10
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "ERR-01 offline save",
+    "facts": {
+      "created": 1
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "msedge1440 vacation keyboard",
+    "facts": {
+      "width": 1440
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "msedge1440 maintenance table",
+    "facts": {
+      "width": 1440,
+      "rows": 1
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "msedge1440 reviewer",
+    "facts": {
+      "width": 1440
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "msedge1440 print",
+    "facts": {
+      "request": 10
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "chrome390 vacation keyboard",
+    "facts": {
+      "width": 390
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "chrome390 maintenance table",
+    "facts": {
+      "width": 390,
+      "rows": 1
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "chrome390 reviewer",
+    "facts": {
+      "width": 390
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "chrome390 print",
+    "facts": {
+      "request": 10
+    },
+    "run": "ux.log"
+  },
+  {
+    "check": "MAP layer toggle",
+    "facts": {
+      "layers": 2
+    },
+    "run": "final-ui.log"
+  },
+  {
+    "check": "role explicit expanded group",
+    "facts": {
+      "id": 93,
+      "permissions": 1
+    },
+    "run": "final-ui.log"
+  },
+  {
+    "check": "NTF actual link",
+    "facts": {
+      "task": 116,
+      "path": "/task-board"
+    },
+    "run": "final-access.log"
+  },
+  {
+    "check": "PERM-01 queue matrix",
+    "facts": {
+      "branchA": 1,
+      "branchB": 4,
+      "denial": 403
+    },
+    "run": "final-access.log"
+  },
+  {
+    "check": "part explicit department",
+    "facts": {
+      "id": 2
+    },
+    "run": "uiRecheck.log"
+  },
+  {
+    "check": "Role clone edit delete via search",
+    "facts": {
+      "source": 93,
+      "copy": 95
+    },
+    "run": "role-search.log"
+  }
+]
