@@ -69,7 +69,8 @@
           <div><dt>المدينة / القرية</dt><dd>{{ r.cityOrVillage || '—' }}</dd></div>
           <div><dt>طبيعة العقار</dt><dd>{{ r.propertyNature || '—' }}</dd></div>
           <div><dt>الموقع</dt><dd>{{ r.siteName || '—' }}</dd></div>
-          <div><dt>المتابع لدى الجهة</dt><dd>{{ r.followerName || '—' }}@if (r.followerPhone) { <small class="mono"> · {{ formatPhone(r.followerPhone) }}</small> }</dd></div>
+          <div><dt>المتابع لدى الجهة</dt><dd>{{ r.followerName || '—' }}</dd></div>
+          <div><dt>هاتف المتابع</dt><dd>@if (r.followerPhone) { <bdi dir="ltr">{{ formatPhone(r.followerPhone) }}</bdi> } @else { — }</dd></div>
           @if (r.notes) { <div class="wide"><dt>ملاحظات عامة</dt><dd>{{ r.notes }}</dd></div> }
         </dl>
       </section>

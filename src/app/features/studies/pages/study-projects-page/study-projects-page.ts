@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
 import { Subject, debounceTime } from 'rxjs';
 import { AppPermission } from '@core/constants/access';
 import { orEmpty } from '@core/http/or-empty';
@@ -12,26 +11,34 @@ import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { Pager } from '@shared/ui/pager';
 import { latestRequest } from '@shared/ui/track-request';
-import { StudyProgress } from '../../components/progress-bar';
-import { StudyStatusChip } from '../../components/study-status-chip';
+import { StudyProjectCard } from '../../components/project-card';
 import { StudyProjectsService } from '../../data-access/study-projects.service';
 import { StudyProject } from '../../data-access/studies.models';
 
 const PAGE_SIZE = 20;
 const STATUSES = [{ value: 1, label: 'جارٍ' }, { value: 2, label: 'معلّق' }, { value: 3, label: 'مكتمل' }, { value: 4, label: 'ملغى' }];
-const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-', '/') : '—';
 
 /**
- * مشاريع الدراسات: بحث بالكود أو الاسم، وفلتر بالحالة والفرع (لنظرة المؤسسة)، ونسبة الإنجاز لكل مشروع.
+ * مشاريع الدراسات: بحث بالكود أو الاسم، وفلتر بالحالة والفرع (لنظرة المؤسسة)، والمشاريع بطاقات (قرار 2026-11-16):
+ * نسبة الإنجاز، المتأخر، الأيام الباقية، وشريط مراحل العمل مع المرحلة الحالية (StudyProjectCard).
  * المشروع يُنشأ من صفحة أمر البدء المعتمد (زر «إنشاء مشروع») كي تبقى السلسلة مربوطة.
  */
 @Component({
   selector: 'app-study-projects-page',
   standalone: true,
-  imports: [RouterLink, PageHeader, Alert, EmptyState, Pager, StudyStatusChip, StudyProgress],
+  imports: [PageHeader, Alert, EmptyState, Pager, StudyProjectCard],
   templateUrl: './study-projects-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
-  styles: [`td small { display: block; color: var(--ink-500); font-size: 12px; } .dim { opacity: .55; transition: opacity .15s; }`]
+  styles: [`
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 14px; }
+    .dim { opacity: .55; transition: opacity .15s; }
+    .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 12px; color: var(--ink-500); }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .k { width: 14px; height: 7px; border-radius: 3px; background: var(--fill-strong); }
+    .k.s-closed { background: var(--brand-500); }
+    .k.s-active { background: var(--info-500); }
+    .k.s-late { background: var(--danger-500); }
+  `]
 })
 export class StudyProjectsPage {
   private service = inject(StudyProjectsService);
@@ -39,7 +46,6 @@ export class StudyProjectsPage {
 
   statuses = STATUSES;
   pageSize = PAGE_SIZE;
-  fmt = day;
   orgWide = computed(() => inject(AuthService).hasPermission(AppPermission.ViewOrganizationDashboard));
 
   search = signal('');

@@ -52,7 +52,7 @@ export function kindIcon(kind: string): IconName {
     .file:hover:not(:disabled) { background: var(--fill-strong); transform: none; box-shadow: none; }
     .ico { display: grid; flex: none; color: var(--brand-700); }
     .meta { display: grid; min-width: 0; }
-    .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .name { line-height: 1.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .meta small { color: var(--ink-500); font-weight: 400; font-size: 11px; }
     .none { color: var(--ink-500); }
     .muted { margin: 0; color: var(--ink-500); font-size: 13px; }

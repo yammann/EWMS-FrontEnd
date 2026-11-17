@@ -35,9 +35,9 @@
           <tr><th>{{ f.label }}</th><td colspan="3" class="pre">{{ f.value }}</td></tr>
         } @else if ($index % 2 === 0) {
           <tr>
-            <th>{{ f.label }}</th><td>{{ f.value }}</td>
+            <th>{{ f.label }}</th><td>@if (f.ltr) { <bdi dir="ltr">{{ f.value }}</bdi> } @else { {{ f.value }} }</td>
             @if (fields()[$index + 1]; as g) {
-              @if (!g.wide) { <th>{{ g.label }}</th><td>{{ g.value }}</td> } @else { <th></th><td></td> }
+              @if (!g.wide) { <th>{{ g.label }}</th><td>@if (g.ltr) { <bdi dir="ltr">{{ g.value }}</bdi> } @else { {{ g.value }} }</td> } @else { <th></th><td></td> }
             } @else { <th></th><td></td> }
           </tr>
         }

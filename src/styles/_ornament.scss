@@ -1,0 +1,55 @@
+/* =========================================================
+   الزخرفة العشرية (خلفية خافتة)
+   الرسم قناع من public/brand/ornament.svg يُلوَّن بـ --ornament-color، فيتبع الثيمات والوضع الداكن،
+   وشفافيته --ornament-opacity، وعرض البلاطة --ornament-size (ارتفاعها = العرض × tan 54° = 1.37638).
+   $fade = تدرّج يُطفئ أطرافها (يتقاطع مع الزخرفة).
+   - .ornament: طبقة تملأ أقرب أب مُموضَع تحت محتواه (صفحة الدخول): <div class="ornament" aria-hidden="true"></div>
+   - .ornament.ornament-top: شريط أعلى أبيه يخفت نزولاً، تحت محتوى الأب (رأس القائمة الجانبية)
+   - رأس الصفحة (.page-header) والحالة الفارغة (.empty-state): زخرفة تلقائية بعنصر ::before، بلا تعديل القوالب
+   ========================================================= */
+@mixin ornament-paint($fade: null) {
+  pointer-events: none;
+  background: var(--ornament-color);
+  opacity: var(--ornament-opacity);
+  $tile: url(/brand/ornament.svg) 0 0 / var(--ornament-size) calc(var(--ornament-size) * 1.37638) repeat;
+  @if $fade {
+    -webkit-mask: $tile, $fade;
+    -webkit-mask-composite: source-in;
+    mask: $tile, $fade;
+    mask-composite: intersect;
+  } @else {
+    -webkit-mask: $tile;
+    mask: $tile;
+  }
+}
+
+.ornament { position: absolute; inset: 0; @include ornament-paint; }
+.ornament.ornament-top {
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 240px;
+  max-height: 100%;
+  @include ornament-paint(linear-gradient(to bottom, black, transparent));
+}
+
+/* رأس الصفحة: الزخرفة في جهة الأزرار (يسار الصفحة العربية) وتخفت نحو العنوان، فيبقى النص صافياً */
+.page-header { position: relative; isolation: isolate; }
+.page-header::before {
+  content: "";
+  position: absolute;
+  inset: -22px 0 -12px;
+  z-index: -1;
+  --ornament-opacity: .09;
+  @include ornament-paint(radial-gradient(110% 150% at 0 0, black, transparent 65%));
+}
+
+/* الحالة الفارغة: هالة زخرفة دائرية خلف الأيقونة والنص */
+.empty-state { position: relative; isolation: isolate; }
+.empty-state::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  --ornament-opacity: .1;
+  @include ornament-paint(radial-gradient(closest-side, black, transparent));
+}

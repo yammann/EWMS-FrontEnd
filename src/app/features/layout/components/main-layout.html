@@ -2,6 +2,7 @@
       [class.collapsing]="motion() === 'collapsing'" [class.expanding]="motion() === 'expanding'" [class.settling]="motion() === 'settling'">
   <!-- السايدبار بأسلوب macOS: مادة شفافة، أقسام قابلة للطي، ووضع الأيقونات فقط -->
   <aside class="sidebar" aria-label="القائمة الرئيسية">
+    <div class="ornament ornament-top" aria-hidden="true"></div>
     <div class="sidebar-head">
       <a class="brand" routerLink="/" aria-label="EWMS — لوحة المتابعة">
         <app-logo class="brand-logo" />
@@ -34,10 +35,10 @@
         }
         <!-- وضع الأيقونات: أيقونة القسم (اسمه عند المرور)، والضغط عليها يُنزل أيقونات صفحاته تحتها -->
         @if (section.title && collapsed() && !compact()) {
-          <button type="button" class="rail-section" [class.open]="railOpen() === section.id"
-                  [class.has-active]="railOpen() !== section.id && hasActive(section)" (click)="toggleRail(section)"
+          <button type="button" class="rail-section" [class.open]="openSection() === section.id"
+                  [class.has-active]="openSection() !== section.id && hasActive(section)" (click)="toggleSection(section)"
                   [attr.data-label]="section.title" [attr.aria-label]="section.title"
-                  [attr.aria-expanded]="railOpen() === section.id" [attr.aria-controls]="'nav-' + section.id">
+                  [attr.aria-expanded]="openSection() === section.id" [attr.aria-controls]="'nav-' + section.id">
             <app-icon [name]="section.icon" class="rail-icon" /><app-icon name="chevron" class="rail-chevron" [weight]="2.4" />
           </button>
         }

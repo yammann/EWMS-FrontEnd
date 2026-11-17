@@ -23,30 +23,20 @@
 
   <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
 
-  <section class="panel">
-    @if (loading() && !rows().length) {
-      <app-empty-state>جارٍ التحميل…</app-empty-state>
-    } @else if (!rows().length && !error()) {
-      <div class="empty-state"><h3>{{ hasFilter() ? 'لا توجد نتائج مطابقة' : 'لا مشاريع بعد' }}</h3>
-        <p>{{ hasFilter() ? 'جرّب تعديل البحث أو الفلاتر.' : 'يُنشأ المشروع من صفحة أمر البدء المعتمد بزر «إنشاء مشروع».' }}</p></div>
-    } @else if (rows().length) {
-      <div class="table-wrap" [class.dim]="loading()"><table>
-        <thead><tr><th>الكود</th><th>المشروع</th><th>المدير</th><th>التخطيط</th><th>الإنجاز</th>@if (orgWide()) { <th>الفرع</th> }<th>الحالة</th></tr></thead>
-        <tbody>
-          @for (p of rows(); track p.id) {
-            <tr>
-              <td><a class="mono cell-strong" [routerLink]="['/studies/projects', p.id]">{{ p.code }}</a></td>
-              <td><span class="cell-strong">{{ p.name }}</span><small>أمر البدء {{ p.startOrderNumber }}</small></td>
-              <td>{{ p.managerName }}</td>
-              <td class="nowrap">{{ fmt(p.plannedStartDate) }} ← {{ fmt(p.plannedEndDate) }}</td>
-              <td><app-study-progress [percent]="p.progress" /></td>
-              @if (orgWide()) { <td>{{ p.branchName }}</td> }
-              <td><app-study-status-chip kind="project" [status]="p.status" [name]="p.statusName" /></td>
-            </tr>
-          }
-        </tbody>
-      </table></div>
-      <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
-    }
-  </section>
+  @if (loading() && !rows().length) {
+    <section class="panel"><app-empty-state>جارٍ التحميل…</app-empty-state></section>
+  } @else if (!rows().length && !error()) {
+    <section class="panel"><div class="empty-state"><h3>{{ hasFilter() ? 'لا توجد نتائج مطابقة' : 'لا مشاريع بعد' }}</h3>
+      <p>{{ hasFilter() ? 'جرّب تعديل البحث أو الفلاتر.' : 'يُنشأ المشروع من صفحة أمر البدء المعتمد بزر «إنشاء مشروع».' }}</p></div></section>
+  } @else if (rows().length) {
+    <div class="legend" aria-label="ألوان شريط المراحل">
+      <span>شريط المراحل:</span>
+      <span><i class="k s-closed"></i>مغلقة</span><span><i class="k s-active"></i>جارية</span>
+      <span><i class="k s-late"></i>متأخرة</span><span><i class="k s-todo"></i>لم تبدأ</span>
+    </div>
+    <div class="cards" [class.dim]="loading()">
+      @for (p of rows(); track p.id) { <app-study-project-card [project]="p" [showBranch]="orgWide()" /> }
+    </div>
+    <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+  }
 </div>

@@ -10,7 +10,8 @@ import { Logo } from '@shared/ui/logo';
 import { StudyPrintService } from '../../data-access/study-print.service';
 import { STUDY_PRINT_ROUTES, StudyPrint, StudyPrintSegment } from '../../data-access/studies.models';
 
-interface Field { label: string; value: string; wide?: boolean; }
+/** ltr: قيمة تُقرأ من اليسار (رقم هاتف) فتُعزل عن اتجاه الصفحة كي لا تنقلب مجموعات أرقامها */
+interface Field { label: string; value: string; wide?: boolean; ltr?: boolean; }
 interface Table { title: string; head: string[]; rows: string[][]; foot?: string[]; }
 
 const day = (value: string | null | undefined) => value ? value.slice(0, 10).replaceAll('-', '/') : '';
@@ -44,8 +45,9 @@ export class StudyPrintPage {
       { label: 'المحافظة', value: r.governorateName }, { label: 'المنطقة', value: text(r.area) },
       { label: 'المدينة / القرية', value: text(r.cityOrVillage) }, { label: 'طبيعة العقار', value: text(r.propertyNature) },
       { label: 'نوع العمل', value: r.workTypeName }, { label: 'الاستعجال', value: r.urgencyName },
-      { label: 'المتابع لدى الجهة', value: [r.followerName, r.followerPhone ? formatPhone(r.followerPhone) : ''].filter(Boolean).join(' — ') },
-      { label: 'الموقع', value: text(r.siteName) },
+      { label: 'المتابع لدى الجهة', value: text(r.followerName) },
+      { label: 'هاتف المتابع', value: r.followerPhone ? formatPhone(r.followerPhone) : '', ltr: true },
+      { label: 'الموقع', value: text(r.siteName), wide: true },
       { label: 'ملاحظات عامة', value: text(r.notes), wide: true }
     ];
     if (a) return [

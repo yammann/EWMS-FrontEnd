@@ -23,6 +23,11 @@
   --accent: #988561;
   --accent-soft: #edebe0;
 
+  /* الزخرفة العشرية (public/brand/ornament.svg، صنف .ornament): لونها ذهبي الهوية وشفافيتها خافتة */
+  --ornament-color: var(--accent);
+  --ornament-opacity: .12;
+  --ornament-size: 128px;
+
   /* ---------- الأسطح والنصوص (الوضع الفاتح — نظام ألوان Apple) ---------- */
   --page-bg: #f5f5f7;
   --surface: #ffffff;
@@ -125,6 +130,7 @@
 
   --accent: #b9a779;
   --accent-soft: #2e2a20;
+  --ornament-opacity: .16;
 
   --danger-500: #ff453a;
   --danger-600: #ff6961;

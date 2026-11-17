@@ -149,25 +149,22 @@ export class MainLayout {
   }
 
   /**
-   * حالة السايدبار المحفوظة: مطوي (أيقونات فقط) + الأقسام المغلقة في الوضع الموسّع
-   * + القسم المفتوح في الوضع المطوي (railOpen): كل قسم أيقونة تنسدل تحتها صفحاته، قسم واحد في كل مرة،
-   * ويبقى آخر قسم فُتح مفتوحاً (قرار المستخدم 2026-10-13). القسم الأول بلا عنوان فتظهر صفحاته دائماً.
+   * حالة السايدبار المحفوظة: مطوي (أيقونات فقط) + القسم المفتوح (openSection).
+   * قسم واحد مفتوح في كل مرة في الوضعين: فتح قسم يغلق غيره، والضغط على المفتوح يغلقه، ويبقى آخر قسم فُتح مفتوحاً
+   * (الوضع المطوي بقرار 2026-10-13، والموسّع مثله بقرار 2026-11-15). القسم الأول بلا عنوان فتظهر صفحاته دائماً.
    */
   readonly collapsed = signal(false);
-  readonly closedSections = signal<ReadonlySet<string>>(new Set());
-  readonly railOpen = signal<string | null>(null);
+  readonly openSection = signal<string | null>(null);
 
-  isOpen(section: NavSection) { return !section.title || !this.closedSections().has(section.id); }
+  isOpen(section: NavSection) { return !section.title || this.openSection() === section.id; }
 
-  /** روابط القسم مطوية: في الوضع المطوي إلا القسم المفتوح، وفي الموسّع حسب طي القسم، ولا شيء على الشاشة الصغيرة */
+  /** روابط القسم مطوية: كل قسم بعنوان إلا القسم المفتوح، ولا شيء يُطوى على الشاشة الصغيرة */
   groupClosed(section: NavSection) {
-    if (this.compact()) return false;
-    if (this.collapsed()) return !!section.title && this.railOpen() !== section.id;
-    return !this.isOpen(section);
+    return !this.compact() && !this.isOpen(section);
   }
 
-  toggleRail(section: NavSection) {
-    this.railOpen.update(id => id === section.id ? null : section.id);
+  toggleSection(section: NavSection) {
+    this.openSection.update(id => id === section.id ? null : section.id);
     this.saveSidebar();
     this.followIndicator();
   }
@@ -236,27 +233,20 @@ export class MainLayout {
     requestAnimationFrame(step);
   }
 
-  toggleSection(section: NavSection) {
-    this.closedSections.update(set => {
-      const next = new Set(set);
-      next.has(section.id) ? next.delete(section.id) : next.add(section.id);
-      return next;
-    });
-    this.saveSidebar();
-    this.followIndicator();
-  }
-
+  /** المحفوظ باسم rail (اسمه منذ كان للوضع المطوي وحده). بلا قسم محفوظ في الوضع الموسّع: يُفتح قسم الصفحة الحالية */
   private loadSidebar() {
     try {
       const saved = JSON.parse(localStorage.getItem(SIDEBAR_KEY) ?? 'null');
       this.collapsed.set(saved?.collapsed === true);
-      this.closedSections.set(new Set(Array.isArray(saved?.closed) ? saved.closed : []));
-      this.railOpen.set(typeof saved?.rail === 'string' ? saved.rail : null);
+      this.openSection.set(typeof saved?.rail === 'string' ? saved.rail : null);
     } catch { /* التخزين غير متاح — الإعداد الافتراضي */ }
+    if (!this.collapsed() && this.openSection() === null) {
+      this.openSection.set(this.sections().find(s => s.title && this.hasActive(s))?.id ?? null);
+    }
   }
 
   private saveSidebar() {
-    try { localStorage.setItem(SIDEBAR_KEY, JSON.stringify({ collapsed: this.collapsed(), closed: [...this.closedSections()], rail: this.railOpen() })); }
+    try { localStorage.setItem(SIDEBAR_KEY, JSON.stringify({ collapsed: this.collapsed(), rail: this.openSection() })); }
     catch { /* تجاهل */ }
   }
 

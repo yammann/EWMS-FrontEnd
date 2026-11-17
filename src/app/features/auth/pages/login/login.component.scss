@@ -14,6 +14,8 @@
    الخلفية
    ========================================================= */
 .bg-layer { position: absolute; inset: 0; pointer-events: none; }
+/* زخرفة صفحة الدخول أكبر من بقية الصفحات (الافتراضي 128px) — تكبر مع عرض الشاشة */
+.bg-layer .ornament { --ornament-size: clamp(170px, 13vw, 230px); }
 
 .bg-orb {
   position: absolute;
@@ -31,14 +33,15 @@
   to   { transform: translate(40px, -30px) scale(1.08); }
 }
 
-/* طوابع المحافظات منثورة بخفة */
+/* طوابع المحافظات منثورة فوق الزخرفة: حبر أوضح، وهالة بلون الصفحة حول خطوطها تفصلها عن خطوط الزخرفة تحتها
+   (الشفافية في اللون لا في العنصر، كي تبقى الهالة كاملة) */
 .bg-stamp {
   position: absolute;
   top: var(--y);
   left: var(--x);
-  width: clamp(90px, 10vw, 150px);
-  color: var(--brand-600);
-  opacity: .1;
+  width: clamp(100px, 11vw, 160px);
+  color: color-mix(in srgb, var(--brand-600) 45%, transparent);
+  filter: drop-shadow(0 0 1.5px var(--page-bg)) drop-shadow(0 0 3px var(--page-bg));
   --stamp-paper: transparent;
   transform: rotate(var(--r));
   animation: float 9s ease-in-out infinite alternate;

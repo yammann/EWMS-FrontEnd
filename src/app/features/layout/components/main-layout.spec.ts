@@ -60,6 +60,26 @@ describe('MainLayout — القائمة على الشاشات الصغيرة', (
     buttons()[1].click(); await f.whenStable();
     expect(buttons()[0].getAttribute('aria-expanded')).toBe('false');
     expect(buttons()[1].getAttribute('aria-expanded')).toBe('true');
-    expect(layout.railOpen()).toBe('vacations');
+    expect(layout.openSection()).toBe('vacations');
+  });
+
+  it('expanded: opening a section closes the other, and the open one closes on a second click', async () => {
+    const f = TestBed.createComponent(MainLayout);
+    const layout = f.componentInstance;
+    layout.collapsed.set(false); layout.openSection.set(null);
+    await f.whenStable();
+    const el: HTMLElement = f.nativeElement;
+    const buttons = () => [...el.querySelectorAll<HTMLButtonElement>('.nav-section')];
+    const expanded = () => buttons().map(b => b.getAttribute('aria-expanded'));
+    expect(buttons().map(b => b.textContent?.trim())).toEqual(['المهام', 'الإجازات']);
+    expect(expanded()).toEqual(['false', 'false']);
+
+    buttons()[0].click(); await f.whenStable();
+    expect(expanded()).toEqual(['true', 'false']);
+    buttons()[1].click(); await f.whenStable();
+    expect(expanded()).toEqual(['false', 'true']);
+    expect(el.querySelectorAll('.nav-group.closed').length).toBe(1);
+    buttons()[1].click(); await f.whenStable();
+    expect(expanded()).toEqual(['false', 'false']);
   });
 });
