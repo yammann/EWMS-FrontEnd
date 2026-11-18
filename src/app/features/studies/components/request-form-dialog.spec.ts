@@ -57,7 +57,7 @@ describe('StudyRequestFormDialog beneficiaries', () => {
 
   it('requires a selection and sends its numeric id and name when the user selects an active beneficiary', () => {
     const { fixture, http, form, c } = open(false);
-    form.patchValue({ governorateCode: 'SY02' });
+    form.patchValue({ governorateCode: 'SY02', requestNumber: '001/د/2026' });
     c.save();
     expect(form.controls.mainBeneficiaryId.invalid).toBe(true);
     http.expectNone('/api/StudyRequests/Create');
@@ -81,7 +81,7 @@ describe('StudyRequestFormDialog beneficiaries', () => {
 
   it('keeps a saved inactive beneficiary and its original name when editing', () => {
     const { fixture, http, form, c } = open(false, {
-      id: 10, mainBeneficiaryId: 9, mainBeneficiary: 'الجهة القديمة', requestDate: '2026-11-18',
+      id: 10, requestNumber: '001/د/2026', mainBeneficiaryId: 9, mainBeneficiary: 'الجهة القديمة', requestDate: '2026-11-18',
       governorateCode: 'SY02', urgency: 2, workType: 1, branchId: 1, entityCode: 'OLD'
     }, [...BENEFICIARIES, { id: 9, name: 'جهة معطلة', code: '0009', isActive: false }]);
     fixture.detectChanges();
@@ -139,7 +139,7 @@ describe('StudyRequestFormDialog beneficiaries', () => {
 
   it('uses the configured code even if the readonly form control is changed programmatically', () => {
     const { http, form, c } = open(false);
-    form.patchValue({ mainBeneficiaryId: 7, governorateCode: 'SY02' });
+    form.patchValue({ mainBeneficiaryId: 7, governorateCode: 'SY02', requestNumber: '001/د/2026' });
     form.controls.entityCode.setValue('FORGED');
     c.save();
     const create = http.expectOne('/api/StudyRequests/Create');
@@ -157,5 +157,51 @@ describe('StudyRequestFormDialog beneficiaries', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('أكمل رمز هذه الجهة');
     c.save();
     http.expectNone('/api/StudyRequests/Update/10');
+  });
+});
+
+describe('StudyRequestFormDialog manual request number', () => {
+  afterEach(() => TestBed.inject(HttpTestingController).verify());
+
+  it.each([
+    ['', 'أدخل رقم الطلب.'],
+    ['   ', 'أدخل رقم الطلب.'],
+    ['1'.repeat(31), 'الحد الأقصى 30 حرفاً.']
+  ])('blocks saving an invalid request number: %j', (requestNumber, message) => {
+    const { fixture, http, form, c } = open(false);
+    form.patchValue({ mainBeneficiaryId: 7, governorateCode: 'SY02', requestNumber });
+    c.save();
+    fixture.detectChanges();
+    expect(form.controls.requestNumber.invalid).toBe(true);
+    expect((fixture.nativeElement as HTMLElement).querySelector('#study-request-number-error')?.textContent).toBe(message);
+    http.expectNone('/api/StudyRequests/Create');
+  });
+
+  it('sends the number entered by the user with leading zeros and punctuation preserved', () => {
+    const { fixture, http, form, c } = open(false);
+    form.patchValue({ mainBeneficiaryId: 7, governorateCode: 'SY02' });
+    const input = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>('input[formControlName=requestNumber]')!;
+    expect(input.required).toBe(true);
+    expect(input.readOnly).toBe(false);
+    input.value = '  ٠٠١/د/2026  ';
+    input.dispatchEvent(new Event('input'));
+    c.save();
+    const create = http.expectOne('/api/StudyRequests/Create');
+    expect(create.request.body.requestNumber).toBe('٠٠١/د/2026');
+    create.flush({ id: 1, requestNumber: '٠٠١/د/2026' });
+  });
+
+  it('loads and updates the manual number while preserving historical archive data', () => {
+    const { http, form, c } = open(false, {
+      id: 10, requestNumber: '001/2026', diwanRequestNumber: 'رقم أرشيف سابق',
+      mainBeneficiaryId: 7, mainBeneficiary: BENEFICIARIES[0].name, requestDate: '2026-11-18',
+      governorateCode: 'SY02', urgency: 2, workType: 1, branchId: 1, rowVersion: 'version'
+    });
+    expect(form.controls.requestNumber.value).toBe('001/2026');
+    form.controls.requestNumber.setValue(' 002/2026 ');
+    c.save();
+    const update = http.expectOne('/api/StudyRequests/Update/10');
+    expect(update.request.body).toMatchObject({ requestNumber: '002/2026', diwanRequestNumber: 'رقم أرشيف سابق', rowVersion: 'version' });
+    update.flush({ id: 10, requestNumber: '002/2026' });
   });
 });

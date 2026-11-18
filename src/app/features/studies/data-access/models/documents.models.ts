@@ -34,10 +34,10 @@ export interface StudyDocumentBase {
   nextIssuers?: StudyPerson[] | null; nextIssuersTotal?: number;
 }
 
-/** طلب تجهيز الدراسة (REQ) */
+/** طلب تجهيز الدراسة — رقمه يُدخل يدوياً من الديوان المركزي */
 export interface StudyRequest extends StudyDocumentBase {
   id: number; requestNumber: string; requestDate: string; urgency: number; urgencyName: string;
-  /** رقم الطلب من الديوان المركزي (يدوي) */
+  /** حقل قديم للبيانات السابقة؛ رقم الطلب المعتمد هو requestNumber */
   diwanRequestNumber: string | null;
   ministryArchiveNumber: string | null; ministryArchiveDate: string | null;
   adminArchiveNumber: string | null; adminArchiveDate: string | null;
@@ -50,7 +50,7 @@ export interface StudyRequest extends StudyDocumentBase {
   canCreateAssignment: boolean;
 }
 export interface StudyRequestInput {
-  requestDate: string; urgency: number; diwanRequestNumber?: string | null;
+  requestNumber: string; requestDate: string; urgency: number; diwanRequestNumber?: string | null;
   ministryArchiveNumber?: string | null; ministryArchiveDate?: string | null;
   adminArchiveNumber?: string | null; adminArchiveDate?: string | null;
   beneficiaryArchiveNumber?: string | null; addedDate?: string | null; entityCode?: string | null;

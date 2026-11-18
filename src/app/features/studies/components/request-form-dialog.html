@@ -1,5 +1,4 @@
 <app-modal size="lg" [heading]="request() ? 'تعديل طلب تجهيز الدراسة' : 'طلب تجهيز دراسة جديد'"
-           [subheading]="request()?.requestNumber ?? 'يُرقَّم تلقائياً عند الحفظ ويبقى مسودة حتى تسجيله نهائياً'"
            [busy]="saving()" (closed)="closed.emit()">
   <form [formGroup]="form" (ngSubmit)="save()">
     <div class="modal-body form-stack">
@@ -8,9 +7,25 @@
 
       <section class="form-section">
         <h3>بيانات الطلب</h3>
-        <div class="form-grid-3">
+        <div class="form-grid-2">
+          @let requestNumber = form.controls.requestNumber;
+          @let invalidNumber = requestNumber.touched && requestNumber.invalid;
+          <label class="form-field"><span class="form-label">رقم الديوان المركزي <small>(مطلوب)</small></span>
+            <input formControlName="requestNumber" maxlength="30" dir="auto" required
+                   [attr.aria-invalid]="invalidNumber" [attr.aria-describedby]="invalidNumber ? 'study-request-number-error' : null">
+            @if (invalidNumber) {
+              <small class="form-error" id="study-request-number-error">{{ requestNumber.hasError('maxlength') ? 'الحد الأقصى 30 حرفاً.' : 'أدخل رقم الطلب.' }}</small>
+            }
+          </label>
+          <label class="form-field"><span class="form-label">تاريخ الطلب</span><input type="date" formControlName="requestDate"></label>
+        </div>
+        <div class="request-options" [class.form-grid-3]="chooseBranch()" [class.form-grid-2]="!chooseBranch()">
+          <label class="form-field"><span class="form-label">الاستعجال</span>
+            <select formControlName="urgency">@for (u of urgencies; track u.value) { <option [ngValue]="u.value">{{ u.label }}</option> }</select></label>
+          <label class="form-field"><span class="form-label">نوع العمل</span>
+            <select formControlName="workType">@for (w of workTypes; track w.value) { <option [ngValue]="w.value">{{ w.label }}</option> }</select></label>
           @if (chooseBranch()) {
-            <label class="form-field"><span class="form-label">الفرع</span>
+            <label class="form-field request-branch"><span class="form-label">الفرع</span>
               <select formControlName="branchId">
                 <option [ngValue]="0" disabled>اختر الفرع…</option>
                 @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
@@ -18,18 +33,12 @@
               @if (form.controls.branchId.touched && form.controls.branchId.invalid) { <small class="form-error">اختر الفرع</small> }
             </label>
           }
-          <label class="form-field"><span class="form-label">تاريخ الطلب</span><input type="date" formControlName="requestDate"></label>
-          <label class="form-field"><span class="form-label">الاستعجال</span>
-            <select formControlName="urgency">@for (u of urgencies; track u.value) { <option [ngValue]="u.value">{{ u.label }}</option> }</select></label>
-          <label class="form-field"><span class="form-label">نوع العمل</span>
-            <select formControlName="workType">@for (w of workTypes; track w.value) { <option [ngValue]="w.value">{{ w.label }}</option> }</select></label>
         </div>
       </section>
 
       <section class="form-section">
         <h3>الأرشيف</h3>
         <div class="form-grid-3">
-          <label class="form-field"><span class="form-label">رقم الطلب من الديوان المركزي</span><input formControlName="diwanRequestNumber" maxlength="50"></label>
           <label class="form-field"><span class="form-label">رقم أرشيف ديوان الوزارة</span><input formControlName="ministryArchiveNumber" maxlength="50"></label>
           <label class="form-field"><span class="form-label">تاريخ أرشيف ديوان الوزارة</span><input type="date" formControlName="ministryArchiveDate"></label>
           <label class="form-field"><span class="form-label">رقم أرشيف الجهة المستفيدة</span><input formControlName="beneficiaryArchiveNumber" maxlength="50"></label>

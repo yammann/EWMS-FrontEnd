@@ -38,7 +38,7 @@ export class StudyPrintPage {
     const r = d.request, a = d.assignment, s = d.response, o = d.startOrder, c = d.designApproval;
     if (r) return [
       { label: 'الجهة المستفيدة الرئيسية', value: r.mainBeneficiary }, { label: 'الجهة الفرعية', value: text(r.subBeneficiary) },
-      { label: 'رقم الطلب من الديوان المركزي', value: text(r.diwanRequestNumber) }, { label: 'رمز الجهة', value: text(r.entityCode) },
+      { label: 'رقم الطلب من الديوان المركزي', value: r.requestNumber }, { label: 'رمز الجهة', value: text(r.entityCode) },
       { label: 'رقم أرشيف ديوان الوزارة', value: text(r.ministryArchiveNumber) }, { label: 'تاريخ أرشيف ديوان الوزارة', value: day(r.ministryArchiveDate) },
       { label: 'رقم أرشيف ديوان الإدارة', value: text(r.adminArchiveNumber) }, { label: 'تاريخ أرشيف ديوان الإدارة', value: day(r.adminArchiveDate) },
       { label: 'رقم أرشيف الجهة المستفيدة', value: text(r.beneficiaryArchiveNumber) }, { label: 'تاريخ الإضافة', value: day(r.addedDate) },

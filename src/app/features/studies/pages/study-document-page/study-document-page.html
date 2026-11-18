@@ -49,7 +49,7 @@
           <div><dt>تاريخ الطلب</dt><dd>{{ r.requestDate | date:'yyyy/MM/dd' }}</dd></div>
           <div><dt>الاستعجال</dt><dd>{{ r.urgencyName }}</dd></div>
           <div><dt>نوع العمل</dt><dd>{{ r.workTypeName }}</dd></div>
-          <div><dt>رقم الطلب من الديوان المركزي</dt><dd>{{ r.diwanRequestNumber || 'بدون' }}</dd></div>
+          <div><dt>رقم الطلب من الديوان المركزي</dt><dd dir="auto">{{ r.requestNumber }}</dd></div>
           <div><dt>رقم أرشيف ديوان الوزارة</dt><dd>{{ r.ministryArchiveNumber || 'بدون' }}</dd></div>
           <div><dt>تاريخ أرشيف ديوان الوزارة</dt><dd>{{ r.ministryArchiveDate ? (r.ministryArchiveDate | date:'yyyy/MM/dd') : '—' }}</dd></div>
           <div><dt>رقم أرشيف الجهة المستفيدة</dt><dd>{{ r.beneficiaryArchiveNumber || 'بدون' }}</dd></div>

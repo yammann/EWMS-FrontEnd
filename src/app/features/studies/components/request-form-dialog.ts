@@ -24,7 +24,7 @@ import { optional } from '../utils/form-rows';
 const phone = (c: AbstractControl<string>) => !c.value.trim() || isValidPhone(c.value) ? null : { phone: true };
 
 /**
- * طلب تجهيز الدراسة (REQ) — حقول النموذج الورقي الوارد من مكتب المدير.
+ * طلب تجهيز الدراسة — رقمه يُدخل يدوياً من الديوان المركزي.
  * يأخذ فرع المستخدم؛ من يتصفح المؤسسة يختار الفرع عند الإنشاء. الموقع من سجل المواقع اختياري (لمن يملك صلاحية عرض المواقع):
  * يُنسخ إلى المشروع فيظهر على خريطة الفرع.
  */
@@ -33,6 +33,11 @@ const phone = (c: AbstractControl<string>) => !c.value.trim() || isValidPhone(c.
   standalone: true,
   imports: [ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
+  styles: [`
+    .request-options { gap: 16px; }
+    @media (max-width: 760px) { .request-branch { grid-column: 1 / -1; } }
+    @media (max-width: 640px) { .request-options { grid-template-columns: minmax(0, 1fr); } }
+  `],
   templateUrl: './request-form-dialog.html'
 })
 export class StudyRequestFormDialog implements OnInit {
@@ -88,6 +93,7 @@ export class StudyRequestFormDialog implements OnInit {
 
   form = inject(FormBuilder).nonNullable.group({
     branchId: [0],
+    requestNumber: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(30)]],
     requestDate: [localDateInput(), Validators.required],
     urgency: [2, Validators.required],
     workType: [1, Validators.required],
@@ -100,7 +106,6 @@ export class StudyRequestFormDialog implements OnInit {
     area: ['', Validators.maxLength(100)],
     cityOrVillage: ['', Validators.maxLength(100)],
     propertyNature: ['', Validators.maxLength(100)],
-    diwanRequestNumber: ['', Validators.maxLength(50)],
     ministryArchiveNumber: ['', Validators.maxLength(50)],
     ministryArchiveDate: [''],
     adminArchiveNumber: ['', Validators.maxLength(50)],
@@ -142,10 +147,10 @@ export class StudyRequestFormDialog implements OnInit {
     const r = this.request();
     if (r) {
       this.form.reset({
-        branchId: r.branchId, requestDate: dateOnly(r.requestDate), urgency: r.urgency, workType: r.workType,
+        branchId: r.branchId, requestNumber: r.requestNumber, requestDate: dateOnly(r.requestDate), urgency: r.urgency, workType: r.workType,
         mainBeneficiaryId: r.mainBeneficiaryId ?? 0, subBeneficiary: r.subBeneficiary ?? '', entityCode: r.entityCode ?? '',
         governorateCode: r.governorateCode, siteId: r.siteId ?? 0, area: r.area ?? '', cityOrVillage: r.cityOrVillage ?? '', propertyNature: r.propertyNature ?? '',
-        diwanRequestNumber: r.diwanRequestNumber ?? '', ministryArchiveNumber: r.ministryArchiveNumber ?? '', ministryArchiveDate: dateOnly(r.ministryArchiveDate),
+        ministryArchiveNumber: r.ministryArchiveNumber ?? '', ministryArchiveDate: dateOnly(r.ministryArchiveDate),
         adminArchiveNumber: r.adminArchiveNumber ?? '', adminArchiveDate: dateOnly(r.adminArchiveDate),
         beneficiaryArchiveNumber: r.beneficiaryArchiveNumber ?? '', addedDate: dateOnly(r.addedDate),
         followerName: r.followerName ?? '', followerPhone: r.followerPhone ?? '', notes: r.notes ?? ''
@@ -178,11 +183,11 @@ export class StudyRequestFormDialog implements OnInit {
     const beneficiary = this.beneficiaryOptions().find(b => b.id === v.mainBeneficiaryId);
     if (!beneficiary?.code?.trim()) return;
     const body: StudyRequestInput = {
-      requestDate: v.requestDate, urgency: v.urgency, workType: v.workType,
+      requestNumber: v.requestNumber.trim(), requestDate: v.requestDate, urgency: v.urgency, workType: v.workType,
       mainBeneficiaryId: beneficiary.id, mainBeneficiary: beneficiary.name,
       subBeneficiary: optional(v.subBeneficiary), entityCode: beneficiary.code.trim(),
       governorateCode: v.governorateCode, area: optional(v.area), cityOrVillage: optional(v.cityOrVillage), propertyNature: optional(v.propertyNature),
-      diwanRequestNumber: optional(v.diwanRequestNumber), ministryArchiveNumber: optional(v.ministryArchiveNumber), ministryArchiveDate: v.ministryArchiveDate || null,
+      diwanRequestNumber: r?.diwanRequestNumber ?? null, ministryArchiveNumber: optional(v.ministryArchiveNumber), ministryArchiveDate: v.ministryArchiveDate || null,
       adminArchiveNumber: optional(v.adminArchiveNumber), adminArchiveDate: v.adminArchiveDate || null,
       beneficiaryArchiveNumber: optional(v.beneficiaryArchiveNumber), addedDate: v.addedDate || null,
       followerName: optional(v.followerName), followerPhone: v.followerPhone.trim() ? normalizePhone(v.followerPhone) : null,
