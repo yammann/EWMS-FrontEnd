@@ -75,7 +75,7 @@ export interface StudyAssignment extends StudyDocumentBase {
 }
 export interface StudyAssignmentInput {
   requestId: number; followingDepartmentId: number; assignmentDate: string;
-  projectCode?: string | null; allocatedBudget?: number | null; scopeSummary: string;
+  adminArchiveNumber?: string; allocatedBudget?: number | null; scopeSummary: string;
   needsTechnicalEvaluation: boolean; needsResourceEstimate: boolean; needsPreliminaryBudget: boolean; needsFinalRecommendation: boolean;
   referralDate: string; responseDeadline: string; priority: number;
   rowVersion?: string | null;

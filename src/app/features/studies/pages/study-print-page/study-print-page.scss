@@ -43,13 +43,17 @@ h2 { margin: 14px 0 6px; font-size: 14px; }
 .signer { display: grid; justify-items: center; align-content: start; gap: 3px; padding: 8px; border: 1px solid var(--rule); text-align: center; break-inside: avoid; }
 .signer strong { font-size: 13px; }
 .signer small { color: var(--soft); font-size: 11.5px; }
-.signer .note { color: var(--ink); white-space: pre-line; }
 .signer img { height: 52px; max-width: 90%; object-fit: contain; }
 .sign-space { height: 52px; }
 .signer .name { font-weight: 700; min-height: 20px; }
 .stamp { display: grid; place-items: center; width: 34mm; height: 34mm; border: 1px dashed #b5b5bd; border-radius: 50%; color: #b5b5bd; font-size: 11px; align-self: center; }
 
 .foot { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--rule); font-size: 12px; }
+.approval-notes { margin-bottom: 10px; }
+.approval-notes h2 { margin: 0 0 6px; break-after: avoid; }
+.approval-notes dl { margin: 0; }
+.approval-notes dt { font-weight: 700; break-after: avoid; }
+.approval-notes dd { margin: 0 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .copy { margin: 0; }
 
 @media print {

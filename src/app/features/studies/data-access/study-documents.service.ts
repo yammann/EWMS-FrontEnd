@@ -40,6 +40,11 @@ export class StudyDocumentsService {
   submit<K extends StudyDocumentKind>(kind: K, id: number): Observable<Item<K>> {
     return this.api.put<Item<K>>(`${this.base(kind)}/Submit/${id}`, {});
   }
+
+  previewProjectCode(requestId: number, assignmentDate: string, adminArchiveNumber: string) {
+    return this.api.get<{ projectCode: string }>(`/StudyAssignments/ProjectCode/${requestId}`
+      + query({ assignmentDate, adminArchiveNumber }));
+  }
   cancel<K extends StudyDocumentKind>(kind: K, id: number, reason: string): Observable<Item<K>> {
     return this.api.put<Item<K>>(`${this.base(kind)}/Cancel/${id}`, { reason: reason.trim() });
   }

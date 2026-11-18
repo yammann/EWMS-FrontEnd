@@ -31,6 +31,7 @@ export class StudyPrintPage {
   header = PRINT_HEADER;
   data = signal<StudyPrint | null>(null);
   error = signal('');
+  approvalNotes = computed(() => this.data()?.signatures.filter(s => s.note?.trim()) ?? []);
 
   fields = computed<Field[]>(() => {
     const d = this.data();

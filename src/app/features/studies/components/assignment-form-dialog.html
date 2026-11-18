@@ -17,9 +17,21 @@
             </select>
             @if (form.controls.followingDepartmentId.touched && form.controls.followingDepartmentId.invalid) { <small class="form-error">اختر القسم المتابع</small> }</label>
           <label class="form-field"><span class="form-label">تاريخ التكليف</span><input type="date" formControlName="assignmentDate"></label>
-          <label class="form-field"><span class="form-label">كود المشروع <small class="hint">(اختياري)</small></span><input formControlName="projectCode" maxlength="50" dir="auto"></label>
           <label class="form-field"><span class="form-label">الميزانية المرصودة <small class="hint">(ل.س، اختياري)</small></span>
             <input type="number" formControlName="allocatedBudget" min="0" step="any"></label>
+          @if (needsArchiveNumber()) {
+            <label class="form-field full"><span class="form-label">رقم أرشيف ديوان الإدارة <small>(مطلوب)</small></span>
+              <input formControlName="adminArchiveNumber" maxlength="50" dir="auto" required>
+              <small class="hint">رقم الأرشيف غير مسجل في الطلب. أدخله لتوليد كود المشروع.</small>
+            </label>
+          }
+          <label class="form-field full"><span class="form-label">كود المشروع</span>
+            <input [value]="projectCode()" readonly dir="ltr"
+                   [placeholder]="previewLoading() ? 'جارٍ توليد الكود…' : (assignment() ? 'غير مسجل' : '')">
+          </label>
+          @if (previewError()) {
+            <div class="full"><app-alert [message]="previewError()" retryLabel="إعادة المحاولة" (retry)="retryProjectCode()" /></div>
+          }
           <label class="form-field full"><span class="form-label">ملخص نطاق العمل والمتطلبات الخاصة بالعمل</span>
             <textarea formControlName="scopeSummary" rows="4" maxlength="4000"></textarea>
             @if (form.controls.scopeSummary.touched && form.controls.scopeSummary.invalid) { <small class="form-error">ملخص النطاق مطلوب</small> }</label>
@@ -48,6 +60,6 @@
         </div>
       </section>
     </div>
-    <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid || (!assignment() && !projectCode())" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
   </form>
 </app-modal>

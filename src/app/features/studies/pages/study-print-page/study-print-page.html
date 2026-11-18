@@ -63,13 +63,25 @@
             @if (s.jobTitle) { <small>{{ s.jobTitle }}</small> }
             <small class="ltr">{{ s.decidedAtHijri || '' }}</small>
             <small>{{ s.signerName ? s.decisionName : '' }}</small>
-            @if (s.note) { <small class="note">{{ s.note }}</small> }
           </div>
         }
         <div class="signer"><span class="stamp">مكان الختم</span></div>
       </div>
     }
 
-    <footer class="foot"><p class="copy">نسخة إلى:<br>- أرشيف {{ d.branchName }}</p></footer>
+    <footer class="foot">
+      @if (approvalNotes().length) {
+        <section class="approval-notes">
+          <h2>ملاحظات الاعتماد</h2>
+          <dl>
+            @for (s of approvalNotes(); track $index) {
+              <dt>{{ s.signerRoleName }}@if (s.signerName) { <span> · {{ s.signerName }}</span> }</dt>
+              <dd dir="auto">{{ s.note }}</dd>
+            }
+          </dl>
+        </section>
+      }
+      <p class="copy">نسخة إلى:<br>- أرشيف {{ d.branchName }}</p>
+    </footer>
   </article>
 } @else if (!error()) { <p class="loading no-print" role="status">جارٍ التحميل…</p> }

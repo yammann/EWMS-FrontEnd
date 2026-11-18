@@ -135,8 +135,8 @@ export class StudyDocumentPage {
   // ─────────── آباء النماذج: من المستند الحالي (للتعديل) أو له (لإصدار التالي) ───────────
   assignmentParent = computed<AssignmentParent | null>(() => {
     const r = this.request(), a = this.assignment();
-    if (r) return { requestId: r.id, requestNumber: r.requestNumber, mainBeneficiary: r.mainBeneficiary, branchId: r.branchId };
-    if (a) return { requestId: a.requestId, requestNumber: a.requestNumber, mainBeneficiary: a.mainBeneficiary, branchId: a.branchId };
+    if (r) return { requestId: r.id, requestNumber: r.requestNumber, mainBeneficiary: r.mainBeneficiary, branchId: r.branchId, adminArchiveNumber: r.adminArchiveNumber };
+    if (a) return { requestId: a.requestId, requestNumber: a.requestNumber, mainBeneficiary: a.mainBeneficiary, branchId: a.branchId, adminArchiveNumber: null };
     return null;
   });
   responseParent = computed<ResponseParent | null>(() => {
