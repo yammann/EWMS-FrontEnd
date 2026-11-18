@@ -32,6 +32,7 @@ import {
   StudyAssignment, StudyDocumentKind, StudyRecommendation, StudyRequest, StudyResponse, StudyStartOrder
 } from '../../data-access/studies.models';
 import { AnyStudyDocument, DOCUMENT_META, documentNumber } from '../../utils/document-meta';
+import { responseMoney, syrianEquivalent } from '../../utils/response-pricing';
 import { RouteDoc, routeNote } from '../../utils/route-note';
 
 /** نافذة مفتوحة: تعديل المستند نفسه أو إصدار التالي في السلسلة */
@@ -75,6 +76,8 @@ export class StudyDocumentPage {
   dialog = signal<Dialog>(null);
 
   money = money;
+  responseMoney = responseMoney;
+  syrianEquivalent = syrianEquivalent;
   formatPhone = formatPhone;
   notAvailable = StudyRecommendation.NotAvailable;
 

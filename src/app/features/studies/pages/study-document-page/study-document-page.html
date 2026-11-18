@@ -107,7 +107,15 @@
           <div><dt>مدير المشروع المقترح</dt><dd>{{ s.proposedManagerName || '—' }}</dd></div>
           <div><dt>التوصية الفنية النهائية</dt><dd>{{ s.recommendationName }}</dd></div>
           <div><dt>مساحة الموقع العام</dt><dd>{{ s.siteArea != null ? s.siteArea + ' م²' : '—' }}</dd></div>
-          <div><dt>التكلفة المبدئية</dt><dd>{{ s.initialCost != null ? money(s.initialCost) : '—' }}</dd></div>
+          <div><dt>التكلفة المبدئية</dt><dd>
+            {{ responseMoney(s.initialCost, s.costsInUsd) }}
+            @if (s.costsInUsd && syrianEquivalent(s.initialCost, s.usdToSypRate); as amount) {
+              <small class="muted"> · {{ amount }}</small>
+            }
+          </dd></div>
+          @if (s.costsInUsd && s.usdToSypRate; as rate) {
+            <div><dt>دولار واحد يساوي</dt><dd>{{ rate.toLocaleString('en-US', { maximumFractionDigits: 6 }) }} ل.س</dd></div>
+          }
         </dl>
         @if (s.recommendation === notAvailable) { <p class="muted note">التوصية «غير متاح»: لا يُصدر بعد هذا الرد أمر بدء.</p> }
         @if (s.buildings.length) {
@@ -119,15 +127,40 @@
           </table></div>
         }
       </section>
+      @if (s.buildings.some(b => b.details?.length)) {
+        <section class="panel">
+          <div class="panel-heading"><div><h2>تفاصيل المباني</h2></div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>نوع البناء</th><th>رمز المبنى</th><th>وظيفة المبنى</th><th>المساحة (م²)</th></tr></thead>
+            <tbody>
+              @for (b of s.buildings; track b.buildingType) {
+                @for (detail of b.details ?? []; track $index) {
+                  <tr><td>{{ b.buildingTypeName }}</td><td><bdi>{{ detail.code }}</bdi></td>
+                    <td>{{ detail.function }}</td><td class="mono">{{ detail.area }}</td></tr>
+                }
+              }
+            </tbody>
+          </table></div>
+        </section>
+      }
       <section class="panel">
         <div class="panel-heading"><div><h2>الجدول التفصيلي للتكلفة المبدئية</h2></div></div>
         @if (!s.costItems.length) { <p class="muted">لا بنود.</p> } @else {
           <div class="table-wrap"><table>
             <thead><tr><th>البند</th><th>الوحدة</th><th>الكمية</th><th>سعر الوحدة</th><th>المجموع</th></tr></thead>
             <tbody>@for (c of s.costItems; track c.id) {
-              <tr><td>{{ c.description }}</td><td>{{ c.unit }}</td><td class="mono">{{ c.quantity }}</td><td class="mono">{{ money(c.unitPrice) }}</td><td class="mono">{{ money(c.total) }}</td></tr>
+              <tr>
+                <td>{{ c.description }}</td><td>{{ c.unit }}</td><td class="mono">{{ c.quantity }}</td>
+                <td class="mono">{{ responseMoney(c.unitPrice, s.costsInUsd) }}</td>
+                <td class="mono">
+                  {{ responseMoney(c.total, s.costsInUsd) }}
+                  @if (s.costsInUsd && syrianEquivalent(c.total, s.usdToSypRate); as amount) {
+                    <br><small class="muted">{{ amount }}</small>
+                  }
+                </td>
+              </tr>
             }</tbody>
-            <tfoot><tr><td colspan="4">الإجمالي</td><td class="mono cell-strong">{{ money(s.totalCost) }}</td></tr></tfoot>
+            <tfoot><tr><td colspan="4">الإجمالي</td><td class="mono cell-strong">{{ responseMoney(s.totalCost, s.costsInUsd) }}</td></tr></tfoot>
           </table></div>
         }
       </section>

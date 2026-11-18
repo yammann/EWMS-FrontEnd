@@ -9,6 +9,7 @@ import { Icon } from '@shared/ui/icon';
 import { Logo } from '@shared/ui/logo';
 import { StudyPrintService } from '../../data-access/study-print.service';
 import { STUDY_PRINT_ROUTES, StudyPrint, StudyPrintSegment } from '../../data-access/studies.models';
+import { responseMoney } from '../../utils/response-pricing';
 
 /** ltr: قيمة تُقرأ من اليسار (رقم هاتف) فتُعزل عن اتجاه الصفحة كي لا تنقلب مجموعات أرقامها */
 interface Field { label: string; value: string; wide?: boolean; ltr?: boolean; }
@@ -67,7 +68,7 @@ export class StudyPrintPage {
       { label: 'التكليف المرجعي', value: s.assignmentNumber }, { label: 'كود المشروع', value: text(s.projectCode) },
       { label: 'القسم المتابع', value: s.followingDepartmentName }, { label: 'تاريخ الرد', value: day(s.responseDate) },
       { label: 'مدير المشروع المقترح', value: text(s.proposedManagerName) }, { label: 'التوصية الفنية النهائية', value: s.recommendationName },
-      { label: 'مساحة الموقع العام', value: s.siteArea != null ? s.siteArea + ' م²' : '' }, { label: 'التكلفة المبدئية', value: s.initialCost != null ? money(s.initialCost) : '' },
+      { label: 'مساحة الموقع العام', value: s.siteArea != null ? s.siteArea + ' م²' : '' }, { label: 'التكلفة المبدئية', value: s.initialCost != null ? responseMoney(s.initialCost, s.costsInUsd) : '' },
       { label: 'تقدير المدة اللازمة لإعداد الدراسة', value: s.requiredDays ? s.requiredDays + ' يوم تقويمي' : '', wide: true }
     ];
     if (o) return [
@@ -90,8 +91,11 @@ export class StudyPrintPage {
     const s = d?.response, o = d?.startOrder;
     if (s) return [
       { title: 'المباني', head: ['نوع البناء', 'عدد المباني', 'المساحة الإجمالية للمباني (م²)'], rows: s.buildings.map(b => [b.buildingTypeName, text(b.buildingCount), text(b.buildingsArea)]) },
+      { title: 'تفاصيل المباني', head: ['نوع البناء', 'رمز المبنى', 'وظيفة المبنى', 'المساحة (م²)'],
+        rows: s.buildings.flatMap(b => (b.details ?? []).map(d => [b.buildingTypeName, d.code, d.function, text(d.area)])) },
       { title: 'الجدول التفصيلي للتكلفة المبدئية', head: ['البند', 'الوحدة', 'الكمية', 'سعر الوحدة', 'المجموع'],
-        rows: s.costItems.map(c => [c.description, c.unit, text(c.quantity), money(c.unitPrice), money(c.total)]), foot: s.costItems.length ? ['الإجمالي', '', '', '', money(s.totalCost)] : undefined },
+        rows: s.costItems.map(c => [c.description, c.unit, text(c.quantity), responseMoney(c.unitPrice, s.costsInUsd), responseMoney(c.total, s.costsInUsd)]),
+        foot: s.costItems.length ? ['الإجمالي', '', '', '', responseMoney(s.totalCost, s.costsInUsd)] : undefined },
       { title: 'الكوادر الهندسية المقترحة', head: ['الاختصاص', 'العدد'], rows: s.staffEstimates.map(x => [x.disciplineName, text(x.staffCount)]) },
       { title: 'الموارد اللوجستية اللازمة', head: ['المورد', 'الكمية', 'ملاحظة'], rows: s.logisticItems.map(x => [x.item, text(x.quantity), text(x.note)]) }
     ].filter(t => t.rows.length);

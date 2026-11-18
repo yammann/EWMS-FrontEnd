@@ -9,7 +9,6 @@ import { Branch } from '@core/models/ewms.models';
 import { PagedResult } from '@core/models/paged-result.model';
 import { AuthService } from '@core/services/auth.service';
 import { LookupsService } from '@core/services/lookups.service';
-import { money } from '@core/utils/format';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
@@ -23,6 +22,7 @@ import {
   DOCUMENT_STATUSES, StudyAssignment, StudyDocumentKind, StudyDocumentStatus, StudyRequest, StudyResponse, StudyStartOrder
 } from '../../data-access/studies.models';
 import { DOCUMENT_KINDS, DOCUMENT_META, documentDate, documentNumber } from '../../utils/document-meta';
+import { responseMoney } from '../../utils/response-pricing';
 
 const PAGE_SIZE = 20;
 
@@ -58,7 +58,7 @@ function toRows(kind: StudyDocumentKind, result: PagedResult<unknown>): ListRow[
       }
       case 'responses': {
         const r = item as StudyResponse;
-        return { ...row, number, date, title: r.projectCode ? 'كود ' + r.projectCode : 'إشعار الرد', subtitle: '', extra: [r.followingDepartmentName, r.recommendationName, money(r.totalCost)] };
+        return { ...row, number, date, title: r.projectCode ? 'كود ' + r.projectCode : 'إشعار الرد', subtitle: '', extra: [r.followingDepartmentName, r.recommendationName, responseMoney(r.totalCost, r.costsInUsd)] };
       }
       case 'startOrders': {
         const o = item as StudyStartOrder;

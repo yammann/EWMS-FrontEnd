@@ -82,7 +82,11 @@ export interface StudyAssignmentInput {
 }
 
 /** سطر نوع بناء: العدد والمساحة فقط (مساحة الموقع والتكلفة المبدئية حقلان للرد كله) */
-export interface ResponseBuilding { buildingType: number; buildingTypeName: string; buildingCount: number; buildingsArea: number; }
+export interface ResponseBuildingDetail { code: string; function: string; area: number; }
+export interface ResponseBuilding {
+  buildingType: number; buildingTypeName: string; buildingCount: number; buildingsArea: number;
+  details?: ResponseBuildingDetail[];
+}
 export interface ResponseCostItem { id: number; sortOrder: number; description: string; unit: string; quantity: number; unitPrice: number; total: number; }
 export interface ResponseStaff { disciplineId: number; disciplineName: string; staffCount: number; }
 export interface StudyItem { id: number; item: string; quantity: number; note: string | null; }
@@ -96,6 +100,7 @@ export interface StudyResponse extends StudyDocumentBase {
   /** RSP-yy-nnnn */
   responseNumber: string;
   siteArea: number | null; initialCost: number | null;
+  costsInUsd: boolean; usdToSypRate: number | null;
   /** مجموع جدول البنود (يحسبه الخادم) */
   totalCost: number;
   buildings: ResponseBuilding[]; costItems: ResponseCostItem[]; staffEstimates: ResponseStaff[]; logisticItems: StudyItem[];
@@ -109,7 +114,8 @@ export interface StudyResponse extends StudyDocumentBase {
 export interface StudyResponseInput {
   assignmentId: number; responseDate: string; proposedManagerUserId?: number | null;
   recommendation: number; siteArea?: number | null; initialCost?: number | null;
-  buildings: { buildingType: number; buildingCount: number; buildingsArea: number }[];
+  costsInUsd: boolean; usdToSypRate: number | null;
+  buildings: Omit<ResponseBuilding, 'buildingTypeName'>[];
   costItems: { description: string; unit: string; quantity: number; unitPrice: number }[];
   rowVersion?: string | null;
 }

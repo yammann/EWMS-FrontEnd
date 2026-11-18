@@ -1,0 +1,19 @@
+.legacy-buildings p { margin: 0; }
+.legacy-pricing p { margin: 0; }
+.cost-line-total { display: grid; gap: 2px; padding-block: 10px; font-size: 13px; }
+.cost-line-total, .currency-equivalent { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.building-details { display: grid; gap: 10px; }
+.building-detail {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+  min-width: 0;
+  margin: 0;
+  padding: 8px 12px 12px;
+  border: 1px solid var(--separator);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.building-detail legend { padding-inline: 6px; color: var(--ink-700); font-size: 13px; font-weight: 700; }
+.building-total { font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .building-detail { grid-template-columns: minmax(0, 1fr); }
+}

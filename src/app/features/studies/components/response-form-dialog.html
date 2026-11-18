@@ -24,17 +24,59 @@
 
       <section class="form-section" formArrayName="buildings">
         <h3>المباني</h3>
-        <p class="hint">المساحة الإجمالية للمباني = عدد الطوابق × المساحة الطابقية.</p>
+        @if (legacyBuildingSummary()) {
+          <div class="rows-foot legacy-buildings">
+            <p class="hint">هذا الرد يحتوي على عدد المباني والمساحة الإجمالية فقط.</p>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="enterBuildingDetails()">إدخال تفاصيل المباني</button>
+          </div>
+        }
         <div class="rows">
           @for (b of form.controls.buildings.controls; track $index; let i = $index) {
             <div class="row building" [formGroupName]="i">
               <label class="check"><input type="checkbox" formControlName="included"> <strong>{{ buildingTypes[i].label }}</strong></label>
               @if (b.controls.included.value) {
-                <div class="form-grid-3">
+                <div class="form-grid-2">
                   <label class="form-field"><span class="form-label">عدد المباني</span><input type="number" formControlName="buildingCount" min="0" step="1">
-                    @if (b.controls.buildingCount.invalid) { <small class="form-error">عدد صحيح (بلا كسور)</small> }</label>
-                  <label class="form-field"><span class="form-label">المساحة الإجمالية للمباني (م²)</span><input type="number" formControlName="buildingsArea" min="0" step="any"></label>
+                    @if (b.controls.buildingCount.invalid) { <small class="form-error">أدخل عدداً صحيحاً غير سالب.</small> }
+                    @else if (individualBuildings() && (b.controls.buildingCount.value ?? 0) > maxBuildingsPerType) {
+                      <small class="form-error">يمكن تفصيل {{ maxBuildingsPerType }} مبنى لكل نوع كحد أقصى.</small>
+                    }
+                  </label>
+                  <label class="form-field"><span class="form-label">المساحة الإجمالية (م²)</span>
+                    @if (individualBuildings() || legacyBuildingSummary()) {
+                      <input class="building-total" [value]="qty(buildingArea(b))" readonly>
+                      @if (buildingArea(b) > maxBuildingArea) { <small class="form-error">إجمالي المساحة يتجاوز الحد المسموح.</small> }
+                    } @else {
+                      <input type="number" formControlName="buildingsArea" min="0" [max]="maxBuildingArea" step="any">
+                      @if (b.controls.buildingsArea.touched && b.controls.buildingsArea.invalid) { <small class="form-error">أدخل مساحة إجمالية صالحة.</small> }
+                    }
+                  </label>
                 </div>
+                @let details = buildingDetails(b);
+                @if (details.length) {
+                  <div class="building-details" formArrayName="details">
+                    @for (detail of details; track detail; let j = $index) {
+                      <fieldset class="form-grid-3 building-detail" [formGroupName]="j">
+                        <legend>المبنى {{ j + 1 }}</legend>
+                        <label class="form-field">
+                          <span class="form-label">رمز المبنى</span>
+                          <input formControlName="code" dir="auto" maxlength="50" required>
+                          @if (detail.controls.code.touched && detail.controls.code.invalid) { <small class="form-error">أدخل رمز المبنى.</small> }
+                        </label>
+                        <label class="form-field">
+                          <span class="form-label">وظيفة المبنى</span>
+                          <input formControlName="function" maxlength="200" required>
+                          @if (detail.controls.function.touched && detail.controls.function.invalid) { <small class="form-error">أدخل وظيفة المبنى.</small> }
+                        </label>
+                        <label class="form-field">
+                          <span class="form-label">المساحة (م²)</span>
+                          <input type="number" formControlName="area" min="0.01" step="0.01" required>
+                          @if (detail.controls.area.touched && detail.controls.area.invalid) { <small class="form-error">أدخل مساحة موجبة بخانتين عشريتين على الأكثر.</small> }
+                        </label>
+                      </fieldset>
+                    }
+                  </div>
+                }
               }
             </div>
           }
@@ -44,9 +86,30 @@
       <!-- خارج formArrayName: وإلا بحث Angular عن الحقلين داخل مصفوفة المباني ولم يربطهما بالنموذج فضاعت قيمتهما -->
       <section class="form-section">
         <h3>الموقع والتكلفة المبدئية</h3>
+        @if (!costsInUsd()) {
+          <div class="rows-foot legacy-pricing">
+            <p class="hint">هذا الرد مسعّر بالليرة السورية. للانتقال إلى الدولار، أعد إدخال الأسعار.</p>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="enableUsdPricing()">إعادة التسعير بالدولار</button>
+          </div>
+        }
         <div class="form-grid-3">
           <label class="form-field"><span class="form-label">مساحة الموقع العام (م²)</span><input type="number" formControlName="siteArea" min="0" step="any"></label>
-          <label class="form-field"><span class="form-label">التكلفة المبدئية (ل.س)</span><input type="number" formControlName="initialCost" min="0" step="any"></label>
+          @if (costsInUsd()) {
+            <label class="form-field">
+              <span class="form-label">دولار واحد يساوي (ل.س)</span>
+              <input type="number" formControlName="usdToSypRate" min="0.000001" step="any" inputmode="decimal">
+              @if (form.controls.usdToSypRate.invalid) {
+                <small class="form-error">أدخل سعر صرف موجباً حتى ست خانات عشرية.</small>
+              }
+            </label>
+          }
+          <label class="form-field">
+            <span class="form-label">التكلفة المبدئية ({{ costUnit() }})</span>
+            <input type="number" formControlName="initialCost" min="0" step="any" inputmode="decimal">
+            @if (equivalent(form.controls.initialCost.value); as amount) {
+              <small class="hint currency-equivalent" aria-live="polite">{{ amount }}</small>
+            }
+          </label>
         </div>
       </section>
 
@@ -59,18 +122,26 @@
               <label class="form-field"><span class="form-label">البند</span><input formControlName="description" maxlength="500"></label>
               <label class="form-field"><span class="form-label">الوحدة</span><input formControlName="unit" maxlength="30"></label>
               <label class="form-field"><span class="form-label">الكمية</span><input type="number" formControlName="quantity" min="0" step="any"></label>
-              <label class="form-field"><span class="form-label">سعر الوحدة</span><input type="number" formControlName="unitPrice" min="0" step="any"></label>
-              <span class="form-field"><span class="form-label">المجموع</span><span class="mono line-total">{{ money(rowTotal(c)) }}</span></span>
+              <label class="form-field"><span class="form-label">سعر الوحدة ({{ costUnit() }})</span><input type="number" formControlName="unitPrice" min="0" step="any"></label>
+              <div class="form-field">
+                <span class="form-label">المجموع</span>
+                <div class="cost-line-total">
+                  <strong>{{ costMoney(rowTotal(c)) }}</strong>
+                  @if (c.controls.unitPrice.value != null) {
+                    @if (equivalent(rowTotal(c)); as amount) { <small class="hint currency-equivalent">{{ amount }}</small> }
+                  }
+                </div>
+              </div>
               <button type="button" class="icon-btn row-remove" aria-label="حذف البند" (click)="remove(form.controls.costItems, i)"><app-icon name="trash" [size]="16" /></button>
             </div>
           }
         </div>
         <div class="rows-foot">
           <button type="button" class="btn btn-ghost btn-sm" (click)="addCost()">+ بند تكلفة</button>
-          <span class="total">إجمالي الجدول: <strong>{{ money(costTotal()) }}</strong></span>
+          <span class="total table-cost-total">إجمالي الجدول: <strong>{{ costMoney(costTotal()) }}</strong></span>
         </div>
       </section>
     </div>
-    <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid || buildingLimitsExceeded()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
   </form>
 </app-modal>
