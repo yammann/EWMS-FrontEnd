@@ -27,6 +27,7 @@
         <thead><tr>
           @if (isStage()) { <th>الترتيب</th> }
           <th>الاسم</th>
+          @if (isBeneficiary()) { <th>رمز الجهة</th> }
           @if (isStage()) { <th>الوزن</th><th>المستند المرتبط</th> }
           <th>الحالة</th>
           <th class="actions-th"></th>
@@ -36,6 +37,7 @@
             <tr>
               @if (isStage()) { <td class="mono">{{ item.defaultOrder }}</td> }
               <td><span class="cell-strong">{{ item.name }}</span></td>
+              @if (isBeneficiary()) { <td dir="auto">{{ item.code || 'يحتاج استكمال الرمز' }}</td> }
               @if (isStage()) {
                 <td class="mono">{{ item.defaultWeight }}</td>
                 <td>{{ item.linkedDocument ? linkedLabel(item.linkedDocument) : '—' }}</td>
@@ -61,7 +63,16 @@
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="modal-body form-stack">
         <app-alert [message]="crud.formError()" />
-        <label class="form-field"><span class="form-label">الاسم</span><input formControlName="name" maxlength="100"></label>
+        <label class="form-field"><span class="form-label">الاسم</span><input formControlName="name" [maxlength]="nameMaxLength()"></label>
+        @if (isBeneficiary()) {
+          <label class="form-field"><span class="form-label">رمز الجهة <small class="hint">(مطلوب)</small></span>
+            <input formControlName="code" maxlength="30" dir="auto" required>
+            @if (form.controls.code.touched && form.controls.code.invalid) {
+              <small class="form-error">أدخل رمز الجهة بما لا يتجاوز 30 حرفاً</small>
+            }
+            <small class="hint">يُملأ هذا الرمز تلقائياً عند اختيار الجهة في الطلب.</small>
+          </label>
+        }
         @if (isStage()) {
           <div class="form-grid-2">
             <label class="form-field"><span class="form-label">الترتيب</span>

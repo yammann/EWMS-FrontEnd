@@ -42,7 +42,7 @@ export interface StudyRequest extends StudyDocumentBase {
   ministryArchiveNumber: string | null; ministryArchiveDate: string | null;
   adminArchiveNumber: string | null; adminArchiveDate: string | null;
   beneficiaryArchiveNumber: string | null; addedDate: string | null; entityCode: string | null;
-  mainBeneficiary: string; subBeneficiary: string | null;
+  mainBeneficiaryId: number | null; mainBeneficiary: string; subBeneficiary: string | null;
   governorateCode: string; governorateName: string; area: string | null; cityOrVillage: string | null;
   propertyNature: string | null; workType: number; workTypeName: string;
   followerName: string | null; followerPhone: string | null; notes: string | null;
@@ -54,7 +54,7 @@ export interface StudyRequestInput {
   ministryArchiveNumber?: string | null; ministryArchiveDate?: string | null;
   adminArchiveNumber?: string | null; adminArchiveDate?: string | null;
   beneficiaryArchiveNumber?: string | null; addedDate?: string | null; entityCode?: string | null;
-  mainBeneficiary: string; subBeneficiary?: string | null;
+  mainBeneficiaryId: number; mainBeneficiary: string; subBeneficiary?: string | null;
   governorateCode: string; area?: string | null; cityOrVillage?: string | null; propertyNature?: string | null;
   workType: number; followerName?: string | null; followerPhone?: string | null; notes?: string | null;
   siteId?: number | null;

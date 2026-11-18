@@ -10,7 +10,11 @@ export const DOCUMENT_STATUSES: readonly EnumOption<StudyDocumentStatus>[] = [
 ];
 
 export const URGENCIES: readonly EnumOption[] = [{ value: 1, label: 'مستعجل' }, { value: 2, label: 'عادي' }];
-export const WORK_TYPES: readonly EnumOption[] = [{ value: 1, label: 'إنشاء' }, { value: 2, label: 'صيانة وترميم' }];
+export const WORK_TYPES: readonly EnumOption[] = [
+  { value: 1, label: 'إنشاء جديد' },
+  { value: 2, label: 'صيانة وترميم' },
+  { value: 3, label: 'إنشاء جديد / صيانة وترميم' }
+];
 export const PRIORITIES: readonly EnumOption[] = [
   { value: 1, label: 'عاجل جداً وسري' }, { value: 2, label: 'عاجل' }, { value: 3, label: 'عادي' }
 ];

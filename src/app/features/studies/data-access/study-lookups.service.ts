@@ -5,14 +5,16 @@ import { query } from '../utils/query';
 import { StudyEmployee, StudyLookup, StudyLookupInput, StudyStageType, StudyStageTypeInput } from './studies.models';
 
 /** قوائم الدراسات البسيطة (اسم + فعّال) */
-export type StudySimpleLookupKind = 'attachmentTypes' | 'disciplines';
+export type StudySimpleLookupKind = 'attachmentTypes' | 'disciplines' | 'beneficiaries';
 const SIMPLE_ROUTES: Record<StudySimpleLookupKind, string> = {
-  attachmentTypes: '/StudyLookups/AttachmentTypes', disciplines: '/StudyLookups/Disciplines'
+  attachmentTypes: '/StudyLookups/AttachmentTypes', disciplines: '/StudyLookups/Disciplines',
+  beneficiaries: '/StudyLookups/Beneficiaries'
 };
 
 /**
- * قوائم فرع الدراسات: أنواع المراحل (تُنسخ إلى كل مشروع جديد بترتيبها ووزنها)، أنواع المرفقات، والاختصاصات الهندسية.
+ * قوائم فرع الدراسات: أنواع المراحل، أنواع المرفقات، الاختصاصات الهندسية، والجهات المستفيدة.
  * القراءة: أنواع المراحل والاختصاصات بـ ViewStudyLookups، وأنواع المرفقات لمن يرى أي مستند (AnyStudyView).
+ * الجهات المستفيدة متاحة أيضاً لمن ينشئ أو يعدّل طلب دراسة.
  * المعطّل يبقى في السجلات القديمة ولا يظهر في النماذج الجديدة (activeOnly).
  */
 @Injectable({ providedIn: 'root' })

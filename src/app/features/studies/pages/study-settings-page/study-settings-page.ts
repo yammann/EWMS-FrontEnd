@@ -14,12 +14,12 @@ import { PageHeader } from '@shared/ui/page-header';
 import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { StudyAccess } from '../../data-access/study-access';
-import { StudyLookupsService } from '../../data-access/study-lookups.service';
+import { StudyLookupsService, StudySimpleLookupKind } from '../../data-access/study-lookups.service';
 import {
   LINKED_DOCUMENTS, StudyLinkedDocument, StudyLookup, StudyLookupInput, StudyStageType, StudyStageTypeInput
 } from '../../data-access/studies.models';
 
-type SettingsKind = 'stageTypes' | 'attachmentTypes' | 'disciplines';
+type SettingsKind = 'stageTypes' | StudySimpleLookupKind;
 /** صف الجدول: القوائم البسيطة اسم + فعّال، وأنواع المراحل تزيد الترتيب والوزن والمستند المرتبط */
 type SettingsRow = StudyLookup & Partial<Omit<StudyStageType, 'id' | 'name' | 'isActive'>>;
 type SettingsBody = StudyStageTypeInput | StudyLookupInput;
@@ -31,12 +31,16 @@ const KINDS: Record<SettingsKind, { label: string; single: string; hint: string 
       + 'يُنشأ في المشروع مرحلةً مغلقة بتواريخ ذلك المستند. تعديل نوع لا يغيّر مراحل المشاريع الموجودة.'
   },
   attachmentTypes: { label: 'أنواع المرفقات', single: 'نوع مرفق', hint: 'يُختار نوع لكل ملف يُرفع على مستندات الدراسة ومشاريعها ومخططاتها.' },
-  disciplines: { label: 'الاختصاصات الهندسية', single: 'اختصاص', hint: 'تُستعمل في تقدير الكادر في الرد، وفي مهندسي أمر البدء.' }
+  disciplines: { label: 'الاختصاصات الهندسية', single: 'اختصاص', hint: 'تُستعمل في تقدير الكادر في الرد، وفي مهندسي أمر البدء.' },
+  beneficiaries: {
+    label: 'الجهات المستفيدة', single: 'جهة مستفيدة',
+    hint: 'لكل جهة رمز مطلوب وفريد يُملأ تلقائياً في الطلب. أكمل رموز الجهات القديمة لتظهر في قائمة الاختيار. تعطيل جهة أو تعديل اسمها لا يغيّر بيانات الطلبات السابقة.'
+  }
 };
 const KIND_KEYS = Object.keys(KINDS) as SettingsKind[];
 
 /**
- * إعدادات فرع الدراسات: أنواع المراحل وأنواع المرفقات والاختصاصات الهندسية.
+ * إعدادات فرع الدراسات: أنواع المراحل وأنواع المرفقات والاختصاصات الهندسية والجهات المستفيدة.
  * المستخدَم لا يُحذف (يرفضه الخادم برسالة) بل يُعطَّل: يبقى في السجلات القديمة ويختفي من النماذج الجديدة.
  */
 @Component({
@@ -65,9 +69,12 @@ export class StudySettingsPage {
   kind = signal<SettingsKind>('stageTypes');
   current = computed(() => KINDS[this.kind()]);
   isStage = computed(() => this.kind() === 'stageTypes');
+  isBeneficiary = computed(() => this.kind() === 'beneficiaries');
+  nameMaxLength = computed(() => this.kind() === 'beneficiaries' ? 200 : 100);
 
   form = inject(FormBuilder).nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
+    code: [''],
     isActive: [true],
     defaultOrder: [0, [Validators.required, Validators.min(0), Validators.max(1000), integer]],
     defaultWeight: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -83,7 +90,7 @@ export class StudySettingsPage {
     remove: item => this.isStage() ? this.service.deleteStageType(item.id) : this.service.deleteLookup(this.simpleKind(), item.id),
     can: { create: () => this.can().createLookup, edit: () => this.can().editLookup, delete: () => this.can().deleteLookup },
     onOpen: item => this.form.reset({
-      name: item?.name ?? '', isActive: item?.isActive ?? true,
+      name: item?.name ?? '', code: item?.code ?? '', isActive: item?.isActive ?? true,
       defaultOrder: item?.defaultOrder ?? this.nextOrder(), defaultWeight: item?.defaultWeight ?? 0,
       linkedDocument: item?.linkedDocument ?? 0
     }),
@@ -101,6 +108,11 @@ export class StudySettingsPage {
     inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe(p => {
       const tab = p.get('tab') as SettingsKind | null;
       this.kind.set(tab && KIND_KEYS.includes(tab) ? tab : 'stageTypes');
+      this.form.controls.name.setValidators([Validators.required, Validators.maxLength(this.nameMaxLength())]);
+      this.form.controls.name.updateValueAndValidity();
+      this.form.controls.code.setValidators(this.isBeneficiary()
+        ? [Validators.required, Validators.pattern(/\S/), Validators.maxLength(30)] : []);
+      this.form.controls.code.updateValueAndValidity();
       this.crud.reload(true);
     });
   }
@@ -112,11 +124,12 @@ export class StudySettingsPage {
   linkedLabel(value: number | undefined) { return LINKED_DOCUMENTS.find(d => d.value === value)?.label ?? '—'; }
 
   save() {
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
     const body: SettingsBody = this.isStage()
       ? { name: v.name.trim(), isActive: v.isActive, defaultOrder: v.defaultOrder, defaultWeight: v.defaultWeight, linkedDocument: v.linkedDocument }
-      : { name: v.name.trim(), isActive: v.isActive };
+      : { name: v.name.trim(), isActive: v.isActive, ...(this.isBeneficiary() ? { code: v.code.trim() } : {}) };
     this.crud.save(body);
   }
 

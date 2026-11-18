@@ -21,7 +21,7 @@
           <label class="form-field"><span class="form-label">تاريخ الطلب</span><input type="date" formControlName="requestDate"></label>
           <label class="form-field"><span class="form-label">الاستعجال</span>
             <select formControlName="urgency">@for (u of urgencies; track u.value) { <option [ngValue]="u.value">{{ u.label }}</option> }</select></label>
-          <label class="form-field"><span class="form-label">إنشاء / صيانة وترميم</span>
+          <label class="form-field"><span class="form-label">نوع العمل</span>
             <select formControlName="workType">@for (w of workTypes; track w.value) { <option [ngValue]="w.value">{{ w.label }}</option> }</select></label>
         </div>
       </section>
@@ -42,10 +42,29 @@
       <section class="form-section">
         <h3>الجهة المستفيدة والموقع</h3>
         <div class="form-grid-3">
-          <label class="form-field full"><span class="form-label">الجهة المستفيدة الرئيسية</span><input formControlName="mainBeneficiary" maxlength="200">
-            @if (form.controls.mainBeneficiary.touched && form.controls.mainBeneficiary.invalid) { <small class="form-error">الجهة المستفيدة الرئيسية مطلوبة</small> }</label>
+          <label class="form-field full"><span class="form-label">الجهة المستفيدة الرئيسية</span>
+            <select formControlName="mainBeneficiaryId">
+              <option [ngValue]="0" disabled>{{ beneficiariesLoading() ? 'جارٍ تحميل الجهات المستفيدة…' : 'اختر الجهة المستفيدة…' }}</option>
+              @for (b of beneficiaryOptions(); track b.id) {
+                <option [ngValue]="b.id">{{ b.name }}{{ b.isActive ? '' : ' (الجهة الحالية)' }}</option>
+              }
+            </select>
+            @if (form.controls.mainBeneficiaryId.touched && form.controls.mainBeneficiaryId.invalid) { <small class="form-error">اختر الجهة المستفيدة الرئيسية</small> }
+            @if (!beneficiariesLoading() && !beneficiaryError() && !activeBeneficiaries().length) {
+              <small class="hint">لا توجد جهات مستفيدة فعالة برمز محدد. أضف جهة أو أكمل رمزها من إعدادات الدراسات.</small>
+            }
+          </label>
+          @if (beneficiaryError()) {
+            <div class="full"><app-alert [message]="beneficiaryError()" retryLabel="إعادة المحاولة" (retry)="loadBeneficiaries()" /></div>
+          }
           <label class="form-field"><span class="form-label">اسم الجهة الفرعية (اللواء — الإدارة)</span><input formControlName="subBeneficiary" maxlength="200"></label>
-          <label class="form-field"><span class="form-label">رمز الجهة</span><input formControlName="entityCode" maxlength="30" dir="auto"></label>
+          <label class="form-field"><span class="form-label">رمز الجهة</span>
+            <input formControlName="entityCode" maxlength="30" dir="auto" readonly required>
+            <small class="hint">يُملأ تلقائياً من الجهة المختارة.</small>
+            @if (!beneficiariesLoading() && !beneficiaryError() && form.controls.mainBeneficiaryId.value && !form.controls.entityCode.value) {
+              <small class="form-error">أكمل رمز هذه الجهة من إعدادات الدراسات.</small>
+            }
+          </label>
           <label class="form-field"><span class="form-label">طبيعة العقار</span><input formControlName="propertyNature" maxlength="100"></label>
           <label class="form-field"><span class="form-label">المحافظة</span>
             <select formControlName="governorateCode">
@@ -76,6 +95,6 @@
         </div>
       </section>
     </div>
-    <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid || beneficiariesLoading() || !!beneficiaryError()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
   </form>
 </app-modal>

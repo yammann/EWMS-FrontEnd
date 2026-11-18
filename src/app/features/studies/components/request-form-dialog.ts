@@ -1,5 +1,7 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, catchError, of, switchMap } from 'rxjs';
 import { AppPermission, SITE_PICK_ACCESS } from '@core/constants/access';
 import { GOVERNORATES } from '@core/constants/governorates';
 import { orEmpty } from '@core/http/or-empty';
@@ -13,8 +15,9 @@ import { FormActions } from '@shared/ui/form-actions';
 import { Modal } from '@shared/ui/modal';
 import { trackRequest } from '@shared/ui/track-request';
 import { StudyDocumentsService } from '../data-access/study-documents.service';
+import { StudyLookupsService } from '../data-access/study-lookups.service';
 import { SiteLookupService, SiteOption } from '@core/services/site-lookup.service';
-import { StudyRequest, StudyRequestInput, URGENCIES, WORK_TYPES } from '../data-access/studies.models';
+import { StudyLookup, StudyRequest, StudyRequestInput, URGENCIES, WORK_TYPES } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
 import { optional } from '../utils/form-rows';
 
@@ -37,6 +40,8 @@ export class StudyRequestFormDialog implements OnInit {
   private auth = inject(AuthService);
   private lookups = inject(LookupsService);
   private siteLookup = inject(SiteLookupService);
+  private studyLookups = inject(StudyLookupsService);
+  private beneficiaryReload = new Subject<void>();
 
   /** null = طلب جديد */
   request = input<StudyRequest | null>(null);
@@ -53,6 +58,23 @@ export class StudyRequestFormDialog implements OnInit {
   branches = signal<Branch[]>([]);
   /** قائمة مساعدة لم تُحمَّل (نقص صلاحية): يُقال في النموذج */
   missing = signal('');
+  beneficiaries = signal<StudyLookup[]>([]);
+  activeBeneficiaries = computed(() => this.beneficiaries().filter(b => b.isActive && b.code?.trim()));
+  beneficiariesLoading = signal(true);
+  beneficiaryError = signal('');
+  /** الجهة المحفوظة تبقى قابلة للاختيار بعد تعطيلها، ويُحفظ اسمها كما ورد في الطلب. */
+  beneficiaryOptions = computed(() => {
+    const current = this.request(), options = this.activeBeneficiaries();
+    if (!current?.mainBeneficiaryId) return options;
+    const configured = this.beneficiaries().find(b => b.id === current.mainBeneficiaryId);
+    const saved: StudyLookup = {
+      id: current.mainBeneficiaryId, name: current.mainBeneficiary,
+      code: configured ? configured.code : current.entityCode, isActive: configured?.isActive ?? false
+    };
+    return options.some(b => b.id === saved.id)
+      ? options.map(b => b.id === saved.id ? saved : b)
+      : [saved, ...options];
+  });
 
   /** حقل الموقع يظهر لمن يقرأ سجل المواقع (AnySiteView: ومنهم كاتب الطلب)؛ بدونها يبقى موقع الطلب كما هو */
   canPickSite = this.auth.hasAnyPermission(SITE_PICK_ACCESS);
@@ -69,9 +91,9 @@ export class StudyRequestFormDialog implements OnInit {
     requestDate: [localDateInput(), Validators.required],
     urgency: [2, Validators.required],
     workType: [1, Validators.required],
-    mainBeneficiary: ['', [Validators.required, Validators.maxLength(200)]],
+    mainBeneficiaryId: [0, [Validators.required, Validators.min(1)]],
     subBeneficiary: ['', Validators.maxLength(200)],
-    entityCode: ['', Validators.maxLength(30)],
+    entityCode: ['', [Validators.required, Validators.maxLength(30)]],
     governorateCode: ['', Validators.required],
     /** 0 = بلا موقع */
     siteId: [0],
@@ -90,12 +112,38 @@ export class StudyRequestFormDialog implements OnInit {
     notes: ['', Validators.maxLength(2000)]
   });
 
+  constructor() {
+    this.form.controls.mainBeneficiaryId.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.syncEntityCode());
+    this.beneficiaryReload.pipe(
+      switchMap(() => {
+        this.beneficiariesLoading.set(true);
+        this.beneficiaryError.set('');
+        return this.studyLookups.lookup('beneficiaries', !this.request()).pipe(catchError(() => {
+          this.beneficiaryError.set('تعذّر تحميل الجهات المستفيدة. أعد المحاولة.');
+          return of([] as StudyLookup[]);
+        }));
+      }),
+      takeUntilDestroyed()
+    ).subscribe(list => {
+      this.beneficiaries.set(list);
+      this.syncEntityCode();
+      this.beneficiariesLoading.set(false);
+    });
+  }
+
+  loadBeneficiaries() { this.beneficiaryReload.next(); }
+
+  private syncEntityCode() {
+    const beneficiary = this.beneficiaryOptions().find(b => b.id === this.form.controls.mainBeneficiaryId.value);
+    this.form.controls.entityCode.setValue(beneficiary?.code?.trim() ?? '');
+  }
+
   ngOnInit() {
     const r = this.request();
     if (r) {
       this.form.reset({
         branchId: r.branchId, requestDate: dateOnly(r.requestDate), urgency: r.urgency, workType: r.workType,
-        mainBeneficiary: r.mainBeneficiary, subBeneficiary: r.subBeneficiary ?? '', entityCode: r.entityCode ?? '',
+        mainBeneficiaryId: r.mainBeneficiaryId ?? 0, subBeneficiary: r.subBeneficiary ?? '', entityCode: r.entityCode ?? '',
         governorateCode: r.governorateCode, siteId: r.siteId ?? 0, area: r.area ?? '', cityOrVillage: r.cityOrVillage ?? '', propertyNature: r.propertyNature ?? '',
         diwanRequestNumber: r.diwanRequestNumber ?? '', ministryArchiveNumber: r.ministryArchiveNumber ?? '', ministryArchiveDate: dateOnly(r.ministryArchiveDate),
         adminArchiveNumber: r.adminArchiveNumber ?? '', adminArchiveDate: dateOnly(r.adminArchiveDate),
@@ -103,6 +151,7 @@ export class StudyRequestFormDialog implements OnInit {
         followerName: r.followerName ?? '', followerPhone: r.followerPhone ?? '', notes: r.notes ?? ''
       });
     }
+    this.loadBeneficiaries();
     this.governorate.set(this.form.controls.governorateCode.value);
     this.form.controls.governorateCode.valueChanges.subscribe(code => {
       this.governorate.set(code);
@@ -123,12 +172,15 @@ export class StudyRequestFormDialog implements OnInit {
 
   save() {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid || this.saving() || this.beneficiariesLoading() || this.beneficiaryError()) return;
     const v = this.form.getRawValue();
     const r = this.request();
+    const beneficiary = this.beneficiaryOptions().find(b => b.id === v.mainBeneficiaryId);
+    if (!beneficiary?.code?.trim()) return;
     const body: StudyRequestInput = {
       requestDate: v.requestDate, urgency: v.urgency, workType: v.workType,
-      mainBeneficiary: v.mainBeneficiary.trim(), subBeneficiary: optional(v.subBeneficiary), entityCode: optional(v.entityCode),
+      mainBeneficiaryId: beneficiary.id, mainBeneficiary: beneficiary.name,
+      subBeneficiary: optional(v.subBeneficiary), entityCode: beneficiary.code.trim(),
       governorateCode: v.governorateCode, area: optional(v.area), cityOrVillage: optional(v.cityOrVillage), propertyNature: optional(v.propertyNature),
       diwanRequestNumber: optional(v.diwanRequestNumber), ministryArchiveNumber: optional(v.ministryArchiveNumber), ministryArchiveDate: v.ministryArchiveDate || null,
       adminArchiveNumber: optional(v.adminArchiveNumber), adminArchiveDate: v.adminArchiveDate || null,
