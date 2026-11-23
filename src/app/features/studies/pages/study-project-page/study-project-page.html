@@ -11,8 +11,17 @@
     <div class="header-actions">
       <a class="btn btn-ghost" routerLink="/studies/projects">كل المشاريع</a>
       @if (project(); as p) {
-        @if (p.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')">تعديل</button> }
-        @if (p.canRequestCompletion) { <button class="btn" type="button" [disabled]="busy()" (click)="requestCompletion()">طلب اعتماد الإنجاز</button> }
+        @if (p.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')"><app-action-icon kind="edit" /> تعديل</button> }
+        @if (p.canRequestCompletion) {
+          <button class="btn" type="button" [disabled]="busy()" [attr.aria-busy]="pending.send()" (click)="requestCompletion()">
+            <app-action-icon kind="send" [busy]="pending.send()" /> طلب اعتماد الإنجاز
+          </button>
+        }
+        @if (p.canReactivate) {
+          <button class="btn" type="button" [disabled]="busy()" [attr.aria-busy]="pending.reactivate()" (click)="reactivateProject(p)">
+            <app-action-icon kind="reactivate" [busy]="pending.reactivate()" /> إعادة تفعيل المشروع
+          </button>
+        }
       }
     </div>
   </header>
@@ -22,7 +31,7 @@
 
   @if (project(); as p) {
     @if (p.status === 4) {
-      <p class="alert state-note" role="status"><app-icon name="lock" [size]="16" /> المشروع ملغى ويبقى للأرشيف فقط.</p>
+      <p class="alert state-note" role="status"><app-icon name="lock" [size]="16" /> المشروع ملغى.</p>
     } @else if (p.status === 3) {
       <p class="alert state-note" role="status"><app-icon name="checkmark" [size]="16" /> المشروع مكتمل.</p>
     } @else if (p.status === 2) {
@@ -83,7 +92,11 @@
         </div>
         <div class="header-actions">
           @if (p.canCancel) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="actionError.set(''); dialog.set('cancel')">إلغاء المشروع</button> }
-          @if (p.canDelete) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="remove()">حذف</button> }
+          @if (p.canDelete) {
+            <button class="btn btn-danger" type="button" [disabled]="busy()" [attr.aria-busy]="pending.delete()" (click)="remove()">
+              <app-delete-action-content [busy]="pending.delete()" />
+            </button>
+          }
         </div>
       </section>
     }

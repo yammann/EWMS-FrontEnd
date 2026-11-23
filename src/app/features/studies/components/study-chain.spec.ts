@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { StudyChain } from '../data-access/studies.models';
+import { StudyChain, StudyDiwanStage } from '../data-access/studies.models';
 import { StudyChainView } from './study-chain';
 
 const chain = (over: Partial<StudyChain> = {}): StudyChain => ({
@@ -21,6 +21,13 @@ function open(c: StudyChain, current: 'requests' | 'assignments' | 'project' | n
 }
 
 describe('StudyChainView', () => {
+  it('shows the Diwan case between the approved response and the unissued start order', () => {
+    const { steps } = open(chain({ responseId: 3, responseStatus: 3, diwanStage: StudyDiwanStage.AwaitingBranchHead }));
+    expect(steps[3].textContent).toContain('معاملة الديوان');
+    expect(steps[3].textContent).toContain('بانتظار إجراء رئيس الفرع');
+    expect(steps[3].classList.contains('wait')).toBe(true);
+    expect(steps[4].textContent).toContain('لم يصدر بعد');
+  });
   it('shapes each step by its state: done, waiting, missing', () => {
     const { view, steps } = open(chain());
     expect(view.steps().map(s => view.tone(s))).toEqual(['done', 'wait', 'missing', 'missing', 'missing']);

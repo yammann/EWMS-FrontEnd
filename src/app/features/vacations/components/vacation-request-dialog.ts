@@ -8,6 +8,7 @@ import { daysAr, fridaysAr, holidaysAr } from '@core/utils/arabic-count';
 import { Alert } from '@shared/ui/alert';
 import { FormActions } from '@shared/ui/form-actions';
 import { Icon } from '@shared/ui/icon';
+import { ActionIcon } from '@shared/ui/action-icon';
 import { Modal } from '@shared/ui/modal';
 import { trackRequest } from '@shared/ui/track-request';
 import { VacationService } from '../data-access/vacation.service';
@@ -19,7 +20,7 @@ import { notInPast, vacationDateRange } from '../utils/vacation-validators';
  * تُحسب المدة بأيام العمل (بلا الجمعة والعطل الرسمية)، ولا تقديم بأثر رجعي. تُطلق submitted بالطلب المقدَّم.
  */
 @Component({
-  selector: 'app-vacation-request-dialog', standalone: true, imports: [Modal, Alert, FormActions, ReactiveFormsModule, Icon],
+  selector: 'app-vacation-request-dialog', standalone: true, imports: [Modal, Alert, FormActions, ReactiveFormsModule, Icon, ActionIcon],
   templateUrl: './vacation-request-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }

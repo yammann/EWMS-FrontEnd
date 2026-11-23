@@ -1,8 +1,10 @@
 <main class="shell" [class.collapsed]="collapsed()" [class.menu-open]="menuOpen()"
       [class.collapsing]="motion() === 'collapsing'" [class.expanding]="motion() === 'expanding'" [class.settling]="motion() === 'settling'">
   <!-- السايدبار بأسلوب macOS: مادة شفافة، أقسام قابلة للطي، ووضع الأيقونات فقط -->
-  <aside class="sidebar" aria-label="القائمة الرئيسية">
+  <aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
     <div class="ornament ornament-top" aria-hidden="true"></div>
+    <!-- الرأس (تصميم المستخدم 2026-11-23): الشعار والاسم | فاصل نجمته عدّاد الثواني | الوقت والتاريخ.
+         زر طي القائمة في أول النافبار. -->
     <div class="sidebar-head">
       <a class="brand" routerLink="/" aria-label="EWMS — لوحة المتابعة">
         <app-logo class="brand-logo" />
@@ -11,10 +13,7 @@
           <small>نظام إدارة سير العمل</small>
         </span>
       </a>
-      <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" [attr.aria-expanded]="!collapsed()"
-              [attr.aria-label]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'" [attr.title]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'">
-        <app-icon name="sidebar" />
-      </button>
+      <app-sidebar-clock [rail]="collapsed()" />
       <!-- الشاشات الصغيرة: الروابط مغلقة حتى يُضغط «القائمة» -->
       <button type="button" class="menu-toggle" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-controls="main-nav">
         <app-icon [name]="menuOpen() ? 'xmark' : 'menu'" [weight]="2" /><span>{{ menuOpen() ? 'إغلاق' : 'القائمة' }}</span>
@@ -64,6 +63,10 @@
     <!-- النافبار: المظهر والإشعارات والملف الشخصي وتسجيل الخروج -->
     <header class="topbar">
       <div class="topbar-start">
+        <button type="button" class="top-btn sidebar-toggle" (click)="toggleSidebar()" aria-controls="sidebar" [attr.aria-expanded]="!collapsed()"
+                [attr.aria-label]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'" [attr.title]="collapsed() ? 'توسيع القائمة' : 'طي القائمة'">
+          <app-icon name="sidebar" />
+        </button>
         <app-back-button />
         <span class="greeting">مرحباً، <strong>{{ firstName() }}</strong></span>
       </div>

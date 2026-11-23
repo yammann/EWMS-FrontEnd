@@ -29,9 +29,10 @@
       <div class="form-field">
         <span class="form-label">المرفقات <small class="muted">(اختياري — PDF أو صورة JPG/PNG، حتى {{ attachRules.maxFiles }} ملفات، 5MB لكل ملف)</small></span>
         <div class="files">
-          <label class="btn btn-ghost btn-sm" [class.disabled]="files().length >= attachRules.maxFiles"><app-icon name="paperclip" [size]="15" /> إرفاق ملف
-            <input #t1 type="file" multiple hidden [accept]="attachRules.accept" (change)="addFiles(t1)" [disabled]="files().length >= attachRules.maxFiles || saving()">
-          </label>
+          <input #picker type="file" multiple hidden [accept]="attachRules.accept" (change)="addFiles(picker)" [disabled]="files().length >= attachRules.maxFiles || saving()">
+          <button type="button" class="btn btn-ghost btn-sm" (click)="picker.click()" [disabled]="files().length >= attachRules.maxFiles || saving()">
+            <app-action-icon kind="upload" [size]="16" /> إرفاق ملف
+          </button>
           @for (f of files(); track $index) {
             <span class="file-chip">{{ f.name }} · {{ size(f.size) }}
               <button type="button" class="btn btn-ghost" (click)="removeFile($index)" [disabled]="saving()" [attr.aria-label]="'إزالة ' + f.name"><app-icon name="xmark" [size]="13" [weight]="2.2" /></button></span>
@@ -40,6 +41,6 @@
         @if (filesError()) { <p class="form-error">{{ filesError() }}</p> }
       </div>
     </div>
-    <app-form-actions [busy]="saving()" [disabled]="blocked()" label="تقديم الطلب" busyLabel="جارٍ تقديم الطلب…" (dismissed)="closed.emit()" />
+    <app-form-actions action="send" [busy]="saving()" [disabled]="blocked()" label="تقديم الطلب" busyLabel="جارٍ تقديم الطلب…" (dismissed)="closed.emit()" />
   </form>
 </app-modal>

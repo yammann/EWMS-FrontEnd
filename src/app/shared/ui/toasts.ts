@@ -1,17 +1,24 @@
 import { Component, inject } from '@angular/core';
 import { Icon } from './icon';
+import { ActionIcon } from './action-icon';
 import { ToastService } from '@shared/ui/toast.service';
 
 /** حاوية التنبيهات — مرة واحدة في MainLayout */
 @Component({
-  selector: 'app-toasts', standalone: true, imports: [Icon],
+  selector: 'app-toasts', standalone: true, imports: [Icon, ActionIcon],
   template: `
     <div class="toast-container" aria-live="polite">
       @for (toast of toasts(); track toast.id) {
         <div class="toast toast-{{ toast.type }}" [attr.role]="toast.type === 'error' ? 'alert' : 'status'" (click)="service.dismiss(toast.id)">
           <div class="toast-icon" aria-hidden="true">
             @switch (toast.type) {
-              @case ('success') { <app-icon name="checkmark" [weight]="2.2" /> }
+              @case ('success') {
+                @if (toast.action; as action) {
+                  @defer (on immediate) { <app-action-icon [kind]="action" [complete]="true" /> }
+                } @else {
+                  <app-icon name="checkmark" [weight]="2.2" />
+                }
+              }
               @case ('error') { <app-icon name="alert" [weight]="2" /> }
               @default { <app-icon name="info" [weight]="2" /> }
             }

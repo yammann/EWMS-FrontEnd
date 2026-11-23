@@ -42,6 +42,6 @@ export class NotificationToasts {
   open(n: AppNotification) {
     this.service.dismissToast(n.id);
     this.service.markAsRead(n.id).subscribe({ error: () => {} });
-    this.router.navigateByUrl(notificationRoute(n, this.auth.canReviewVacations()));
+    this.router.navigateByUrl(notificationRoute(n, this.auth.canReviewVacations(), p => this.auth.hasPermission(p)));
   }
 }

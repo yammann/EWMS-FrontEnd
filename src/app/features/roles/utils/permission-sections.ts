@@ -33,6 +33,7 @@ export const PERMISSION_SECTIONS: PermissionSectionDef[] = [
     { key: 'study-requests', title: 'طلبات تجهيز الدراسة', names: ['ViewStudyRequests', 'CreateStudyRequest', 'EditStudyRequest', 'DeleteStudyRequest'] },
     { key: 'study-assignments', title: 'التكليفات الداخلية IPA', names: ['ViewStudyAssignments', 'CreateStudyAssignment', 'EditStudyAssignment', 'DeleteStudyAssignment'] },
     { key: 'study-responses', title: 'إشعارات الرد', names: ['ViewStudyResponses', 'CreateStudyResponse', 'EditStudyResponse', 'EditStudyResponsePlanning', 'DeleteStudyResponse'] },
+    { key: 'study-diwan', title: 'معاملات الديوان', names: ['ManageStudyDiwanCorrespondence'] },
     { key: 'study-start-orders', title: 'أوامر بدء الدراسة PIO', names: ['ViewStudyStartOrders', 'CreateStudyStartOrder', 'EditStudyStartOrder', 'DeleteStudyStartOrder'] },
     { key: 'study-signatures', title: 'التواقيع (صلاحية لكل صفة موقّع)', names: [
       'SignStudyAsFollowingDepartment', 'SignStudyAsPlanning', 'SignStudyAsCompetentDepartment', 'SignStudyAsBranchHead',

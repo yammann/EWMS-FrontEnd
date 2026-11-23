@@ -1,27 +1,24 @@
 import { Component, input, output } from '@angular/core';
-import { Icon } from './icon';
+import { ActionIcon } from './action-icon';
 
 /**
  * أزرار الصف في جداول الإدارة: تعديل + حذف (أيقونتان) بحسب الصلاحية، ومؤشر انشغال على الحذف. الشكل من .icon-btn العام.
  * أزرار إضافية خاصة بالصفحة (مثل «السجل» أو «نسخ») تُمرَّر كمحتوى وتظهر قبلهما.
  */
 @Component({
-  selector: 'app-row-actions', standalone: true, imports: [Icon],
+  selector: 'app-row-actions', standalone: true, imports: [ActionIcon],
   template: `
     <div class="row-actions">
       <ng-content />
       @if (canEdit()) {
-        <button type="button" class="icon-btn edit" title="تعديل" (click)="edit.emit()">
-          <app-icon name="pencil" [weight]="2" />
+        <button type="button" class="icon-btn edit" title="تعديل" aria-label="تعديل" (click)="edit.emit()">
+          <app-action-icon kind="edit" [size]="16" />
         </button>
       }
       @if (canDelete()) {
-        <button type="button" class="icon-btn danger" title="حذف" (click)="remove.emit()" [disabled]="deleting()">
-          @if (deleting()) {
-            <span class="button-spinner dark"></span>
-          } @else {
-            <app-icon name="trash" [weight]="2" />
-          }
+        <button type="button" class="icon-btn danger" title="حذف" (click)="remove.emit()" [disabled]="deleting()"
+                [attr.aria-label]="deleting() ? 'جارٍ الحذف…' : 'حذف'" [attr.aria-busy]="deleting()">
+          <app-action-icon kind="delete" [size]="16" [busy]="deleting()" />
         </button>
       }
     </div>`,

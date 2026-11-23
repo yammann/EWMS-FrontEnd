@@ -64,6 +64,29 @@ button.btn-sm {
   border-radius: var(--radius-sm);
 }
 
+// Keep the native hit area and adjacent actions in place while the painted delete button contracts.
+@media (prefers-reduced-motion: no-preference) {
+  .btn-danger:has(> app-delete-action-content)[aria-busy="true"] {
+    isolation: isolate;
+    position: relative;
+    background: transparent;
+  }
+  .btn-danger:has(> app-delete-action-content)[aria-busy="true"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background-color: var(--danger-600);
+    animation: fold-delete-button 240ms 715ms var(--ease) both;
+  }
+  @keyframes fold-delete-button {
+    from { clip-path: inset(0 round var(--radius-md)); }
+    to { clip-path: inset(0 max(0px, calc(50% - 21px)) round var(--radius-full)); }
+  }
+}
+
 /* زر صغير ملوّن خفيف */
 .btn-mini {
   display: inline-flex;

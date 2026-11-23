@@ -1,11 +1,13 @@
 /** فرع الدراسات المركزية — السلسلة والتواقيع (من studies.models.ts؛ التعليق الشارح للنسخة هناك) */
 import { StudyDecision, StudyDocumentStatus, StudyOwnerType, StudyProjectStatus } from './enums.models';
+import { StudyDiwanStage } from './diwan.models';
 
 /** سلسلة الدراسة من الطلب إلى المشروع (في التفاصيل فقط) */
 export interface StudyChain {
   requestId: number; requestNumber: string; requestStatus: StudyDocumentStatus;
   assignmentId: number | null; assignmentNumber: string | null; assignmentStatus: StudyDocumentStatus | null;
   responseId: number | null; responseStatus: StudyDocumentStatus | null;
+  diwanStage?: StudyDiwanStage | null;
   startOrderId: number | null; startOrderNumber: string | null; startOrderStatus: StudyDocumentStatus | null;
   projectId: number | null; projectCode: string | null; projectStatus: StudyProjectStatus | null;
 }

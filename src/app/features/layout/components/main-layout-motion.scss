@@ -23,20 +23,20 @@ nav { position: relative; }
 nav a { z-index: 1; }
 nav a.active, nav a.active:hover { background: transparent; }
 
-/* الطي والتوسيع */
-nav a .label, .brand-text, .nav-section, .sidebar-foot { transition: opacity .14s var(--ease), transform .14s var(--ease); }
+/* الطي والتوسيع (الساعة تتلاشى مع الأسماء ثم تظهر بشكلها المطوي) */
+nav a .label, .brand-text, .nav-section, .sidebar-foot, app-sidebar-clock { transition: opacity .14s var(--ease), transform .14s var(--ease); }
 .shell.collapsing {
-  nav a .label, .brand-text, .nav-section, .sidebar-foot { opacity: 0; transform: translateX(10px); }
+  nav a .label, .brand-text, .nav-section, .sidebar-foot, app-sidebar-clock { opacity: 0; transform: translateX(10px); }
 }
 .shell.expanding {
   nav a .label { animation: label-in .42s var(--ease-spring) both; animation-delay: calc(90ms + var(--i, 0) * 18ms); }
-  .brand-text, .nav-section, .sidebar-foot { animation: label-in .42s var(--ease-spring) 60ms both; }
+  .brand-text, .nav-section, .sidebar-foot, app-sidebar-clock { animation: label-in .42s var(--ease-spring) 60ms both; }
 }
 /* لحظة التبديل بين الوضعين: لا تُحرَّك الأقسام (تتغيّر بنيتها)، والعمود يظهر بتلاشٍ واحد */
 .shell.settling, .shell.expanding {
   .nav-group, .rail-tray .nav-group-inner { transition: none; }
 }
-.shell.settling nav { animation: nav-in .3s var(--ease) both; }
+.shell.settling nav, .shell.settling app-sidebar-clock { animation: nav-in .3s var(--ease) both; }
 .shell.settling .nav-group a { animation: none; }
 @keyframes nav-in { from { opacity: 0; } }
 @keyframes label-in { from { opacity: 0; transform: translateX(10px); } }
@@ -61,5 +61,5 @@ nav a:active app-icon { transform: scale(.88); }
 
 @media (prefers-reduced-motion: reduce) {
   .shell, .nav-group, .nav-indicator, nav a, nav a .label, nav a app-icon, .rail-section .rail-icon,
-  .brand-text, .nav-section, .sidebar-foot, .rail-tray .nav-group-inner { animation: none !important; transition: none !important; }
+  .brand-text, .nav-section, .sidebar-foot, app-sidebar-clock, .rail-tray .nav-group-inner { animation: none !important; transition: none !important; }
 }

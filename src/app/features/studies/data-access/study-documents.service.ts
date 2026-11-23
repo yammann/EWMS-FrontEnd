@@ -5,7 +5,8 @@ import { PagedResult } from '@core/models/paged-result.model';
 import { allPages } from '../utils/all-pages';
 import { query } from '../utils/query';
 import {
-  STUDY_DOCUMENT_ROUTES, StudyActivityLog, StudyChain, StudyDocumentFilter, StudyDocumentKind, StudyDocumentKinds, StudyResponse, StudyResponsePlanningInput
+  STUDY_DOCUMENT_ROUTES, StudyActivityLog, StudyChain, StudyDiwanDecision, StudyDiwanReferenceInput, StudyDiwanReviewAction,
+  StudyDocumentFilter, StudyDocumentKind, StudyDocumentKinds, StudyResponse, StudyResponsePlanningInput
 } from './studies.models';
 
 type Item<K extends StudyDocumentKind> = StudyDocumentKinds[K]['item'];
@@ -52,6 +53,24 @@ export class StudyDocumentsService {
   /** جزء التخطيط وإدارة المشاريع من الرد: يحفظه من يملك EditStudyResponsePlanning بعد توقيع القسم المتابع وقبل توقيع التخطيط */
   updateResponsePlanning(id: number, body: StudyResponsePlanningInput): Observable<StudyResponse> {
     return this.api.put<StudyResponse>(`/StudyResponses/UpdatePlanning/${id}`, body);
+  }
+
+  registerDiwanDispatch(id: number, input: StudyDiwanReferenceInput): Observable<StudyResponse> {
+    return this.api.post<StudyResponse>(`/StudyResponses/Diwan/${id}/Dispatch`, input);
+  }
+
+  registerDiwanReply(id: number, input: StudyDiwanReferenceInput, decision: StudyDiwanDecision, file: File): Observable<StudyResponse> {
+    const body = new FormData();
+    body.append('file', file);
+    return this.api.post<StudyResponse>(`/StudyResponses/Diwan/${id}/Reply` + query({ ...input, decision }), body);
+  }
+
+  reviewDiwanReply(id: number, action: StudyDiwanReviewAction, note: string, rowVersion: string): Observable<StudyResponse> {
+    return this.api.post<StudyResponse>(`/StudyResponses/Diwan/${id}/Review`, { action, note, rowVersion });
+  }
+
+  diwanReplyFile(id: number, replyId: number): Observable<Blob> {
+    return this.api.getBlob(`/StudyResponses/Diwan/${id}/Reply/${replyId}/File`);
   }
 
   /**

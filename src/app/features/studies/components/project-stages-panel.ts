@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ActionIcon, ActionKind } from '@shared/ui/action-icon';
 import { Alert } from '@shared/ui/alert';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { Icon } from '@shared/ui/icon';
@@ -24,7 +25,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
 @Component({
   selector: 'app-study-project-stages-panel',
   standalone: true,
-  imports: [Alert, Icon, StudyProgress, StudyStatusChip, StudyStageFormDialog, StudyTaskFormDialog, StudyTaskProgressDialog],
+  imports: [ActionIcon, Alert, Icon, StudyProgress, StudyStatusChip, StudyStageFormDialog, StudyTaskFormDialog, StudyTaskProgressDialog],
   template: `
     <section class="panel">
       <div class="panel-heading">
@@ -53,14 +54,24 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
 
             <div class="stage-actions">
               @if (can().closeStage && s.status !== 3 && !busy()) { <button type="button" class="btn btn-sm" (click)="close(s)">إغلاق المرحلة</button> }
-              @if (can().closeStage && s.status === 3 && !s.linkedDocument && last) { <button type="button" class="btn btn-ghost btn-sm" (click)="reopen(s)">إعادة فتح</button> }
+              @if (can().closeStage && s.status === 3 && !s.linkedDocument && last) {
+                @let reopening = pending().has('reopen-' + s.id);
+                <button type="button" class="btn btn-ghost btn-sm" [disabled]="reopening" [attr.aria-busy]="reopening" (click)="reopen(s)">
+                  <app-action-icon kind="reactivate" [size]="16" [busy]="reopening" /> إعادة فتح
+                </button>
+              }
               @if (s.canAddTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: null })">+ مهمة</button> }
-              @if (can().editStage && s.status !== 3 && !s.linkedDocument) { <button type="button" class="btn btn-ghost btn-sm" (click)="stageDialog.set({ stage: s })">تعديل</button> }
+              @if (can().editStage && s.status !== 3 && !s.linkedDocument) { <button type="button" class="btn btn-ghost btn-sm" (click)="stageDialog.set({ stage: s })"><app-action-icon kind="edit" [size]="15" /> تعديل</button> }
               @if (can().editStage && !s.linkedDocument && s.status !== 3) {
                 <button type="button" class="icon-btn" aria-label="تقديم المرحلة" [disabled]="first || busy()" (click)="move(s, -1)"><app-icon name="turnUp" [size]="15" /></button>
                 <button type="button" class="icon-btn down" aria-label="تأخير المرحلة" [disabled]="last || busy()" (click)="move(s, 1)"><app-icon name="turnUp" [size]="15" /></button>
               }
-              @if (can().deleteStage && !s.linkedDocument && s.status !== 3) { <button type="button" class="icon-btn del" aria-label="حذف المرحلة" (click)="removeStage(s)"><app-icon name="trash" [size]="15" /></button> }
+              @if (can().deleteStage && !s.linkedDocument && s.status !== 3) {
+                @let removing = pending().has('delete-stage-' + s.id);
+                <button type="button" class="icon-btn del" aria-label="حذف المرحلة" [disabled]="removing" [attr.aria-busy]="removing" (click)="removeStage(s)">
+                  <app-action-icon kind="delete" [size]="15" [busy]="removing" />
+                </button>
+              }
             </div>
 
             @if (tasksOf(s.id); as list) {
@@ -79,8 +90,13 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
                         <td class="row-end">
                           <div class="cell-actions">
                             @if (t.canUpdateProgress) { <button type="button" class="btn btn-sm" (click)="progressDialog.set(t)">تحديث الإنجاز</button> }
-                            @if (t.canEdit && can().editTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: t })">تعديل</button> }
-                            @if (t.canEdit && can().deleteTask) { <button type="button" class="icon-btn del" aria-label="حذف المهمة" (click)="removeTask(t)"><app-icon name="trash" [size]="15" /></button> }
+                            @if (t.canEdit && can().editTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: t })"><app-action-icon kind="edit" [size]="15" /> تعديل</button> }
+                            @if (t.canEdit && can().deleteTask) {
+                              @let removing = pending().has('delete-task-' + t.id);
+                              <button type="button" class="icon-btn del" aria-label="حذف المهمة" [disabled]="removing" [attr.aria-busy]="removing" (click)="removeTask(t)">
+                                <app-action-icon kind="delete" [size]="15" [busy]="removing" />
+                              </button>
+                            }
                           </div>
                         </td>
                       </tr>
@@ -98,13 +114,13 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
     </section>
 
     @if (stageDialog(); as d) {
-      @defer (on immediate) { <app-study-stage-form-dialog [project]="project()" [stage]="d.stage" (closed)="stageDialog.set(null)" (saved)="done('حُفظت المرحلة'); stageDialog.set(null)" /> }
+      @defer (on immediate) { <app-study-stage-form-dialog [project]="project()" [stage]="d.stage" (closed)="stageDialog.set(null)" (saved)="done('حُفظت المرحلة', 'save'); stageDialog.set(null)" /> }
     }
     @if (taskDialog(); as d) {
-      @defer (on immediate) { <app-study-task-form-dialog [project]="project()" [stage]="d.stage" [task]="d.task" (closed)="taskDialog.set(null)" (saved)="done('حُفظت المهمة'); taskDialog.set(null)" /> }
+      @defer (on immediate) { <app-study-task-form-dialog [project]="project()" [stage]="d.stage" [task]="d.task" (closed)="taskDialog.set(null)" (saved)="done('حُفظت المهمة', 'save'); taskDialog.set(null)" /> }
     }
     @if (progressDialog(); as t) {
-      @defer (on immediate) { <app-study-task-progress-dialog [task]="t" (closed)="progressDialog.set(null)" (saved)="done('حُدّث الإنجاز'); progressDialog.set(null)" /> }
+      @defer (on immediate) { <app-study-task-progress-dialog [task]="t" (closed)="progressDialog.set(null)" (saved)="done('حُدّث الإنجاز', 'save'); progressDialog.set(null)" /> }
     }
   `,
   styles: [`
@@ -134,7 +150,8 @@ export class StudyProjectStagesPanel {
   changed = output<void>();
 
   can = inject(StudyAccess).can;
-  busy = signal(false);
+  pending = signal<ReadonlySet<string>>(new Set());
+  busy = computed(() => this.pending().size > 0);
   error = signal('');
   stageDialog = signal<{ stage: ProjectStage | null } | null>(null);
   taskDialog = signal<{ stage: ProjectStage; task: StageTask | null } | null>(null);
@@ -150,31 +167,37 @@ export class StudyProjectStagesPanel {
   /** مهام في المرحلة لا تظهر لي (عددها الكلي أكبر مما يصلني) — لا يكون إلا لمن لا يرى المشروع كاملاً */
   hidden(s: ProjectStage) { return !this.project().canViewFull && s.tasksTotal > this.tasksOf(s.id).length; }
 
-  done(message: string) { this.toast.success(message); this.changed.emit(); }
+  done(message: string, action?: ActionKind) { this.toast.success(message, action); this.changed.emit(); }
 
-  private run<T>(call: Observable<T>, message: string) {
-    this.busy.set(true); this.error.set('');
+  private run<T>(key: string, call: Observable<T>, message: string, action?: ActionKind) {
+    if (this.pending().has(key)) return;
+    this.pending.update(keys => new Set(keys).add(key));
+    this.error.set('');
     call.subscribe({
-      next: () => { this.busy.set(false); this.done(message); },
-      error: e => { this.busy.set(false); this.error.set(e.message ?? 'تعذّر تنفيذ الإجراء'); this.changed.emit(); }
-    });
+      next: () => this.done(message, action),
+      error: e => { this.error.set(e.message ?? 'تعذّر تنفيذ الإجراء'); this.changed.emit(); }
+    }).add(() => this.pending.update(keys => {
+      const remaining = new Set(keys);
+      remaining.delete(key);
+      return remaining;
+    }));
   }
 
   async close(s: ProjectStage) {
     if (!await this.confirm.ask(`إغلاق المرحلة «${s.stageTypeName}»؟ يجب إنجاز كل مهامها وإغلاق ما قبلها.`, 'إغلاق')) return;
-    this.run(this.service.closeStage(s.id), 'أُغلقت المرحلة');
+    this.run('close-' + s.id, this.service.closeStage(s.id), 'أُغلقت المرحلة');
   }
   async reopen(s: ProjectStage) {
-    if (!await this.confirm.ask(`إعادة فتح المرحلة «${s.stageTypeName}»؟`, 'إعادة فتح')) return;
-    this.run(this.service.reopenStage(s.id), 'أُعيد فتح المرحلة');
+    if (!await this.confirm.ask(`إعادة فتح المرحلة «${s.stageTypeName}»؟`, 'إعادة فتح', undefined, 'reactivate')) return;
+    this.run('reopen-' + s.id, this.service.reopenStage(s.id), 'أُعيد فتح المرحلة', 'reactivate');
   }
   async removeStage(s: ProjectStage) {
-    if (!await this.confirm.ask(`حذف المرحلة «${s.stageTypeName}»؟ لا يمكن التراجع.`, 'حذف')) return;
-    this.run(this.service.removeStage(s.id), 'حُذفت المرحلة');
+    if (!await this.confirm.ask(`حذف المرحلة «${s.stageTypeName}»؟ لا يمكن التراجع.`, 'حذف', undefined, 'delete')) return;
+    this.run('delete-stage-' + s.id, this.service.removeStage(s.id), 'حُذفت المرحلة', 'delete');
   }
   async removeTask(t: StageTask) {
-    if (!await this.confirm.ask(`حذف المهمة «${t.title}»؟ لا يمكن التراجع.`, 'حذف')) return;
-    this.run(this.service.removeTask(t.id), 'حُذفت المهمة');
+    if (!await this.confirm.ask(`حذف المهمة «${t.title}»؟ لا يمكن التراجع.`, 'حذف', undefined, 'delete')) return;
+    this.run('delete-task-' + t.id, this.service.removeTask(t.id), 'حُذفت المهمة', 'delete');
   }
   /** تقديم/تأخير مرحلة: المراحل المغلقة ومراحل المستندات تبقى في مكانها ويُرسل الترتيب الجديد كاملاً */
   move(s: ProjectStage, step: -1 | 1) {
@@ -182,6 +205,6 @@ export class StudyProjectStagesPanel {
     const i = ids.indexOf(s.id), j = i + step;
     if (j < 0 || j >= ids.length) return;
     [ids[i], ids[j]] = [ids[j], ids[i]];
-    this.run(this.service.reorderStages(this.project().id, ids), 'تغيّر ترتيب المراحل');
+    this.run('reorder', this.service.reorderStages(this.project().id, ids), 'تغيّر ترتيب المراحل');
   }
 }

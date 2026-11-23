@@ -34,42 +34,7 @@
   overflow-y: auto;
 }
 
-.sidebar-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--separator);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-  padding: 6px 8px;
-  color: inherit;
-}
-
-.brand-logo { width: 46px; height: 42px; flex: none; transition: width .35s var(--ease-spring), height .35s var(--ease-spring); }
-
-.brand-text { display: grid; min-width: 0; line-height: 1.3; white-space: nowrap; }
-.brand-text strong { color: var(--ink-900); font-size: 17px; font-weight: 700; letter-spacing: .02em; }
-.brand-text small { color: var(--ink-500); font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
-
-.sidebar-toggle {
-  flex: none;
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
-  padding: 0;
-  border-radius: var(--radius-xs);
-  background: transparent;
-  color: var(--ink-500);
-}
-.sidebar-toggle app-icon { width: 19px; height: 19px; }
-.sidebar-toggle:hover:not(:disabled) { background: var(--fill); color: var(--ink-900); filter: none; }
+/* رأس السايدبار (الشعار والساعة): main-layout-head.scss */
 
 nav { display: flex; flex-direction: column; flex: 1; }
 
@@ -145,9 +110,6 @@ nav a.active app-icon { color: var(--on-brand); }
    ========================================================= */
 .shell.collapsed {
   .sidebar { padding-inline: 10px; overflow: visible; }
-  .sidebar-head { flex-direction: column; gap: 10px; }
-  .brand { justify-content: center; padding: 4px 0; flex: none; }
-  .brand-logo { width: 38px; height: 34px; }
   .brand-text, .nav-section, .sidebar-foot { display: none; }
   .nav-group-inner { gap: 4px; overflow: visible; }
   .nav-group + .nav-group { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--separator); }

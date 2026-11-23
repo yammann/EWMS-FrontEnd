@@ -25,6 +25,7 @@ function kindOf(type: string): Kind {
   if (type === 'StudyApprovalRequested') return { icon: 'pencil', tone: 'orange' };
   if (type === 'StudyNextStepReady') return { icon: 'forward', tone: 'green' };
   if (type === 'StudyTaskAssigned') return { icon: 'clipboard', tone: 'blue' };
+  if (type === 'StudyProjectReactivated') return { icon: 'undo', tone: 'green' };
   if (type.startsWith('Study')) return { icon: 'docText', tone: 'blue' };
   if (type.startsWith('Task') || type === 'WorkTaskAssigned') return { icon: 'clipboard', tone: 'blue' };
   if (type === 'LoginLocked') return { icon: 'lock', tone: 'red' };
@@ -119,6 +120,6 @@ export class NotificationsPage {
   }
 
   open(n: AppNotification) {
-    this.markRead(n, () => this.router.navigateByUrl(notificationRoute(n, this.auth.canReviewVacations())));
+    this.markRead(n, () => this.router.navigateByUrl(notificationRoute(n, this.auth.canReviewVacations(), p => this.auth.hasPermission(p))));
   }
 }

@@ -25,7 +25,7 @@ import { FormActions } from '@shared/ui/form-actions';
             <p class="note">يُنشأ بند بعنوان المهمة وموعدها، ويبقى مرتبطاً بها: ترى حالتها من مفكرتك وتفتحها بنقرة.</p>
           }
         </div>
-        <app-form-actions [busy]="saving()" [disabled]="!listId" label="إضافة" busyLabel="جارٍ الإضافة…" (dismissed)="closed.emit()" />
+        <app-form-actions [action]="null" [busy]="saving()" [disabled]="!listId" label="إضافة" busyLabel="جارٍ الإضافة…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`.note { margin: 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--ink-50); font-size: 12px; color: var(--ink-600); } .muted { margin: 0; color: var(--ink-500); }`]

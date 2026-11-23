@@ -41,7 +41,7 @@ export class StatusChip {
           </label>
           <p class="note">سيصل إشعار للموظف الجديد وللموظف السابق.</p>
         </div>
-        <app-form-actions [busy]="busy()" [disabled]="!selected() || selected() === currentUserId()" label="نقل" busyLabel="جارٍ النقل…" (dismissed)="closed.emit()" />
+        <app-form-actions [action]="null" [busy]="busy()" [disabled]="!selected() || selected() === currentUserId()" label="نقل" busyLabel="جارٍ النقل…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`.note { margin: 12px 0 0; font-size: 12px; color: var(--ink-500); }`]

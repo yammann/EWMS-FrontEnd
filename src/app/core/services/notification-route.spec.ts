@@ -1,3 +1,4 @@
+import { AppPermission } from '@core/constants/access';
 import { AppNotification } from '@core/models/notification.models';
 import { notificationRoute } from './notification.service';
 
@@ -17,5 +18,13 @@ describe('notificationRoute for studies', () => {
   it('opens my study tasks for a task notification, and falls back to the profile without an id', () => {
     expect(notificationRoute(note('StudyTask', 5, 'StudyTaskAssigned'), false)).toBe('/studies/my-tasks');
     expect(notificationRoute(note('StudyRequest', null), false)).toBe('/profile');
+  });
+
+  it('opens a reactivated project, task list or signature queue according to the recipient', () => {
+    const reactivated = note('StudyProject', 7, 'StudyProjectReactivated');
+    expect(notificationRoute(reactivated, false, p => p === AppPermission.ViewStudyProjects)).toBe('/studies/projects/7');
+    expect(notificationRoute(reactivated, false, p => p === AppPermission.UpdateStudyTaskProgress)).toBe('/studies/my-tasks');
+    expect(notificationRoute(reactivated, false, () => false)).toBe('/notifications');
+    expect(notificationRoute(note('StudyProjectApproval', 7, 'StudyProjectReactivated'), false)).toBe('/studies/approvals');
   });
 });

@@ -1,9 +1,11 @@
 import { Injectable, signal } from '@angular/core';
+import type { ActionKind } from './action-icon';
 
 export interface ConfirmRequest {
   message: string;
   confirmLabel: string;
   title: string;
+  action?: ActionKind;
   resolve: (confirmed: boolean) => void;
 }
 
@@ -15,9 +17,9 @@ export interface ConfirmRequest {
 export class ConfirmService {
   readonly current = signal<ConfirmRequest | null>(null);
 
-  ask(message: string, confirmLabel = 'تأكيد', title = 'تأكيد الإجراء'): Promise<boolean> {
+  ask(message: string, confirmLabel = 'تأكيد', title = 'تأكيد الإجراء', action?: ActionKind): Promise<boolean> {
     this.current()?.resolve(false);   // طلب جديد يلغي السابق
-    return new Promise(resolve => this.current.set({ message, confirmLabel, title, resolve }));
+    return new Promise(resolve => this.current.set({ message, confirmLabel, title, action, resolve }));
   }
 
   answer(confirmed: boolean) {

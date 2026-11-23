@@ -19,7 +19,7 @@ import { StudyStatusChip } from '../../components/study-status-chip';
 import { StudyAccess } from '../../data-access/study-access';
 import { StudyDocumentsService } from '../../data-access/study-documents.service';
 import {
-  DOCUMENT_STATUSES, StudyAssignment, StudyDocumentKind, StudyDocumentStatus, StudyRequest, StudyResponse, StudyStartOrder
+  DIWAN_STAGES, DOCUMENT_STATUSES, StudyAssignment, StudyDiwanStage, StudyDocumentKind, StudyDocumentStatus, StudyRequest, StudyResponse, StudyStartOrder
 } from '../../data-access/studies.models';
 import { DOCUMENT_KINDS, DOCUMENT_META, documentDate, documentNumber } from '../../utils/document-meta';
 import { responseMoney } from '../../utils/response-pricing';
@@ -35,7 +35,7 @@ interface ListRow {
 const EXTRA_COLUMNS: Record<StudyDocumentKind, string[]> = {
   requests: ['المحافظة', 'نوع العمل', 'الاستعجال'],
   assignments: ['القسم المتابع', 'الأهمية', 'الحد الأقصى للرد'],
-  responses: ['القسم المتابع', 'التوصية', 'التكلفة المبدئية'],
+  responses: ['القسم المتابع', 'التوصية', 'التكلفة المبدئية', 'معاملة الديوان'],
   startOrders: ['القسم المختص', 'مدير المشروع', 'البدء ← الحد الأقصى']
 };
 
@@ -58,7 +58,9 @@ function toRows(kind: StudyDocumentKind, result: PagedResult<unknown>): ListRow[
       }
       case 'responses': {
         const r = item as StudyResponse;
-        return { ...row, number, date, title: r.projectCode ? 'كود ' + r.projectCode : 'إشعار الرد', subtitle: '', extra: [r.followingDepartmentName, r.recommendationName, responseMoney(r.totalCost, r.costsInUsd)] };
+        return { ...row, number, date, title: r.projectCode ? 'كود ' + r.projectCode : 'إشعار الرد', subtitle: '',
+          extra: [r.followingDepartmentName, r.recommendationName, responseMoney(r.totalCost, r.costsInUsd),
+            r.diwanStage ? DIWAN_STAGES[r.diwanStage] : ''] };
       }
       case 'startOrders': {
         const o = item as StudyStartOrder;
@@ -92,26 +94,30 @@ export class StudyDocumentsPage {
   private service = inject(StudyDocumentsService);
   private router = inject(Router);
   private auth = inject(AuthService);
+  private route = inject(ActivatedRoute);
   private latest = latestRequest();
 
   can = inject(StudyAccess).can;
   meta = DOCUMENT_META;
   statuses = DOCUMENT_STATUSES;
+  diwanList = this.route.snapshot.data['diwanList'] === true;
+  diwanStages = Object.entries(DIWAN_STAGES).map(([value, label]) => ({ value: Number(value) as StudyDiwanStage, label }));
   pageSize = PAGE_SIZE;
 
   /** الأنواع التي يملك المستخدم عرضها */
-  kinds = computed(() => DOCUMENT_KINDS.filter(k => this.auth.hasPermission(DOCUMENT_META[k].view)));
+  kinds = computed(() => DOCUMENT_KINDS.filter(k => (!this.diwanList || k === 'responses') && this.auth.hasPermission(DOCUMENT_META[k].view)));
   kind = signal<StudyDocumentKind>('requests');
   columns = computed(() => EXTRA_COLUMNS[this.kind()]);
   orgWide = computed(() => this.auth.hasPermission(AppPermission.ViewOrganizationDashboard));
 
   status = signal<StudyDocumentStatus | 0>(0);
+  diwanStage = signal<StudyDiwanStage | 0>(0);
   search = signal('');
   from = signal('');
   to = signal('');
   branchId = signal(0);
   branches = signal<Branch[]>([]);
-  hasFilter = computed(() => !!(this.status() || this.search().trim() || this.from() || this.to() || this.branchId()));
+  hasFilter = computed(() => !!(this.status() || this.diwanStage() || this.search().trim() || this.from() || this.to() || this.branchId()));
 
   rows = signal<ListRow[]>([]);
   total = signal(0);
@@ -127,12 +133,12 @@ export class StudyDocumentsPage {
     if (this.orgWide()) {
       inject(LookupsService).branchOptions().pipe(orEmpty(() => undefined)).subscribe(b => this.branches.set(b));
     }
-    inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe(p => {
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(p => {
       const allowed = this.kinds();
       const wanted = p.get('type') as StudyDocumentKind | null;
       const next = wanted && allowed.includes(wanted) ? wanted : allowed[0];
       if (!next) return;
-      if (next !== this.kind()) { this.kind.set(next); this.rows.set([]); this.total.set(0); }
+      if (next !== this.kind()) { this.kind.set(next); this.diwanStage.set(0); this.rows.set([]); this.total.set(0); }
       this.page.set(1);
       this.load();
     });
@@ -145,7 +151,7 @@ export class StudyDocumentsPage {
   changed() { this.search$.next(); }
 
   clearFilters() {
-    this.status.set(0); this.search.set(''); this.from.set(''); this.to.set(''); this.branchId.set(0);
+    this.status.set(0); this.diwanStage.set(0); this.search.set(''); this.from.set(''); this.to.set(''); this.branchId.set(0);
     this.page.set(1); this.load();
   }
 
@@ -155,6 +161,7 @@ export class StudyDocumentsPage {
     const kind = this.kind();
     const filter = {
       status: this.status() || null, search: this.search().trim() || null, from: this.from() || null, to: this.to() || null,
+      diwanOnly: this.diwanList ? true : undefined, diwanStage: kind === 'responses' ? this.diwanStage() || null : null,
       branchId: this.branchId() || null, page: this.page(), pageSize: PAGE_SIZE
     };
     const call = this.service.list(kind, filter) as Observable<PagedResult<unknown>>;

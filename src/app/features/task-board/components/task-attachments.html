@@ -7,7 +7,7 @@
           <span class="meta"><span class="name">{{ a.fileName }}</span><small>{{ size(a.size) }} · {{ a.uploadedByName }}</small></span>
         </button>
         @if (a.canDelete && !readonly()) {
-          <button type="button" class="del" (click)="remove(a)" [disabled]="busy()" [attr.aria-label]="'حذف ' + a.fileName" title="حذف"><app-icon name="trash" [size]="17" /></button>
+          <button type="button" class="del" (click)="remove(a)" [disabled]="busy()" [attr.aria-label]="'حذف ' + a.fileName" title="حذف"><app-action-icon kind="delete" [size]="17" /></button>
         }
       </li>
     }
@@ -19,8 +19,9 @@
 @if (canAttach() && !readonly()) {
   <div class="drop" [class.over]="over()" (dragover)="$event.preventDefault(); over.set(true)" (dragleave)="over.set(false)" (drop)="dropped($event)">
     <input #picker type="file" multiple hidden [accept]="accept" (change)="picked($event)">
-    <button type="button" class="btn btn-ghost btn-sm" (click)="picker.click()" [disabled]="busy() || remaining() <= 0">
-      {{ busy() ? progressText() || 'جارٍ الرفع…' : '+ إرفاق ملف' }}</button>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="picker.click()" [disabled]="busy() || remaining() <= 0" [attr.aria-busy]="busy()">
+      <app-action-icon kind="upload" [busy]="busy()" />
+      {{ busy() ? progressText() || 'جارٍ الرفع…' : 'إرفاق ملف' }}</button>
     <small>{{ remaining() > 0 ? 'أو اسحب الملفات إلى هنا — PDF وصور وWord وExcel وPowerPoint حتى 10MB (متبقٍّ ' + remaining() + ' من ' + max + ')' : 'بلغت الحد الأقصى ' + max + ' ملفات' }}</small>
   </div>
 }

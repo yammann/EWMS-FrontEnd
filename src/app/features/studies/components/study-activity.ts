@@ -9,12 +9,12 @@ import { latestRequest } from '@shared/ui/track-request';
 import { StudyDocumentsService } from '../data-access/study-documents.service';
 import { StudyActivityLog } from '../data-access/studies.models';
 
-/** أيقونة كل إجراء (StudyLogAction): إنشاء، تعديل، إرسال، اعتماد، رفض، إلغاء، إغلاق مرحلة، حذف، إعادة فتح */
+/** أيقونة كل إجراء (StudyLogAction) */
 const ACTION_ICONS: Record<number, IconName> = {
-  1: 'plus', 2: 'pencil', 3: 'forward', 4: 'checkmark', 5: 'xmark', 6: 'lock', 7: 'lock', 8: 'trash', 9: 'undo'
+  1: 'plus', 2: 'pencil', 3: 'forward', 4: 'checkmark', 5: 'xmark', 6: 'lock', 7: 'lock', 8: 'trash', 9: 'undo', 10: 'undo'
 };
 /** لون الشارة: اعتماد أخضر، رفض وحذف أحمر، إلغاء وإغلاق رمادي */
-const ACTION_TONES: Record<number, string> = { 4: 'ok', 5: 'bad', 8: 'bad', 6: 'mute', 7: 'mute' };
+const ACTION_TONES: Record<number, string> = { 4: 'ok', 5: 'bad', 8: 'bad', 6: 'mute', 7: 'mute', 10: 'ok' };
 
 /**
  * سجل الدراسة كلها (من الطلب حتى المشروع) مرتباً من الأحدث: كل سطر من فعل ومن فعله ومتى، مع التفاصيل

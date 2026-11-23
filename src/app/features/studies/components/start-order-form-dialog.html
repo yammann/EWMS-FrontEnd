@@ -1,5 +1,5 @@
 <app-modal size="lg" [heading]="order() ? 'تعديل أمر البدء' : 'أمر بدء دراسة مشروع (PIO)'"
-           [subheading]="order()?.orderNumber ?? ('التكليف المرجعي ' + parent().assignmentNumber)"
+           [subheading]="order()?.orderNumber ?? ('كتاب الموافقة المركزي ' + parent().diwanReplyNumber)"
            [busy]="saving()" (closed)="closed.emit()">
   <form [formGroup]="form" (ngSubmit)="save()">
     <div class="modal-body form-stack">

@@ -11,6 +11,7 @@ import { TruncationTipService } from '@shared/ui/truncation-tip.service';
 import { Logo } from '@shared/ui/logo';
 import { Icon, IconName } from '@shared/ui/icon';
 import { AppearanceMenu } from './appearance-menu';
+import { SidebarClock } from './sidebar-clock';
 import { BackButton } from '@shared/ui/back-button';
 import { hasOpenModal } from '@shared/ui/modal';
 import { roleLabel } from '@core/utils/roles';
@@ -29,9 +30,9 @@ interface NavSection { id: 'main' | 'tasks' | 'vacations' | 'studies' | 'mainten
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton, SidebarClock],
   templateUrl: './main-layout.html',
-  styleUrls: ['./main-layout.scss', './main-layout-rail.scss', './main-layout-motion.scss', './main-layout-compact.scss'],
+  styleUrls: ['./main-layout.scss', './main-layout-head.scss', './main-layout-rail.scss', './main-layout-motion.scss', './main-layout-compact.scss'],
   host: { '(document:keydown.escape)': 'closeMenu()', '(window:resize)': 'placeIndicator(false)' }
 })
 export class MainLayout {
@@ -91,6 +92,7 @@ export class MainLayout {
       // فرع الدراسات المركزية: تُضاف صفحاته هنا مع كل مرحلة من بناء الواجهة
       { id: 'studies', title: 'الدراسات', icon: 'ruler', items: [
         canAny(STUDY_DOCUMENTS_VIEW) && { path: '/studies/documents', label: 'مستندات الدراسة', icon: 'docText' },
+        can(AppPermission.ViewStudyResponses) && { path: '/studies/diwan', label: 'معاملات الديوان', icon: 'clipboard' },
         can(AppPermission.ViewStudyProjects) && { path: '/studies/projects', label: 'مشاريع الدراسات', icon: 'folderChart' },
         can(AppPermission.UpdateStudyTaskProgress) && { path: '/studies/my-tasks', label: 'مهامي في الدراسات', icon: 'checklist' },
         canAny(STUDY_SIGN) && { path: '/studies/approvals', label: 'بانتظار توقيعي', icon: 'pencil' },

@@ -6,6 +6,7 @@ import { Modal } from '@shared/ui/modal';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { fileSize } from '@core/utils/file-size';
 import { Icon, IconName } from '@shared/ui/icon';
+import { ActionIcon } from '@shared/ui/action-icon';
 
 /** أيقونة حسب نوع الملف */
 export function fileIcon(contentType: string): IconName {
@@ -21,7 +22,7 @@ export function fileIcon(contentType: string): IconName {
  * قائمة «readonly» (مرفقات الأصل) بلا حذف ولا رفع.
  */
 @Component({
-  selector: 'app-task-attachments', standalone: true, imports: [Modal, Icon],
+  selector: 'app-task-attachments', standalone: true, imports: [Modal, Icon, ActionIcon],
   templateUrl: './task-attachments.html',
   styleUrl: './task-attachments.scss'
 })
@@ -75,7 +76,7 @@ export class TaskAttachments implements OnDestroy {
   }
 
   async remove(a: TaskAttachment) {
-    if (await this.confirm.ask(`حذف المرفق «${a.fileName}»؟`, 'حذف')) this.removed.emit(a);
+    if (await this.confirm.ask(`حذف المرفق «${a.fileName}»؟`, 'حذف', 'تأكيد الإجراء', 'delete')) this.removed.emit(a);
   }
 
   /** صور وPDF تُعاين داخل نافذة، وغيرها (Office) يُنزَّل مباشرة */

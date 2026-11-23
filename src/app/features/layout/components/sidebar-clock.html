@@ -1,0 +1,10 @@
+<span class="sec-line" aria-hidden="true"><span class="sec-fill"></span><span class="sec-star"></span></span>
+<time class="clock" [attr.datetime]="isoMinute()">
+  <span class="hm">{{ time() }}</span>
+  @if (rail()) {
+    <span class="period">{{ period() }}</span>
+  } @else {
+    <span class="part">{{ dayPart() }}</span>
+    <span class="date">{{ date() }}</span>
+  }
+</time>

@@ -88,6 +88,7 @@ export const AppPermission = {
   EditStudyAssignment: 'EditStudyAssignment', DeleteStudyAssignment: 'DeleteStudyAssignment',
   ViewStudyResponses: 'ViewStudyResponses', CreateStudyResponse: 'CreateStudyResponse', EditStudyResponse: 'EditStudyResponse', DeleteStudyResponse: 'DeleteStudyResponse',
   EditStudyResponsePlanning: 'EditStudyResponsePlanning',
+  ManageStudyDiwanCorrespondence: 'ManageStudyDiwanCorrespondence',
   ViewStudyStartOrders: 'ViewStudyStartOrders', CreateStudyStartOrder: 'CreateStudyStartOrder',
   EditStudyStartOrder: 'EditStudyStartOrder', DeleteStudyStartOrder: 'DeleteStudyStartOrder',
   CancelStudyDocuments: 'CancelStudyDocuments',

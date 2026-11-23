@@ -1,0 +1,46 @@
+/* =========================================================
+   رأس السايدبار (تصميم المستخدم 2026-11-23):
+   الشعار فوق «EWMS» و«نظام إدارة سير العمل» | خط فاصل نجمته عدّاد الثواني | الوقت و«مساء الاثنين» والتاريخ.
+   الساعة والفاصل مكوّن مستقل (sidebar-clock.ts). زر طي القائمة انتقل إلى أول النافبار (.sidebar-toggle.top-btn).
+   الشاشات الصغيرة تعيد الشعار والاسم سطراً واحداً وتخفي الساعة (main-layout-compact.scss).
+   ========================================================= */
+.sidebar-head {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 2px 2px 16px;
+  border-bottom: 1px solid var(--separator);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: none;
+  min-width: 0;
+  padding: 2px;
+  color: inherit;
+}
+
+.brand-logo { width: 60px; height: 46px; flex: none; transition: width .35s var(--ease-spring), height .35s var(--ease-spring); }
+
+.brand-text { display: grid; justify-items: center; min-width: 0; line-height: 1.3; white-space: nowrap; }
+.brand-text strong { color: var(--ink-900); font-size: 17px; font-weight: 700; letter-spacing: .08em; line-height: 1.15; }
+.brand-text small { color: var(--ink-500); font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
+
+app-sidebar-clock { flex: 1; }
+
+/* المطوي: الشعار ثم الفاصل الأفقي ثم الوقت */
+.shell.collapsed {
+  .sidebar-head { flex-direction: column; align-items: center; gap: 8px; padding: 0 0 14px; }
+  .brand { padding: 4px 0; }
+  .brand-logo { width: 38px; height: 34px; }
+  app-sidebar-clock { flex: none; }
+}
+
+/* زر طي القائمة أول عناصر النافبار: قريب من حافة القائمة لا بمسافة النافبار العادية (الشاشات الصغيرة تخفيه) */
+@media (min-width: 861px) {
+  .topbar { padding-inline-start: 10px; }
+}

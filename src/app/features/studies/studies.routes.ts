@@ -36,6 +36,10 @@ export const STUDIES_ROUTES: Routes = [
         path: 'documents', canActivate: [permissionGuard], data: { anyPermission: STUDY_DOCUMENTS_VIEW },
         loadComponent: () => import('./pages/study-documents-page/study-documents-page').then(m => m.StudyDocumentsPage)
       },
+      {
+        path: 'diwan', canActivate: [permissionGuard], data: { permission: AppPermission.ViewStudyResponses, diwanList: true },
+        loadComponent: () => import('./pages/study-documents-page/study-documents-page').then(m => m.StudyDocumentsPage)
+      },
       documentRoute('requests'),
       documentRoute('assignments'),
       documentRoute('responses'),

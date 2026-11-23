@@ -22,7 +22,7 @@ import { Modal } from '@shared/ui/modal';
             <textarea #box rows="4" maxlength="1000" [value]="reason()" (input)="reason.set(box.value)"></textarea>
           </label>
         </div>
-        <app-form-actions [busy]="busy()" [disabled]="!reason().trim()" [label]="confirmLabel()" busyLabel="جارٍ التنفيذ…" (dismissed)="closed.emit()" />
+        <app-form-actions [action]="null" [busy]="busy()" [disabled]="!reason().trim()" [label]="confirmLabel()" busyLabel="جارٍ التنفيذ…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>
   `

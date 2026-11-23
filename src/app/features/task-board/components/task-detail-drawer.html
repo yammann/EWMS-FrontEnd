@@ -134,7 +134,9 @@
           <form class="comment-form" (ngSubmit)="addComment()">
             <label class="sr-only" for="task-comment">تعليق</label>
             <textarea id="task-comment" name="comment" rows="2" maxlength="2000" [(ngModel)]="comment" placeholder="اكتب تعليقاً أو تحديثاً…"></textarea>
-            <button type="submit" class="btn btn-sm" [disabled]="busy() || !comment.trim()">إرسال</button>
+            <button type="submit" class="btn btn-sm" [disabled]="busy() || !comment.trim()" [attr.aria-busy]="sendingComment()">
+              <app-action-icon kind="send" [busy]="sendingComment()" /> {{ sendingComment() ? 'جارٍ الإرسال…' : 'إرسال' }}
+            </button>
           </form>
         }
       </section>
@@ -148,8 +150,8 @@
           <button type="button" class="btn btn-danger btn-sm" (click)="remove()" [disabled]="busy()">تأكيد الحذف</button>
           <button type="button" class="btn btn-ghost btn-sm" (click)="confirmDelete.set(false)">تراجع</button>
         } @else {
-          @if (t.canEdit) { <button type="button" class="btn btn-ghost btn-sm" (click)="edit.emit(t)">تعديل</button> }
-          @if (t.canDelete) { <button type="button" class="btn btn-danger btn-sm" (click)="confirmDelete.set(true)">حذف</button> }
+          @if (t.canEdit) { <button type="button" class="btn btn-ghost btn-sm" (click)="edit.emit(t)"><app-action-icon kind="edit" [size]="16" /> تعديل</button> }
+          @if (t.canDelete) { <button type="button" class="btn btn-danger btn-sm" (click)="confirmDelete.set(true)"><app-action-icon kind="delete" [size]="16" /> حذف</button> }
         }
       </footer>
     }

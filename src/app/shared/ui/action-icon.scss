@@ -1,0 +1,115 @@
+:host {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  pointer-events: none;
+  vertical-align: -.2em;
+}
+
+svg { width: 100%; height: 100%; overflow: visible; }
+.bin-base { clip-path: inset(31% 0 0) view-box; }
+.bin-lid { clip-path: inset(0 0 69%) view-box; }
+.lock-top { clip-path: inset(0 0 59%) view-box; }
+.lock-base { clip-path: inset(41% 0 0) view-box; }
+.feed-window { clip-path: inset(-5% 0 34%) view-box; }
+.bin-fill { fill: currentColor; }
+.ink { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.flight-trails, .orbit { opacity: 0; }
+.orbit { stroke-width: 1; stroke-dasharray: .64 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :host-context(button:enabled:focus-visible),
+  :host-context(button:enabled:active) { --action-cue: 1; }
+  @media (hover: hover) {
+    :host-context(button:enabled:hover) { --action-cue: 1; }
+  }
+
+  .lid, .bucket, .pencil, .sheet, .arrow, .plane, .shackle {
+    transition: transform 210ms var(--ease);
+  }
+  .lid {
+    transform-origin: 19px 7px;
+    transform: translateY(calc(-1px * var(--action-cue, 0))) rotate(calc(32deg * var(--action-cue, 0)));
+  }
+  .bucket {
+    transform-origin: 12px 20px;
+    transform: rotate(calc(-7deg * var(--action-cue, 0)));
+  }
+  .shackle {
+    transform-origin: 16px 10px;
+    transform: translateY(calc(-1px * var(--action-cue, 0))) rotate(calc(25deg * var(--action-cue, 0)));
+  }
+  .pencil {
+    transform-origin: 13px 16px;
+    transform: translateX(calc(-1.5px * var(--action-cue, 0))) rotate(calc(-8deg * var(--action-cue, 0)));
+  }
+  .ink { stroke-dashoffset: calc(1 - var(--action-cue, 0)); transition: stroke-dashoffset 250ms var(--ease); }
+  .sheet { transform: translateY(calc(2.5px * var(--action-cue, 0))); }
+  .arrow { transform: translateY(calc(-2px * var(--action-cue, 0))); }
+  .plane { transform: translate(calc(-2px * var(--action-cue, 0)),calc(-1px * var(--action-cue, 0))); }
+  .drawer, .tray { transform-origin: 12px 20px; }
+  .restart, .result, .play, .orbit { transform-origin: 12px 12px; }
+
+  :host(.pending) {
+    .lid { animation: open-bin 470ms var(--ease) both; }
+    .bucket { animation: catch 470ms var(--ease) both; }
+    .pencil { animation: write 500ms var(--ease) both; }
+    .ink { stroke-dashoffset: 0; }
+    .sheet { animation: feed 560ms var(--ease) both; }
+    .drawer, .tray { animation: catch 560ms var(--ease) both; }
+    .arrow { animation: lift 530ms var(--ease) both; }
+    .plane { animation: fly 540ms var(--ease) both; }
+    .flight-trails { animation: trail 540ms ease-out both; }
+    .shackle { animation: unlock 500ms var(--ease) both; }
+  }
+  :host(.complete) {
+    --action-cue: 0;
+    .lid { animation: close-bin 300ms var(--ease) both; }
+    .bin-fill, .result, .play { animation: arrive 270ms var(--ease) both; }
+    .orbit { animation: circle-bin 520ms 180ms ease-out; }
+    .restart { animation: restart 390ms var(--ease) both; }
+  }
+}
+
+@keyframes open-bin {
+  0% { transform: none; } 55% { transform: translateY(-1.5px) rotate(62deg); }
+  100% { transform: translateY(-1px) rotate(46deg); }
+}
+@keyframes close-bin {
+  0% { transform: translateY(-1px) rotate(46deg); }
+  73% { transform: rotate(-6deg); } 100% { transform: none; }
+}
+@keyframes catch {
+  0%,32% { transform: none; } 58% { transform: rotate(-6deg) scale(1.08,.90); }
+  82% { transform: scale(.98,1.05); } 100% { transform: none; }
+}
+@keyframes write {
+  0% { transform: none; } 24% { transform: translate(2px,-2px) rotate(7deg); }
+  47% { transform: translate(1px,1px); } 73% { transform: translate(-1px,0) rotate(-8deg); }
+  100% { transform: translate(-2px,-1px); }
+}
+@keyframes feed {
+  0% { transform: none; } 25% { transform: translateY(-1.5px) rotate(-3deg); }
+  100% { transform: translateY(7px); }
+}
+@keyframes lift {
+  0% { transform: none; } 30% { transform: translateY(2px); }
+  72% { transform: translateY(-3px); } 100% { transform: translateY(-1px); }
+}
+@keyframes fly {
+  0% { transform: none; } 30% { transform: translate(2px,1px); }
+  77% { transform: translate(-3px,-3px) rotate(-5deg); }
+  100% { transform: translate(-2px,-2px); }
+}
+@keyframes trail { 0%,20% { opacity: 0; } 65% { opacity: .9; } 100% { opacity: .45; } }
+@keyframes unlock {
+  0% { transform: none; } 65% { transform: translateY(-2px) rotate(54deg); }
+  100% { transform: translateY(-1px) rotate(43deg); }
+}
+@keyframes arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes circle-bin {
+  from { opacity: 0; stroke-dashoffset: .64; transform: rotate(-80deg); }
+  46% { opacity: .9; stroke-dashoffset: 0; }
+  to { opacity: 0; transform: rotate(200deg); }
+}
+@keyframes restart { from { opacity: 0; transform: rotate(74deg); } to { opacity: 1; transform: none; } }

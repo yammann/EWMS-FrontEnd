@@ -1,9 +1,12 @@
 /** فرع الدراسات المركزية — المستندات (من studies.models.ts؛ التعليق الشارح للنسخة هناك) */
 import { StudyApproval, StudyChain } from './chain.models';
 import { StudyDocumentStatus } from './enums.models';
+import { StudyDiwanCase, StudyDiwanStage } from './diwan.models';
 
 export interface StudyDocumentFilter {
   status?: StudyDocumentStatus | null; search?: string | null; branchId?: number | null;
+  diwanStage?: StudyDiwanStage | null;
+  diwanOnly?: boolean;
   from?: string | null; to?: string | null; page?: number; pageSize?: number;
 }
 
@@ -109,6 +112,8 @@ export interface StudyResponse extends StudyDocumentBase {
   /** جزء التخطيط: وقّع القسم المتابع ولم يوقّع التخطيط (في التفاصيل فقط) */
   canEditPlanningPart: boolean;
   canCreateStartOrder: boolean;
+  diwanStage?: StudyDiwanStage | null;
+  diwanCase?: StudyDiwanCase | null;
 }
 /** جزء القسم المتابع: الجدولان يُستبدلان كاملين عند كل حفظ؛ المباني مبنيان على الأكثر */
 export interface StudyResponseInput {
@@ -133,6 +138,7 @@ export interface StartOrderEngineer { engineerUserId: number; engineerName: stri
 /** أمر بدء الدراسة (PIO) */
 export interface StudyStartOrder extends StudyDocumentBase {
   id: number; responseId: number; assignmentId: number; assignmentNumber: string; projectCode: string | null;
+  diwanReplyId?: number | null; diwanReplyNumber?: string | null;
   requestId: number; branchId: number; branchName: string;
   competentDepartmentId: number; competentDepartmentName: string;
   projectManagerUserId: number; projectManagerName: string;
@@ -141,7 +147,7 @@ export interface StudyStartOrder extends StudyDocumentBase {
   canCreateProject: boolean;
 }
 export interface StudyStartOrderInput {
-  responseId: number; competentDepartmentId: number; projectManagerUserId: number;
+  diwanReplyId?: number; competentDepartmentId: number; projectManagerUserId: number;
   orderDate: string; studyStartDate: string; studyDeadline: string;
   engineers: { engineerUserId: number; disciplineId: number }[];
   resources: StudyItemInput[];

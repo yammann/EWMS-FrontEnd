@@ -17,8 +17,13 @@ import { StudyEmployee, StudyLookup, StudyStartOrder, StudyStartOrderInput } fro
 import { dateOnly } from '../utils/document-meta';
 import { ItemRow, itemRow, itemValue } from '../utils/form-rows';
 
-/** الرد المعتمد الذي يُصدر له أمر البدء */
-export interface StartOrderParent { responseId: number; assignmentNumber: string; branchId: number; proposedManagerUserId: number | null; }
+/** كتاب الموافقة المحال لإصدار أمر البدء، مع بيانات التكليف الموروثة */
+export interface StartOrderParent {
+  diwanReplyId?: number;
+  diwanReplyNumber?: string;
+  branchId: number;
+  proposedManagerUserId: number | null;
+}
 
 type EngineerRow = FormGroup<{ engineerUserId: FormControl<number>; disciplineId: FormControl<number> }>;
 
@@ -119,7 +124,7 @@ export class StudyStartOrderFormDialog implements OnInit {
     const v = this.form.getRawValue();
     const o = this.order();
     const body: StudyStartOrderInput = {
-      responseId: this.parent().responseId,
+      diwanReplyId: this.parent().diwanReplyId,
       competentDepartmentId: v.competentDepartmentId, projectManagerUserId: v.projectManagerUserId,
       orderDate: v.orderDate, studyStartDate: v.studyStartDate, studyDeadline: v.studyDeadline,
       engineers: v.engineers.map(e => ({ engineerUserId: e.engineerUserId, disciplineId: e.disciplineId })),

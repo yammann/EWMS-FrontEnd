@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AssignedTaskService } from '../data-access/assigned-task.service';
-import { Observable } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 import { AssignedTaskDetail, TaskAttachment, TaskStatus, TASK_STATUS_LABEL } from '../data-access/assigned-task.models';
 import { hasOpenModal } from '@shared/ui/modal';
 import { ConfirmService } from '@shared/ui/confirm.service';
@@ -16,10 +16,11 @@ import { TaskNoteDialog } from './task-note-dialog';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { Icon, IconName } from '@shared/ui/icon';
+import { ActionIcon } from '@shared/ui/action-icon';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
-  selector: 'app-task-detail-drawer', standalone: true, imports: [Icon, Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
+  selector: 'app-task-detail-drawer', standalone: true, imports: [Icon, ActionIcon, Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
   templateUrl: './task-detail-drawer.html',
   styleUrl: './task-detail-drawer.scss'
 })
@@ -39,6 +40,7 @@ export class TaskDetailDrawer {
   task = signal<AssignedTaskDetail | null>(null);
   error = signal('');
   busy = signal(false);
+  sendingComment = signal(false);
   confirmDelete = signal(false);
   comment = '';
   newItem = '';
@@ -107,18 +109,20 @@ export class TaskDetailDrawer {
     if (!t || this.uploading()) return;
     this.uploading.set(true); this.error.set(''); this.progress.set(files.length > 1 ? `0 من ${files.length}` : '');
     this.service.attachSequentially(t.id, files, (done, total) => this.progress.set(total > 1 ? `${done} من ${total}` : '')).subscribe({
-      next: updated => { this.uploading.set(false); this.progress.set(''); this.task.set(updated); this.changed.emit(); },
-      error: e => { this.uploading.set(false); this.progress.set(''); this.error.set(e.message); this.load(); this.changed.emit(); }
+      next: updated => { this.uploading.set(false); this.progress.set(''); this.task.set(updated); this.toast.success('اكتمل رفع المرفقات', 'upload'); this.changed.emit(); },
+      error: e => { this.uploading.set(false); this.progress.set(''); this.load(); this.error.set(e.message); this.changed.emit(); }
     });
   }
 
-  removeAttachment(a: TaskAttachment) { this.run(this.service.deleteAttachment(a.id)); }
+  removeAttachment(a: TaskAttachment) { this.run(this.service.deleteAttachment(a.id), () => this.toast.success('حُذف المرفق', 'delete')); }
 
   addComment() {
     const t = this.task();
     const text = this.comment.trim();
     if (!t || !text || this.busy()) return;
-    trackRequest(this.service.comment(t.id, text), this.busy, this.error, updated => { this.comment = ''; this.task.set(updated); this.changed.emit(); });
+    this.sendingComment.set(true);
+    const request = this.service.comment(t.id, text).pipe(finalize(() => this.sendingComment.set(false)));
+    this.run(request, () => { this.comment = ''; this.toast.success('أُرسل التعليق', 'send'); });
   }
 
   remove() {

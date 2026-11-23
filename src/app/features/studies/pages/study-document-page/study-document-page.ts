@@ -8,6 +8,8 @@ import { money } from '@core/utils/format';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { ConfirmService } from '@shared/ui/confirm.service';
+import { ActionIcon } from '@shared/ui/action-icon';
+import { DeleteActionContent } from '@shared/ui/delete-action-content';
 import { EmptyState } from '@shared/ui/empty-state';
 import { Icon } from '@shared/ui/icon';
 import { ToastService } from '@shared/ui/toast.service';
@@ -25,6 +27,7 @@ import { ResponseParent, StudyResponseFormDialog } from '../../components/respon
 import { StudyResponsePlanningDialog } from '../../components/response-planning-dialog';
 import { StartOrderParent, StudyStartOrderFormDialog } from '../../components/start-order-form-dialog';
 import { StudyChainView } from '../../components/study-chain';
+import { StudyDiwanPanel } from '../../components/study-diwan-panel';
 import { StudyStatusChip } from '../../components/study-status-chip';
 import { StudyAccess } from '../../data-access/study-access';
 import { StudyDocumentsService } from '../../data-access/study-documents.service';
@@ -47,9 +50,9 @@ type Dialog = 'edit' | 'planning' | 'next' | 'cancel' | 'project' | null;
   selector: 'app-study-document-page',
   standalone: true,
   imports: [
-    DatePipe, UtcPipe, RouterLink, Alert, EmptyState, Icon, StudyChainView, StudyStatusChip, StudyApprovalsPanel, StudyReasonDialog,
+    DatePipe, UtcPipe, RouterLink, ActionIcon, Alert, DeleteActionContent, EmptyState, Icon, StudyChainView, StudyStatusChip, StudyApprovalsPanel, StudyReasonDialog,
     StudyRequestFormDialog, StudyAssignmentFormDialog, StudyResponseFormDialog, StudyStartOrderFormDialog,
-    StudyAttachments, StudyActivity, StudyResponsePlanningDialog, StudyProjectFormDialog
+    StudyAttachments, StudyActivity, StudyResponsePlanningDialog, StudyProjectFormDialog, StudyDiwanPanel
   ],
   templateUrl: './study-document-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/list-tools.scss', './study-document-page.scss']
@@ -71,7 +74,8 @@ export class StudyDocumentPage {
   doc = signal<AnyStudyDocument | null>(null);
   loading = signal(false);
   error = signal('');
-  busy = signal(false);
+  pending = { submit: signal(false), delete: signal(false), cancel: signal(false) };
+  busy = computed(() => this.pending.submit() || this.pending.delete() || this.pending.cancel());
   actionError = signal('');
   dialog = signal<Dialog>(null);
 
@@ -115,10 +119,9 @@ export class StudyDocumentPage {
 
   /** إصدار المستند التالي في السلسلة (من علم الخادم) */
   next = computed<{ label: string } | null>(() => {
-    const r = this.request(), a = this.assignment(), s = this.response();
+    const r = this.request(), a = this.assignment();
     if (r?.canCreateAssignment) return { label: 'إصدار تكليف داخلي' };
     if (a?.canCreateResponse) return { label: 'كتابة إشعار الرد' };
-    if (s?.canCreateStartOrder) return { label: 'إصدار أمر البدء' };
     if (this.startOrder()?.canCreateProject && this.access().createProject) return { label: 'إنشاء مشروع' };
     return null;
   });
@@ -150,8 +153,12 @@ export class StudyDocumentPage {
   });
   startOrderParent = computed<StartOrderParent | null>(() => {
     const s = this.response(), o = this.startOrder();
-    if (s) return { responseId: s.id, assignmentNumber: s.assignmentNumber, branchId: s.branchId, proposedManagerUserId: s.proposedManagerUserId };
-    if (o) return { responseId: o.responseId, assignmentNumber: o.assignmentNumber, branchId: o.branchId, proposedManagerUserId: null };
+    const reply = s?.diwanCase?.replies[0];
+    if (s && reply) return {
+      diwanReplyId: reply.id, diwanReplyNumber: reply.number,
+      branchId: s.branchId, proposedManagerUserId: s.proposedManagerUserId
+    };
+    if (o) return { branchId: o.branchId, proposedManagerUserId: null };
     return null;
   });
 
@@ -176,32 +183,37 @@ export class StudyDocumentPage {
   }
 
   async submit() {
-    const message = this.kind() === 'requests'
+    const kind = this.kind();
+    const id = this.id();
+    const action = kind === 'requests' ? 'save' : 'send';
+    const message = kind === 'requests'
       ? 'تسجيل الطلب نهائياً؟ يصبح معتمداً ولا يُعدَّل بعدها، ويمكن إصدار التكليف له.'
       : 'إرسال المستند للاعتماد؟ لا يُعدَّل أثناء التوقيع، ويُعاد إليك إن رُفض.';
-    if (!await this.confirm.ask(message, this.submitLabel())) return;
-    this.run(this.service.submit(this.kind(), this.id()) as Observable<AnyStudyDocument>, d => {
+    if (!await this.confirm.ask(message, this.submitLabel(), undefined, action) || this.kind() !== kind || this.id() !== id) return;
+    this.run('submit', this.service.submit(kind, id) as Observable<AnyStudyDocument>, d => {
       this.doc.set(d);
-      this.toast.success(this.kind() === 'requests' ? 'سُجّل الطلب نهائياً — الخطوة التالية: إصدار التكليف الداخلي' : 'أُرسل المستند للاعتماد — انظر «أين وصل» أعلى الصفحة');
+      this.toast.success(kind === 'requests' ? 'سُجّل الطلب نهائياً — الخطوة التالية: إصدار التكليف الداخلي' : 'أُرسل المستند للاعتماد — انظر «أين وصل» أعلى الصفحة', action);
     });
   }
 
   cancelDocument(reason: string) {
-    this.run(this.service.cancel(this.kind(), this.id(), reason) as Observable<AnyStudyDocument>, d => {
+    this.run('cancel', this.service.cancel(this.kind(), this.id(), reason) as Observable<AnyStudyDocument>, d => {
       this.doc.set(d); this.dialog.set(null); this.toast.success('أُلغي المستند — يبقى في الأرشيف');
     });
   }
 
   async remove() {
-    if (!await this.confirm.ask(`حذف المسودة «${this.number()}»؟ لا يمكن التراجع.`, 'حذف')) return;
-    this.run(this.service.remove(this.kind(), this.id()), () => {
-      this.toast.success('حُذفت المسودة');
-      this.router.navigate(['/studies/documents'], { queryParams: { type: this.kind() === 'requests' ? null : this.kind() } });
+    const kind = this.kind();
+    const id = this.id();
+    if (!await this.confirm.ask(`حذف المسودة «${this.number()}»؟ لا يمكن التراجع.`, 'حذف', undefined, 'delete') || this.kind() !== kind || this.id() !== id) return;
+    this.run('delete', this.service.remove(kind, id), () => {
+      this.toast.success('حُذفت المسودة', 'delete');
+      this.router.navigate(['/studies/documents'], { queryParams: { type: kind === 'requests' ? null : kind } });
     });
   }
 
   /** حُفظ المستند نفسه بعد التعديل */
-  edited(d: AnyStudyDocument) { this.dialog.set(null); this.doc.set(d); this.toast.success('تم الحفظ'); }
+  edited(d: AnyStudyDocument) { this.dialog.set(null); this.doc.set(d); this.toast.success('تم الحفظ', 'save'); }
 
   /** أُنشئ المشروع من أمر البدء: إلى صفحته */
   projectCreated(id: number) {
@@ -220,7 +232,12 @@ export class StudyDocumentPage {
   /** تغيّر سطر توقيع: يُعاد تحميل المستند (قد تتغيّر حالته وأعلامه) */
   decided() { this.toast.success('حُفظ القرار'); this.load(); }
 
-  private run<T>(call: Observable<T>, done: (value: T) => void) {
-    trackRequest(call, this.busy, this.actionError, done);
+  diwanSaved(response: StudyResponse) {
+    this.doc.set(response);
+    this.toast.success('حُفظ الإجراء على معاملة الديوان');
+  }
+
+  private run<T>(action: keyof typeof this.pending, call: Observable<T>, done: (value: T) => void) {
+    if (!this.busy()) trackRequest(call, this.pending[action], this.actionError, done);
   }
 }

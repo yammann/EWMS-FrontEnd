@@ -17,12 +17,17 @@
     overflow: visible;
   }
 
-  .sidebar-head, .shell.collapsed .sidebar-head { flex-direction: row; padding-bottom: 0; border-bottom: 0; }
+  .sidebar-head, .shell.collapsed .sidebar-head { flex-direction: row; align-items: center; padding: 0; border-bottom: 0; }
   /* الشريط الرفيع ليس موضعاً للزخرفة (والسايدبار هنا غير مُموضَع فلا تُحصر داخله) */
   .sidebar > .ornament { display: none; }
-  .brand, .shell.collapsed .brand { justify-content: flex-start; flex: 1; padding: 2px 4px; }
+  /* الشعار والاسم سطر واحد، والساعة لا تتسع في الشريط */
+  .brand, .shell.collapsed .brand { flex-direction: row; justify-content: flex-start; gap: 12px; flex: 1; padding: 2px 4px; }
   .brand-logo, .shell.collapsed .brand-logo { width: 38px; height: 34px; }
+  .brand-text { justify-items: start; }
+  .brand-text strong { letter-spacing: .02em; }
+  .brand-text small { font-size: 12px; }
   .shell.collapsed .brand-text { display: grid; }
+  app-sidebar-clock { display: none; }
   .sidebar-foot { display: none; }
 
   .menu-toggle {

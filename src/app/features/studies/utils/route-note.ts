@@ -1,4 +1,4 @@
-import { StudyApproval, StudyChain, StudyDecision, StudyDocumentKind, StudyPerson } from '../data-access/studies.models';
+import { DIWAN_STAGES, StudyApproval, StudyChain, StudyDecision, StudyDiwanStage, StudyDocumentKind, StudyPerson } from '../data-access/studies.models';
 
 export type RouteTone = 'info' | 'wait' | 'done';
 
@@ -7,6 +7,7 @@ export interface RouteNote { tone: RouteTone; title: string; text: string; link?
 
 export interface RouteDoc {
   status: number; approvals: StudyApproval[]; chain: StudyChain | null; followingDepartmentName?: string; recommendation?: number;
+  diwanStage?: StudyDiwanStage | null;
   nextSigners?: StudyPerson[] | null; nextSignersTotal?: number; nextIssuers?: StudyPerson[] | null; nextIssuersTotal?: number;
 }
 
@@ -28,7 +29,7 @@ const SIGNERS: Partial<Record<StudyDocumentKind, string>> = {
 const NEXT: Record<StudyDocumentKind, { name: string; who: (d: RouteDoc) => string }> = {
   requests: { name: 'التكليف الداخلي', who: () => 'يُصدره من يملك صلاحية «إصدار تكليف داخلي» في الفرع' },
   assignments: { name: 'إشعار الرد', who: d => `يكتبه القسم المتابع${d.followingDepartmentName ? ' (' + d.followingDepartmentName + ')' : ''}` },
-  responses: { name: 'أمر البدء', who: () => 'يُصدره من يملك صلاحية «إصدار أمر البدء» في الفرع' },
+  responses: { name: 'معاملة الديوان', who: () => 'يتابعها ديوان فرع الدراسات' },
   startOrders: { name: 'مشروع الدراسة', who: () => 'يُنشئه من يملك صلاحية «إنشاء مشروع» (إدارة المشاريع)' }
 };
 
@@ -65,9 +66,11 @@ export function routeNote(kind: StudyDocumentKind, d: RouteDoc): RouteNote | nul
       return { tone: 'wait', title: waiting ? `بانتظار توقيع «${waiting.signerRoleName}»` : 'بانتظار الاعتماد', text: progress + who };
     }
     case 3: {
-      if (kind === 'responses' && d.recommendation === 3)
-        return { tone: 'done', title: 'اعتُمد الرد بتوصية «غير متاح»', text: 'تنتهي الدراسة عند هذا الرد ولا يصدر أمر بدء.' };
       const issued = nextIssued(kind, d.chain);
+      if (kind === 'responses') {
+        if (issued) return { tone: 'done', title: 'صدر أمر بدء الدراسة', text: 'أمر البدء:', link: issued.link, linkLabel: issued.label };
+        return diwanRouteNote(d);
+      }
       return issued
         ? { tone: 'done', title: kind === 'requests' ? `سُجّل الطلب وانتقل إلى «${next.name}»` : `اعتُمد وانتقل إلى «${next.name}»`, text: 'المستند التالي:', link: issued.link, linkLabel: issued.label }
         : { tone: 'wait', title: kind === 'requests' ? `سُجّل الطلب، والخطوة التالية: «${next.name}»` : `اعتُمد، والخطوة التالية: «${next.name}»`, text: issuersText(next.name, next.who(d), d) };
@@ -75,6 +78,25 @@ export function routeNote(kind: StudyDocumentKind, d: RouteDoc): RouteNote | nul
     default:
       return null;
   }
+}
+
+const DIWAN_DETAIL: Record<StudyDiwanStage, string> = {
+  1: 'يتولى ديوان فرع الدراسات إرسال المعاملة ورقياً وتسجيل الصادر.',
+  2: 'يتابع ديوان فرع الدراسات ورود كتاب الديوان المركزي.',
+  3: 'يراجع رئيس فرع الدراسات كتاب الرد المركزي.',
+  4: 'يراجع ديوان فرع الدراسات ملاحظة رئيس الفرع ويعيد تسجيل الرد.',
+  5: 'تُعد إدارة المشاريع أمر البدء من كتاب الموافقة المركزي المحال.',
+  6: 'ثبّت رئيس الفرع الاطلاع على الرفض المركزي.',
+  7: 'وُثّق الرد المركزي. التوصية الفنية «غير متاح» تمنع البدء.'
+};
+
+function diwanRouteNote(d: RouteDoc): RouteNote {
+  const stage = d.diwanStage ?? StudyDiwanStage.AwaitingDispatch;
+  const closed = stage === StudyDiwanStage.Rejected || stage === StudyDiwanStage.ClosedWithoutStart;
+  const people = d.nextIssuers?.length ? ` الإجراء لدى ${peopleText(d.nextIssuers, d.nextIssuersTotal)}.`
+    : d.nextIssuers?.length === 0 ? ' لا يوجد موظف مكلّف بهذا الإجراء في الفرع.' : '';
+  const title = stage === StudyDiwanStage.AwaitingDispatch ? 'اعتُمد إشعار الرد وأُحيل إلى ديوان الدراسات' : DIWAN_STAGES[stage];
+  return { tone: closed ? 'done' : 'wait', title, text: DIWAN_DETAIL[stage] + people };
 }
 
 /** من يصدر المستند التالي: أسماؤهم من الخادم، أو تنبيه إن لم يملك الصلاحية أحد، أو الوصف العام للخوادم التي لا ترسل الأسماء */

@@ -22,11 +22,12 @@
         </div>
       </section>
 
+      @if (legacyLayout()) {
       <section class="form-section" formArrayName="buildings">
         <h3>المباني</h3>
-        @if (legacyBuildingSummary()) {
+        @if (legacyBuildingSummary() || !individualBuildings()) {
           <div class="rows-foot legacy-buildings">
-            <p class="hint">هذا الرد يحتوي على عدد المباني والمساحة الإجمالية فقط.</p>
+            <p class="hint">أدخل تفاصيل كل مبنى لمطابقتها مع بنود التكلفة.</p>
             <button type="button" class="btn btn-ghost btn-sm" (click)="enterBuildingDetails()">إدخال تفاصيل المباني</button>
           </div>
         }
@@ -82,6 +83,7 @@
           }
         </div>
       </section>
+      }
 
       <!-- خارج formArrayName: وإلا بحث Angular عن الحقلين داخل مصفوفة المباني ولم يربطهما بالنموذج فضاعت قيمتهما -->
       <section class="form-section">
@@ -113,8 +115,10 @@
         </div>
       </section>
 
+      @if (legacyLayout()) {
       <section class="form-section" formArrayName="costItems">
         <h3>الجدول التفصيلي للتكلفة المبدئية</h3>
+        @let choices = legacyBuildingChoices();
         @if (!form.controls.costItems.length) { <p class="rows-empty">لا بنود بعد.</p> }
         <div class="rows">
           @for (c of form.controls.costItems.controls; track c; let i = $index) {
@@ -134,13 +138,89 @@
               </div>
               <button type="button" class="icon-btn row-remove" aria-label="حذف البند" (click)="remove(form.controls.costItems, i)"><app-icon name="trash" [size]="16" /></button>
             </div>
+            @if (choices.length) {
+              <label class="form-field"><span class="form-label">المبنى المقابل للبند</span>
+                <select #assignment [value]="legacyCostAssignment(c)" (change)="assignLegacyCost(c, +assignment.value)">
+                  <option value="-1">مطابقة تلقائية</option>
+                  @for (choice of choices; track choice.row; let j = $index) {
+                    <option [value]="j">{{ buildingTypeLabel(choice.buildingType) }} — المبنى {{ choice.index + 1 }} {{ choice.code }} {{ choice.function }}</option>
+                  }
+                </select>
+              </label>
+            }
           }
         </div>
         <div class="rows-foot">
           <button type="button" class="btn btn-ghost btn-sm" (click)="addCost()">+ بند تكلفة</button>
           <span class="total table-cost-total">إجمالي الجدول: <strong>{{ costMoney(costTotal()) }}</strong></span>
         </div>
+        <p class="hint" role="status">{{ mergeMessage() }}</p>
+        @if (choices.length && form.controls.costItems.length) {
+          <p class="hint">بعد المطابقة، سيُشتق وصف البند من نوع المبنى ورمزه ووظيفته.</p>
+        }
+        <button type="button" class="btn btn-ghost btn-sm" (click)="mergeLegacyBuildings()">مطابقة المباني وبنود التكلفة</button>
       </section>
+      } @else {
+        <section class="form-section" formArrayName="pricedBuildings">
+          <h3>المباني والتكلفة المبدئية</h3>
+          @if (!form.controls.pricedBuildings.length) { <p class="rows-empty">لا مبانٍ مضافة.</p> }
+          <div class="building-details">
+            @for (row of form.controls.pricedBuildings.controls; track row; let i = $index) {
+              <fieldset class="building-detail" [formGroupName]="i">
+                <legend>المبنى {{ i + 1 }}</legend>
+                <div class="priced-building-fields">
+                  <label class="form-field"><span class="form-label">نوع المبنى</span>
+                    <select formControlName="buildingType">
+                      @for (type of buildingTypes; track type.value) { <option [ngValue]="type.value">{{ type.label }}</option> }
+                    </select>
+                  </label>
+                  <label class="form-field"><span class="form-label">رمز المبنى</span>
+                    <input formControlName="code" dir="auto" maxlength="50" required>
+                    @if (row.controls.code.touched && row.controls.code.invalid) { <small class="form-error">أدخل رمز المبنى.</small> }
+                  </label>
+                  <label class="form-field"><span class="form-label">وظيفة المبنى</span>
+                    <input formControlName="function" maxlength="200" required>
+                    @if (row.controls.function.touched && row.controls.function.invalid) { <small class="form-error">أدخل وظيفة المبنى.</small> }
+                  </label>
+                  <label class="form-field"><span class="form-label">المساحة (م²)</span>
+                    <input type="number" formControlName="area" min="0.01" step="0.01" required>
+                    @if (row.controls.area.touched && row.controls.area.invalid) { <small class="form-error">أدخل مساحة موجبة بخانتين عشريتين على الأكثر ضمن الحد المسموح.</small> }
+                  </label>
+                  <label class="form-field"><span class="form-label">سعر المتر المربع ({{ costUnit() }})</span>
+                    <input type="number" formControlName="unitPrice" min="0" step="any" required>
+                    @if (row.controls.unitPrice.touched && row.controls.unitPrice.invalid) { <small class="form-error">أدخل سعرًا غير سالب.</small> }
+                  </label>
+                  <div class="priced-building-total">
+                    <div class="form-field">
+                      <span class="form-label">تكلفة المبنى</span>
+                      <div class="cost-line-total">
+                        <strong>{{ costMoney(buildingCost(row)) }}</strong>
+                        @if (row.controls.unitPrice.value != null && equivalent(buildingCost(row)); as amount) {
+                          <small class="hint currency-equivalent">{{ amount }}</small>
+                        }
+                      </div>
+                    </div>
+                    <button type="button" class="icon-btn row-remove" [attr.aria-label]="'حذف المبنى ' + (i + 1)"
+                            (click)="remove(form.controls.pricedBuildings, i)"><app-icon name="trash" [size]="16" /></button>
+                  </div>
+                </div>
+              </fieldset>
+            }
+          </div>
+          <div class="rows-foot">
+            <button type="button" class="btn btn-ghost btn-sm" [disabled]="form.controls.pricedBuildings.length >= maxPricedBuildings"
+                    (click)="addBuilding()">+ إضافة مبنى</button>
+            <span class="total table-cost-total">إجمالي تكلفة المباني: <strong>{{ costMoney(costTotal()) }}</strong></span>
+          </div>
+          @for (type of buildingTypes; track type.value) {
+            @let summary = buildingSummary(type.value);
+            @if (summary.count) {
+              <p class="hint">{{ type.label }} — عدد المباني {{ summary.count }}، إجمالي المساحة {{ qty(summary.area) }} م²</p>
+              @if (summary.area > maxBuildingArea) { <small class="form-error">إجمالي المساحة يتجاوز الحد المسموح.</small> }
+            }
+          }
+        </section>
+      }
     </div>
     <app-form-actions [busy]="saving()" [disabled]="form.invalid || buildingLimitsExceeded()" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
   </form>

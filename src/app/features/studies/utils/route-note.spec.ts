@@ -1,4 +1,4 @@
-import { StudyApproval, StudyChain, StudyPerson } from '../data-access/studies.models';
+import { StudyApproval, StudyChain, StudyDiwanStage, StudyPerson } from '../data-access/studies.models';
 import { peopleText, routeNote } from './route-note';
 const person = (fullName: string, departmentName: string | null = null): StudyPerson => ({ id: 1, fullName, departmentName, jobTitle: null });
 
@@ -51,8 +51,13 @@ describe('routeNote', () => {
     expect(n.text).toContain('قسم إدارة التصميم');
   });
 
-  it('ends the study at an "unavailable" response, and shows nothing for rejected or cancelled documents', () => {
-    expect(routeNote('responses', { status: 3, approvals: [], chain: chain(), recommendation: 3 })!.title).toContain('غير متاح');
+  it('routes approved responses to the Diwan even if the recommendation is unavailable', () => {
+    const response = { status: 3, approvals: [], chain: chain(), recommendation: 3 };
+    expect(routeNote('responses', response)!.title).toContain('أُحيل إلى ديوان الدراسات');
+    expect(routeNote('responses', { ...response, diwanStage: StudyDiwanStage.ClosedWithoutStart })!.title).toContain('غير متاح');
+  });
+
+  it('shows nothing for rejected or cancelled documents', () => {
     expect(routeNote('responses', { status: 4, approvals: [], chain: chain() })).toBeNull();
     expect(routeNote('responses', { status: 5, approvals: [], chain: chain() })).toBeNull();
   });

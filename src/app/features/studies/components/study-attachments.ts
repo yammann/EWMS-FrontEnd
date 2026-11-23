@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { fileSize } from '@core/utils/file-size';
 import { canStreamToDisk } from '@core/utils/stream-download';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { ActionIcon } from '@shared/ui/action-icon';
 import { Alert } from '@shared/ui/alert';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { errorMessage } from '@shared/ui/error-message';
@@ -49,7 +50,7 @@ function iconOf(a: StudyAttachment): IconName {
 @Component({
   selector: 'app-study-attachments',
   standalone: true,
-  imports: [DatePipe, UtcPipe, Alert, Icon, Modal, SelectValue],
+  imports: [DatePipe, UtcPipe, ActionIcon, Alert, Icon, Modal, SelectValue],
   template: `
     <section class="panel">
       <div class="panel-heading"><div>
@@ -75,7 +76,9 @@ function iconOf(a: StudyAttachment): IconName {
           <div class="drop">
             <app-icon name="paperclip" [size]="20" />
             <span>{{ full() ? 'اكتمل عدد المرفقات' : 'اسحب الملفات إلى هنا أو' }}</span>
-            <button type="button" class="btn btn-sm" (click)="file.click()" [disabled]="full()">اختيار ملفات</button>
+            <button type="button" class="btn btn-sm" (click)="file.click()" [disabled]="full()">
+              <app-action-icon kind="upload" [size]="16" [busy]="uploading()" /> اختيار ملفات
+            </button>
             <input #file type="file" multiple hidden [accept]="accept" (change)="picked(file)" />
           </div>
         </div>
@@ -128,8 +131,8 @@ function iconOf(a: StudyAttachment): IconName {
                       @if (a.previewable) { <button type="button" class="btn btn-ghost btn-sm" (click)="preview(a)">معاينة</button> }
                       <button type="button" class="btn btn-ghost btn-sm" (click)="download(a)">تنزيل</button>
                       @if (a.canDelete && canWrite()) {
-                        <button type="button" class="btn btn-ghost btn-sm del" (click)="remove(a)" [disabled]="removingId() === a.id" [attr.aria-label]="'حذف ' + a.fileName">
-                          <app-icon name="trash" [size]="15" />
+                        <button type="button" class="btn btn-ghost btn-sm del" (click)="remove(a)" [disabled]="removing().has(a.id)" [attr.aria-busy]="removing().has(a.id)" [attr.aria-label]="'حذف ' + a.fileName">
+                          <app-action-icon kind="delete" [size]="15" [busy]="removing().has(a.id)" />
                         </button>
                       }
                     }
@@ -221,11 +224,12 @@ export class StudyAttachments implements OnDestroy {
   storageDown = signal(false);
   dragOver = signal(false);
   queue = signal<UploadItem[]>([]);
+  uploading = computed(() => this.queue().some(q => q.state === 'up'));
   full = computed(() => this.items().length + this.queue().filter(q => q.state !== 'error').length >= MAX_FILES);
 
   /** تنزيلات جارية: معرّف المرفق → نسبة التقدّم (null = حجم غير معروف) */
   downloading = signal<Record<number, number | null>>({});
-  removingId = signal<number | null>(null);
+  removing = signal<ReadonlySet<number>>(new Set());
   viewing = signal<StudyAttachment | null>(null);
   safeUrl = signal<SafeResourceUrl | null>(null);
   previewError = signal('');
@@ -390,17 +394,20 @@ export class StudyAttachments implements OnDestroy {
 
   // ─────────── الحذف ───────────
   async remove(a: StudyAttachment) {
-    if (!await this.confirm.ask(`حذف المرفق «${a.fileName}»؟ لا يمكن التراجع.`, 'حذف')) return;
-    this.removingId.set(a.id);
+    if (!await this.confirm.ask(`حذف المرفق «${a.fileName}»؟ لا يمكن التراجع.`, 'حذف', undefined, 'delete') || this.removing().has(a.id)) return;
+    this.removing.update(ids => new Set(ids).add(a.id));
     this.service.remove(a.id).subscribe({
       next: () => {
-        this.removingId.set(null);
         this.items.update(list => list.filter(x => x.id !== a.id));
-        this.toast.success('حُذف المرفق');
+        this.toast.success('حُذف المرفق', 'delete');
         this.changed.emit();
       },
-      error: e => { this.removingId.set(null); this.toast.error(errorMessage(e, 'تعذر حذف المرفق')); }
-    });
+      error: e => this.toast.error(errorMessage(e, 'تعذر حذف المرفق'))
+    }).add(() => this.removing.update(ids => {
+      const remaining = new Set(ids);
+      remaining.delete(a.id);
+      return remaining;
+    }));
   }
 
   ngOnDestroy() {

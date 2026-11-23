@@ -41,7 +41,7 @@ export interface StudyProject {
   plannedStartDate: string; plannedEndDate: string; actualStartDate: string | null; actualEndDate: string | null;
   status: StudyProjectStatus; statusName: string; progress: number;
   createdByName: string; createdAt: string; updatedAt: string | null; rowVersion: string;
-  canEdit: boolean; canDelete: boolean; canCancel: boolean;
+  canEdit: boolean; canDelete: boolean; canCancel: boolean; canReactivate: boolean;
   /** أرى المشروع كاملاً؛ وإلا فمراحلي ومهامي وفريقي بحسب viewLevel (1 كاملة، 2 مهام القسم، 3 مهام المكتب، 4 مهامي) */
   canViewFull: boolean; viewLevel: 1 | 2 | 3 | 4; viewLevelName: string;
   /** كل المراحل مغلقة ولا طلب إنجاز معلّق */

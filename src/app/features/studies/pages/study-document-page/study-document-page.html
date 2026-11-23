@@ -13,10 +13,14 @@
       @if (doc(); as d) {
         @if (canPrint()) { <a class="btn btn-ghost" [routerLink]="['/studies/print', meta().segment, d.id]"><app-icon name="printer" [size]="16" /> طباعة</a> }
         @if (kind() === 'responses') {
-          @if (response()?.canEditFollowingPart) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')">تعديل جزء القسم المتابع</button> }
-          @if (response()?.canEditPlanningPart) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('planning')">جزء التخطيط</button> }
-        } @else if (d.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')">تعديل</button> }
-        @if (d.canSubmit) { <button class="btn" type="button" [disabled]="busy()" (click)="submit()">{{ submitLabel() }}</button> }
+          @if (response()?.canEditFollowingPart) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')"><app-action-icon kind="edit" /> تعديل جزء القسم المتابع</button> }
+          @if (response()?.canEditPlanningPart) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('planning')"><app-action-icon kind="edit" /> جزء التخطيط</button> }
+        } @else if (d.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')"><app-action-icon kind="edit" /> تعديل</button> }
+        @if (d.canSubmit) {
+          <button class="btn" type="button" [disabled]="busy()" [attr.aria-busy]="pending.submit()" (click)="submit()">
+            <app-action-icon [kind]="kind() === 'requests' ? 'save' : 'send'" [busy]="pending.submit()" /> {{ submitLabel() }}
+          </button>
+        }
         @if (next(); as n) { <button class="btn" type="button" [disabled]="busy()" (click)="dialog.set('next')">+ {{ n.label }}</button> }
       }
     </div>
@@ -40,6 +44,11 @@
     }
 
     @if (d.chain) { <section class="panel"><app-study-chain [chain]="d.chain" [current]="kind()" [responseNumber]="responseNumber()" /></section> }
+    @if (response(); as s) {
+      @if (s.diwanCase; as diwan) {
+        <app-study-diwan-panel [response]="s" [diwan]="diwan" (saved)="diwanSaved($event)" (startOrder)="dialog.set('next')" />
+      }
+    }
 
     <!-- ═════════ الطلب ═════════ -->
     @if (request(); as r) {
@@ -192,6 +201,9 @@
         <div class="panel-heading"><div><h2>بيان أمر البدء</h2></div></div>
         <dl class="facts">
           <div><dt>أمر التكليف المرجعي</dt><dd class="mono">{{ o.assignmentNumber }}</dd></div>
+          @if (o.diwanReplyNumber; as replyNumber) {
+            <div><dt>كتاب الموافقة المركزي المحال</dt><dd><bdi>{{ replyNumber }}</bdi></dd></div>
+          }
           <div><dt>كود المشروع</dt><dd class="mono">{{ o.projectCode || '—' }}</dd></div>
           <div><dt>تاريخ الأمر</dt><dd>{{ o.orderDate | date:'yyyy/MM/dd' }}</dd></div>
           <div><dt>القسم المختص</dt><dd>{{ o.competentDepartmentName }}</dd></div>
@@ -236,7 +248,11 @@
         </div>
         <div class="header-actions">
           @if (d.canCancel) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="actionError.set(''); dialog.set('cancel')">إلغاء المستند</button> }
-          @if (d.canDelete) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="remove()">حذف</button> }
+          @if (d.canDelete) {
+            <button class="btn btn-danger" type="button" [disabled]="busy()" [attr.aria-busy]="pending.delete()" (click)="remove()">
+              <app-delete-action-content [busy]="pending.delete()" />
+            </button>
+          }
         </div>
       </section>
     }

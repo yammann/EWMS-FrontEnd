@@ -10,6 +10,7 @@ export * from './models/enums.models';
 export * from './models/lookups.models';
 export * from './models/chain.models';
 export * from './models/documents.models';
+export * from './models/diwan.models';
 export * from './models/projects.models';
 export * from './models/drawings.models';
 export * from './models/records.models';

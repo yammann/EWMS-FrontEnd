@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import type { ActionKind } from './action-icon';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -6,6 +7,7 @@ export interface Toast {
   id: number;
   type: ToastType;
   message: string;
+  action?: ActionKind;
 }
 
 /**
@@ -17,13 +19,13 @@ export class ToastService {
   private seq = 0;
   readonly toasts = signal<Toast[]>([]);
 
-  show(message: string, type: ToastType = 'success') {
+  show(message: string, type: ToastType = 'success', action?: ActionKind) {
     const id = ++this.seq;
-    this.toasts.update(list => [...list, { id, type, message }]);
+    this.toasts.update(list => [...list, { id, type, message, action }]);
     setTimeout(() => this.dismiss(id), type === 'error' ? 6000 : 3500);
   }
 
-  success(message: string) { this.show(message, 'success'); }
+  success(message: string, action?: ActionKind) { this.show(message, 'success', action); }
   error(message: string) { this.show(message, 'error'); }
   info(message: string) { this.show(message, 'info'); }
 

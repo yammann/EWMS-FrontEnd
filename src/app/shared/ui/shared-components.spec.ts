@@ -57,13 +57,16 @@ describe('shared components', () => {
     f.componentInstance.invalid.set(false); await f.whenStable();
     expect(submit().disabled).toBe(false);
     expect(submit().textContent).toBe('حفظ');
+    expect(submit().querySelector('app-action-icon.pending')).toBeNull();
     f.componentInstance.busy.set(true); await f.whenStable();
     expect(submit().disabled).toBe(true);
     expect(submit().textContent).toBe('جارٍ…');
+    expect(submit().querySelector('app-action-icon.pending')).not.toBeNull();
     (f.nativeElement.querySelector('button.ghost') as HTMLButtonElement).click();
     // الإلغاء معطّل أثناء الانشغال → لا يصدر
     expect(dismissed).not.toHaveBeenCalled();
     f.componentInstance.busy.set(false); await f.whenStable();
+    expect(submit().querySelector('app-action-icon.complete')).toBeNull();
     (f.nativeElement.querySelector('button.ghost') as HTMLButtonElement).click();
     expect(dismissed).toHaveBeenCalledTimes(1);
   });

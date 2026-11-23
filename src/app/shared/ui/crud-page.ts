@@ -121,7 +121,7 @@ export class CrudPage<T extends { id: number }, B, R = unknown> {
         this.saving.set(false);
         this.dialog.set(null);
         const m = this.cfg.messages.saved;
-        this.toast.success(typeof m === 'function' ? m(result, d.mode) : m);
+        this.toast.success(typeof m === 'function' ? m(result, d.mode) : m, 'save');
         this.trigger.next();
       },
       error: e => { this.saving.set(false); this.formError.set(errorMessage(e, 'تعذر الحفظ')); }
@@ -131,13 +131,13 @@ export class CrudPage<T extends { id: number }, B, R = unknown> {
   async remove(item: T) {
     if (this.cfg.can?.delete && !this.cfg.can.delete()) return this.deny('حذف');
     if (!this.cfg.remove || this.deletingId() !== null) return;
-    if (!await this.confirm.ask(this.cfg.messages.confirmDelete(item), this.cfg.messages.confirmLabel ?? 'حذف')) return;
+    if (!await this.confirm.ask(this.cfg.messages.confirmDelete(item), this.cfg.messages.confirmLabel ?? 'حذف', undefined, 'delete')) return;
     this.deletingId.set(item.id);
     this.cfg.remove(item).subscribe({
       next: () => {
         this.deletingId.set(null);
         this.items.update(list => list.filter(x => x.id !== item.id));
-        this.toast.success(this.cfg.messages.deleted);
+        this.toast.success(this.cfg.messages.deleted, 'delete');
         if (this.dialog()?.item?.id === item.id) this.dialog.set(null);
       },
       error: e => { this.deletingId.set(null); this.toast.error(errorMessage(e, 'تعذر الحذف')); }

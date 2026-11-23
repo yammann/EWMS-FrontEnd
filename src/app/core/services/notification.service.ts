@@ -1,6 +1,7 @@
 import { Injectable, NgZone, inject, signal } from '@angular/core';
 import { Subject, Subscription, interval, tap, catchError, EMPTY } from 'rxjs';
 import type { HubConnection } from '@microsoft/signalr';
+import { AppPermission, AppPermissionName } from '@core/constants/access';
 import { ApiService } from '@core/services/api.service';
 import { AppNotification } from '@core/models/notification.models';
 import { PagedResult } from '@core/models/paged-result.model';
@@ -169,11 +170,16 @@ const STUDY_PAGES: Record<string, string> = {
 };
 
 /** الوجهة عند فتح الإشعار: طلبات تنتظر قرار المدير → المراجعة، وبقية إشعارات الإجازات → «إجازاتي»، وغيرها → الملف الشخصي */
-export function notificationRoute(n: AppNotification, canReview: boolean): string {
+export function notificationRoute(n: AppNotification, canReview: boolean, hasPermission?: (permission: AppPermissionName) => boolean): string {
   if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
   if (n.relatedEntityType === 'StudyTask') return '/studies/my-tasks';
+  if (n.relatedEntityType === 'StudyProjectApproval') return '/studies/approvals';
+  if (n.type === 'StudyProjectReactivated' && n.relatedEntityType === 'StudyProject' && hasPermission
+      && !hasPermission(AppPermission.ViewStudyProjects)) {
+    return hasPermission(AppPermission.UpdateStudyTaskProgress) ? '/studies/my-tasks' : '/notifications';
+  }
   const study = n.relatedEntityType ? STUDY_PAGES[n.relatedEntityType] : undefined;
   if (study && n.relatedEntityId) return `${study}/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'ToDoList' && n.relatedEntityId) return `/todo-lists/${n.relatedEntityId}`;

@@ -53,7 +53,7 @@
           </select>
         </label>
       </div>
-      <app-form-actions [busy]="busy()" [disabled]="!reason().trim()" label="إرسال الطلب" busyLabel="جارٍ الإرسال…" (dismissed)="askOpen.set(false)" />
+      <app-form-actions action="send" [busy]="busy()" [disabled]="!reason().trim()" label="إرسال الطلب" busyLabel="جارٍ الإرسال…" (dismissed)="askOpen.set(false)" />
     </form>
   </app-modal>
 }

@@ -73,6 +73,7 @@ export class StudyPrintPage {
     ];
     if (o) return [
       { label: 'أمر التكليف المرجعي', value: o.assignmentNumber }, { label: 'كود المشروع', value: text(o.projectCode) },
+      ...(o.diwanReplyNumber ? [{ label: 'كتاب الموافقة المركزي المحال', value: o.diwanReplyNumber }] : []),
       { label: 'تاريخ الأمر', value: day(o.orderDate) }, { label: 'القسم المختص', value: o.competentDepartmentName },
       { label: 'مدير المشروع', value: o.projectManagerName }, { label: 'تاريخ بدء الدراسة', value: day(o.studyStartDate) },
       { label: 'الحد الأقصى للإنهاء', value: day(o.studyDeadline), wide: true }

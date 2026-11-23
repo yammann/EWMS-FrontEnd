@@ -6,8 +6,10 @@ import { forkJoin, Observable } from 'rxjs';
 import { AppPermission } from '@core/constants/access';
 import { AuthService } from '@core/services/auth.service';
 import { UtcPipe } from '@shared/pipes/format.pipes';
+import { ActionIcon } from '@shared/ui/action-icon';
 import { Alert } from '@shared/ui/alert';
 import { ConfirmService } from '@shared/ui/confirm.service';
+import { DeleteActionContent } from '@shared/ui/delete-action-content';
 import { EmptyState } from '@shared/ui/empty-state';
 import { Icon } from '@shared/ui/icon';
 import { ToastService } from '@shared/ui/toast.service';
@@ -37,7 +39,7 @@ const TABS: { key: Tab; label: string }[] = [
 const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-', '/') : '—';
 
 /**
- * صفحة مشروع دراسة: ترويسة بنسبة الإنجاز وإجراءات المشروع (تعديل، طلب الإنجاز، إلغاء، حذف)، ثم تبويبات:
+ * صفحة مشروع دراسة: ترويسة بنسبة الإنجاز وإجراءات المشروع، ثم تبويبات:
  * المراحل والمهام، المخطط الزمني (Gantt)، الفريق، والتواقيع والمرفقات والسجل. المشروع ومهامه يُحمَّلان معاً
  * ويُعاد تحميلهما بعد أي تغيير في المراحل والمهام؛ وعمليات الفريق تعيد المشروع كاملاً. الأعلام من الخادم.
  */
@@ -45,7 +47,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
   selector: 'app-study-project-page',
   standalone: true,
   imports: [
-    DatePipe, UtcPipe, RouterLink, Alert, EmptyState, Icon, StudyChainView, StudyStatusChip, StudyProgress, StudyApprovalsPanel,
+    DatePipe, UtcPipe, RouterLink, ActionIcon, Alert, DeleteActionContent, EmptyState, Icon, StudyChainView, StudyStatusChip, StudyProgress, StudyApprovalsPanel,
     StudyProjectFormDialog, StudyProjectStagesPanel, StudyProjectTeamPanel, StudyProjectDrawingsPanel, StudyGantt, StudyReasonDialog, StudyAttachments, StudyActivity
   ],
   templateUrl: './study-project-page.html',
@@ -73,7 +75,8 @@ export class StudyProjectPage {
   tasksTruncated = signal<number | null>(null);
   loading = signal(false);
   error = signal('');
-  busy = signal(false);
+  pending = { send: signal(false), reactivate: signal(false), delete: signal(false), cancel: signal(false) };
+  busy = computed(() => this.pending.send() || this.pending.reactivate() || this.pending.delete() || this.pending.cancel());
   actionError = signal('');
   dialog = signal<Dialog>(null);
   tab = signal<Tab>('stages');
@@ -130,23 +133,38 @@ export class StudyProjectPage {
   reload() { this.load(); }
 
   teamUpdated(p: StudyProject) { this.project.set(p); this.logVersion.update(v => v + 1); }
-  decided() { this.toast.success('حُفظ القرار'); this.load(); }
+  decided() { this.toast.success('حُفظ القرار', 'save'); this.load(); }
 
-  edited(p: StudyProject) { this.dialog.set(null); this.project.set(p); this.toast.success('تم الحفظ'); this.logVersion.update(v => v + 1); }
+  edited(p: StudyProject) { this.dialog.set(null); this.project.set(p); this.toast.success('تم الحفظ', 'save'); this.logVersion.update(v => v + 1); }
 
   async requestCompletion() {
-    if (!await this.confirm.ask('إرسال إنجاز المشروع للاعتماد؟ يوقّع عليه إدارة المشاريع ثم رئيس الفرع.', 'إرسال')) return;
-    this.run(this.service.requestCompletion(this.id()), p => { this.project.set(p); this.toast.success('أُرسل الإنجاز للاعتماد'); this.logVersion.update(v => v + 1); });
+    const id = this.id();
+    if (!await this.confirm.ask('إرسال إنجاز المشروع للاعتماد؟ يوقّع عليه إدارة المشاريع ثم رئيس الفرع.', 'إرسال', undefined, 'send') || this.id() !== id) return;
+    this.run('send', this.service.requestCompletion(id), p => { this.project.set(p); this.toast.success('أُرسل الإنجاز للاعتماد', 'send'); this.logVersion.update(v => v + 1); });
   }
 
   cancelProject(reason: string) {
-    this.run(this.service.cancel(this.id(), reason), p => { this.project.set(p); this.dialog.set(null); this.toast.success('أُلغي المشروع'); this.logVersion.update(v => v + 1); });
+    this.run('cancel', this.service.cancel(this.id(), reason), p => { this.project.set(p); this.dialog.set(null); this.toast.success('أُلغي المشروع'); this.logVersion.update(v => v + 1); });
+  }
+
+  async reactivateProject(project: StudyProject) {
+    if (!await this.confirm.ask(`إعادة تفعيل المشروع «${project.code}» وإعادته إلى حالة «جارٍ»؟`, 'إعادة تفعيل', undefined, 'reactivate')) return;
+    if (this.id() !== project.id || this.busy()) return;
+    this.run('reactivate', this.service.reactivate(project.id), updated => {
+      this.toast.success('أُعيد تفعيل المشروع', 'reactivate');
+      if (this.id() !== updated.id) return;
+      this.project.set(updated);
+      this.load();
+    });
   }
 
   async remove() {
-    if (!await this.confirm.ask(`حذف المشروع «${this.project()?.code}»؟ لا يُحذف مشروع له مهام أو مخططات أو مرفقات.`, 'حذف')) return;
-    this.run(this.service.remove(this.id()), () => { this.toast.success('حُذف المشروع'); this.router.navigate(['/studies/projects']); });
+    const id = this.id();
+    if (!await this.confirm.ask(`حذف المشروع «${this.project()?.code}»؟ لا يُحذف مشروع له مهام أو مخططات أو مرفقات.`, 'حذف', undefined, 'delete') || this.id() !== id) return;
+    this.run('delete', this.service.remove(id), () => { this.toast.success('حُذف المشروع', 'delete'); this.router.navigate(['/studies/projects']); });
   }
 
-  private run<T>(call: Observable<T>, done: (value: T) => void) { trackRequest(call, this.busy, this.actionError, done); }
+  private run<T>(action: keyof typeof this.pending, call: Observable<T>, done: (value: T) => void) {
+    if (!this.busy()) trackRequest(call, this.pending[action], this.actionError, done);
+  }
 }

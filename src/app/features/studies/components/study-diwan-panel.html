@@ -1,0 +1,93 @@
+<section class="panel" id="diwan">
+  <div class="panel-heading">
+    <h2>معاملة الديوان</h2>
+    <p>{{ diwan().stageName }}</p>
+    <div class="actions">
+      @if (diwan().canRegisterDispatch) {
+        <button class="btn" type="button" (click)="open('dispatch')">تسجيل الصادر</button>
+      }
+      @if (diwan().canRegisterReply) {
+        <button class="btn" type="button" (click)="open('reply')">تسجيل كتاب الرد المركزي</button>
+      }
+      @if (diwan().canReview) {
+        <button class="btn" type="button" (click)="open('confirm')">{{ confirmLabel() }}</button>
+        <button class="btn btn-ghost" type="button" (click)="open('return')">إعادة للتصحيح</button>
+      }
+    </div>
+  </div>
+
+  @if (diwan().dispatchNumber; as dispatch) {
+    <dl class="facts">
+      <div><dt>رقم الصادر</dt><dd><bdi>{{ dispatch }}</bdi></dd></div>
+      <div><dt>تاريخ الصادر</dt><dd>{{ diwan().dispatchDate | date:'yyyy/MM/dd' }}</dd></div>
+      @if (diwan().reviewNote; as reviewNote) { <div class="wide"><dt>ملاحظة رئيس الفرع</dt><dd>{{ reviewNote }}</dd></div> }
+    </dl>
+  }
+
+  <app-alert [message]="downloadError()" />
+  @if (diwan().replies.length) {
+    <div class="table-wrap">
+      <table aria-label="كتب الرد المركزي">
+        <thead><tr><th>رقم الكتاب الوارد</th><th>التاريخ</th><th>النتيجة</th><th>صورة الكتاب</th><th>أمر البدء</th></tr></thead>
+        <tbody>
+          @for (reply of diwan().replies; track reply.id; let current = $first) {
+            <tr>
+              <td><bdi>{{ reply.number }}</bdi></td>
+              <td>{{ reply.date | date:'yyyy/MM/dd' }}</td>
+              <td>{{ reply.decision === decisions.Approved ? 'موافقة' : 'رفض' }} @if (!current) { <small>(تسجيل سابق)</small> }</td>
+              <td>
+                <button class="btn btn-ghost btn-sm" type="button" [disabled]="downloading()" (click)="download(reply)">
+                  تنزيل صورة الكتاب
+                </button>
+              </td>
+              <td>
+                @if (current && response().canCreateStartOrder) {
+                  <button class="btn btn-sm" type="button" (click)="startOrder.emit()">إعداد أمر البدء</button>
+                } @else { — }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (action(); as mode) {
+  <app-modal [heading]="titles[mode]" [subheading]="response().responseNumber" [busy]="saving()" (closed)="action.set(null)">
+    <form (submit)="$event.preventDefault(); save()">
+      <div class="modal-body form-stack">
+        <app-alert [message]="error()" />
+        @if (mode === 'dispatch' || mode === 'reply') {
+          <label class="form-field"><span class="form-label">{{ mode === 'dispatch' ? 'رقم الصادر' : 'رقم الكتاب الوارد' }}</span>
+            <input #ref [value]="number()" (input)="number.set(ref.value)" maxlength="50" dir="auto" required>
+          </label>
+          <label class="form-field"><span class="form-label">{{ mode === 'dispatch' ? 'تاريخ الصادر' : 'تاريخ الكتاب الوارد' }}</span>
+            <input #day type="date" [value]="date()" (input)="date.set(day.value)" required>
+          </label>
+          @if (mode === 'reply') {
+            <label class="form-field"><span class="form-label">نتيجة الديوان المركزي</span>
+              <select #result (change)="decision.set(result.value === '1' ? decisions.Approved : result.value === '2' ? decisions.Rejected : null)" required>
+                <option value="" [selected]="!decision()">اختر النتيجة</option>
+                <option value="1" [selected]="decision() === decisions.Approved">موافقة</option>
+                <option value="2" [selected]="decision() === decisions.Rejected">رفض</option>
+              </select>
+            </label>
+            <label class="form-field"><span class="form-label">صورة الكتاب الورقي (PDF أو صورة)</span>
+              <input #attachment type="file" accept=".pdf,image/*" (change)="pickFile(attachment)" required>
+            </label>
+          }
+        } @else {
+          @if (mode === 'confirm') {
+            <p>{{ canRefer() ? 'ستُحال الموافقة المركزية إلى إدارة المشاريع لإعداد أمر بدء الدراسة.' : 'سيُثبّت اطلاع رئيس الفرع وتُغلق معاملة الديوان.' }}</p>
+          }
+          <label class="form-field"><span class="form-label">{{ mode === 'return' ? 'سبب الإعادة' : 'ملاحظة (اختيارية)' }}</span>
+            <textarea #review [value]="note()" (input)="note.set(review.value)" rows="4" maxlength="1000" [required]="mode === 'return'"></textarea>
+          </label>
+        }
+      </div>
+      <app-form-actions [action]="mode === 'confirm' ? null : 'save'" [busy]="saving()" [disabled]="!valid()" [label]="mode === 'confirm' ? confirmLabel() : 'حفظ'"
+        busyLabel="جارٍ الحفظ…" (dismissed)="action.set(null)" />
+    </form>
+  </app-modal>
+}

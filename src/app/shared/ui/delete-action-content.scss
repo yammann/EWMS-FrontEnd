@@ -1,0 +1,47 @@
+:host {
+  position: relative;
+  display: inline-block;
+  padding-inline-start: calc(18px + .55em);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.word { position: relative; }
+.piece { display: none; }
+app-action-icon {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :host(.collecting) .label { opacity: 0; }
+  :host(.collecting) app-action-icon { animation: center-bin 240ms 715ms var(--ease) both; }
+  .piece {
+    position: absolute;
+    display: block;
+    inset: 0;
+    pointer-events: none;
+    transform-origin: var(--center) 50%;
+    animation: fly-to-bin 420ms var(--delay) both;
+  }
+
+  // Each mask shows part of the fully shaped word, so the Arabic joining and dots survive takeoff.
+  .first  { --center: 82%; --travel: 18%; --delay: 80ms;  clip-path: inset(-.4em 0 -.4em 65%); }
+  .second { --center: 53%; --travel: 47%; --delay: 185ms; clip-path: inset(-.4em 35% -.4em 41%); }
+  .third  { --center: 21%; --travel: 79%; --delay: 295ms; clip-path: inset(-.4em 59% -.4em 0); }
+
+  @keyframes fly-to-bin {
+    0% { transform: none; }
+    43% { transform: translate(38%, -.82em) rotate(-17deg) scale(.85); }
+    82% { opacity: 1; }
+    100% { opacity: 0; transform: translate(calc(var(--travel) + .55em + 8px), -.08em) rotate(10deg) scale(.25); }
+  }
+
+  @keyframes center-bin {
+    from { inset-inline-start: 0; }
+    to { inset-inline-start: calc(50% - 9px); }
+  }
+}

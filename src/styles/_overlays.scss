@@ -119,6 +119,7 @@
   color: var(--danger-600);
 }
 .confirm-icon svg, .confirm-icon app-icon { width: 24px; height: 24px; }
+.confirm-icon-brand { background: var(--brand-100); color: var(--brand-700); }
 
 .confirm-dialog h3 { margin: 0 0 6px; color: var(--ink-900); font-size: 17px; font-weight: 700; }
 

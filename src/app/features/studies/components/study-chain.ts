@@ -1,10 +1,10 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Icon } from '@shared/ui/icon';
-import { DOCUMENT_STATUSES, StudyChain, StudyDocumentKind } from '../data-access/studies.models';
+import { DIWAN_STAGES, DOCUMENT_STATUSES, StudyChain, StudyDiwanStage, StudyDocumentKind } from '../data-access/studies.models';
 
 interface ChainStep {
-  key: StudyDocumentKind | 'project';
+  key: StudyDocumentKind | 'project' | 'diwan';
   label: string;
   number: string | null;
   status: number | null;
@@ -48,6 +48,8 @@ const docStatusName = (s: number | null) => DOCUMENT_STATUSES.find(x => x.value 
               @if (step.link && step.key !== current()) { <a class="number mono" [routerLink]="step.link">{{ step.number }}</a> }
               @else { <span class="number mono">{{ step.number }}</span> }
               @if (step.statusName) { <small class="state">{{ step.statusName }}</small> }
+            } @else if (step.statusName) {
+              <small class="state">{{ step.statusName }}</small>
             } @else {
               <small class="state">لم يصدر بعد</small>
             }
@@ -57,7 +59,7 @@ const docStatusName = (s: number | null) => DOCUMENT_STATUSES.find(x => x.value 
     </ol>
   `,
   styles: [`
-    .chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .chain { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
     .step { position: relative; display: grid; justify-items: center; align-content: start; gap: 8px; text-align: center; min-width: 0; padding: 0 4px; }
     .dot { position: relative; z-index: 1; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
            background: var(--surface, #fff); color: var(--ink-500); box-shadow: inset 0 0 0 2px var(--ink-300); }
@@ -84,7 +86,7 @@ const docStatusName = (s: number | null) => DOCUMENT_STATUSES.find(x => x.value 
     .bad .state { color: var(--danger-700); }
     .missing { opacity: .65; }
     @media (max-width: 640px) {
-      .chain { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+      .chain { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); gap: 14px; }
       .step { grid-template-columns: 32px minmax(0, 1fr); justify-items: start; text-align: start; gap: 12px; align-items: start; padding: 0; }
       .body { justify-items: start; }
       .step::after { top: 36px; inset-inline-start: 15px; width: 2px; height: calc(100% - 22px); }
@@ -101,20 +103,30 @@ export class StudyChainView {
 
   /** حالة الخطوة لشكلها: done منجزة، wait جارية أو بانتظار، bad مرفوضة، off ملغاة، missing لم تصدر */
   tone(step: ChainStep): StepTone {
-    if (!step.number) return 'missing';
+    if (!step.number && step.status === null) return 'missing';
     switch (step.status) { case 3: return 'done'; case 4: return 'bad'; case 5: return 'off'; default: return 'wait'; }
   }
   /** الخط بعد الخطوة i صلب إن وُجدت التالية */
-  linked(i: number) { return !!this.steps()[i + 1]?.number; }
+  linked(i: number) {
+    const next = this.steps()[i + 1];
+    return !!next && this.tone(next) !== 'missing';
+  }
   /** وممتلئ بلون العلامة إن اكتملت الخطوة i */
   filled(i: number) { return this.linked(i) && this.tone(this.steps()[i]) === 'done'; }
 
   steps = computed<ChainStep[]>(() => {
     const c = this.chain();
+    const stage = c.diwanStage;
+    const diwan: ChainStep[] = stage ? [{
+      key: 'diwan', label: 'معاملة الديوان', number: null,
+      status: c.responseStatus === 5 ? 5 : stage === StudyDiwanStage.Referred ? 3 : stage >= StudyDiwanStage.Rejected ? 4 : 2,
+      statusName: c.responseStatus === 5 ? 'أُلغي إشعار الرد' : DIWAN_STAGES[stage], link: null
+    }] : [];
     return [
       { key: 'requests', label: 'طلب تجهيز الدراسة', number: c.requestNumber, status: c.requestStatus, statusName: docStatusName(c.requestStatus), link: `/studies/requests/${c.requestId}` },
       { key: 'assignments', label: 'التكليف الداخلي', number: c.assignmentNumber, status: c.assignmentStatus, statusName: docStatusName(c.assignmentStatus), link: c.assignmentId ? `/studies/assignments/${c.assignmentId}` : null },
       { key: 'responses', label: 'إشعار الرد', number: c.responseId ? (this.responseNumber() ?? 'إشعار الرد') : null, status: c.responseStatus, statusName: docStatusName(c.responseStatus), link: c.responseId ? `/studies/responses/${c.responseId}` : null },
+      ...diwan,
       { key: 'startOrders', label: 'أمر البدء', number: c.startOrderNumber, status: c.startOrderStatus, statusName: docStatusName(c.startOrderStatus), link: c.startOrderId ? `/studies/start-orders/${c.startOrderId}` : null },
       { key: 'project', label: 'المشروع', number: c.projectCode, status: c.projectStatus ? PROJECT_TONE[c.projectStatus] : null, statusName: c.projectStatus ? PROJECT_STATUS_NAMES[c.projectStatus] : '', link: c.projectId ? `/studies/projects/${c.projectId}` : null }
     ];

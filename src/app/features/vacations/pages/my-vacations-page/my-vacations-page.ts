@@ -89,7 +89,7 @@ export class MyVacationsPage {
     this.requestOpen.set(false);
     this.toast.success(v
       ? `تم تقديم طلب الإجازة رقم ${v.requestNumber} (أيام العمل: ${daysAr(v.vacDayCount)}). الحالة: ${v.statusAr}`
-      : 'تم تقديم طلب الإجازة');
+      : 'تم تقديم طلب الإجازة', 'send');
     if (this.canView()) { this.pager.go(1); this.load(); }
   }
 

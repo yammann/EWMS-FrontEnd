@@ -28,6 +28,7 @@ export class StudyProjectsService {
   update(id: number, body: StudyProjectInput) { return this.api.put<StudyProject>(`/StudyProjects/Update/${id}`, body); }
   remove(id: number) { return this.api.delete<{ message: string }>(`/StudyProjects/Delete/${id}`); }
   cancel(id: number, reason: string) { return this.api.put<StudyProject>(`/StudyProjects/Cancel/${id}`, { reason: reason.trim() }); }
+  reactivate(id: number) { return this.api.put<StudyProject>(`/StudyProjects/Reactivate/${id}`, {}); }
   /** كل المراحل مغلقة: يُرسل الإنجاز لتوقيع إدارة المشاريع ثم رئيس الفرع */
   requestCompletion(id: number) { return this.api.put<StudyProject>(`/StudyProjects/RequestCompletion/${id}`, {}); }
   /** السجل مُرقَّم في الخادم (100 للصفحة): تُجمع صفحاته لتبقى التصفية في الواجهة كما كانت */

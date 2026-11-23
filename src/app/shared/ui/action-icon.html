@@ -1,0 +1,45 @@
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+  @if (complete() && kind() !== 'delete') {
+    @if (kind() === 'reactivate') {
+      <use class="restart" [attr.href]="sprite + 'refresh'" />
+      <path class="play" d="M10 8.5 15.5 12 10 15.5Z" fill="currentColor" stroke="none" />
+    } @else {
+      <use class="result" [attr.href]="sprite + 'checkmark'" />
+    }
+  } @else {
+    @switch (kind()) {
+      @case ('delete') {
+        <g class="bucket">
+          <use class="bin-base" [attr.href]="sprite + 'trash'" />
+          @if (complete()) { <use class="bin-base bin-fill" [attr.href]="sprite + 'trash'" /> }
+        </g>
+        <g class="lid"><use class="bin-lid" [attr.href]="sprite + 'trash'" /></g>
+        @if (complete()) { <circle class="orbit" cx="12" cy="12" r="11" pathLength="1" /> }
+      }
+      @case ('edit') {
+        <path class="ink" d="M5 21h12" pathLength="1" />
+        <use class="pencil" [attr.href]="sprite + 'pencil'" />
+      }
+      @case ('save') {
+        <g class="feed-window"><g class="sheet"><use [attr.href]="sprite + 'docText'" x="4" y="-1" width="16" height="18" /></g></g>
+        <g class="drawer">
+          <path d="m5.5 13.5-2 3v3a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5v-3l-2-3" />
+          <path d="M4 16.5h4.5l1.5 2h4l1.5-2H20" />
+        </g>
+      }
+      @case ('upload') {
+        <path class="arrow" d="M12 15V4m-5 5 5-5 5 5" />
+        <path class="tray" d="M4 15v3.5A2 2 0 0 0 6 20.5h12a2 2 0 0 0 2-2V15" />
+      }
+      @case ('send') {
+        <g class="flight-trails"><path d="M15 11h6m-4 4h5" /></g>
+        <g class="plane"><path d="m3 4 18 6.5-7 3.2-3.4 6.8Z M3.5 4.5 14 13.7" /></g>
+      }
+      @case ('reactivate') {
+        <use class="lock-base" [attr.href]="sprite + 'lock'" />
+        <g class="shackle"><use class="lock-top" [attr.href]="sprite + 'lock'" /></g>
+      }
+    }
+  }
+</svg>

@@ -38,8 +38,7 @@ describe('StudyResponseFormDialog', () => {
   it('previews Syrian equivalents from the manual rate and keeps the table total in dollars', () => {
     const { fixture, http, dialog } = open();
     dialog.form.patchValue({ initialCost: 120, usdToSypRate: 150 });
-    dialog.addCost();
-    dialog.form.controls.costItems.at(0).setValue({ description: 'بند', unit: 'م²', quantity: 3, unitPrice: 12.5 });
+    dialog.addBuilding({ buildingType: 1, code: 'A-01', function: 'إدارة', area: 3, unitPrice: 12.5 });
     fixture.detectChanges();
     const root: HTMLElement = fixture.nativeElement;
     expect(root.querySelector('[formControlName=usdToSypRate]')).not.toBeNull();
@@ -79,31 +78,54 @@ describe('StudyResponseFormDialog', () => {
     http.expectNone('/api/StudyResponses/Update/9');
   });
 
-  it('requires one row per building, preserves rows while changing the count, and submits the sum', () => {
+  it('uses the same area for the building and its cost item', () => {
     const { fixture, http, dialog } = open();
-    const building = dialog.form.controls.buildings.at(0);
-    building.patchValue({ included: true, buildingCount: 1 });
+    dialog.addBuilding();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.building-detail')).toHaveLength(0);
-    building.controls.buildingCount.setValue(2);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.building-detail')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('.building-detail')).toHaveLength(1);
     dialog.save();
     http.expectNone('/api/StudyResponses/Create');
 
     const first = { code: 'A-01', function: 'إدارة', area: 10.15 };
     const second = { code: 'A-02', function: 'مختبر', area: 5.2 };
-    building.controls.details.at(0).setValue(first);
-    building.controls.details.at(1).setValue(second);
-    building.controls.buildingCount.setValue(1);
-    expect(dialog.form.valid).toBe(true);
-    building.controls.buildingCount.setValue(2);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.building-total').value).toBe('15.35');
+    dialog.form.controls.pricedBuildings.at(0).setValue({ ...first, buildingType: 1, unitPrice: 20 });
+    dialog.addBuilding({ ...second, buildingType: 1, unitPrice: 10 });
     dialog.save();
     const request = http.expectOne('/api/StudyResponses/Create');
     expect(request.request.body.buildings).toEqual([{ buildingType: 1, buildingCount: 2, buildingsArea: 15.35, details: [first, second] }]);
+    expect(request.request.body.costItems).toMatchObject([
+      { unit: 'م²', quantity: first.area, unitPrice: 20 },
+      { unit: 'م²', quantity: second.area, unitPrice: 10 }
+    ]);
     request.flush({ id: 9 });
+  });
+
+  it('reopens a single saved building with its price in the unified form', () => {
+    const detail = { code: 'A-01', function: 'إدارة', area: 10 };
+    const { dialog } = open({
+      id: 9, responseDate: '2026-11-18', recommendation: 1,
+      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 1, buildingsArea: 10, details: [detail] }],
+      costItems: [{ id: 5, sortOrder: 1, description: 'إعادة تأهيل — A-01 — إدارة', unit: 'م²', quantity: 10, unitPrice: 25, total: 250 }]
+    });
+    expect(dialog.legacyLayout()).toBe(false);
+    expect(dialog.form.controls.pricedBuildings.getRawValue()).toEqual([{ ...detail, buildingType: 1, unitPrice: 25 }]);
+  });
+
+  it('preserves an unmatched legacy item until the user assigns it to a building', () => {
+    const detail = { code: 'A-01', function: 'إدارة', area: 10 };
+    const { dialog } = open({
+      id: 9, responseDate: '2026-11-18', recommendation: 1,
+      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 1, buildingsArea: 10, details: [detail] }],
+      costItems: [{ id: 5, sortOrder: 1, description: 'أعمال ترميم', unit: 'متر مربع', quantity: 10, unitPrice: 25, total: 250 }]
+    });
+    dialog.mergeLegacyBuildings();
+    expect(dialog.legacyLayout()).toBe(true);
+    const cost = dialog.form.controls.costItems.at(0);
+    expect(cost.controls.description.value).toBe('أعمال ترميم');
+    dialog.assignLegacyCost(cost, 0);
+    dialog.mergeLegacyBuildings();
+    expect(dialog.legacyLayout()).toBe(false);
+    expect(dialog.form.controls.pricedBuildings.getRawValue()).toEqual([{ ...detail, buildingType: 1, unitPrice: 25 }]);
   });
 
   it('retains a saved summary with no details and allows opting into individual rows', () => {

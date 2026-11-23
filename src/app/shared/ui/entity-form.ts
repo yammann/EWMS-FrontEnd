@@ -2,6 +2,7 @@ import { Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Alert } from './alert';
 import { Icon } from './icon';
+import { ActionIcon } from './action-icon';
 
 /**
  * نموذج الاسم + الوصف لنوافذ إنشاء/تعديل كيانات الإدارة (فرع/قسم/مكتب) — بدل نسختين متطابقتين تقريباً في كل صفحة.
@@ -9,7 +10,7 @@ import { Icon } from './icon';
  * أيقونة حقل الاسم: `<app-icon nameIcon name="…" />` (تظهر في الإنشاء فقط، كما كان).
  */
 @Component({
-  selector: 'app-entity-form', standalone: true, imports: [ReactiveFormsModule, Alert, Icon],
+  selector: 'app-entity-form', standalone: true, imports: [ReactiveFormsModule, Alert, Icon, ActionIcon],
   template: `
     <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="form-stack">
       <app-alert [message]="error()" />
@@ -42,13 +43,16 @@ import { Icon } from './icon';
 
       <div class="modal-actions">
         <button type="button" class="ghost" (click)="dismissed.emit()">إلغاء</button>
-        <button type="submit" [disabled]="form().invalid || saving() === mode()">
-          @if (saving() === mode()) {
-            <span class="button-spinner"></span>
-            <span>{{ mode() === 'create' ? 'جاري الإنشاء...' : 'جاري الحفظ...' }}</span>
+        <button type="submit" [disabled]="form().invalid || saving() === mode()" [attr.aria-busy]="saving() === mode()">
+          @if (mode() === 'edit') {
+            <app-action-icon kind="save" [size]="16" [busy]="saving() === 'edit'" />
+            <span>{{ saving() === 'edit' ? 'جاري الحفظ...' : 'حفظ التعديل' }}</span>
+          } @else if (saving() === 'create') {
+            <span class="button-spinner" aria-hidden="true"></span>
+            <span>جاري الإنشاء...</span>
           } @else {
-            <app-icon [name]="mode() === 'create' ? 'plus' : 'checkmark'" [size]="16" [weight]="2" />
-            <span>{{ mode() === 'create' ? createLabel() : 'حفظ التعديل' }}</span>
+            <app-icon name="plus" [size]="16" [weight]="2" />
+            <span>{{ createLabel() }}</span>
           }
         </button>
       </div>

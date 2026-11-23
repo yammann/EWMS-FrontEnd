@@ -93,6 +93,14 @@ describe('Central studies API contract', () => {
 
   it('maps project, team, stage and task routes', () => {
     const service = TestBed.inject(StudyProjectsService);
+    service.reactivate(2).subscribe(project => {
+      expect(project.status).toBe(1);
+      expect(project.canReactivate).toBe(false);
+    });
+    const reactivate = http.expectOne('/api/StudyProjects/Reactivate/2');
+    expect(reactivate.request.method).toBe('PUT');
+    reactivate.flush({ id: 2, status: 1, canReactivate: false });
+
     service.addMember(4, 21, ' مهندس ').subscribe();
     const member = http.expectOne('/api/StudyProjects/Members/4');
     expect(member.request.method).toBe('POST');
@@ -138,6 +146,26 @@ describe('Central studies API contract', () => {
     expect(http.expectOne('/api/StudyAttachments/Get/7').request.responseType).toBe('blob');
     service.remove(7).subscribe();
     expect(http.expectOne('/api/StudyAttachments/Delete/7').request.method).toBe('DELETE');
+  });
+
+  it('registers Diwan paper references and sends the scanned reply in the same request', () => {
+    const service = TestBed.inject(StudyDocumentsService);
+    const reference = { number: '0007/A', date: '2026-11-19', rowVersion: 'AAAAAAAAAAA=' };
+    service.registerDiwanDispatch(3, reference).subscribe();
+    const dispatch = http.expectOne('/api/StudyResponses/Diwan/3/Dispatch');
+    expect(dispatch.request.body).toEqual(reference);
+    dispatch.flush({});
+
+    service.registerDiwanReply(3, reference, 1, new File(['%PDF'], 'reply.pdf')).subscribe();
+    const reply = http.expectOne(r => r.url.startsWith('/api/StudyResponses/Diwan/3/Reply?'));
+    expect(new URLSearchParams(reply.request.url.split('?')[1]).get('number')).toBe('0007/A');
+    expect((reply.request.body as FormData).get('file')).toBeInstanceOf(File);
+    reply.flush({});
+
+    service.reviewDiwanReply(3, 1, '', reference.rowVersion).subscribe();
+    const review = http.expectOne('/api/StudyResponses/Diwan/3/Review');
+    expect(review.request.body).toEqual({ action: 1, note: '', rowVersion: reference.rowVersion });
+    review.flush({});
   });
 
   it('saves the planning part of a response on its own route and reads print data per document type', () => {
