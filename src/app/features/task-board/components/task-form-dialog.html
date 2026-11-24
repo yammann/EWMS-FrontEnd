@@ -7,10 +7,10 @@
         @if (mode() === 'create' && templates().length) {
           <label class="form-field">
             <span class="form-label">البدء من قالب <small class="muted">(اختياري — يملأ الحقول وتبقى قابلة للتعديل)</small></span>
-            <select [ngModel]="''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="applyTemplate($event)">
+            <app-select [ngModel]="''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="applyTemplate($event)">
               <option value="">بدون قالب</option>
               @for (t of templates(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
-            </select>
+            </app-select>
           </label>
         }
 
@@ -34,12 +34,12 @@
           }
           <label class="form-field">
             <span class="form-label">إسناد إلى {{ targetLabel() }}</span>
-            <select formControlName="targetId">
+            <app-select formControlName="targetId">
               <option [ngValue]="0">{{ targetsLoading() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel() }}</option>
               @for (t of targets(); track t.id) {
                 <option [ngValue]="t.id">{{ t.name }}@if (targetLabel() !== 'موظف') { — {{ t.headNames || 'لا أحد يتولاها حالياً' }} }</option>
               }
-            </select>
+            </app-select>
             @if (!targetsLoading() && !targets().length) { <small class="form-hint">لا توجد جهات متاحة للإسناد ضمن صلاحياتك.</small> }
             @else if (selectedTarget() && targetLabel() !== 'موظف' && !selectedTarget()!.headNames) {
               <small class="form-hint warn">لا يوجد من يملك صلاحية تولّي مهام هذه الجهة حالياً — ستبقى المهمة بانتظاره.</small>

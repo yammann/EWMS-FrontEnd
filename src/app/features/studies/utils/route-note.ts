@@ -86,13 +86,13 @@ const DIWAN_DETAIL: Record<StudyDiwanStage, string> = {
   3: 'يراجع رئيس فرع الدراسات كتاب الرد المركزي.',
   4: 'يراجع ديوان فرع الدراسات ملاحظة رئيس الفرع ويعيد تسجيل الرد.',
   5: 'تُعد إدارة المشاريع أمر البدء من كتاب الموافقة المركزي المحال.',
-  6: 'ثبّت رئيس الفرع الاطلاع على الرفض المركزي.',
+  6: 'رفض الديوان المركزي الدراسة، فعاد إشعار الرد إلى القسم المتابع ليعدّله ويرسله للاعتماد، ثم يُرسل بصادر جديد.',
   7: 'وُثّق الرد المركزي. التوصية الفنية «غير متاح» تمنع البدء.'
 };
 
 function diwanRouteNote(d: RouteDoc): RouteNote {
   const stage = d.diwanStage ?? StudyDiwanStage.AwaitingDispatch;
-  const closed = stage === StudyDiwanStage.Rejected || stage === StudyDiwanStage.ClosedWithoutStart;
+  const closed = stage === StudyDiwanStage.ClosedWithoutStart;
   const people = d.nextIssuers?.length ? ` الإجراء لدى ${peopleText(d.nextIssuers, d.nextIssuersTotal)}.`
     : d.nextIssuers?.length === 0 ? ' لا يوجد موظف مكلّف بهذا الإجراء في الفرع.' : '';
   const title = stage === StudyDiwanStage.AwaitingDispatch ? 'اعتُمد إشعار الرد وأُحيل إلى ديوان الدراسات' : DIWAN_STAGES[stage];

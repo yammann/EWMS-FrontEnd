@@ -6,10 +6,11 @@ import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** إضافة مهمة من لوحة المهام إلى إحدى قوائم مفكرتي كبند مرتبط بها (تُظهر حالتها وتفتحها) */
 @Component({
-  selector: 'app-add-to-todo-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
+  selector: 'app-add-to-todo-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, Modal],
   template: `
     <app-modal heading="أضف إلى مفكرتي" [subheading]="taskTitle()" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
@@ -19,9 +20,9 @@ import { FormActions } from '@shared/ui/form-actions';
           @else if (!lists().length) { <p class="muted">لا توجد قوائم نشطة — أنشئ قائمة من صفحة مفكرتي أولاً.</p> }
           @else {
             <label class="form-field"><span class="form-label">القائمة</span>
-              <select name="list" [(ngModel)]="listId" autofocus>
+              <app-select name="list" [(ngModel)]="listId" autofocus>
                 @for (l of lists(); track l.id) { <option [ngValue]="l.id">{{ l.name }}</option> }
-              </select></label>
+              </app-select></label>
             <p class="note">يُنشأ بند بعنوان المهمة وموعدها، ويبقى مرتبطاً بها: ترى حالتها من مفكرتك وتفتحها بنقرة.</p>
           }
         </div>

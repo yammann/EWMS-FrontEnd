@@ -104,12 +104,12 @@
           <ng-container ngProjectAs="[before]" [formGroup]="form">
             <div class="form-field">
               <label class="form-label" [attr.for]="dlg.mode + '-dept'">القسم</label>
-              <select [id]="dlg.mode + '-dept'" formControlName="departmentId">
+              <app-select [id]="dlg.mode + '-dept'" formControlName="departmentId">
                 <option value="">اختر القسم</option>
                 @for (department of departmentList(); track department.id) {
                   <option [value]="department.id">{{ department.branchName }} / {{ department.name }}</option>
                 }
-              </select>
+              </app-select>
               @if (dlg.mode === 'create' && form.controls.departmentId.touched && form.controls.departmentId.invalid) {
                 <small class="form-error">اختر القسم التابع له المكتب.</small>
               }

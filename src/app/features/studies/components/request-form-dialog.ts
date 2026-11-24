@@ -20,6 +20,7 @@ import { SiteLookupService, SiteOption } from '@core/services/site-lookup.servic
 import { StudyLookup, StudyRequest, StudyRequestInput, URGENCIES, WORK_TYPES } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
 import { optional } from '../utils/form-rows';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const phone = (c: AbstractControl<string>) => !c.value.trim() || isValidPhone(c.value) ? null : { phone: true };
 
@@ -31,7 +32,7 @@ const phone = (c: AbstractControl<string>) => !c.value.trim() || isValidPhone(c.
 @Component({
   selector: 'app-study-request-form-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   styles: [`
     .request-options { gap: 16px; }

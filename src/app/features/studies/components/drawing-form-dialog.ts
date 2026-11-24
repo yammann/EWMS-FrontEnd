@@ -12,6 +12,7 @@ import { StudyDrawingsService } from '../data-access/study-drawings.service';
 import { BasisOption, DRAWING_KINDS, DrawingKind, StudyDrawing, StudyDrawingInput, StudyProject } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
 import { optional } from '../utils/form-rows';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * مخطط في المشروع (معماري، إنشائي، كهرباء وميكانيك، تصميم داخلي، تقني): الاسم والرقم والتاريخ والوصف.
@@ -21,7 +22,7 @@ import { optional } from '../utils/form-rows';
 @Component({
   selector: 'app-study-drawing-form-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `
     <app-modal [heading]="drawing() ? 'تعديل المخطط' : 'مخطط جديد'" [subheading]="project().code" [busy]="saving()" (closed)="closed.emit()">
@@ -30,7 +31,7 @@ import { optional } from '../utils/form-rows';
           <app-alert [message]="error()" />
           <div class="form-grid-2">
             <label class="form-field"><span class="form-label">نوع المخطط</span>
-              <select formControlName="kind">@for (k of kinds; track k.value) { <option [ngValue]="k.value">{{ k.label }}</option> }</select></label>
+              <app-select formControlName="kind">@for (k of kinds; track k.value) { <option [ngValue]="k.value">{{ k.label }}</option> }</app-select></label>
             <label class="form-field"><span class="form-label">رقم المخطط</span><input formControlName="drawingNumber" maxlength="50" dir="ltr">
               @if (form.controls.drawingNumber.touched && form.controls.drawingNumber.invalid) { <small class="form-error">رقم المخطط مطلوب</small> }</label>
             <label class="form-field full"><span class="form-label">اسم المخطط</span><input formControlName="name" maxlength="200">
@@ -38,22 +39,22 @@ import { optional } from '../utils/form-rows';
             <label class="form-field"><span class="form-label">تاريخ المخطط</span><input type="date" formControlName="drawingDate"></label>
             @if (orgWide() && !drawing()) {
               <label class="form-field"><span class="form-label">القسم المُصدِر</span>
-                <select formControlName="departmentId">
+                <app-select formControlName="departmentId">
                   <option [ngValue]="0">— قسمي —</option>
                   @for (d of project().departments; track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
-                </select></label>
+                </app-select></label>
             }
             @if (!isArchitectural()) {
               <label class="form-field full"><span class="form-label">مبني على النسخة المعمارية المعتمدة</span>
-                <select formControlName="basedOnVersionId">
+                <app-select formControlName="basedOnVersionId">
                   <option [ngValue]="0" disabled>اختر…</option>
                   @for (b of basis(); track b.id) { <option [ngValue]="b.id">{{ b.label }}</option> }
-                </select>
+                </app-select>
                 @if (!basis().length) { <small class="hint">لا نسخة معمارية معتمدة بعد: تُعتمد النسخة بإصدار CDA لها.</small> }</label>
             }
             @if (drawing()) {
               <label class="form-field"><span class="form-label">الحالة</span>
-                <select formControlName="status"><option [ngValue]="1">قيد الإعداد</option><option [ngValue]="2">بانتظار المراجعة</option></select>
+                <app-select formControlName="status"><option [ngValue]="1">قيد الإعداد</option><option [ngValue]="2">بانتظار المراجعة</option></app-select>
                 @if (isArchitectural()) { <small class="hint">المعماري تُرسل نسخه للاعتماد بإصدار CDA.</small> }</label>
             }
             <label class="form-field full"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="3" maxlength="2000"></textarea></label>

@@ -12,12 +12,12 @@
         <div class="form-grid-3">
           <label class="form-field"><span class="form-label">تاريخ الرد</span><input type="date" formControlName="responseDate"></label>
           <label class="form-field"><span class="form-label">مدير المشروع المقترح <small class="hint">(اختياري)</small></span>
-            <select formControlName="proposedManagerUserId">
+            <app-select formControlName="proposedManagerUserId">
               <option [ngValue]="0">— بلا اقتراح —</option>
               @for (e of employees(); track e.id) { <option [ngValue]="e.id">{{ e.fullName }}{{ e.departmentName ? ' — ' + e.departmentName : '' }}</option> }
-            </select></label>
+            </app-select></label>
           <label class="form-field"><span class="form-label">التوصية الفنية النهائية</span>
-            <select formControlName="recommendation">@for (r of recommendations; track r.value) { <option [ngValue]="r.value">{{ r.label }}</option> }</select>
+            <app-select formControlName="recommendation">@for (r of recommendations; track r.value) { <option [ngValue]="r.value">{{ r.label }}</option> }</app-select>
             @if (form.controls.recommendation.value === 3) { <small class="hint">«غير متاح»: لا يُصدر بعد هذا الرد أمر بدء.</small> }</label>
         </div>
       </section>
@@ -140,12 +140,12 @@
             </div>
             @if (choices.length) {
               <label class="form-field"><span class="form-label">المبنى المقابل للبند</span>
-                <select #assignment [value]="legacyCostAssignment(c)" (change)="assignLegacyCost(c, +assignment.value)">
+                <app-select #assignment [value]="legacyCostAssignment(c)" (change)="assignLegacyCost(c, +assignment.value)">
                   <option value="-1">مطابقة تلقائية</option>
                   @for (choice of choices; track choice.row; let j = $index) {
                     <option [value]="j">{{ buildingTypeLabel(choice.buildingType) }} — المبنى {{ choice.index + 1 }} {{ choice.code }} {{ choice.function }}</option>
                   }
-                </select>
+                </app-select>
               </label>
             }
           }
@@ -170,9 +170,9 @@
                 <legend>المبنى {{ i + 1 }}</legend>
                 <div class="priced-building-fields">
                   <label class="form-field"><span class="form-label">نوع المبنى</span>
-                    <select formControlName="buildingType">
+                    <app-select formControlName="buildingType">
                       @for (type of buildingTypes; track type.value) { <option [ngValue]="type.value">{{ type.label }}</option> }
-                    </select>
+                    </app-select>
                   </label>
                   <label class="form-field"><span class="form-label">رمز المبنى</span>
                     <input formControlName="code" dir="auto" maxlength="50" required>

@@ -67,11 +67,11 @@
           </label>
           @if (mode === 'reply') {
             <label class="form-field"><span class="form-label">نتيجة الديوان المركزي</span>
-              <select #result (change)="decision.set(result.value === '1' ? decisions.Approved : result.value === '2' ? decisions.Rejected : null)" required>
+              <app-select #result (change)="decision.set(result.value === '1' ? decisions.Approved : result.value === '2' ? decisions.Rejected : null)" required>
                 <option value="" [selected]="!decision()">اختر النتيجة</option>
                 <option value="1" [selected]="decision() === decisions.Approved">موافقة</option>
                 <option value="2" [selected]="decision() === decisions.Rejected">رفض</option>
-              </select>
+              </app-select>
             </label>
             <label class="form-field"><span class="form-label">صورة الكتاب الورقي (PDF أو صورة)</span>
               <input #attachment type="file" accept=".pdf,image/*" (change)="pickFile(attachment)" required>

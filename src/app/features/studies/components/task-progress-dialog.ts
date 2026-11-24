@@ -6,6 +6,7 @@ import { Modal } from '@shared/ui/modal';
 import { trackRequest } from '@shared/ui/track-request';
 import { StudyProjectsService } from '../data-access/study-projects.service';
 import { StageTask, StudyTaskStatus, TASK_STATUSES } from '../data-access/studies.models';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * تحديث إنجاز مهمة (للمكلَّف أو مكتبه أو موظفي قسمه، علم canUpdateProgress): النسبة 0–100 والحالة.
@@ -15,7 +16,7 @@ import { StageTask, StudyTaskStatus, TASK_STATUSES } from '../data-access/studie
 @Component({
   selector: 'app-study-task-progress-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `
     <app-modal heading="تحديث الإنجاز" [subheading]="task().title" [busy]="saving()" (closed)="closed.emit()">
@@ -27,7 +28,7 @@ import { StageTask, StudyTaskStatus, TASK_STATUSES } from '../data-access/studie
             <input type="range" formControlName="progress" min="0" max="100" step="5" (input)="sync()">
             <input type="number" formControlName="progress" min="0" max="100" step="1" (input)="sync()" aria-label="نسبة الإنجاز"></label>
           <label class="form-field"><span class="form-label">الحالة</span>
-            <select formControlName="status">@for (s of statuses; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }</select></label>
+            <app-select formControlName="status">@for (s of statuses; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }</app-select></label>
         </div>
         <app-form-actions [busy]="saving()" [disabled]="form.invalid" label="حفظ" busyLabel="جارٍ الحفظ…" (dismissed)="closed.emit()" />
       </form>

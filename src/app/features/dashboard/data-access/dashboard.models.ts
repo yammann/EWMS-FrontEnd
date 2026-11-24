@@ -1,5 +1,3 @@
-import { WorkTaskCard } from '@features/work-tasks';
-
 // تطابق Application/DTOs/Response/DashboardResponseDtos.cs
 // لوحات المتابعة = إحصائيات عامة للمؤسسة. الإجازات لها صفحة مستقلة (VacationStats).
 
@@ -9,7 +7,7 @@ export interface DashboardCountItem {
   days: number;
 }
 
-export type DashboardActivityType = 'UserJoined' | 'TaskCreated' | 'TaskAssigned';
+export type DashboardActivityType = 'UserJoined';
 
 export interface DashboardActivity {
   type: DashboardActivityType;
@@ -19,13 +17,6 @@ export interface DashboardActivity {
   date: string;
 }
 
-export interface WorkTaskDistribution {
-  taskId: number;
-  taskName: string;
-  icon: string;
-  assigneeNames: string[];
-}
-
 export interface BranchSummary {
   id: number;
   name: string;
@@ -33,7 +24,6 @@ export interface BranchSummary {
   departmentsCount: number;
   officesCount: number;
   employeesCount: number;
-  tasksCount: number;
 }
 
 export interface OverviewDashboard {
@@ -41,8 +31,6 @@ export interface OverviewDashboard {
   departmentsCount: number;
   officesCount: number;
   employeesCount: number;
-  workTasksCount: number;
-  employeesWithTasks: number;
   branches: BranchSummary[];
   employeesByRole: DashboardCountItem[];
   recentActivity: DashboardActivity[];
@@ -54,7 +42,6 @@ export interface DepartmentSummary {
   managerNames: string;
   officesCount: number;
   employeesCount: number;
-  employeesWithTasks: number;
 }
 
 export interface BranchDashboard {
@@ -64,11 +51,7 @@ export interface BranchDashboard {
   departmentsCount: number;
   officesCount: number;
   employeesCount: number;
-  tasksCount: number;
-  employeesWithTasks: number;
-  tasks: WorkTaskCard[];
   departments: DepartmentSummary[];
-  taskDistribution: WorkTaskDistribution[];
   employeesByRole: DashboardCountItem[];
   recentActivity: DashboardActivity[];
 }
@@ -78,7 +61,6 @@ export interface OfficeSummary {
   name: string;
   managerNames: string;
   employeesCount: number;
-  employeesWithTasks: number;
 }
 
 export interface DepartmentDashboard {
@@ -89,10 +71,7 @@ export interface DepartmentDashboard {
   managerNames: string;
   officesCount: number;
   employeesCount: number;
-  tasksCount: number;
-  employeesWithoutTasks: number;
   offices: OfficeSummary[];
-  taskDistribution: WorkTaskDistribution[];
   recentActivity: DashboardActivity[];
 }
 
@@ -101,7 +80,6 @@ export interface OfficeMember {
   fullName: string;
   roleName: string;
   email: string;
-  taskNames: string[];
   joinedAt: string;
 }
 
@@ -114,11 +92,7 @@ export interface OfficeDashboard {
   branchName: string;
   managerNames: string;
   employeesCount: number;
-  tasksCount: number;
-  employeesWithTasks: number;
-  employeesWithoutTasks: number;
   members: OfficeMember[];
-  taskDistribution: WorkTaskDistribution[];
   recentActivity: DashboardActivity[];
 }
 

@@ -15,6 +15,7 @@ import { VacationService } from '../../data-access/vacation.service';
 import { PublicHoliday } from '../../data-access/vacation.models';
 import { vacationDateRange } from '../../utils/vacation-validators';
 import { daysAr, fridaysAr } from '@core/utils/arabic-count';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
@@ -26,7 +27,7 @@ type HolidayBody = { name: string; startDate: string; endDate: string | null };
  */
 @Component({
   selector: 'app-holidays-page', standalone: true,
-  imports: [PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
+  imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
   styleUrl: '../../../../shared/styles/page-base.scss',
   templateUrl: './holidays-page.html',
   styles: [`.year-select { width: auto; min-width: 110px; } .nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }`]

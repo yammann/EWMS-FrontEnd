@@ -26,29 +26,19 @@
     <section class="dash-stats" aria-label="إحصائيات القسم">
       <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="door" tone="purple" />
       <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="users" tone="green" />
-      <app-stat-tile label="مهام العمل" [value]="d.tasksCount" icon="clipboard" tone="blue" hint="المسنَدة لموظفي القسم" />
-      <app-stat-tile label="موظفون بلا مهام" [value]="d.employeesWithoutTasks" icon="puzzle" tone="orange" [alert]="d.employeesWithoutTasks > 0" />
     </section>
-
-    @if (isOwn()) {
-      <section class="panel">
-        <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام المسنَدة إليك</h2></div></div>
-        <app-task-cards [tasks]="myTasks()" emptyText="لا توجد مهام مسنَدة إليك" />
-      </section>
-    }
 
     <section class="panel">
       <div class="panel-heading"><div><h2>مكاتب القسم</h2><p>اضغط على المكتب لعرض لوحته</p></div></div>
       @if (d.offices.length) {
         <div class="table-wrap"><table>
-          <thead><tr><th>المكتب</th><th>رئيس المكتب</th><th>الموظفون</th><th>مسؤولون عن مهام</th></tr></thead>
+          <thead><tr><th>المكتب</th><th>رئيس المكتب</th><th>الموظفون</th></tr></thead>
           <tbody>
             @for (o of d.offices; track o.id) {
               <tr>
                 <td><a class="cell-link" [routerLink]="['/dashboard/office', o.id]">{{ o.name }}</a></td>
                 <td [class.muted-cell]="!o.managerNames">{{ o.managerNames || 'لم يُعيَّن' }}</td>
                 <td class="num">{{ o.employeesCount }}</td>
-                <td class="num">{{ o.employeesWithTasks }} من {{ o.employeesCount }}</td>
               </tr>
             }
           </tbody>
@@ -57,12 +47,7 @@
     </section>
 
     <section class="panel">
-      <div class="panel-heading"><div><h2>توزيع مهام العمل</h2><p>من المسؤول عن كل مهمة داخل القسم</p></div></div>
-      <app-task-distribution [items]="d.taskDistribution" />
-    </section>
-
-    <section class="panel">
-      <div class="panel-heading"><div><h2>آخر الإجراءات</h2><p>انضمام الموظفين وإسناد المهام في القسم</p></div></div>
+      <div class="panel-heading"><div><h2>آخر الإجراءات</h2><p>انضمام الموظفين إلى القسم</p></div></div>
       <app-activity-list [items]="d.recentActivity" />
     </section>
 

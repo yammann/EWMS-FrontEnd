@@ -49,9 +49,9 @@
           <label class="form-field"><span class="form-label">اللون</span>
             <span class="color-row"><input type="color" formControlName="color"><app-status-chip [name]="form.controls.name.value || 'معاينة'" [color]="form.controls.color.value" /></span></label>
           <label class="form-field"><span class="form-label">المرحلة</span>
-            <select formControlName="stage">
+            <app-select formControlName="stage">
               @for (s of stages; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }
-            </select>
+            </app-select>
             <small class="hint">{{ stageHint() }}</small></label>
         }
       </div>

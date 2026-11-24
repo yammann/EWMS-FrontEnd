@@ -22,9 +22,7 @@ export const AppPermission = {
   ViewBranchMap: 'ViewBranchMap',
   // لا لوحة ولا إشعارات ولا مهام شخصية بلا صلاحية (قرار 2026-10-03: لا شيء مفتوح للجميع)
   ViewOrganizationDashboard: 'ViewOrganizationDashboard', ViewMyDashboard: 'ViewMyDashboard',
-  ViewMyWorkTasks: 'ViewMyWorkTasks', ViewNotifications: 'ViewNotifications',
-
-  ViewWorkTasks: 'ViewWorkTasks', CreateWorkTask: 'CreateWorkTask', EditWorkTask: 'EditWorkTask', DeleteWorkTask: 'DeleteWorkTask',
+  ViewNotifications: 'ViewNotifications',
 
   // لوحة المهام: ViewTaskBoard تفتح اللوحة (واستقبال ما أُسند للمستخدم شخصياً)؛ الإسناد والتولّي بصلاحيات
   ViewTaskBoard: 'ViewTaskBoard',
@@ -183,11 +181,6 @@ export const DASHBOARD_ACCESS: readonly AppPermissionName[] = [
 export const DEPARTMENT_DASHBOARD_ACCESS: readonly AppPermissionName[] = [AppPermission.ViewBranchDashboard, AppPermission.ViewDepartmentDashboard];
 export const OFFICE_DASHBOARD_ACCESS: readonly AppPermissionName[] = [
   AppPermission.ViewBranchDashboard, AppPermission.ViewDepartmentDashboard, AppPermission.ViewOfficeDashboard
-];
-/** صفحة مهمة عمل: المسنَدة لي أو أي صلاحية إشراف (نفس AnyWorkTaskView في الباكاند) */
-export const WORK_TASK_VIEW: readonly AppPermissionName[] = [
-  AppPermission.ViewMyWorkTasks, AppPermission.ViewWorkTasks, AppPermission.ViewBranchDashboard,
-  AppPermission.ViewDepartmentDashboard, AppPermission.ViewOfficeDashboard
 ];
 /** صفحة «مستندات الدراسة»: عرض أي نوع من المستندات الأربعة */
 export const STUDY_DOCUMENTS_VIEW: readonly AppPermissionName[] = [

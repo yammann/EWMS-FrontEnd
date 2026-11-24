@@ -3,7 +3,7 @@
 .field { display: grid; gap: 6px; align-content: start; min-width: 0; }
 .field-label { font-size: 12px; font-weight: 700; color: var(--ink-600); }
 .req { color: var(--danger-700); margin-inline-start: 2px; }
-.field input, .field select { width: 100%; min-width: 0; }
+.field input, .field app-select { width: 100%; min-width: 0; }
 .filters-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .no-filters { margin: 0; }
 

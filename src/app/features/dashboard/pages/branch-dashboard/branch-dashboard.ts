@@ -6,7 +6,7 @@ import { DashboardService } from '../../data-access/dashboard.service';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { BranchDashboard } from '../../data-access/dashboard.models';
-import { ActivityList, TaskCards, TaskDistributionTable } from '../../components/dashboard-widgets';
+import { ActivityList } from '../../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { AppPermission } from '@core/constants/access';
 import { Alert } from '@shared/ui/alert';
@@ -16,7 +16,7 @@ import { latestRequest } from '@shared/ui/track-request';
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({
   selector: 'app-branch-dashboard', standalone: true,
-  imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
+  imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './branch-dashboard.html'
 })

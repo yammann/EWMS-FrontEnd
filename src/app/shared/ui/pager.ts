@@ -1,5 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
-import { SelectValue } from './select-value';
+import { SearchSelect, SelectOption } from './search-select';
 
 /**
  * تقسيم صفحات موحّد للمشروع كله: «عرض 1–10 من 56»، السابق/التالي وأرقام الصفحات (مع ... عند الكثرة)، واختيار حجم الصفحة.
@@ -9,7 +9,7 @@ import { SelectValue } from './select-value';
  * @example <app-pager [page]="p.page()" [pageSize]="p.size()" [total]="p.total()" (pageChange)="p.go($event)" (sizeChange)="p.setSize($event)" />
  */
 @Component({
-  selector: 'app-pager', standalone: true, imports: [SelectValue],
+  selector: 'app-pager', standalone: true, imports: [SearchSelect, SelectOption],
   template: `
     @if (visible()) {
       <nav class="pager" aria-label="تقسيم الصفحات">
@@ -26,9 +26,9 @@ import { SelectValue } from './select-value';
         }
         @if (sizes().length > 1) {
           <label class="size"><span>في الصفحة</span>
-            <select #t1 [appSelectValue]="pageSize()" (change)="sizeChange.emit(+t1.value)" aria-label="عدد العناصر في الصفحة">
+            <app-select #t1 [value]="pageSize()" (change)="sizeChange.emit(+t1.value)" aria-label="عدد العناصر في الصفحة">
               @for (s of sizes(); track s) { <option [value]="s">{{ s }}</option> }
-            </select></label>
+            </app-select></label>
         }
       </nav>
     }`,

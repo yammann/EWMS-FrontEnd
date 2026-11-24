@@ -30,7 +30,9 @@
   <app-alert [message]="actionError()" />
 
   @if (doc(); as d) {
-    @if (d.status === 4) {
+    @if (d.status === 4 && response()?.diwanStage === 6) {
+      <p class="alert alert-warning state-note" role="status"><app-icon name="warning" [size]="16" /> رفض الديوان المركزي الدراسة — انظر الكتاب المركزي وملاحظة رئيس الفرع في «معاملة الديوان». يعدّل القسم المتابع الرد ويرسله للاعتماد، ثم يُرسل إلى الديوان المركزي بصادر جديد.</p>
+    } @else if (d.status === 4) {
       <p class="alert alert-warning state-note" role="status"><app-icon name="warning" [size]="16" /> رُفض المستند — انظر سبب الرفض في التواقيع أدناه. عدّله ثم أرسله من جديد.</p>
     } @else if (d.status === 5) {
       <p class="alert state-note" role="status"><app-icon name="lock" [size]="16" /> المستند ملغى ويبقى للأرشيف فقط.</p>
@@ -46,7 +48,7 @@
     @if (d.chain) { <section class="panel"><app-study-chain [chain]="d.chain" [current]="kind()" [responseNumber]="responseNumber()" /></section> }
     @if (response(); as s) {
       @if (s.diwanCase; as diwan) {
-        <app-study-diwan-panel [response]="s" [diwan]="diwan" (saved)="diwanSaved($event)" (startOrder)="dialog.set('next')" />
+        <app-study-diwan-panel [response]="s" [diwan]="diwan" [openAction]="diwanAction()" (saved)="diwanSaved($event)" (startOrder)="dialog.set('next')" />
       }
     }
 

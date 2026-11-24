@@ -7,11 +7,9 @@ import { DashboardService } from '../../data-access/dashboard.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { NotificationService } from '@core/services/notification.service';
-import { WorkTaskService } from '@features/work-tasks';
 import { OfficeDashboard } from '../../data-access/dashboard.models';
-import { WorkTaskCard } from '@features/work-tasks';
 import { roleLabel } from '@core/utils/roles';
-import { ActivityList, TaskCards, TaskDistributionTable } from '../../components/dashboard-widgets';
+import { ActivityList } from '../../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -20,7 +18,7 @@ import { latestRequest } from '@shared/ui/track-request';
 /** لوحة رئيس المكتب */
 @Component({
   selector: 'app-office-dashboard', standalone: true,
-  imports: [DashboardFrame, EmptyState, Alert, CommonModule, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
+  imports: [DashboardFrame, EmptyState, Alert, CommonModule, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './office-dashboard.html'
 })
@@ -28,12 +26,10 @@ export class OfficeDashboardPage {
   /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
   private latest = latestRequest();
   private service = inject(DashboardService);
-  private tasks = inject(WorkTaskService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
 
   data = signal<OfficeDashboard | null>(null);
-  myTasks = signal<WorkTaskCard[]>([]);
   loading = signal(false);
   error = signal('');
   isOwn = signal(true);
@@ -60,6 +56,5 @@ export class OfficeDashboardPage {
 
   load() {
     this.latest(this.service.office(this.id), this.loading, this.error, d => { this.data.set(d); });
-    if (this.isOwn()) this.tasks.my().subscribe({ next: t => this.myTasks.set(t), error: () => this.myTasks.set([]) });
   }
 }

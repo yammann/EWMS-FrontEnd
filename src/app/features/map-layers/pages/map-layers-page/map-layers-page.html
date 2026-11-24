@@ -11,10 +11,10 @@
     <div class="panel-heading"><h2>الطبقات <span class="count">({{ filtered().length }})</span></h2>
       <div class="tools">
         @if (access().canChooseBranch && branches().length) {
-          <select #b [appSelectValue]="branchId() ?? ''" (change)="selectBranch(b.value)" aria-label="الفرع">
+          <app-select #b [value]="branchId() ?? ''" (change)="selectBranch(b.value)" aria-label="الفرع">
             <option value="">كل الفروع</option>
             @for (br of branches(); track br.id) { <option [value]="br.id">{{ br.name }}</option> }
-          </select>
+          </app-select>
         }
         <input #t1 class="search" type="search" placeholder="بحث بالاسم أو الحقل…" [value]="search()" (input)="search.set(t1.value)" aria-label="بحث">
       </div>

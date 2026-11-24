@@ -10,10 +10,10 @@
         <label class="form-field"><span class="form-label">الموعد <small class="muted">(اختياري — منه تأتي «اليوم» والتذكيرات)</small></span>
           <input name="due" type="date" [(ngModel)]="due"></label>
         <label class="form-field"><span class="form-label">التكرار</span>
-          <select name="repeat" [(ngModel)]="repeat" [disabled]="!due">
+          <app-select name="repeat" [(ngModel)]="repeat" [disabled]="!due">
             <option value="None">بلا تكرار</option>
             @for (r of repeats; track r.key) { <option [value]="r.key">{{ r.label }}</option> }
-          </select>
+          </app-select>
           @if (!due) { <small class="form-hint">يحتاج التكرار موعداً.</small> }</label>
       </div>
       <label class="check"><input name="important" type="checkbox" [(ngModel)]="important"> <app-icon name="starFill" [size]="14" class="star" /> مهم <small class="muted">(يظهر أول القائمة)</small></label>

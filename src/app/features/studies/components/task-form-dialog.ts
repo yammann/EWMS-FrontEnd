@@ -9,6 +9,7 @@ import { StudyProjectsService } from '../data-access/study-projects.service';
 import { ProjectStage, StageTask, StageTaskInput, StudyProject, StudyTaskTarget, TASK_TARGETS } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
 import { optional } from '../utils/form-rows';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * مهمة في مرحلة: توجَّه إلى قسم مشارك، أو مكتب من قسم مشارك، أو عضو في الفريق (جهة واحدة فقط).
@@ -19,7 +20,7 @@ import { optional } from '../utils/form-rows';
 @Component({
   selector: 'app-study-task-form-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `
     <app-modal [heading]="task() ? 'تعديل المهمة' : 'مهمة جديدة'" [subheading]="stage().stageTypeName" [busy]="saving()" (closed)="closed.emit()">
@@ -34,37 +35,37 @@ import { optional } from '../utils/form-rows';
             <label class="form-field full"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="2" maxlength="2000"></textarea></label>
 
             <label class="form-field"><span class="form-label">تُسنَد إلى</span>
-              <select formControlName="targetType">@for (t of targets; track t.value) { <option [ngValue]="t.value">{{ t.label }}</option> }</select></label>
+              <app-select formControlName="targetType">@for (t of targets; track t.value) { <option [ngValue]="t.value">{{ t.label }}</option> }</app-select></label>
 
             @switch (target()) {
               @case (1) {
                 <label class="form-field"><span class="form-label">القسم المشارك</span>
-                  <select formControlName="departmentId">
+                  <app-select formControlName="departmentId">
                     <option [ngValue]="0" disabled>اختر…</option>
                     @for (d of departments(); track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
-                  </select></label>
+                  </app-select></label>
               }
               @case (2) {
                 @if (departments().length > 1) {
                   <label class="form-field"><span class="form-label">القسم</span>
-                    <select formControlName="officeDepartmentId">
+                    <app-select formControlName="officeDepartmentId">
                       <option [ngValue]="0" disabled>اختر…</option>
                       @for (d of departments(); track d.departmentId) { <option [ngValue]="d.departmentId">{{ d.departmentName }}</option> }
-                    </select></label>
+                    </app-select></label>
                 }
                 <label class="form-field"><span class="form-label">المكتب</span>
-                  <select formControlName="officeId">
+                  <app-select formControlName="officeId">
                     <option [ngValue]="0" disabled>اختر…</option>
                     @for (o of offices(); track o.id) { <option [ngValue]="o.id">{{ o.name }}</option> }
-                  </select>
+                  </app-select>
                   @if (form.controls.officeDepartmentId.value && !offices().length) { <small class="hint">لا مكاتب لهذا القسم.</small> }</label>
               }
               @case (3) {
                 <label class="form-field"><span class="form-label">عضو الفريق</span>
-                  <select formControlName="assigneeUserId">
+                  <app-select formControlName="assigneeUserId">
                     <option [ngValue]="0" disabled>اختر…</option>
                     @for (m of members(); track m.userId) { <option [ngValue]="m.userId">{{ m.fullName }} — {{ m.department }}</option> }
-                  </select>
+                  </app-select>
                   @if (!members().length) { <small class="hint">لا أعضاء {{ scoped() ? 'من القسم المسؤول عن المرحلة ' : '' }}في الفريق بعد — يضيفهم رئيس القسم.</small> }</label>
               }
             }

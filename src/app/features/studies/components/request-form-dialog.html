@@ -21,15 +21,15 @@
         </div>
         <div class="request-options" [class.form-grid-3]="chooseBranch()" [class.form-grid-2]="!chooseBranch()">
           <label class="form-field"><span class="form-label">الاستعجال</span>
-            <select formControlName="urgency">@for (u of urgencies; track u.value) { <option [ngValue]="u.value">{{ u.label }}</option> }</select></label>
+            <app-select formControlName="urgency">@for (u of urgencies; track u.value) { <option [ngValue]="u.value">{{ u.label }}</option> }</app-select></label>
           <label class="form-field"><span class="form-label">نوع العمل</span>
-            <select formControlName="workType">@for (w of workTypes; track w.value) { <option [ngValue]="w.value">{{ w.label }}</option> }</select></label>
+            <app-select formControlName="workType">@for (w of workTypes; track w.value) { <option [ngValue]="w.value">{{ w.label }}</option> }</app-select></label>
           @if (chooseBranch()) {
             <label class="form-field request-branch"><span class="form-label">الفرع</span>
-              <select formControlName="branchId">
+              <app-select formControlName="branchId">
                 <option [ngValue]="0" disabled>اختر الفرع…</option>
                 @for (b of branches(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
-              </select>
+              </app-select>
               @if (form.controls.branchId.touched && form.controls.branchId.invalid) { <small class="form-error">اختر الفرع</small> }
             </label>
           }
@@ -52,12 +52,12 @@
         <h3>الجهة المستفيدة والموقع</h3>
         <div class="form-grid-3">
           <label class="form-field full"><span class="form-label">الجهة المستفيدة الرئيسية</span>
-            <select formControlName="mainBeneficiaryId">
+            <app-select formControlName="mainBeneficiaryId">
               <option [ngValue]="0" disabled>{{ beneficiariesLoading() ? 'جارٍ تحميل الجهات المستفيدة…' : 'اختر الجهة المستفيدة…' }}</option>
               @for (b of beneficiaryOptions(); track b.id) {
                 <option [ngValue]="b.id">{{ b.name }}{{ b.isActive ? '' : ' (الجهة الحالية)' }}</option>
               }
-            </select>
+            </app-select>
             @if (form.controls.mainBeneficiaryId.touched && form.controls.mainBeneficiaryId.invalid) { <small class="form-error">اختر الجهة المستفيدة الرئيسية</small> }
             @if (!beneficiariesLoading() && !beneficiaryError() && !activeBeneficiaries().length) {
               <small class="hint">لا توجد جهات مستفيدة فعالة برمز محدد. أضف جهة أو أكمل رمزها من إعدادات الدراسات.</small>
@@ -76,17 +76,17 @@
           </label>
           <label class="form-field"><span class="form-label">طبيعة العقار</span><input formControlName="propertyNature" maxlength="100"></label>
           <label class="form-field"><span class="form-label">المحافظة</span>
-            <select formControlName="governorateCode">
+            <app-select formControlName="governorateCode">
               <option value="" disabled>اختر المحافظة…</option>
               @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
-            </select>
+            </app-select>
             @if (form.controls.governorateCode.touched && form.controls.governorateCode.invalid) { <small class="form-error">اختر المحافظة</small> }</label>
           @if (canPickSite) {
             <label class="form-field"><span class="form-label">الموقع على الخريطة <small class="hint">(اختياري)</small></span>
-              <select formControlName="siteId">
+              <app-select formControlName="siteId">
                 <option [ngValue]="0">— بلا موقع —</option>
                 @for (s of siteOptions(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
-              </select>
+              </app-select>
               <small class="hint">بدون موقع لا يظهر مشروع هذه الدراسة على خريطة الفرع.</small></label>
           }
           <label class="form-field"><span class="form-label">المنطقة</span><input formControlName="area" maxlength="100"></label>

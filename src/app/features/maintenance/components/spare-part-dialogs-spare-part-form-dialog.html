@@ -6,8 +6,8 @@
       <div class="form-grid-2">
         @if (!part() && departments().length > 1) {
           <label class="form-field full"><span class="form-label">مخزون القسم</span>
-            <select formControlName="departmentId"><option [ngValue]="0">اختر القسم</option>
-              @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }</select></label>
+            <app-select formControlName="departmentId"><option [ngValue]="0">اختر القسم</option>
+              @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }</app-select></label>
         }
         <label class="form-field"><span class="form-label">اسم القطعة</span><input formControlName="name" maxlength="200" autocomplete="off"></label>
         <label class="form-field"><span class="form-label">رقم القطعة <small class="hint">(اختياري)</small></span><input formControlName="partNumber" maxlength="100" dir="ltr" autocomplete="off"></label>

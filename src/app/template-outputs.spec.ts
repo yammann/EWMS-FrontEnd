@@ -11,7 +11,9 @@ const files = walk(root).filter(f => /\.(ts|html)$/.test(f) && !f.endsWith('.spe
 const read = (f: string) => readFileSync(f, 'utf8');
 
 // أحداث DOM المسموحة على عناصر app-* (تُربط مباشرة على العنصر المضيف)
-const DOM_EVENTS = new Set(['click', 'dblclick', 'keydown', 'keyup', 'keydown.enter', 'keydown.escape', 'keyup.enter', 'keydown.esc', 'focus', 'blur', 'mouseenter', 'mouseleave', 'contextmenu', 'scroll', 'pointerdown', 'dragover', 'drop']);
+const DOM_EVENTS = new Set(['click', 'dblclick', 'keydown', 'keyup', 'keydown.enter', 'keydown.escape', 'keyup.enter', 'keydown.esc', 'focus', 'blur', 'mouseenter', 'mouseleave', 'contextmenu', 'scroll', 'pointerdown', 'dragover', 'drop',
+  // مخرج توجيه NgModel (يُطبَّق على أي عنصر فيه ngModel، ومنه <app-select>)
+  'ngModelChange']);
 
 describe('template output bindings', () => {
   const outputs = new Map<string, Set<string>>();   // selector → مخرجاته

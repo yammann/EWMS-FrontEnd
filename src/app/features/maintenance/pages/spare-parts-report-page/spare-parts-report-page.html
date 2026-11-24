@@ -10,10 +10,10 @@
       <label class="period">من <input #t1 type="date" [value]="from()" [max]="to()" (change)="from.set(t1.value); load()"></label>
       <label class="period">إلى <input #t2 type="date" [value]="to()" [min]="from()" [max]="today" (change)="to.set(t2.value); load()"></label>
       @if (departments().length > 1) {
-        <select #t3 (change)="departmentId.set(+t3.value); load()" aria-label="القسم">
+        <app-select #t3 (change)="departmentId.set(+t3.value); load()" aria-label="القسم">
           <option [value]="0">كل الأقسام</option>
           @for (d of departments(); track d.id) { <option [value]="d.id">{{ d.name }}</option> }
-        </select>
+        </app-select>
       }
     </div>
   </div>

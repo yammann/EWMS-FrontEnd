@@ -12,6 +12,7 @@ import {
 } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
 import { optional } from '../utils/form-rows';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * مشروع الدراسة: يُنشأ من أمر بدء معتمد (الاسم، تواريخ التخطيط، وكوده إن لم يكن للتكليف كود)،
@@ -21,7 +22,7 @@ import { optional } from '../utils/form-rows';
 @Component({
   selector: 'app-study-project-form-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `
     <app-modal [heading]="project() ? 'تعديل المشروع' : 'إنشاء مشروع من أمر البدء'" [subheading]="subheading()" [busy]="saving()" (closed)="closed.emit()">
@@ -40,13 +41,13 @@ import { optional } from '../utils/form-rows';
             <label class="form-field"><span class="form-label">نهاية الدراسة المخططة</span><input type="date" formControlName="plannedEndDate">
               @if (form.hasError('range')) { <small class="form-error">النهاية قبل البداية</small> }</label>
             <label class="form-field"><span class="form-label">مدير المشروع</span>
-              <select formControlName="managerUserId">
+              <app-select formControlName="managerUserId">
                 <option [ngValue]="0">{{ project() ? '— بلا تغيير —' : '— مدير أمر البدء —' }}</option>
                 @for (e of employees(); track e.id) { <option [ngValue]="e.id">{{ e.fullName }}{{ e.departmentName ? ' — ' + e.departmentName : '' }}</option> }
-              </select></label>
+              </app-select></label>
             @if (project()) {
               <label class="form-field"><span class="form-label">الحالة</span>
-                <select formControlName="status">@for (s of statuses; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }</select></label>
+                <app-select formControlName="status">@for (s of statuses; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }</app-select></label>
             }
           </div>
         </div>

@@ -6,6 +6,6 @@
 a.label { color: var(--brand-700); }
 .x { min-height: 28px; width: 28px; padding: 0; background: transparent; color: var(--ink-500); font-size: 18px; box-shadow: none; }
 .add { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; }
-.add select, .add input { min-width: 0; }
+.add app-select, .add input { min-width: 0; }
 .muted { margin: 0 0 8px; color: var(--ink-500); font-size: 13px; }
 .err { margin: 8px 0 0; }

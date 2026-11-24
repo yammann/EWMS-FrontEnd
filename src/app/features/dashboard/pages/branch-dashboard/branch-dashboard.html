@@ -20,19 +20,13 @@
       <app-stat-tile label="الأقسام" [value]="d.departmentsCount" icon="building" tone="blue" />
       <app-stat-tile label="المكاتب" [value]="d.officesCount" icon="door" tone="purple" />
       <app-stat-tile label="الموظفون" [value]="d.employeesCount" icon="users" tone="green" />
-      <app-stat-tile label="مهام الفرع" [value]="d.tasksCount" icon="clipboard" tone="orange" [hint]="d.employeesWithTasks + ' موظف مسؤول عن مهام'" />
-    </section>
-
-    <section class="panel">
-      <div class="panel-heading"><div><span class="panel-kicker">مهام الفرع</span><h2>المهام التي يقوم بها الفرع</h2><p>تختلف من فرع لآخر — كل بطاقة تفتح صفحة المهمة</p></div></div>
-      <app-task-cards [tasks]="d.tasks" [showAssignees]="true" emptyText="لم تُعرَّف مهام لهذا الفرع بعد — يضيفها مدير النظام من صفحة مهام العمل" />
     </section>
 
     <section class="panel">
       <div class="panel-heading"><div><h2>أقسام الفرع</h2><p>اضغط على القسم لعرض لوحته</p></div></div>
       @if (d.departments.length) {
         <div class="table-wrap"><table>
-          <thead><tr><th>القسم</th><th>رئيس القسم</th><th>المكاتب</th><th>الموظفون</th><th>مسؤولون عن مهام</th></tr></thead>
+          <thead><tr><th>القسم</th><th>رئيس القسم</th><th>المكاتب</th><th>الموظفون</th></tr></thead>
           <tbody>
             @for (dep of d.departments; track dep.id) {
               <tr>
@@ -40,7 +34,6 @@
                 <td [class.muted-cell]="!dep.managerNames">{{ dep.managerNames || 'لم يُعيَّن' }}</td>
                 <td class="num">{{ dep.officesCount }}</td>
                 <td class="num">{{ dep.employeesCount }}</td>
-                <td class="num">{{ dep.employeesWithTasks }} من {{ dep.employeesCount }}</td>
               </tr>
             }
           </tbody>
@@ -49,13 +42,7 @@
     </section>
 
     <section class="panel">
-      <div class="panel-heading"><div><h2>توزيع مهام العمل</h2><p>من المسؤول عن كل مهمة في الفرع</p></div></div>
-      <app-task-distribution [items]="d.taskDistribution" />
-    </section>
-
-
-    <section class="panel">
-      <div class="panel-heading"><div><h2>آخر الإجراءات</h2><p>انضمام الموظفين وإضافة مهام العمل وإسنادها في الفرع</p></div></div>
+      <div class="panel-heading"><div><h2>آخر الإجراءات</h2><p>انضمام الموظفين إلى الفرع</p></div></div>
       <app-activity-list [items]="d.recentActivity" />
     </section>
 

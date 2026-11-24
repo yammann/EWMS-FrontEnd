@@ -8,7 +8,7 @@ let idSeq = 0;
 /** هل توجد نافذة مفتوحة؟ (للعناصر غير المنبثقة التي تستمع لـ Esc مثل لوحة تفاصيل المهمة) */
 export const hasOpenModal = () => openStack.length > 0;
 
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), .ss-trigger:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * نافذة منبثقة موحّدة: خلفية، عنوان، زر إغلاق، Esc، إغلاق بالنقر خارجها، حبس التركيز داخلها،
@@ -73,7 +73,7 @@ export class Modal implements OnDestroy {
       const panel = this.panel().nativeElement;
       // الأولوية: [autofocus] ← أول حقل إدخال ← أول عنصر قابل للتركيز (مثل زر في نافذة التأكيد)
       const first = panel.querySelector<HTMLElement>('[autofocus]')
-        ?? panel.querySelector<HTMLElement>('input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled])')
+        ?? panel.querySelector<HTMLElement>('input:not([disabled]):not([type="hidden"]), .ss-trigger:not([disabled]), textarea:not([disabled])')
         ?? panel.querySelector<HTMLElement>(FOCUSABLE);
       (first ?? panel).focus();
     });

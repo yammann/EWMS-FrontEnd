@@ -18,7 +18,6 @@ import { TASK_BOARD_ROUTES } from '@features/task-board/task-board.routes';
 import { TODO_ROUTES } from '@features/todo/todo.routes';
 import { USERS_ROUTES } from '@features/users/users.routes';
 import { VACATIONS_ROUTES, VACATION_PRINT_ROUTES } from '@features/vacations/vacations.routes';
-import { WORK_TASKS_ROUTES } from '@features/work-tasks/work-tasks.routes';
 
 /**
  * تعريف المسارات موزّع على الميزات (<feature>.routes.ts)؛ كل صفحة تُحمَّل عند فتحها فقط (loadComponent)،
@@ -39,7 +38,6 @@ export const routes: Routes = [
     canActivateChild: [authGuard],
     children: [
       ...DASHBOARD_ROUTES,
-      ...WORK_TASKS_ROUTES,
       ...PROFILE_ROUTES,
       ...NOTIFICATIONS_ROUTES,
       ...TASK_BOARD_ROUTES,

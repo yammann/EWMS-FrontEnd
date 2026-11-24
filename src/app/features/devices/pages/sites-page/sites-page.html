@@ -9,10 +9,10 @@
 
   <div class="toolbar">
     <input #t1 class="search" type="search" placeholder="بحث باسم الموقع أو الوصف أو المسؤول…" [value]="search()" (input)="search.set(t1.value)" aria-label="بحث">
-    <select #t2 [appSelectValue]="governorate()" (change)="setGovernorate(t2.value)" aria-label="تصفية حسب المحافظة">
+    <app-select #t2 [value]="governorate()" (change)="setGovernorate(t2.value)" aria-label="تصفية حسب المحافظة">
       <option value="">كل المحافظات</option>
       @for (g of governorates; track g.code) { <option [value]="g.code">{{ g.name }}</option> }
-    </select>
+    </app-select>
   </div>
 
   <section class="panel">

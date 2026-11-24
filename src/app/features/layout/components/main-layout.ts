@@ -121,7 +121,6 @@ export class MainLayout {
         can(AppPermission.ViewReportLog) && { path: '/reports/log', label: 'سجل سحب التقارير', icon: 'clock' }
       ].filter(Boolean) as NavItem[] },
       { id: 'admin', title: 'الإدارة', icon: 'orgChart', items: [
-        can(AppPermission.ViewWorkTasks) && { path: '/work-tasks', label: 'مهام العمل', icon: 'briefcase' },
         can(AppPermission.ViewBranches) && { path: '/branches', label: 'الفروع', icon: 'landmark' },
         canAny(MANAGE_DEPARTMENTS) && { path: '/departments', label: 'الأقسام', icon: 'building' },
         can(AppPermission.ViewOffices) && { path: '/offices', label: 'المكاتب', icon: 'door' },

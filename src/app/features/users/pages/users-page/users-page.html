@@ -218,44 +218,44 @@
 
                   <div class="form-field">
                     <label class="form-label" for="create-role">الدور</label>
-                    <select id="create-role" formControlName="roleId">
+                    <app-select id="create-role" formControlName="roleId">
                       <option value="">اختر الدور</option>
                       @for (role of roleList(); track role.id) {
                         <option [value]="role.id">{{ role.name }}</option>
                       }
-                    </select>
+                    </app-select>
                   </div>
 
                   @if (placement().needsBranch) {
                   <div class="form-field">
                     <label class="form-label" for="create-branch">الفرع <small class="muted">(اختياري)</small></label>
-                    <select id="create-branch" formControlName="branchId" (change)="branchChanged()">
+                    <app-select id="create-branch" formControlName="branchId" (change)="branchChanged()">
                       <option value="">بدون فرع</option>
                       @for (branch of branchList(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
-                    </select>
+                    </app-select>
                   </div>
                   }
 
                   @if (placement().needsDepartment) {
                   <div class="form-field">
                     <label class="form-label" for="create-dept">القسم <small class="muted">(اختياري)</small></label>
-                    <select id="create-dept" formControlName="departmentId" (change)="departmentChanged()">
+                    <app-select id="create-dept" formControlName="departmentId" (change)="departmentChanged()">
                       <option value="">بدون قسم</option>
                       @for (department of filteredDepartments(); track department.id) {
                         <option [value]="department.id">{{ department.name }}</option>
                       }
-                    </select>
+                    </app-select>
                   </div>
                   }
                   @if (placement().needsOffice) {
                   <div class="form-field">
                     <label class="form-label" for="create-office">المكتب <small class="muted">(اختياري)</small></label>
-                    <select id="create-office" formControlName="officeId">
+                    <app-select id="create-office" formControlName="officeId">
                       <option value="">بدون مكتب</option>
                       @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
-                    </select>
+                    </app-select>
                     <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
                   </div>
                   }
@@ -335,44 +335,44 @@
 
                   <div class="form-field">
                     <label class="form-label" for="edit-role">الدور</label>
-                    <select id="edit-role" formControlName="roleId">
+                    <app-select id="edit-role" formControlName="roleId">
                       <option value="">اختر الدور</option>
                       @for (role of roleList(); track role.id) {
                         <option [value]="role.id">{{ role.name }}</option>
                       }
-                    </select>
+                    </app-select>
                   </div>
 
                   @if (placement().needsBranch) {
                   <div class="form-field">
                     <label class="form-label" for="edit-branch">الفرع <small class="muted">(اختياري)</small></label>
-                    <select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
+                    <app-select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
                       <option value="">بدون فرع</option>
                       @for (branch of branchList(); track branch.id) {
                         <option [value]="branch.id">{{ branch.name }}</option>
                       }
-                    </select>
+                    </app-select>
                   </div>
                   }
 
                   @if (placement().needsDepartment) {
                   <div class="form-field">
                     <label class="form-label" for="edit-dept">القسم <small class="muted">(اختياري)</small></label>
-                    <select id="edit-dept" formControlName="departmentId" (change)="departmentChanged()">
+                    <app-select id="edit-dept" formControlName="departmentId" (change)="departmentChanged()">
                       <option value="">بدون قسم</option>
                       @for (department of filteredDepartments(); track department.id) {
                         <option [value]="department.id">{{ department.name }}</option>
                       }
-                    </select>
+                    </app-select>
                   </div>
                   }
                   @if (placement().needsOffice) {
                   <div class="form-field">
                     <label class="form-label" for="edit-office">المكتب <small class="muted">(اختياري)</small></label>
-                    <select id="edit-office" formControlName="officeId">
+                    <app-select id="edit-office" formControlName="officeId">
                       <option value="">بدون مكتب</option>
                       @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
-                    </select>
+                    </app-select>
                     <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
                   </div>
                   }

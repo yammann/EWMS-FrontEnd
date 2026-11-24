@@ -33,8 +33,8 @@ export class LoginComponent {
     { code: 'SY05', x: '80%', y: '10%', r: '7deg', delay: '-2s' },
     { code: 'SY04', x: '12%', y: '62%', r: '6deg', delay: '-4s' },
     { code: 'SY10', x: '84%', y: '66%', r: '-6deg', delay: '-6s' },
-    { code: 'SY01', x: '46%', y: '82%', r: '-3deg', delay: '-3s' },
-    { code: 'SY09', x: '44%', y: '2%', r: '4deg', delay: '-5s' }
+    { code: 'SY01', x: '31%', y: '10%', r: '-3deg', delay: '-3s' },
+    { code: 'SY09', x: '64%', y: '68%', r: '4deg', delay: '-5s' }
   ];
 
   form = this.fb.group({

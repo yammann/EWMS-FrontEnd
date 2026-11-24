@@ -1,11 +1,11 @@
 import { Component, DestroyRef, ElementRef, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { SelectValue } from '@shared/ui/select-value';
 import { ProjectStage, StageTask } from '../data-access/studies.models';
 import {
   FOOT_H, HEAD_H, Month, Placed, Row, Tick, Zoom, axisRange, buildRows, dateText, dayWidth, fridayXs, monthBands, placeRows, rightEdge,
   splitLatinTail, toDay, todayDay, visibleRows, weekTicks
 } from '../utils/gantt-layout';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const ZOOMS: { key: Zoom; label: string }[] = [{ key: 'week', label: 'أسبوع' }, { key: 'month', label: 'شهر' }, { key: 'quarter', label: 'ربع' }];
 const TIP_W = 250;
@@ -25,7 +25,7 @@ const AUTO_COLLAPSE_TASKS = 200;
 @Component({
   selector: 'app-study-gantt',
   standalone: true,
-  imports: [RouterLink, SelectValue],
+  imports: [SearchSelect, SelectOption, RouterLink],
   template: `
     @if (!all().length) {
       <p class="muted">لا مراحل بعد لعرضها.</p>
@@ -38,10 +38,10 @@ const AUTO_COLLAPSE_TASKS = 200;
             </div>
           }
           @if (depts().length > 1) {
-            <select #dsel class="dept" [appSelectValue]="dept()" (change)="dept.set(dsel.value)" aria-label="القسم المسؤول">
+            <app-select #dsel class="dept" [value]="dept()" (change)="dept.set(dsel.value)" aria-label="القسم المسؤول">
               <option value="">كل الأقسام</option>
               @for (d of depts(); track d) { <option [value]="d">{{ d }}</option> }
-            </select>
+            </app-select>
           }
           <button type="button" class="btn btn-ghost btn-sm" [class.on]="lateOnly()" [attr.aria-pressed]="lateOnly()" (click)="lateOnly.set(!lateOnly())">المتأخر فقط</button>
           @if (anyTasks()) { <button type="button" class="btn btn-ghost btn-sm" (click)="toggleAll()">{{ allCollapsed() ? 'فتح كل المراحل' : 'طيّ كل المراحل' }}</button> }
@@ -200,7 +200,7 @@ const AUTO_COLLAPSE_TASKS = 200;
     .seg button { min-height: 28px; padding: 0 12px; background: transparent; color: var(--ink-600); font-size: 12px; font-weight: 700; border-radius: 8px; box-shadow: none; }
     .seg button:hover { background: var(--surface); transform: none; box-shadow: none; }
     .seg button.on { background: var(--surface); color: var(--ink-900); box-shadow: 0 1px 2px rgba(0, 0, 0, .12); }
-    .dept { width: auto; min-width: 150px; max-width: 240px; min-height: 32px; font-size: 12px; }
+    .dept { width: auto; min-width: 150px; max-width: 240px; --select-height: 32px; --select-font-size: 12px; }
     .none { margin: 12px 0; }
     .wrap { position: relative; border-radius: 12px; background: var(--fill); overflow: hidden; }
     .gantt { display: flex; min-width: 0; }

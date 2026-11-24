@@ -16,7 +16,6 @@ teardown('حذف بيانات الاختبار المتبقية', async ({ baseU
   const year = new Date().getFullYear() + 2;
   for (const h of await list(`PublicHolidays/GetAll?year=${year}`)) if (E2E(h.name)) await del(`PublicHolidays/Delete/${h.id}`);
   for (const t of await list('VacationTypes/GetAll')) if (E2E(t.name)) await del(`VacationTypes/Delete/${t.id}`);
-  for (const t of await list('WorkTasks/GetAll')) if (E2E(t.name)) await del(`WorkTasks/Delete/${t.id}`);
   for (const d of await list('Devices/GetAll')) if (E2E(d.name)) await del(`Devices/Delete/${d.id}`);
   for (const s of await list('Sites/GetAll')) if (E2E(s.name)) await del(`Sites/Delete/${s.id}`);
   for (const kind of ['DamageTypes', 'MaintenanceRequestStatuses', 'DeviceTypes', 'DeviceCompanies'])

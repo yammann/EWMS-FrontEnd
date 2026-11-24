@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { localDateInput } from '@core/utils/format';
 import { saveBlob } from '@core/utils/download';
 import { Alert } from '@shared/ui/alert';
@@ -10,6 +10,7 @@ import { StudyDocumentsService } from '../data-access/study-documents.service';
 import {
   StudyDiwanCase, StudyDiwanDecision, StudyDiwanReply, StudyDiwanReviewAction, StudyRecommendation, StudyResponse
 } from '../data-access/studies.models';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 type DiwanAction = 'dispatch' | 'reply' | 'confirm' | 'return';
 
@@ -23,7 +24,7 @@ const TITLES: Record<DiwanAction, string> = {
 @Component({
   selector: 'app-study-diwan-panel',
   standalone: true,
-  imports: [DatePipe, Alert, FormActions, Modal],
+  imports: [SearchSelect, SelectOption, DatePipe, Alert, FormActions, Modal],
   templateUrl: './study-diwan-panel.html',
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss'],
   styles: [`
@@ -37,6 +38,22 @@ export class StudyDiwanPanel {
 
   response = input.required<StudyResponse>();
   diwan = input.required<StudyDiwanCase>();
+  /** إجراء يُفتح تلقائياً مرة واحدة إن كان متاحاً (من قائمة معاملات الديوان) */
+  openAction = input<string | null>(null);
+  private autoOpened = false;
+
+  constructor() {
+    effect(() => {
+      const wanted = this.openAction();
+      const d = this.diwan();
+      if (this.autoOpened || !wanted) return;
+      const allowed = (wanted === 'dispatch' && d.canRegisterDispatch) || (wanted === 'reply' && d.canRegisterReply)
+        || (wanted === 'confirm' && d.canReview);
+      if (!allowed) return;
+      this.autoOpened = true;
+      untracked(() => this.open(wanted as DiwanAction));
+    });
+  }
   saved = output<StudyResponse>();
   startOrder = output<void>();
 
@@ -56,7 +73,9 @@ export class StudyDiwanPanel {
   latest = computed(() => this.diwan().replies[0]);
   canRefer = computed(() => this.latest()?.decision === StudyDiwanDecision.Approved &&
     this.response().recommendation !== StudyRecommendation.NotAvailable);
-  confirmLabel = computed(() => this.canRefer() ? 'إحالة إلى إدارة المشاريع' : 'إثبات الاطلاع وإغلاق المعاملة');
+  confirmLabel = computed(() => this.canRefer() ? 'إحالة إلى إدارة المشاريع'
+    : this.latest()?.decision === StudyDiwanDecision.Rejected ? 'إعادة الرد إلى القسم المتابع للتعديل'
+      : 'إثبات الاطلاع وإغلاق المعاملة');
   valid = computed(() => {
     switch (this.action()) {
       case 'dispatch': return Boolean(this.number().trim() && this.date());

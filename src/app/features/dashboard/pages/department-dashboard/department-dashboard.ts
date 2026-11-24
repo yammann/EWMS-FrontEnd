@@ -6,10 +6,8 @@ import { DashboardService } from '../../data-access/dashboard.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { NotificationService } from '@core/services/notification.service';
-import { WorkTaskService } from '@features/work-tasks';
 import { DepartmentDashboard } from '../../data-access/dashboard.models';
-import { WorkTaskCard } from '@features/work-tasks';
-import { ActivityList, TaskCards, TaskDistributionTable } from '../../components/dashboard-widgets';
+import { ActivityList } from '../../components/dashboard-widgets';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -18,7 +16,7 @@ import { latestRequest } from '@shared/ui/track-request';
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
   selector: 'app-department-dashboard', standalone: true,
-  imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, TaskCards, TaskDistributionTable, ActivityList],
+  imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './department-dashboard.html'
 })
@@ -26,12 +24,10 @@ export class DepartmentDashboardPage {
   /** تحميل الصفحة: كل تحميل يلغي السابق (لا يستبدل ردٌّ متأخر النتيجةَ الأحدث) */
   private latest = latestRequest();
   private service = inject(DashboardService);
-  private tasks = inject(WorkTaskService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
 
   data = signal<DepartmentDashboard | null>(null);
-  myTasks = signal<WorkTaskCard[]>([]);
   loading = signal(false);
   error = signal('');
   /** لوحتي أنا (الصفحة الرئيسية) وليست قسماً أتصفحه */
@@ -57,6 +53,5 @@ export class DepartmentDashboardPage {
 
   load() {
     this.latest(this.service.department(this.id), this.loading, this.error, d => { this.data.set(d); });
-    if (this.isOwn()) this.tasks.my().subscribe({ next: t => this.myTasks.set(t), error: () => this.myTasks.set([]) });
   }
 }

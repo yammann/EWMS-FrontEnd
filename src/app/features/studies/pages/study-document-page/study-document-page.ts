@@ -87,6 +87,8 @@ export class StudyDocumentPage {
 
   /** رقم الرد RSP لبطاقة «إشعار الرد» في السلسلة */
   responseNumber = signal<string | null>(null);
+  /** إجراء ديوان طُلب فتحه من القائمة */
+  diwanAction = signal<string | null>(null);
   number = computed(() => { const d = this.doc(); return d ? documentNumber(this.kind(), d) : ''; });
   request = computed(() => this.kind() === 'requests' ? this.doc() as StudyRequest | null : null);
   assignment = computed(() => this.kind() === 'assignments' ? this.doc() as StudyAssignment | null : null);
@@ -170,6 +172,8 @@ export class StudyDocumentPage {
         this.service.responseNumberOf(d?.chain).subscribe(n => this.responseNumber.set(n));
       });
     });
+    // ?diwan=dispatch|reply|confirm من قائمة معاملات الديوان: تُفتح نافذة الإجراء مباشرةً
+    inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe(q => this.diwanAction.set(q.get('diwan')));
     inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed()).subscribe(p => {
       this.id.set(Number(p.get('id')));
       this.doc.set(null);

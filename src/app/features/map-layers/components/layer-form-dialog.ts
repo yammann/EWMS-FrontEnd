@@ -8,11 +8,11 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { errorMessage } from '@shared/ui/error-message';
 import { FormActions } from '@shared/ui/form-actions';
 import { Modal } from '@shared/ui/modal';
-import { SelectValue } from '@shared/ui/select-value';
 import { ToastService } from '@shared/ui/toast.service';
 import { FIELD_TYPES, LAYER_COLORS, LayerInput, MapFieldType, MapFileOptions, MapLayerDefinition, MapSource } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
 import { Icon } from '@shared/ui/icon';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** حدود الخادم (MapLayerRules) */
 const MAX_FIELDS = 40;
@@ -46,7 +46,7 @@ let keySeq = 0;
  */
 @Component({
   selector: 'app-layer-form-dialog', standalone: true,
-  imports: [Icon, Modal, FormActions, Alert, ReactiveFormsModule, SelectValue],
+  imports: [SearchSelect, SelectOption, Icon, Modal, FormActions, Alert, ReactiveFormsModule],
   templateUrl: './layer-form-dialog.html',
   styleUrls: ['../../../shared/styles/data-tools.scss', './layer-form-dialog.scss']
 })

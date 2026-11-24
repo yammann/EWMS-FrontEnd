@@ -7,10 +7,10 @@
       <div class="form-grid-2">
         @if (branches().length && !isEdit) {
           <label class="form-field full"><span class="form-label">الفرع</span>
-            <select formControlName="branchId">
+            <app-select formControlName="branchId">
               <option value="">— اختر الفرع —</option>
               @for (b of branches(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
-            </select>
+            </app-select>
           </label>
         }
         <label class="form-field"><span class="form-label">اسم الطبقة</span>
@@ -94,9 +94,9 @@
               <div class="inputs">
                 <input #lbl class="label-input" [value]="r.label" (input)="patch(r.key, { label: lbl.value })" maxlength="100"
                        [attr.aria-label]="'عنوان الحقل ' + (i + 1)" placeholder="عنوان الحقل، مثل: اسم المشروع">
-                <select #typ [appSelectValue]="r.type" (change)="setType(r.key, typ.value)" [attr.aria-label]="'نوع الحقل ' + (i + 1)">
+                <app-select #typ [value]="r.type" (change)="setType(r.key, typ.value)" [attr.aria-label]="'نوع الحقل ' + (i + 1)">
                   @for (t of types; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
-                </select>
+                </app-select>
                 <label class="req"><input #req type="checkbox" [checked]="r.isRequired" (change)="patch(r.key, { isRequired: req.checked })"> مطلوب</label>
                 @if (r.type === 5) {
                   <textarea #opt class="options" rows="3" [value]="r.options" (input)="patch(r.key, { options: opt.value })"

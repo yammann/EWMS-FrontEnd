@@ -11,6 +11,7 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { Icon } from '@shared/ui/icon';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * كلمة سر التركيب عند الطلب فقط: لا تصل مع القوائم، تُجلب بالضغط على «إظهار» أو «نسخ» (صلاحية RevealDevicePasswords)
@@ -138,7 +139,7 @@ export class DeviceHistory implements OnInit {
  * الموقع يجب أن يكون موجوداً، والجهاز الجديد يُضاف إلى الكتالوج (قرار المستخدم 2026-10-05).
  */
 @Component({
-  selector: 'app-installations-import', standalone: true, imports: [Alert, Modal, Icon],
+  selector: 'app-installations-import', standalone: true, imports: [SearchSelect, SelectOption, Alert, Modal, Icon],
   templateUrl: './device-ui-installations-import.html',
   styles: [`
     .steps { margin: 0; padding-inline-start: 20px; display: grid; gap: 4px; font-size: 13px; color: var(--ink-600); }

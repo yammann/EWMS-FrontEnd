@@ -27,7 +27,6 @@ const PAGES: [string, string][] = [
   ['offices', '/offices'],
   ['users', '/users'],
   ['roles', '/roles'],
-  ['work-tasks', '/work-tasks'],
 ];
 
 for (const [name, url] of PAGES) {

@@ -1,8 +1,8 @@
 <div class="page">
   <app-page-header eyebrow="إعدادات الإجازات" heading="العطل الرسمية" subtitle="لا تُحسب من مدة الإجازة، مثل يوم الجمعة.">
-    <select #yearSelect class="year-select" (change)="setYear(+yearSelect.value)" aria-label="السنة">
+    <app-select #yearSelect class="year-select" (change)="setYear(+yearSelect.value)" aria-label="السنة">
       @for (y of years; track y) { <option [value]="y" [selected]="y === year()">{{ y }}</option> }
-    </select>
+    </app-select>
     @if (can().create) { <button class="btn" type="button" (click)="crud.openCreate()">+ عطلة جديدة</button> }
     <button class="btn btn-ghost" type="button" (click)="crud.refresh()" [disabled]="crud.busy()">تحديث</button>
   </app-page-header>

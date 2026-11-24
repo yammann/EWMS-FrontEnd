@@ -4,6 +4,7 @@ import { TechnicianOption } from '../data-access/maintenance.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { FormActions } from '@shared/ui/form-actions';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** شارة حالة الطلب بلونها المعرَّف في جدول الحالات (يعمل في الوضعين الفاتح والداكن) */
 @Component({
@@ -27,17 +28,17 @@ export class StatusChip {
  * النافذة تختار الموظف فقط — الحفظ عند الصفحة المستدعية عبر (assign).
  */
 @Component({
-  selector: 'app-assign-dialog', standalone: true, imports: [FormActions, Alert, Modal],
+  selector: 'app-assign-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, Modal],
   template: `
     <app-modal heading="تغيير الموظف المسؤول" [subheading]="subject()" [busy]="busy()" (closed)="closed.emit()">
       <form (submit)="$event.preventDefault(); submit()">
         <div class="modal-body">
           <app-alert [message]="error()" />
           <label class="form-field"><span class="form-label">الموظف المسؤول الجديد</span>
-            <select #t1 (change)="selected.set(+t1.value)" [disabled]="loading()">
+            <app-select #t1 (change)="selected.set(+t1.value)" [disabled]="loading()">
               <option [value]="0" [selected]="!selected()">{{ loading() ? 'جارٍ التحميل…' : 'اختر الموظف' }}</option>
               @for (u of options(); track u.id) { <option [value]="u.id" [disabled]="u.id === currentUserId()">{{ u.fullName }}{{ u.id === currentUserId() ? ' (الحالي)' : '' }}</option> }
-            </select>
+            </app-select>
           </label>
           <p class="note">سيصل إشعار للموظف الجديد وللموظف السابق.</p>
         </div>

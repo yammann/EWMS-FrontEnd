@@ -7,10 +7,10 @@
       @if (!typesLoading() && !typesError() && !types().length) { <p class="alert alert-warning">لا توجد أنواع إجازات متاحة. تواصل مع المسؤول لإضافتها.</p> }
 
       <label class="form-field"><span class="form-label">نوع الإجازة</span>
-        <select formControlName="vacationTypeId">
+        <app-select formControlName="vacationTypeId">
           <option [ngValue]="0">{{ typesLoading() ? 'جارٍ التحميل…' : 'اختر النوع' }}</option>
           @for (type of types(); track type.id) { <option [ngValue]="type.id">{{ type.name }} — {{ type.paymentTypeAr }}</option> }
-        </select>
+        </app-select>
       </label>
       <div class="two">
         <label class="form-field"><span class="form-label">من تاريخ</span><input type="date" formControlName="startVac" [min]="today"></label>

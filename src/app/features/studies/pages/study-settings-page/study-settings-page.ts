@@ -18,6 +18,7 @@ import { StudyLookupsService, StudySimpleLookupKind } from '../../data-access/st
 import {
   LINKED_DOCUMENTS, StudyLinkedDocument, StudyLookup, StudyLookupInput, StudyStageType, StudyStageTypeInput
 } from '../../data-access/studies.models';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 type SettingsKind = 'stageTypes' | StudySimpleLookupKind;
 /** صف الجدول: القوائم البسيطة اسم + فعّال، وأنواع المراحل تزيد الترتيب والوزن والمستند المرتبط */
@@ -46,7 +47,7 @@ const KIND_KEYS = Object.keys(KINDS) as SettingsKind[];
 @Component({
   selector: 'app-study-settings-page',
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeader, Alert, EmptyState, Modal, FormActions, Pager, RowActions],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, PageHeader, Alert, EmptyState, Modal, FormActions, Pager, RowActions],
   templateUrl: './study-settings-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   styles: [`

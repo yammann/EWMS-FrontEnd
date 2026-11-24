@@ -83,9 +83,9 @@
               <small class="hint">من 0 إلى 100 — حصّتها من إنجاز المشروع</small></label>
           </div>
           <label class="form-field"><span class="form-label">المستند المرتبط</span>
-            <select formControlName="linkedDocument">
+            <app-select formControlName="linkedDocument">
               @for (d of linkedDocuments; track d.value) { <option [ngValue]="d.value">{{ d.label }}</option> }
-            </select>
+            </app-select>
             <small class="hint">لا يتغيّر لنوع مستخدَم في مشاريع (أنشئ نوعاً جديداً).</small></label>
         }
         <label class="check"><input type="checkbox" formControlName="isActive">

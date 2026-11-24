@@ -13,12 +13,12 @@
       <app-alert [message]="error()" />
       <div class="decide">
         <label class="form-field"><span class="form-label">يُحوَّل إلى</span>
-          <select #t1 [appSelectValue]="target()" (change)="target.set(+t1.value)" [disabled]="busy()">
+          <app-select #t1 [value]="target()" (change)="target.set(+t1.value)" [disabled]="busy()">
             <option [value]="0">اختر الموظف</option>
             @for (u of assignees(); track u.id) {
               <option [value]="u.id" [selected]="u.id === target()" [disabled]="u.id === request().userId">{{ u.fullName }}{{ u.id === request().userId ? ' (الحالي)' : '' }}{{ u.id === t.suggestedUserId ? ' — المقترح' : '' }}</option>
             }
-          </select>
+          </app-select>
         </label>
         <label class="form-field"><span class="form-label">ملاحظة <small class="hint">(اختياري)</small></span>
           <input #t2 [value]="note()" (input)="note.set(t2.value)" maxlength="500" [disabled]="busy()">
@@ -47,10 +47,10 @@
           <textarea #t3 rows="3" maxlength="500" [value]="reason()" (input)="reason.set(t3.value)" placeholder="مثلاً: العطل خارج اختصاصي، أو لدي إجازة"></textarea>
         </label>
         <label class="form-field"><span class="form-label">زميل مقترح <small class="hint">(اختياري)</small></span>
-          <select #t4 (change)="suggested.set(+t4.value)">
+          <app-select #t4 (change)="suggested.set(+t4.value)">
             <option [value]="0">بلا اقتراح — يختار رئيس القسم</option>
             @for (u of colleagues(); track u.id) { <option [value]="u.id">{{ u.fullName }}</option> }
-          </select>
+          </app-select>
         </label>
       </div>
       <app-form-actions action="send" [busy]="busy()" [disabled]="!reason().trim()" label="إرسال الطلب" busyLabel="جارٍ الإرسال…" (dismissed)="askOpen.set(false)" />

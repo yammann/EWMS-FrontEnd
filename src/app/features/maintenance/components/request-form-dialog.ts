@@ -12,6 +12,7 @@ import { isValidPhone, normalizePhone } from '@core/utils/phone';
 import { DeviceFormDialog } from './device-form-dialog';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 export interface RequestLookups {
   deviceTypes: MaintenanceLookup[];
@@ -26,7 +27,7 @@ export interface RequestLookups {
  * (نافذة الجهاز: الرقم يُكتب مرتين بلا لصق) ثم يُقدَّم الطلب بمعرّفه — الطلب لا يحمل بيانات الجهاز بنفسه.
  */
 @Component({
-  selector: 'app-request-form-dialog', standalone: true, imports: [Alert, ReactiveFormsModule, Modal, DeviceFormDialog],
+  selector: 'app-request-form-dialog', standalone: true, imports: [SearchSelect, SelectOption, Alert, ReactiveFormsModule, Modal, DeviceFormDialog],
   styleUrls: ['../../../shared/styles/data-tools.scss', './request-form-dialog.scss'],
   templateUrl: './request-form-dialog.html',
   

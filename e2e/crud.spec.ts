@@ -160,45 +160,6 @@ test('العطل: عطلة لعدة أيام تضيف يوماً لكل تاري
   await deleteRow(page, name);
 });
 
-// ───────────────────────── مهام العمل ─────────────────────────
-test('مهام العمل: إضافة بفرع وموظف مسؤول، تعديل، وحذف؛ والاسم المكرر في نفس الفرع يُرفض', async ({ page }) => {
-  const name = 'e2e مهمة ' + uid();
-  await page.goto('/work-tasks');
-  await startCreate(page, /مهمة جديدة/);
-  const branch = await field(page, 'الفرع');
-  // أول فرع فيه موظفون (بعد وصول قائمة الفروع)
-  await waitOptions(branch);
-  const options = await branch.locator('option').evaluateAll(os => os.map(o => (o as HTMLOptionElement).value).filter(v => v !== '0'));
-  let picked = false;
-  for (const v of options) {
-    await branch.selectOption(v);
-    const users = (await scope(page)).locator('.user-option input[type=checkbox]');
-    try { await expect(users.first()).toBeVisible({ timeout: 3000 }); } catch { continue; }
-    await users.first().check();
-    picked = true; break;
-  }
-  expect(picked, 'يلزم فرع فيه موظفون').toBe(true);
-  await (await field(page, 'اسم المهمة')).fill(name);
-  await submit(page);
-  await expectRow(page, name);
-  await expect(row(page, name).locator('td').nth(3)).not.toHaveText('—');
-
-  // الاسم نفسه في نفس الفرع: خطأ ظاهر
-  const branchName = (await row(page, name).locator('td').nth(1).innerText()).trim();
-  await startCreate(page, /مهمة جديدة/);
-  await (await field(page, 'اسم المهمة')).fill(name);
-  await (await field(page, 'الفرع')).selectOption({ label: branchName });
-  await submit(page);
-  await expectError(page);
-  await closeDialogIfOpen(page);
-
-  await editRow(page, name);
-  await (await field(page, 'اسم المهمة')).fill(name + ' م');
-  await submit(page);
-  await expectRow(page, name + ' م');
-  await deleteRow(page, name + ' م');
-});
-
 // ───────────────────────── كتالوج الأجهزة ─────────────────────────
 test('كتالوج الأجهزة: إضافة وتعديل وحذف، والاسم+الموديل المكرر يُرفض مع بقاء النموذج', async ({ page }) => {
   const name = 'e2e جهاز ' + uid();

@@ -215,3 +215,6 @@
     max-width: none;
   }
 }
+
+/* لوحات القوائم المنسدلة (<app-select> عبر CDK Overlay): فوق النوافذ المنبثقة ونوافذ التأكيد، تحت التنبيهات العائمة */
+.cdk-overlay-container { z-index: 1060; }

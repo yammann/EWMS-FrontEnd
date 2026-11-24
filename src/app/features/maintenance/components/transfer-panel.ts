@@ -12,7 +12,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
-import { SelectValue } from '@shared/ui/select-value';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * طلب تحويل طلب صيانة (قرار المستخدم 2026-10-05) — في صفحة الطلب:
@@ -20,7 +20,7 @@ import { SelectValue } from '@shared/ui/select-value';
  * - إن وُجد طلب معلّق: شريط بتفاصيله؛ ومن يملك نقل طلبات القسم (canAssign) يقبل (يختار الموظف، المقترح مختار مسبقاً) أو يرفض بملاحظة.
  */
 @Component({
-  selector: 'app-transfer-panel', standalone: true, imports: [SelectValue, FormActions, Alert, UtcPipe, DatePipe, Modal],
+  selector: 'app-transfer-panel', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, UtcPipe, DatePipe, Modal],
   templateUrl: './transfer-panel-transfer-panel.html',
   styleUrl: './transfer-panel-transfer-panel.scss'
 })

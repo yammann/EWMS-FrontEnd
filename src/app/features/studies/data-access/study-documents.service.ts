@@ -42,9 +42,10 @@ export class StudyDocumentsService {
     return this.api.put<Item<K>>(`${this.base(kind)}/Submit/${id}`, {});
   }
 
-  previewProjectCode(requestId: number, assignmentDate: string, adminArchiveNumber: string) {
+  /** assignmentId: معاينة كود مسودة قائمة بعد تغيير تاريخها */
+  previewProjectCode(requestId: number, assignmentDate: string, adminArchiveNumber: string, assignmentId?: number) {
     return this.api.get<{ projectCode: string }>(`/StudyAssignments/ProjectCode/${requestId}`
-      + query({ assignmentDate, adminArchiveNumber }));
+      + query({ assignmentDate, adminArchiveNumber, assignmentId }));
   }
   cancel<K extends StudyDocumentKind>(kind: K, id: number, reason: string): Observable<Item<K>> {
     return this.api.put<Item<K>>(`${this.base(kind)}/Cancel/${id}`, { reason: reason.trim() });

@@ -119,12 +119,12 @@
           <ng-container [formGroup]="form">
             <div class="form-field">
               <label class="form-label" [attr.for]="dlg.mode + '-branch'">الفرع</label>
-              <select [id]="dlg.mode + '-branch'" formControlName="branchId">
+              <app-select [id]="dlg.mode + '-branch'" formControlName="branchId">
                 <option value="">اختر الفرع</option>
                 @for (branch of branchList(); track branch.id) {
                   <option [value]="branch.id">{{ branch.name }}</option>
                 }
-              </select>
+              </app-select>
               @if (dlg.mode === 'create' && form.controls.branchId.touched && form.controls.branchId.invalid) {
                 <small class="form-error">اختر الفرع المرتبط بالقسم.</small>
               }

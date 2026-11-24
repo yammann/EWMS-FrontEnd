@@ -11,10 +11,10 @@
         <h3>بيان أمر التكليف</h3>
         <div class="form-grid-3">
           <label class="form-field"><span class="form-label">القسم المتابع</span>
-            <select formControlName="followingDepartmentId">
+            <app-select formControlName="followingDepartmentId">
               <option [ngValue]="0" disabled>اختر القسم…</option>
               @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
-            </select>
+            </app-select>
             @if (form.controls.followingDepartmentId.touched && form.controls.followingDepartmentId.invalid) { <small class="form-error">اختر القسم المتابع</small> }</label>
           <label class="form-field"><span class="form-label">تاريخ التكليف</span><input type="date" formControlName="assignmentDate"></label>
           <label class="form-field"><span class="form-label">الميزانية المرصودة <small class="hint">(ل.س، اختياري)</small></span>
@@ -56,7 +56,7 @@
             @if (form.controls.responseDeadline.touched && form.controls.responseDeadline.invalid) { <small class="form-error">الحد الأقصى للرد مطلوب</small> }
             @else if (form.hasError('deadline')) { <small class="form-error">لا يسبق تاريخ الإحالة</small> }</label>
           <label class="form-field"><span class="form-label">درجة الأهمية</span>
-            <select formControlName="priority">@for (p of priorities; track p.value) { <option [ngValue]="p.value">{{ p.label }}</option> }</select></label>
+            <app-select formControlName="priority">@for (p of priorities; track p.value) { <option [ngValue]="p.value">{{ p.label }}</option> }</app-select></label>
         </div>
       </section>
     </div>

@@ -16,8 +16,7 @@ export const PERMISSION_SECTIONS: PermissionSectionDef[] = [
   ] },
   { key: 'tasks', title: 'المهام', groups: [
     { key: 'task-board', title: 'لوحة المهام', names: ['ViewTaskBoard', 'AssignTaskToDepartment', 'AssignTaskToOffice', 'AssignTaskToUser', 'HandleUnitTasks', 'ViewTaskStats'] },
-    { key: 'todo-lists', title: 'مفكرتي — قوائم المهام الشخصية (قوائمه هو فقط؛ البنود والتثبيت والأرشفة بصلاحية التعديل)', names: ['ViewToDoLists', 'CreateToDoList', 'EditToDoList', 'DeleteToDoList'] },
-    { key: 'work-tasks', title: 'مهام العمل', names: ['ViewMyWorkTasks', 'ViewWorkTasks', 'CreateWorkTask', 'EditWorkTask', 'DeleteWorkTask'] }
+    { key: 'todo-lists', title: 'مفكرتي — قوائم المهام الشخصية (قوائمه هو فقط؛ البنود والتثبيت والأرشفة بصلاحية التعديل)', names: ['ViewToDoLists', 'CreateToDoList', 'EditToDoList', 'DeleteToDoList'] }
   ] },
   { key: 'maintenance', title: 'الصيانة', groups: [
     { key: 'maint-requests', title: 'طلبات الصيانة', names: ['ViewMaintenanceRequests', 'CreateMaintenanceRequest', 'EditMaintenanceRequest', 'ChangeMaintenanceStatus', 'DeleteMaintenanceRequest', 'AssignMaintenanceRequest', 'RequestMaintenanceTransfer'] },

@@ -23,6 +23,7 @@ import {
 } from '../../data-access/studies.models';
 import { DOCUMENT_KINDS, DOCUMENT_META, documentDate, documentNumber } from '../../utils/document-meta';
 import { responseMoney } from '../../utils/response-pricing';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const PAGE_SIZE = 20;
 
@@ -79,7 +80,7 @@ function toRows(kind: StudyDocumentKind, result: PagedResult<unknown>): ListRow[
 @Component({
   selector: 'app-study-documents-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, PageHeader, Alert, EmptyState, Pager, StudyStatusChip, StudyRequestFormDialog],
+  imports: [SearchSelect, SelectOption, DatePipe, RouterLink, PageHeader, Alert, EmptyState, Pager, StudyStatusChip, StudyRequestFormDialog],
   templateUrl: './study-documents-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   styles: [`
@@ -100,12 +101,11 @@ export class StudyDocumentsPage {
   can = inject(StudyAccess).can;
   meta = DOCUMENT_META;
   statuses = DOCUMENT_STATUSES;
-  diwanList = this.route.snapshot.data['diwanList'] === true;
   diwanStages = Object.entries(DIWAN_STAGES).map(([value, label]) => ({ value: Number(value) as StudyDiwanStage, label }));
   pageSize = PAGE_SIZE;
 
   /** الأنواع التي يملك المستخدم عرضها */
-  kinds = computed(() => DOCUMENT_KINDS.filter(k => (!this.diwanList || k === 'responses') && this.auth.hasPermission(DOCUMENT_META[k].view)));
+  kinds = computed(() => DOCUMENT_KINDS.filter(k => this.auth.hasPermission(DOCUMENT_META[k].view)));
   kind = signal<StudyDocumentKind>('requests');
   columns = computed(() => EXTRA_COLUMNS[this.kind()]);
   orgWide = computed(() => this.auth.hasPermission(AppPermission.ViewOrganizationDashboard));
@@ -161,7 +161,7 @@ export class StudyDocumentsPage {
     const kind = this.kind();
     const filter = {
       status: this.status() || null, search: this.search().trim() || null, from: this.from() || null, to: this.to() || null,
-      diwanOnly: this.diwanList ? true : undefined, diwanStage: kind === 'responses' ? this.diwanStage() || null : null,
+      diwanStage: kind === 'responses' ? this.diwanStage() || null : null,
       branchId: this.branchId() || null, page: this.page(), pageSize: PAGE_SIZE
     };
     const call = this.service.list(kind, filter) as Observable<PagedResult<unknown>>;

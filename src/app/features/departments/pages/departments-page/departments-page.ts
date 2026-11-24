@@ -20,12 +20,13 @@ import { RowActions } from '@shared/ui/row-actions';
 import { StatTile } from '@shared/ui/stat-tile';
 import { DepartmentService } from '../../data-access/department.service';
 import { Icon } from '@shared/ui/icon';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** الأقسام — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-departments-page',
   standalone: true,
-  imports: [Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
+  imports: [SearchSelect, SelectOption, Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './departments-page.html',
   styleUrl: './departments-page.scss'
 })

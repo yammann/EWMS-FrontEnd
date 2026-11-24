@@ -13,6 +13,7 @@ import { trackRequest } from '@shared/ui/track-request';
 import { StudyDocumentsService } from '../data-access/study-documents.service';
 import { PRIORITIES, StudyAssignment, StudyAssignmentInput } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** الطلب الذي يُصدر له التكليف (من صفحة الطلب، أو من التكليف نفسه عند التعديل) */
 export interface AssignmentParent {
@@ -31,7 +32,7 @@ const deadlineAfterReferral = (g: AbstractControl): ValidationErrors | null => {
 @Component({
   selector: 'app-study-assignment-form-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   templateUrl: './assignment-form-dialog.html'
 })
@@ -83,9 +84,9 @@ export class StudyAssignmentFormDialog implements OnInit {
         needsPreliminaryBudget: a.needsPreliminaryBudget, needsFinalRecommendation: a.needsFinalRecommendation,
         referralDate: dateOnly(a.referralDate), responseDeadline: dateOnly(a.responseDeadline), priority: a.priority
       });
-    } else {
-      this.watchProjectCode();
     }
+    // في التعديل أيضاً: يتبع الكود سنة التكليف، فيعيد الخادم توليده عند تغيير التاريخ.
+    this.watchProjectCode();
     // القسم المتابع من أقسام فرع الطلب (يرفض الخادم غيرها)
     const branchId = this.parent().branchId;
     this.lookups.departments().pipe(
@@ -98,8 +99,10 @@ export class StudyAssignmentFormDialog implements OnInit {
 
   private watchProjectCode() {
     const { assignmentDate, adminArchiveNumber } = this.form.controls;
-    merge(assignmentDate.valueChanges, adminArchiveNumber.valueChanges, this.previewRetry).pipe(
-      startWith(null),
+    const editing = this.assignment();
+    const changes = merge(assignmentDate.valueChanges, adminArchiveNumber.valueChanges, this.previewRetry);
+    // التعديل يعرض الكود المحفوظ أولاً ولا يطلب المعاينة إلا بعد تغيير التاريخ
+    (editing ? changes : changes.pipe(startWith(null))).pipe(
       switchMap(() => {
         const archive = adminArchiveNumber.value.trim();
         this.projectCode.set('');
@@ -109,7 +112,7 @@ export class StudyAssignmentFormDialog implements OnInit {
         if (!ready) return EMPTY;
         const date = assignmentDate.value;
         return timer(200).pipe(
-          switchMap(() => this.service.previewProjectCode(this.parent().requestId, date, archive)),
+          switchMap(() => this.service.previewProjectCode(this.parent().requestId, date, archive, editing?.id)),
           catchError((error: { message?: string }) => {
             this.previewLoading.set(false);
             this.previewError.set(error.message || 'تعذّر توليد كود المشروع.');

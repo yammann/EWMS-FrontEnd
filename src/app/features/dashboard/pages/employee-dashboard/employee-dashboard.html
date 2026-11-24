@@ -22,19 +22,10 @@
 
   @if (data(); as d) {
     <section class="dash-stats" aria-label="ملخصي">
-      @if (canMyTasks()) { <app-stat-tile label="مهامي" [value]="tasks().length" icon="clipboard" tone="green" hint="المهام الموكلة إليك" /> }
       <app-stat-tile label="فريقي" [value]="d.team.length" icon="users" tone="blue" [hint]="d.teamName ? 'زملاء ' + d.teamName : ''" />
       @if (canNotifications()) { <app-stat-tile label="إشعارات غير مقروءة" [value]="unread()" icon="bell" tone="purple" /> }
       <app-stat-tile label="أيام إجازة مدفوعة متبقية" [value]="d.paidDaysLeftThisMonth + ' من ' + d.paidDaysLimitPerMonth" icon="beach" tone="orange" hint="هذا الشهر" />
     </section>
-
-    @if (canMyTasks()) {
-    <section class="panel">
-      <div class="panel-heading"><div><span class="panel-kicker">مهامي</span><h2>المهام الموكلة إليك</h2><p>اضغط على المهمة لفتح صفحتها</p></div></div>
-      <app-task-cards [tasks]="tasks()" emptyText="لا توجد مهام موكلة إليك بعد" />
-    </section>
-    }
-
 
     <section class="panel">
       <div class="panel-heading"><div><h2>فريقي</h2>@if (d.teamName) { <p>زملاؤك في {{ d.teamName }}</p> }</div></div>

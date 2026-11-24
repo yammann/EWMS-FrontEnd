@@ -3,32 +3,32 @@
     <div class="modal-body form-stack">
       <app-alert [message]="error()" />
       <label class="form-field"><span class="form-label">القالب</span>
-        <select name="template" [(ngModel)]="templateId">
+        <app-select name="template" [(ngModel)]="templateId">
           <option [ngValue]="0">اختر قالباً</option>
           @for (t of templates(); track t.id) { <option [ngValue]="t.id">{{ t.name }} — {{ t.title }}</option> }
-        </select>
+        </app-select>
         @if (!templates().length) { <small class="form-hint">أنشئ قالباً أولاً من قائمة القوالب.</small> }</label>
 
       @if (kinds().length > 1) {
         <label class="form-field"><span class="form-label">نوع الجهة</span>
-          <select name="kind" [ngModel]="kind()" (ngModelChange)="chooseKind($event)">
+          <app-select name="kind" [ngModel]="kind()" (ngModelChange)="chooseKind($event)">
             @for (k of kinds(); track k) { <option [value]="k">{{ targetLabel[k] }}</option> }
-          </select></label>
+          </app-select></label>
       }
       <label class="form-field"><span class="form-label">إسناد إلى {{ targetLabel[kind()] }}</span>
-        <select name="target" [(ngModel)]="targetId">
+        <app-select name="target" [(ngModel)]="targetId">
           <option [ngValue]="0">{{ loadingTargets() ? 'جارٍ التحميل…' : 'اختر ' + targetLabel[kind()] }}</option>
           @for (t of targets(); track t.id) { <option [ngValue]="t.id">{{ t.name }}</option> }
-        </select></label>
+        </app-select></label>
 
       <div class="two">
         <label class="form-field"><span class="form-label">التكرار</span>
-          <select name="frequency" [(ngModel)]="frequency">
+          <app-select name="frequency" [(ngModel)]="frequency">
             <option [ngValue]="1">{{ freq[1] }}</option><option [ngValue]="2">{{ freq[2] }}</option><option [ngValue]="3">{{ freq[3] }}</option>
-          </select></label>
+          </app-select></label>
         @if (frequency === 2) {
           <label class="form-field"><span class="form-label">يوم الأسبوع</span>
-            <select name="dow" [(ngModel)]="dayOfWeek">@for (d of weekDays; track $index) { <option [ngValue]="$index">{{ d }}</option> }</select></label>
+            <app-select name="dow" [(ngModel)]="dayOfWeek">@for (d of weekDays; track $index) { <option [ngValue]="$index">{{ d }}</option> }</app-select></label>
         } @else if (frequency === 3) {
           <label class="form-field"><span class="form-label">يوم الشهر <small class="muted">(31 = آخر يوم في الشهر القصير)</small></span>
             <input name="dom" type="number" min="1" max="31" [(ngModel)]="dayOfMonth"></label>

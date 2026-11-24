@@ -6,19 +6,19 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { Icon } from '@shared/ui/icon';
 import { PageHeader } from '@shared/ui/page-header';
-import { SelectValue } from '@shared/ui/select-value';
 import { ToastService } from '@shared/ui/toast.service';
 import { latestRequest } from '@shared/ui/track-request';
 import { ReportService } from '../../data-access/report.service';
 import { ReportDefinition, ReportFilter, ReportPreview, ReportValues } from '../../data-access/report.models';
 import { formatCell, initialValues, isNumeric, missingRequired, setFilterValue, visibleOptions } from '../../utils/report-format';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * صفحة تقرير: فلاتر يبنيها الخادم (خياراتها ضمن حدود المستخدم) ← معاينة أول الصفوف مع العدد الكلي ← Excel أو طباعة A4.
  * الفلاتر في عنوان الصفحة (?department=3…) فتبقى عند التحديث والرجوع من الطباعة. المعاينة لا تُسجَّل؛ Excel والطباعة يُسجَّلان.
  */
 @Component({
-  selector: 'app-report-page', standalone: true, imports: [PageHeader, Alert, EmptyState, Icon, SelectValue],
+  selector: 'app-report-page', standalone: true, imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Icon],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', './report-page.scss'],
   templateUrl: './report-page.html'
 })

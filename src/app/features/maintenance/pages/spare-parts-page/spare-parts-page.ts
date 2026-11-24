@@ -17,6 +17,7 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { latestRequest } from '@shared/ui/track-request';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const PAGE_SIZE = 25;
 
@@ -26,7 +27,7 @@ const PAGE_SIZE = 25;
  */
 @Component({
   selector: 'app-spare-parts-page', standalone: true,
-  imports: [RowActions, PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
+  imports: [SearchSelect, SelectOption, RowActions, PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, Pager, SparePartFormDialog, SparePartStockDialog, SparePartMovements],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', '../../styles/list-page.scss'],
   templateUrl: './spare-parts-page.html',
   styles: [`

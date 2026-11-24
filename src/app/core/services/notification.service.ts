@@ -171,7 +171,6 @@ const STUDY_PAGES: Record<string, string> = {
 
 /** الوجهة عند فتح الإشعار: طلبات تنتظر قرار المدير → المراجعة، وبقية إشعارات الإجازات → «إجازاتي»، وغيرها → الملف الشخصي */
 export function notificationRoute(n: AppNotification, canReview: boolean, hasPermission?: (permission: AppPermissionName) => boolean): string {
-  if (n.relatedEntityType === 'WorkTask' && n.relatedEntityId) return `/tasks/${n.relatedEntityId}`;
   if (n.relatedEntityType === 'AssignedTask' && n.relatedEntityId) return `/task-board?task=${n.relatedEntityId}`;
   if (n.relatedEntityType === 'TaskRecurrence') return '/task-board/recurring';
   if (n.relatedEntityType === 'StudyTask') return '/studies/my-tasks';

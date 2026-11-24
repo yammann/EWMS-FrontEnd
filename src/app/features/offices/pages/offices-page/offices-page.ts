@@ -19,12 +19,13 @@ import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
 import { OfficeService } from '../../data-access/office.service';
 import { Icon } from '@shared/ui/icon';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** المكاتب — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-offices-page',
   standalone: true,
-  imports: [Icon, Alert, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
+  imports: [SearchSelect, SelectOption, Icon, Alert, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './offices-page.html',
   styleUrl: './offices-page.scss'
 })

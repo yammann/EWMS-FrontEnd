@@ -7,6 +7,8 @@ export interface StudyDocumentFilter {
   status?: StudyDocumentStatus | null; search?: string | null; branchId?: number | null;
   diwanStage?: StudyDiwanStage | null;
   diwanOnly?: boolean;
+  /** المعاملات التي تنتظر إجراءً فقط، الأقدم انتظاراً أولاً */
+  diwanOpen?: boolean;
   from?: string | null; to?: string | null; page?: number; pageSize?: number;
 }
 
@@ -114,6 +116,12 @@ export interface StudyResponse extends StudyDocumentBase {
   canCreateStartOrder: boolean;
   diwanStage?: StudyDiwanStage | null;
   diwanCase?: StudyDiwanCase | null;
+  /** لقائمة الديوان */
+  mainBeneficiary?: string;
+  diwanDispatchNumber?: string | null; diwanDispatchDate?: string | null;
+  /** بداية انتظار المرحلة الحالية (المعاملة المفتوحة فقط) */
+  diwanSince?: string | null;
+  canRegisterDiwanDispatch?: boolean; canRegisterDiwanReply?: boolean; canReviewDiwan?: boolean;
 }
 /** جزء القسم المتابع: الجدولان يُستبدلان كاملين عند كل حفظ؛ المباني مبنيان على الأكثر */
 export interface StudyResponseInput {

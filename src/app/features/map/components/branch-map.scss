@@ -6,7 +6,7 @@
 .map-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .title h2 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
 .head-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.head-actions select { min-width: 220px; }
+.head-actions app-select { min-width: 220px; }
 
 .map-area { position: relative; }
 .overlay { position: absolute; inset: 0; display: grid; place-items: center; z-index: 6; pointer-events: none; font-size: 14px; font-weight: 700; color: var(--ink-600); background: color-mix(in srgb, var(--page-bg) 60%, transparent); border-radius: var(--radius-lg); }

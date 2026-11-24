@@ -18,8 +18,8 @@ import { TodoListDialog } from '../../components/todo-list-dialog';
 import { TodoItemDialog } from '../../components/todo-item-dialog';
 import { TodoBulkDialog } from '../../components/todo-bulk-dialog';
 import { Alert } from '@shared/ui/alert';
-import { SelectValue } from '@shared/ui/select-value';
 import { Icon, iconFor } from '@shared/ui/icon';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 type Filter = 'all' | 'today' | 'tomorrow' | 'late' | 'done' | 'important';
 type Sort = 'manual' | 'due';
@@ -37,7 +37,7 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
  */
 @Component({
   selector: 'app-todo-list-page', standalone: true,
-  imports: [SelectValue, Alert, FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, Pager, TodoListDialog, TodoItemDialog, TodoBulkDialog],
+  imports: [SearchSelect, SelectOption, Alert, FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, Pager, TodoListDialog, TodoItemDialog, TodoBulkDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../styles/todo.scss', '../../styles/todo-cards.scss'],
   templateUrl: './todo-list-page.html',
   styles: [`

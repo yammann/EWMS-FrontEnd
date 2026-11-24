@@ -7,15 +7,15 @@
     <div class="filters-row">
       <input #q class="search" type="search" dir="auto" placeholder="بحث بالكود أو اسم المشروع…" aria-label="بحث"
              [value]="search()" (input)="search.set(q.value); changed()">
-      <select #s (change)="status.set(+s.value); changed()" aria-label="الحالة">
+      <app-select #s (change)="status.set(+s.value); changed()" aria-label="الحالة">
         <option value="0" [selected]="!status()">كل الحالات</option>
         @for (x of statuses; track x.value) { <option [value]="x.value" [selected]="x.value === status()">{{ x.label }}</option> }
-      </select>
+      </app-select>
       @if (orgWide() && branches().length) {
-        <select #b (change)="branchId.set(+b.value); changed()" aria-label="الفرع">
+        <app-select #b (change)="branchId.set(+b.value); changed()" aria-label="الفرع">
           <option value="0" [selected]="!branchId()">كل الفروع</option>
           @for (x of branches(); track x.id) { <option [value]="x.id" [selected]="x.id === branchId()">{{ x.name }}</option> }
-        </select>
+        </app-select>
       }
       @if (hasFilter()) { <button type="button" class="btn btn-ghost btn-sm" (click)="clear()">مسح الفلاتر</button> }
     </div>

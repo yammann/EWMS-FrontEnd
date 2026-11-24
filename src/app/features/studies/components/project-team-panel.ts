@@ -14,6 +14,7 @@ import { StudyAccess } from '../data-access/study-access';
 import { StudyLookupsService } from '../data-access/study-lookups.service';
 import { StudyProjectsService } from '../data-access/study-projects.service';
 import { ProjectDepartment, StudyEmployee, StudyProject } from '../data-access/studies.models';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 interface DepartmentOption { id: number; name: string; }
 
@@ -25,7 +26,7 @@ interface DepartmentOption { id: number; name: string; }
 @Component({
   selector: 'app-study-project-team-panel',
   standalone: true,
-  imports: [DatePipe, UtcPipe, FormsModule, Alert, Icon, Modal],
+  imports: [SearchSelect, SelectOption, DatePipe, UtcPipe, FormsModule, Alert, Icon, Modal],
   template: `
     <section class="panel">
       <div class="panel-heading">
@@ -66,10 +67,10 @@ interface DepartmentOption { id: number; name: string; }
         <div class="modal-body form-stack">
           <app-alert [message]="dialogError()" />
           <label class="form-field"><span class="form-label">القسم</span>
-            <select [(ngModel)]="pickedDepartment">
+            <app-select [(ngModel)]="pickedDepartment">
               <option [ngValue]="0" disabled>اختر…</option>
               @for (o of departmentOptions(); track o.id) { <option [ngValue]="o.id">{{ o.name }}</option> }
-            </select>
+            </app-select>
             @if (departmentsLoaded() && !departmentOptions().length) { <small class="hint">لا أقسام أخرى متاحة في فرع المشروع.</small> }</label>
         </div>
         <footer class="modal-actions">
@@ -84,10 +85,10 @@ interface DepartmentOption { id: number; name: string; }
         <div class="modal-body form-stack">
           <app-alert [message]="dialogError()" />
           <label class="form-field"><span class="form-label">الموظف</span>
-            <select [(ngModel)]="pickedUser">
+            <app-select [(ngModel)]="pickedUser">
               <option [ngValue]="0" disabled>اختر…</option>
               @for (e of memberOptions(); track e.id) { <option [ngValue]="e.id">{{ e.fullName }}{{ e.officeName ? ' — ' + e.officeName : '' }}</option> }
-            </select>
+            </app-select>
             @if (employeesLoaded() && !memberOptions().length) { <small class="hint">لا موظفون آخرون في هذا القسم.</small> }</label>
           <label class="form-field"><span class="form-label">الصفة في المشروع <small class="hint">(اختياري)</small></span>
             <input [(ngModel)]="roleTitle" maxlength="100" placeholder="مثال: مهندس إنشائي"></label>

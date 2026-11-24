@@ -18,6 +18,7 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { latestRequest } from '@shared/ui/track-request';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const PAGE_SIZE = 20;
 
@@ -26,7 +27,7 @@ const PAGE_SIZE = 20;
  * كل موظف يرى مهامه، ورئيس القسم مهام قسمه وله نقلها لموظف آخر، ورئيس الفرع يطّلع فقط.
  */
 @Component({
-  selector: 'app-maintenance-tasks-page', standalone: true, imports: [RowActions, PageHeader, EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
+  selector: 'app-maintenance-tasks-page', standalone: true, imports: [SearchSelect, SelectOption, RowActions, PageHeader, EmptyState, Alert, UtcPipe, DatePipe, ReactiveFormsModule, Modal, Pager, AssignDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   templateUrl: './tasks-page.html',
   styles: [`

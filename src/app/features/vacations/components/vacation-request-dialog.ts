@@ -14,13 +14,14 @@ import { trackRequest } from '@shared/ui/track-request';
 import { VacationService } from '../data-access/vacation.service';
 import { VACATION_ATTACHMENTS, Vacation, VacationDaysPreview, VacationType } from '../data-access/vacation.models';
 import { notInPast, vacationDateRange } from '../utils/vacation-validators';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * نافذة «تقديم طلب إجازة» (صفحة «إجازاتي»، 2026-10-13): النوع والمدة ومعاينة أيام العمل والسبب والمرفقات.
  * تُحسب المدة بأيام العمل (بلا الجمعة والعطل الرسمية)، ولا تقديم بأثر رجعي. تُطلق submitted بالطلب المقدَّم.
  */
 @Component({
-  selector: 'app-vacation-request-dialog', standalone: true, imports: [Modal, Alert, FormActions, ReactiveFormsModule, Icon, ActionIcon],
+  selector: 'app-vacation-request-dialog', standalone: true, imports: [SearchSelect, SelectOption, Modal, Alert, FormActions, ReactiveFormsModule, Icon, ActionIcon],
   templateUrl: './vacation-request-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }

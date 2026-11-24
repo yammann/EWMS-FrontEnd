@@ -24,11 +24,12 @@ import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
 import { Icon } from '@shared/ui/icon';
 import { UserPlacement, buildUserFormData, hasAssignmentConflict, placementForRole } from '../../utils/user-form';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
+  imports: [SearchSelect, SelectOption, Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss'
 })

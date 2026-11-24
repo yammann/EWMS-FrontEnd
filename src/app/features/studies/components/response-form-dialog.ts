@@ -14,6 +14,7 @@ import { StudyLookupsService } from '../data-access/study-lookups.service';
 import { BUILDING_TYPES, RECOMMENDATIONS, ResponseBuildingDetail, StudyEmployee, StudyResponse, StudyResponseInput } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
 import { responseMoney, syrianEquivalent } from '../utils/response-pricing';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** التكليف الذي يُكتب له الرد */
 export interface ResponseParent { assignmentId: number; assignmentNumber: string; followingDepartmentName: string; branchId: number; }
@@ -49,7 +50,7 @@ type PricedBuildingGroup = FormGroup<{
 @Component({
   selector: 'app-study-response-form-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions, Icon],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions, Icon],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss', './response-form-dialog.scss'],
   templateUrl: './response-form-dialog.html'
 })

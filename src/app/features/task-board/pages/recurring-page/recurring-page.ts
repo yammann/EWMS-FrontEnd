@@ -16,13 +16,14 @@ import { Alert } from '@shared/ui/alert';
 import { PageHeader } from '@shared/ui/page-header';
 import { FormActions } from '@shared/ui/form-actions';
 import { LineList, cleanLines } from '@shared/ui/line-list';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Office: 'مكتب', User: 'موظف' };
 
 /** نافذة قالب: الاسم والعنوان والوصف والأولوية والمدة وبنود التحقق (بند في كل سطر) */
 @Component({
-  selector: 'app-template-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, LineList, Modal],
+  selector: 'app-template-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, LineList, Modal],
   template: `
     <app-modal [heading]="template() ? 'تعديل القالب' : 'قالب جديد'" size="lg" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
@@ -36,9 +37,9 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
             <textarea name="description" rows="4" maxlength="4000" [(ngModel)]="description"></textarea></label>
           <div class="two">
             <label class="form-field"><span class="form-label">الأولوية</span>
-              <select name="priority" [(ngModel)]="priority">
+              <app-select name="priority" [(ngModel)]="priority">
                 @for (p of priorities; track p) { <option [value]="p">{{ priorityLabel[p] }}</option> }
-              </select></label>
+              </app-select></label>
             <label class="form-field"><span class="form-label">مدة التسليم <small class="muted">(أيام من الإنشاء، فارغ = بلا موعد)</small></span>
               <input name="days" type="number" min="0" max="365" [(ngModel)]="days"></label>
           </div>
@@ -85,7 +86,7 @@ export class TemplateDialog implements OnInit {
 
 /** نافذة مهمة دورية: قالب + جهة + جدول */
 @Component({
-  selector: 'app-recurrence-dialog', standalone: true, imports: [FormActions, Alert, FormsModule, Modal],
+  selector: 'app-recurrence-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, Modal],
   templateUrl: './recurrence-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

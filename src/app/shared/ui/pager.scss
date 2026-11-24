@@ -10,5 +10,5 @@
 .pages .num.on:hover:not(:disabled) { background: var(--ink-900); color: var(--surface); }
 .gap { padding: 0 4px; color: var(--ink-400); }
 .size { display: inline-flex; align-items: center; gap: 8px; }
-.size select { width: auto; min-height: 34px; padding-block: 0; }
+.size app-select { width: auto; --select-height: 34px; }
 @media (max-width: 560px) { .pager { justify-content: center; } .pages .nav { padding: 0 10px; } }

@@ -32,10 +32,10 @@
                          (change)="set(f.key, i.value)" (keydown.enter)="set(f.key, i.value)">
                 }
                 @default {
-                  <select #s [appSelectValue]="values()[f.key] ?? ''" [required]="f.required" (change)="set(f.key, s.value)">
+                  <app-select #s [value]="values()[f.key] ?? ''" [required]="f.required" (change)="set(f.key, s.value)">
                     @if (f.required) { <option value="" disabled>اختر…</option> } @else { <option value="">الكل</option> }
                     @for (o of options(f); track o.value) { <option [value]="o.value">{{ o.label }}</option> }
-                  </select>
+                  </app-select>
                 }
               }
               @if (f.hint && f.type === 'number') { <small class="hint">{{ f.hint }}</small> }

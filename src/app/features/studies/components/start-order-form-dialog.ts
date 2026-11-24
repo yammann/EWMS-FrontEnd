@@ -16,6 +16,7 @@ import { StudyLookupsService } from '../data-access/study-lookups.service';
 import { StudyEmployee, StudyLookup, StudyStartOrder, StudyStartOrderInput } from '../data-access/studies.models';
 import { dateOnly } from '../utils/document-meta';
 import { ItemRow, itemRow, itemValue } from '../utils/form-rows';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** كتاب الموافقة المحال لإصدار أمر البدء، مع بيانات التكليف الموروثة */
 export interface StartOrderParent {
@@ -39,7 +40,7 @@ const deadlineAfterStart = (g: AbstractControl): ValidationErrors | null => {
 @Component({
   selector: 'app-study-start-order-form-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions, Icon],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions, Icon],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   templateUrl: './start-order-form-dialog.html'
 })

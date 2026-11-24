@@ -87,10 +87,10 @@
         <div class="form-grid-2 top-gap">
           @if (canAssignOnCreate()) {
             <label class="form-field full"><span class="form-label">الفني المسؤول</span>
-              <select formControlName="assigneeId">
+              <app-select formControlName="assigneeId">
                 <option [ngValue]="0">أنا (من يسجّل الطلب)</option>
                 @for (u of assignees(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
-              </select>
+              </app-select>
               <small class="hint">يصل إشعار للموظف المسند إليه الطلب</small>
             </label>
           }
@@ -101,11 +101,11 @@
       <fieldset class="group"><legend>الصيانة</legend>
         <div class="form-grid-2">
           <label class="form-field"><span class="form-label">نوع العطل</span>
-            <select formControlName="damageTypeId"><option [ngValue]="0">اختر العطل</option>
-              @for (x of lookups().damageTypes; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</select></label>
+            <app-select formControlName="damageTypeId"><option [ngValue]="0">اختر العطل</option>
+              @for (x of lookups().damageTypes; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</app-select></label>
           <label class="form-field"><span class="form-label">حالة الطلب</span>
-            <select formControlName="maintenanceRequestStatusId"><option [ngValue]="0">اختر الحالة</option>
-              @for (x of statusOptions(); track x.id) { <option [ngValue]="x.id">{{ x.name }}{{ isFinal(x.stage) ? ' (نهائية)' : '' }}</option> }</select>
+            <app-select formControlName="maintenanceRequestStatusId"><option [ngValue]="0">اختر الحالة</option>
+              @for (x of statusOptions(); track x.id) { <option [ngValue]="x.id">{{ x.name }}{{ isFinal(x.stage) ? ' (نهائية)' : '' }}</option> }</app-select>
             <small class="hint">وقتا بدء العمل والإنجاز يُسجَّلان تلقائياً حسب مرحلة الحالة</small></label>
           <label class="form-field full"><span class="form-label">وصف العطل والملاحظات <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="3" maxlength="2000"></textarea></label>
         </div>

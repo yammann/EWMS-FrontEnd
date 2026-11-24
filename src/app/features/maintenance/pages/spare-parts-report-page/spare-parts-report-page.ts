@@ -9,13 +9,14 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { latestRequest } from '@shared/ui/track-request';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * تقارير قطع الغيار (قرار المستخدم 2026-10-05 — بلا نسب التكلفة للأقسام): قيمة المخزون، أكثر القطع صرفاً في الفترة،
  * وأعلى الأجهزة تكلفة على مدى عمرها مع تنبيه «إصلاحه أغلى من استبداله» حسب حد نوع الجهاز.
  */
 @Component({
-  selector: 'app-spare-parts-report-page', standalone: true, imports: [PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
+  selector: 'app-spare-parts-report-page', standalone: true, imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', '../../styles/list-page.scss'],
   templateUrl: './spare-parts-report-page.html',
   styles: [`

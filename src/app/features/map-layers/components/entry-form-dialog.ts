@@ -7,13 +7,13 @@ import { Alert } from '@shared/ui/alert';
 import { errorMessage } from '@shared/ui/error-message';
 import { FormActions } from '@shared/ui/form-actions';
 import { Modal } from '@shared/ui/modal';
-import { SelectValue } from '@shared/ui/select-value';
 import {
   FieldValue, MapEntry, MapEntryFile, MapFileOptions, MapLayerDefinition, MapLayerField, fieldExtensions, fieldMaxMegabytes, fileProblem
 } from '../data-access/map-layers.models';
 import { MapLayersService } from '../data-access/map-layers.service';
 import { kindIcon } from './entry-files';
 import { Icon } from '@shared/ui/icon';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** حدود الخادم (MapLayerRules) */
 const TEXT_MAX = 500;
@@ -29,7 +29,7 @@ interface Upload { key: number; fieldId: number; name: string; percent: number; 
  */
 @Component({
   selector: 'app-entry-form-dialog', standalone: true,
-  imports: [Icon, Modal, FormActions, Alert, SelectValue],
+  imports: [SearchSelect, SelectOption, Icon, Modal, FormActions, Alert],
   templateUrl: './entry-form-dialog.html',
   styleUrls: ['../../../shared/styles/data-tools.scss', './entry-form-dialog.scss']
 })

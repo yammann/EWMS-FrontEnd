@@ -42,13 +42,13 @@ describe('StudyRequestFormDialog site picking', () => {
     expect(form.controls.siteId.value).toBe(0);
     expect(c.siteOptions().map(s => s.id)).toEqual([2]);
     fixture.detectChanges();
-    expect((fixture.nativeElement as HTMLElement).querySelector('select[formControlName=siteId]')).not.toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-select[formControlName=siteId]')).not.toBeNull();
   });
 
   it('hides the field and never loads sites without the site permission', () => {
     const { fixture, http } = open(false);
     http.expectNone('/api/Sites/GetAll');
-    expect((fixture.nativeElement as HTMLElement).querySelector('select[formControlName=siteId]')).toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-select[formControlName=siteId]')).toBeNull();
   });
 });
 
@@ -63,9 +63,9 @@ describe('StudyRequestFormDialog beneficiaries', () => {
     http.expectNone('/api/StudyRequests/Create');
 
     fixture.detectChanges();
-    const select = (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('select[formControlName=mainBeneficiaryId]')!;
-    select.selectedIndex = 2;
-    select.dispatchEvent(new Event('change'));
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('app-select[formControlName=mainBeneficiaryId] .ss-trigger')!.click();
+    fixture.detectChanges();
+    document.querySelectorAll<HTMLElement>('.ss-option')[2].click();
     expect(form.controls.mainBeneficiaryId.value).toBe(8);
     expect(form.controls.entityCode.value).toBe('0008');
     fixture.detectChanges();
@@ -87,8 +87,8 @@ describe('StudyRequestFormDialog beneficiaries', () => {
     fixture.detectChanges();
     expect(form.controls.mainBeneficiaryId.value).toBe(9);
     expect(form.controls.entityCode.value).toBe('0009');
-    const select = (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('select[formControlName=mainBeneficiaryId]')!;
-    expect(select.selectedOptions[0].textContent).toContain('الجهة القديمة');
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('app-select[formControlName=mainBeneficiaryId] .ss-trigger')!;
+    expect(trigger.textContent).toContain('الجهة القديمة');
     c.save();
     const update = http.expectOne('/api/StudyRequests/Update/10');
     expect(update.request.body).toMatchObject({ mainBeneficiaryId: 9, mainBeneficiary: 'الجهة القديمة', entityCode: '0009' });

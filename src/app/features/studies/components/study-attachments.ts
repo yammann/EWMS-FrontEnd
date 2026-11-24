@@ -11,12 +11,12 @@ import { ConfirmService } from '@shared/ui/confirm.service';
 import { errorMessage } from '@shared/ui/error-message';
 import { Icon, IconName } from '@shared/ui/icon';
 import { Modal } from '@shared/ui/modal';
-import { SelectValue } from '@shared/ui/select-value';
 import { ToastService } from '@shared/ui/toast.service';
 import { latestRequest } from '@shared/ui/track-request';
 import { StudyAttachmentsService } from '../data-access/study-attachments.service';
 import { StudyLookupsService } from '../data-access/study-lookups.service';
 import { StudyAttachment, StudyLookup, StudyOwnerType } from '../data-access/studies.models';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** الحد الأقصى لعدد المرفقات في السجل الواحد (يفرضه الخادم أيضاً) */
 const MAX_FILES = 100;
@@ -50,7 +50,7 @@ function iconOf(a: StudyAttachment): IconName {
 @Component({
   selector: 'app-study-attachments',
   standalone: true,
-  imports: [DatePipe, UtcPipe, ActionIcon, Alert, Icon, Modal, SelectValue],
+  imports: [SearchSelect, SelectOption, DatePipe, UtcPipe, ActionIcon, Alert, Icon, Modal],
   template: `
     <section class="panel">
       <div class="panel-heading"><div>
@@ -68,10 +68,10 @@ function iconOf(a: StudyAttachment): IconName {
         <div class="uploader" [class.over]="dragOver()" (dragover)="over($event, true)" (dragleave)="over($event, false)" (drop)="dropped($event)">
           <label class="type-pick">
             <span class="form-label">نوع المرفق</span>
-            <select #t [appSelectValue]="typeId() ?? ''" (change)="typeId.set(+t.value || null)" [disabled]="full()">
+            <app-select #t [value]="typeId() ?? ''" (change)="typeId.set(+t.value || null)" [disabled]="full()">
               <option value="">— اختر —</option>
               @for (x of types(); track x.id) { <option [value]="x.id">{{ x.name }}</option> }
-            </select>
+            </app-select>
           </label>
           <div class="drop">
             <app-icon name="paperclip" [size]="20" />

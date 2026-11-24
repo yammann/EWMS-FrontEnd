@@ -12,7 +12,7 @@ import { ActionsTable, CountBars, VacationRows } from '@features/dashboard';
 import { StatTile } from '@shared/ui/stat-tile';
 import { Alert } from '@shared/ui/alert';
 import { latestRequest } from '@shared/ui/track-request';
-import { SelectValue } from '@shared/ui/select-value';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * إحصائيات الإجازات للرؤساء — صفحة مستقلة عن لوحة المتابعة (الإجازات ميزة واحدة من التطبيق).
@@ -20,7 +20,7 @@ import { SelectValue } from '@shared/ui/select-value';
  */
 @Component({
   selector: 'app-vacation-stats', standalone: true,
-  imports: [SelectValue, Alert, RouterLink, StatTile, VacationRows, ActionsTable, CountBars],
+  imports: [SearchSelect, SelectOption, Alert, RouterLink, StatTile, VacationRows, ActionsTable, CountBars],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './vacation-stats-page.html'
 })

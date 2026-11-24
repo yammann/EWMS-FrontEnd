@@ -4,18 +4,18 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { Pager } from '@shared/ui/pager';
-import { SelectValue } from '@shared/ui/select-value';
 import { UtcPipe } from '@shared/pipes/format.pipes';
 import { latestRequest } from '@shared/ui/track-request';
 import { ReportService } from '../../data-access/report.service';
 import { ReportLogEntry, ReportOption } from '../../data-access/report.models';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * سجل سحب التقارير (ViewReportLog): من سحب أي تقرير، بأي فلاتر، وكم صفاً، ومتى — Excel والطباعة، ومعها تصدير
  * صفحة التركيبات ولوحة المهام (المعاينة لا تُسجَّل). الحد في الخادم: سحوبات موظفي فرعي، والمؤسسة كلها لنظرتها.
  */
 @Component({
-  selector: 'app-report-log-page', standalone: true, imports: [PageHeader, Alert, EmptyState, Pager, SelectValue, DatePipe, UtcPipe],
+  selector: 'app-report-log-page', standalone: true, imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Pager, DatePipe, UtcPipe],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   template: `
     <div class="page">
@@ -23,10 +23,10 @@ import { ReportLogEntry, ReportOption } from '../../data-access/report.models';
 
       <div class="filters">
         <div class="filters-row">
-          <select #r [appSelectValue]="reportKey()" (change)="reportKey.set(r.value); reload()" aria-label="التقرير">
+          <app-select #r [value]="reportKey()" (change)="reportKey.set(r.value); reload()" aria-label="التقرير">
             <option value="">كل التقارير</option>
             @for (o of reports(); track o.value) { <option [value]="o.value">{{ o.label }}</option> }
-          </select>
+          </app-select>
           <input #q class="search" type="search" placeholder="اسم المستخدم" [value]="search()" aria-label="اسم المستخدم"
                  (change)="search.set(q.value.trim()); reload()" (keydown.enter)="search.set(q.value.trim()); reload()">
           <label class="period">من <input #f type="date" [value]="from()" (change)="from.set(f.value); reload()"></label>

@@ -14,6 +14,7 @@ import { latestRequest } from '@shared/ui/track-request';
 import { StudyProjectCard } from '../../components/project-card';
 import { StudyProjectsService } from '../../data-access/study-projects.service';
 import { StudyProject } from '../../data-access/studies.models';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const PAGE_SIZE = 20;
 const STATUSES = [{ value: 1, label: 'جارٍ' }, { value: 2, label: 'معلّق' }, { value: 3, label: 'مكتمل' }, { value: 4, label: 'ملغى' }];
@@ -26,7 +27,7 @@ const STATUSES = [{ value: 1, label: 'جارٍ' }, { value: 2, label: 'معلّ�
 @Component({
   selector: 'app-study-projects-page',
   standalone: true,
-  imports: [PageHeader, Alert, EmptyState, Pager, StudyProjectCard],
+  imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Pager, StudyProjectCard],
   templateUrl: './study-projects-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   styles: [`

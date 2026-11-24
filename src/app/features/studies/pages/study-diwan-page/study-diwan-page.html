@@ -1,0 +1,72 @@
+<div class="page">
+  <app-page-header eyebrow="فرع الدراسات" heading="معاملات الديوان"
+    [subtitle]="openOnly() ? 'المعاملات التي تنتظر إجراءً، الأطول انتظاراً أولاً' : 'كل معاملات الديوان'">
+    <button class="btn btn-ghost" type="button" (click)="load()" [disabled]="loading()">تحديث</button>
+  </app-page-header>
+
+  <nav class="segmented" role="tablist" aria-label="المعاملات المعروضة">
+    <button type="button" role="tab" [class.on]="openOnly()" [attr.aria-selected]="openOnly()" (click)="setOpenOnly(true)">تنتظر إجراءً</button>
+    <button type="button" role="tab" [class.on]="!openOnly()" [attr.aria-selected]="!openOnly()" (click)="setOpenOnly(false)">كل المعاملات</button>
+  </nav>
+
+  <div class="filters">
+    <div class="filters-row">
+      <input #q class="search" type="search" dir="auto" placeholder="بحث برقم الرد أو الصادر أو الجهة أو الكود…" aria-label="بحث"
+             [value]="search()" (input)="search.set(q.value); changed()">
+      @if (!openOnly()) {
+        <app-select #s (change)="stage.set($any(+s.value)); changed()" aria-label="مرحلة المعاملة">
+          <option value="0" [selected]="!stage()">كل المراحل</option>
+          @for (x of stages; track x.value) { <option [value]="x.value" [selected]="x.value === stage()">{{ x.label }}</option> }
+        </app-select>
+      }
+    </div>
+  </div>
+
+  <app-alert [message]="error()" retryLabel="إعادة المحاولة" (retry)="load()" />
+
+  <section class="panel">
+    @if (loading() && !rows().length) {
+      <app-empty-state>جارٍ التحميل…</app-empty-state>
+    } @else if (!rows().length && !error()) {
+      <div class="empty-state">
+        <h3>{{ search().trim() || stage() ? 'لا توجد نتائج مطابقة' : openOnly() ? 'لا توجد معاملات تنتظر إجراءً' : 'لا توجد معاملات ديوان بعد' }}</h3>
+        <p>{{ openOnly() ? 'تظهر المعاملة هنا بعد اعتماد إشعار الرد، وتخرج بعد إحالتها أو إغلاقها.' : 'جرّب تعديل البحث أو المرحلة.' }}</p>
+      </div>
+    } @else if (rows().length) {
+      <div class="table-wrap" [class.dim]="loading()"><table>
+        <thead><tr>
+          <th>الرد</th><th>الجهة والمشروع</th><th>المرحلة</th><th>الصادر</th>
+          @if (openOnly()) { <th>الانتظار</th> }
+          <th>الإجراء</th>
+        </tr></thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td><a class="mono cell-strong" [routerLink]="['/studies/responses', r.id]">{{ r.responseNumber }}</a></td>
+              <td><span class="cell-strong">{{ r.mainBeneficiary || '—' }}</span>@if (r.projectCode) { <small class="mono">{{ r.projectCode }}</small> }</td>
+              <td>{{ stageName(r) }}</td>
+              <td>
+                @if (r.diwanDispatchNumber) {
+                  <span class="mono">{{ r.diwanDispatchNumber }}</span><small>{{ r.diwanDispatchDate | date:'yyyy/MM/dd' }}</small>
+                } @else { — }
+              </td>
+              @if (openOnly()) {
+                <td>
+                  @if (waitDays(r); as days) {
+                    <span class="wait" [class]="waitClass(days)">{{ days }} يوم</span>
+                  } @else if (waitDays(r) === 0) { <span class="wait">اليوم</span> } @else { — }
+                </td>
+              }
+              <td class="row-action">
+                @if (action(r); as a) {
+                  <a class="btn btn-sm" [routerLink]="['/studies/responses', r.id]" [queryParams]="{ diwan: a }">{{ labels[a] }}</a>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+      <app-pager [sizes]="[]" [page]="page()" [pageSize]="pageSize" [total]="total()" [disabled]="loading()" (pageChange)="goTo($event)" />
+    }
+  </section>
+</div>

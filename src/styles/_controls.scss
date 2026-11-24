@@ -243,6 +243,7 @@ select {
 
 .input-wrapper input,
 .input-wrapper select { padding-right: 40px; }
+.input-wrapper app-select { --select-pad-start: 40px; }
 
 textarea,
 .textarea {

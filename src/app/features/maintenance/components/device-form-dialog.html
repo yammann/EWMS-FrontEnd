@@ -26,11 +26,11 @@
 
       <div class="form-grid-2">
         <label class="form-field"><span class="form-label">نوع الجهاز</span>
-          <select formControlName="deviceTypeId"><option [ngValue]="0">اختر النوع</option>
-            @for (x of lookups().deviceTypes; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</select></label>
+          <app-select formControlName="deviceTypeId"><option [ngValue]="0">اختر النوع</option>
+            @for (x of lookups().deviceTypes; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</app-select></label>
         <label class="form-field"><span class="form-label">الشركة المصنّعة</span>
-          <select formControlName="deviceCompanyId"><option [ngValue]="0">اختر الشركة</option>
-            @for (x of lookups().companies; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</select></label>
+          <app-select formControlName="deviceCompanyId"><option [ngValue]="0">اختر الشركة</option>
+            @for (x of lookups().companies; track x.id) { <option [ngValue]="x.id">{{ x.name }}</option> }</app-select></label>
         <label class="form-field"><span class="form-label">اسم الجهاز <small class="hint">(اختياري)</small></span><input formControlName="name" maxlength="200"></label>
         <label class="form-field"><span class="form-label">الموديل <small class="hint">(اختياري)</small></span><input formControlName="model" dir="ltr" maxlength="100"></label>
       </div>

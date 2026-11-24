@@ -1,43 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { DashboardAction, DashboardActivity, DashboardCountItem, DashboardVacationRow, WorkTaskDistribution } from '../data-access/dashboard.models';
-import { WorkTaskCard } from '@features/work-tasks';
+import { DashboardAction, DashboardActivity, DashboardCountItem, DashboardVacationRow } from '../data-access/dashboard.models';
 import { Icon, iconFor } from '@shared/ui/icon';
 
 /* =====================================================
  * مكوّنات مشتركة بين لوحات المتابعة (الفرع/القسم/المكتب/الموظف/المؤسسة)
  * ===================================================== */
-
-/** بطاقات مهام العمل — كل بطاقة تفتح صفحة المهمة (حالياً: جاري العمل عليها) */
-@Component({
-  selector: 'app-task-cards', standalone: true, imports: [RouterLink, Icon],
-  template: `
-    @if (tasks().length) {
-      <div class="task-grid">
-        @for (t of tasks(); track t.id) {
-          <a class="task-card" [routerLink]="['/tasks', t.id]">
-            <span class="task-icon" aria-hidden="true"><app-icon [name]="iconFor(t.icon)" /></span>
-            <span class="task-text">
-              <strong>{{ t.name }}</strong>
-              @if (t.description) { <span>{{ t.description }}</span> }
-              @if (showAssignees()) { <small>{{ t.assigneesCount }} موظف مسنَد</small> }
-            </span>
-            <span class="task-go" aria-hidden="true">←</span>
-          </a>
-        }
-      </div>
-    } @else {
-      <p class="empty-inline">{{ emptyText() }}</p>
-    }`,
-  styleUrl: './dashboard-widgets-task-cards.scss'
-})
-export class TaskCards {
-  iconFor = iconFor;
-  tasks = input.required<WorkTaskCard[]>();
-  emptyText = input('لا توجد مهام بعد');
-  showAssignees = input(false);
-}
 
 /** جدول "آخر الإجراءات" على طلبات الإجازة */
 @Component({
@@ -145,7 +113,7 @@ export class CountBars {
   valueText(i: DashboardCountItem) { return `${this.value(i)} ${this.mode() === 'days' ? 'يوم' : this.unit()}`.trim(); }
 }
 
-/** آخر الإجراءات العامة (انضمام موظفين، إضافة مهام وإسنادها) */
+/** آخر الإجراءات العامة (انضمام الموظفين) */
 @Component({
   selector: 'app-activity-list', standalone: true, imports: [CommonModule, Icon],
   template: `
@@ -177,30 +145,4 @@ export class CountBars {
 export class ActivityList {
   iconFor = iconFor;
   items = input.required<DashboardActivity[]>();
-}
-
-/** توزيع مهام العمل على موظفي القسم/المكتب */
-@Component({
-  selector: 'app-task-distribution', standalone: true, imports: [RouterLink, Icon],
-  template: `
-    @if (items().length) {
-      <div class="table-wrap"><table class="compact">
-        <thead><tr><th>المهمة</th><th>الموظفون المسؤولون</th></tr></thead>
-        <tbody>
-          @for (t of items(); track t.taskId) {
-            <tr>
-              <td><a class="cell-link" [routerLink]="['/tasks', t.taskId]"><app-icon [name]="iconFor(t.icon)" [size]="15" /> {{ t.taskName }}</a></td>
-              <td class="wrap-cell">{{ t.assigneeNames.join('، ') }}</td>
-            </tr>
-          }
-        </tbody>
-      </table></div>
-    } @else {
-      <p class="empty-inline">لم تُسند مهام عمل لموظفين هنا بعد</p>
-    }`,
-  styleUrl: '../styles/dashboard-table.scss'
-})
-export class TaskDistributionTable {
-  iconFor = iconFor;
-  items = input.required<WorkTaskDistribution[]>();
 }

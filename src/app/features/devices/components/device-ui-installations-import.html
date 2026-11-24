@@ -8,10 +8,10 @@
     </ol>
     @if (departments().length) {
       <label class="form-field"><span class="form-label">تُسجَّل التركيبات باسم القسم</span>
-        <select #dep (change)="setDepartment(+dep.value)" [disabled]="busy()">
+        <app-select #dep (change)="setDepartment(+dep.value)" [disabled]="busy()">
           <option value="0">قسمي (الافتراضي)</option>
           @for (d of departments(); track d.id) { <option [value]="d.id">{{ d.branchName }} — {{ d.name }}</option> }
-        </select></label>
+        </app-select></label>
     }
     <label class="form-field"><span class="form-label">ملف Excel (‎.xlsx، حتى 2000 سطر)</span>
       <input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="picked($event)" [disabled]="busy()"></label>

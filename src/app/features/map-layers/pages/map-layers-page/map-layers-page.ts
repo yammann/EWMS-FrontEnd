@@ -8,10 +8,10 @@ import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { Pager } from '@shared/ui/pager';
 import { RowActions } from '@shared/ui/row-actions';
-import { SelectValue } from '@shared/ui/select-value';
 import { LayerFormDialog } from '../../components/layer-form-dialog';
 import { LayerInput, MapLayerDefinition, fieldTypeLabel } from '../../data-access/map-layers.models';
 import { MapLayersService } from '../../data-access/map-layers.service';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /**
  * طبقات خرائط الفروع (1.2.0): كل فرع يعرّف طبقاته وحقولها، وتُسجَّل معلوماته على المواقع المشتركة
@@ -19,7 +19,7 @@ import { MapLayersService } from '../../data-access/map-layers.service';
  */
 @Component({
   selector: 'app-map-layers-page', standalone: true,
-  imports: [PageHeader, Alert, EmptyState, Pager, RowActions, SelectValue, LayerFormDialog],
+  imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Pager, RowActions, LayerFormDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', './map-layers-page.scss'],
   templateUrl: './map-layers-page.html'
 })

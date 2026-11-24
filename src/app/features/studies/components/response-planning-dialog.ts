@@ -12,6 +12,7 @@ import { StudyDocumentsService } from '../data-access/study-documents.service';
 import { StudyLookupsService } from '../data-access/study-lookups.service';
 import { StudyLookup, StudyResponse, StudyResponsePlanningInput } from '../data-access/studies.models';
 import { ItemRow, itemRow, itemValue } from '../utils/form-rows';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const MAX_ROWS = 200;
 type StaffRow = FormGroup<{ disciplineId: FormControl<number>; staffCount: FormControl<number> }>;
@@ -24,7 +25,7 @@ type StaffRow = FormGroup<{ disciplineId: FormControl<number>; staffCount: FormC
 @Component({
   selector: 'app-study-response-planning-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, Modal, Alert, FormActions, Icon],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions, Icon],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `
     <app-modal size="lg" heading="التخطيط وإدارة المشاريع" [subheading]="'إشعار الرد ' + response().responseNumber" [busy]="saving()" (closed)="closed.emit()">
@@ -50,10 +51,10 @@ type StaffRow = FormGroup<{ disciplineId: FormControl<number>; staffCount: FormC
               @for (s of form.controls.staffEstimates.controls; track s; let i = $index) {
                 <div class="row staff-row" [formGroupName]="i">
                   <label class="form-field"><span class="form-label">الاختصاص</span>
-                    <select formControlName="disciplineId">
+                    <app-select formControlName="disciplineId">
                       <option [ngValue]="0" disabled>اختر…</option>
                       @for (d of disciplines(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
-                    </select></label>
+                    </app-select></label>
                   <label class="form-field"><span class="form-label">العدد</span><input type="number" formControlName="staffCount" min="0" max="1000" step="1"></label>
                   <button type="button" class="icon-btn row-remove" aria-label="حذف الاختصاص" (click)="remove(form.controls.staffEstimates, i)"><app-icon name="trash" [size]="16" /></button>
                 </div>

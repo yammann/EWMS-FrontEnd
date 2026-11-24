@@ -18,7 +18,7 @@ import { UtcPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
-import { SelectValue } from '@shared/ui/select-value';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 type View = 'table' | 'board';
 type SearchField = 'clientName' | 'serialNumber' | 'model';
@@ -36,7 +36,7 @@ const BOARD_LIMIT = 5;
  */
 @Component({
   selector: 'app-maintenance-requests-page', standalone: true,
-  imports: [SelectValue, PageHeader, EmptyState, Alert, UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
+  imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', '../../styles/list-page.scss'],
   templateUrl: './requests-page.html'
 })

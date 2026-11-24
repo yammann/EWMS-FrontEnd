@@ -7,6 +7,7 @@ import { SiteLookupService, SiteOption } from '@core/services/site-lookup.servic
 import { AppPermission, DEVICE_ACCESS } from '@core/constants/access';
 import { AssignedTaskCard, LINK_TYPE_LABEL, TaskLink, TaskLinkType } from '../data-access/assigned-task.models';
 import { ConfirmService } from '@shared/ui/confirm.service';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** وجهة رابط سجل في نظامه (أو null إن لم تتوفر للمستخدم صفحة له) */
 export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: boolean): string | null {
@@ -22,7 +23,7 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
  * ولمن لا يحق له عرض السجل المرتبط يُظهر وجود رابط بلا بياناته.
  */
 @Component({
-  selector: 'app-task-links', standalone: true, imports: [FormsModule],
+  selector: 'app-task-links', standalone: true, imports: [SearchSelect, SelectOption, FormsModule],
   templateUrl: './task-links-task-links.html',
   styleUrl: './task-links-task-links.scss'
 })

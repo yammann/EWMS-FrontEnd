@@ -14,12 +14,13 @@ import { Alert } from '@shared/ui/alert';
 import { EmptyState } from '@shared/ui/empty-state';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { FormActions } from '@shared/ui/form-actions';
+import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDecimals(c.value) ? null : { decimals: true };
 
 /** إضافة قطعة أو تعديل بياناتها — الكمية والسعر لا يُدخلان هنا (إدخال/تسوية فقط) */
 @Component({
-  selector: 'app-spare-part-form-dialog', standalone: true, imports: [FormActions, Alert, ReactiveFormsModule, Modal],
+  selector: 'app-spare-part-form-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, ReactiveFormsModule, Modal],
   styleUrl: '../../../shared/styles/data-tools.scss',
   templateUrl: './spare-part-dialogs-spare-part-form-dialog.html',
   styles: [`

@@ -9,10 +9,10 @@
 
   @if (employees().length > 1) {
     <div class="filters-row">
-      <select #t1 (change)="userId.set(+t1.value); page.set(1); load()" aria-label="الموظف">
+      <app-select #t1 (change)="userId.set(+t1.value); page.set(1); load()" aria-label="الموظف">
         <option [value]="0" [selected]="!userId()">كل الموظفين</option>
         @for (u of employees(); track u.id) { <option [value]="u.id" [selected]="u.id === userId()">{{ u.fullName }}</option> }
-      </select>
+      </app-select>
     </div>
   }
 
@@ -52,10 +52,10 @@
         @if (formError()) { <p class="alert alert-error full" role="alert">{{ formError() }}</p> }
         @if (canPickEmployee()) {
           <label class="form-field full"><span class="form-label">الموظف المكلَّف بالمهمة</span>
-            <select formControlName="assigneeId">
+            <app-select formControlName="assigneeId">
               @if (!editing()) { <option [ngValue]="0">أنا (المهمة لي)</option> }
               @for (u of employees(); track u.id) { <option [ngValue]="u.id">{{ u.fullName }}</option> }
-            </select>
+            </app-select>
             <small class="hint">يصل إشعار للموظف عند توجيه المهمة إليه</small></label>
         }
         <label class="form-field"><span class="form-label">مكان المهمة</span><input formControlName="taskLocation" maxlength="200"></label>
