@@ -15,7 +15,7 @@ import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة مدير النظام: إحصائيات عامة للمؤسسة + الدخول لأي فرع (صفحات الإدارة من السايدبار) */
 @Component({
-  selector: 'app-overview-dashboard', standalone: true,
+  selector: 'app-overview-dashboard',
   imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './overview-dashboard.html'
@@ -34,7 +34,7 @@ export class OverviewDashboardPage {
 
   constructor() {
     this.load();
-    inject(NotificationService).incoming$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+    inject(NotificationService).changes$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
   }
 
   load() {

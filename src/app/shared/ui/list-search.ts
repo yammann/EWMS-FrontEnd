@@ -7,7 +7,6 @@ import { Icon } from './icon';
  */
 @Component({
   selector: 'app-list-search',
-  standalone: true,
   imports: [Icon],
   template: `
     <div class="list-search">

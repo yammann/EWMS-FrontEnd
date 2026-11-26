@@ -40,7 +40,7 @@ function kindOf(type: string): Kind {
  * التقسيم من الخادم (Notifications/Page)، والإشعار اللحظي يُضاف أعلى الصفحة الأولى.
  */
 @Component({
-  selector: 'app-notifications-page', standalone: true, imports: [Alert, DatePipe, UtcPipe, Pager, Icon],
+  selector: 'app-notifications-page', imports: [Alert, DatePipe, UtcPipe, Pager, Icon],
   styleUrls: ['../../../../shared/styles/page-base.scss', './notifications-page.scss'],
   templateUrl: './notifications-page.html',
   

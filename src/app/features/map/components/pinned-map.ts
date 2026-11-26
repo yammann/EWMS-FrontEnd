@@ -8,7 +8,6 @@ import { Component, DestroyRef, ElementRef, afterNextRender, inject, input, view
  */
 @Component({
   selector: 'app-pinned-map',
-  standalone: true,
   template: `
     <div #pinned class="map-pinned"><ng-content select="[pinned]" /></div>
     <div #sheet class="map-sheet" [class.flat]="!hasPinned()"><ng-content /></div>

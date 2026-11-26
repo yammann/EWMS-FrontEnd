@@ -4,7 +4,7 @@ import { Icon } from '@shared/ui/icon';
 
 /** زر المظهر في النافبار: لوحة الألوان (كدوائر الهوية) + فاتح/داكن/تلقائي */
 @Component({
-  selector: 'app-appearance-menu', standalone: true, imports: [Icon],
+  selector: 'app-appearance-menu', imports: [Icon],
   host: { '(document:click)': 'onDocumentClick($event)', '(document:keydown.escape)': 'open.set(false)' },
   templateUrl: './appearance-menu.html',
   styleUrl: './appearance-menu.scss'

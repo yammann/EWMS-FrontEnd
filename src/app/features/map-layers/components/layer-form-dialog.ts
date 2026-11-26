@@ -13,6 +13,7 @@ import { FIELD_TYPES, LAYER_COLORS, LayerInput, MapFieldType, MapFileOptions, Ma
 import { MapLayersService } from '../data-access/map-layers.service';
 import { Icon } from '@shared/ui/icon';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { ActionButton } from '@shared/ui/action-button';
 
 /** حدود الخادم (MapLayerRules) */
 const MAX_FIELDS = 40;
@@ -45,8 +46,8 @@ let keySeq = 0;
  * أو «حذف نهائي» (تُمحى قيمه من كل السجلات). الحفظ نفسه بيد الصفحة (CrudPage) عبر submitted.
  */
 @Component({
-  selector: 'app-layer-form-dialog', standalone: true,
-  imports: [SearchSelect, SelectOption, Icon, Modal, FormActions, Alert, ReactiveFormsModule],
+  selector: 'app-layer-form-dialog',
+  imports: [ActionButton, SearchSelect, SelectOption, Icon, Modal, FormActions, Alert, ReactiveFormsModule],
   templateUrl: './layer-form-dialog.html',
   styleUrls: ['../../../shared/styles/data-tools.scss', './layer-form-dialog.scss']
 })

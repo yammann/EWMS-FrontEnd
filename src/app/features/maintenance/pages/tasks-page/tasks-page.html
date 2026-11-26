@@ -68,10 +68,11 @@
           <span class="with-btn"><input type="datetime-local" formControlName="completedAt" [min]="form.controls.startedAt.value">@if (!readOnly()) { <button type="button" class="btn btn-ghost btn-sm" (click)="setNow('completedAt')">الآن</button> }</span>
           @if (dateError()) { <small class="form-error">تاريخ الإنجاز لا يسبق تاريخ البدء</small> }</label>
       </div>
-      <footer class="modal-actions">
-        <button type="button" class="ghost" (click)="closeForm()" [disabled]="saving()">{{ readOnly() ? 'إغلاق' : 'إلغاء' }}</button>
-        @if (!readOnly()) { <button type="submit" [disabled]="form.invalid || dateError() || saving()">{{ saving() ? 'جارٍ الحفظ…' : 'حفظ' }}</button> }
-      </footer>
+      @if (readOnly()) {
+        <footer class="modal-actions"><button type="button" class="ghost" (click)="closeForm()">إغلاق</button></footer>
+      } @else {
+        <app-form-actions [busy]="saving()" [disabled]="form.invalid || dateError()" (dismissed)="closeForm()" />
+      }
     </form>
   </app-modal>
 }

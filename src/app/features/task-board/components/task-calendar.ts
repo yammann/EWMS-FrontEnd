@@ -9,7 +9,7 @@ interface Cell { date: Date; key: string; inMonth: boolean; today: boolean; task
 
 /** تقويم شهري لمواعيد تسليم المهام: يكشف ازدحام الأيام. النقر على مهمة يفتحها، والنقر على اليوم يعرض مهامه كاملة */
 @Component({
-  selector: 'app-task-calendar', standalone: true,
+  selector: 'app-task-calendar',
   templateUrl: './task-calendar.html',
   styleUrl: './task-calendar.scss'
 })

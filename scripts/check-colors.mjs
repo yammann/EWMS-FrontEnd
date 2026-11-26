@@ -3,8 +3,10 @@
 // والقيمة الاحتياطية var(--x, #fff)، والسطر الذي يحمل التعليق raw-color-ok (بيانات لون يختارها المستخدم أو ورق مقصود).
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = new URL('../src/app', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
+// fileURLToPath لا pathname: الأخير يبقي الحروف مرمّزة (%D9…) فيفشل في مسار عربي أو فيه مسافة
+const root = fileURLToPath(new URL('../src/app', import.meta.url));
 const walk = dir => readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
 const SKIP_FILE = /(\.spec\.ts|theme\.service\.ts|[\\/]print|print-|signature|stamp)/i;
 const HEX = /#[0-9a-fA-F]{3,8}\b/;

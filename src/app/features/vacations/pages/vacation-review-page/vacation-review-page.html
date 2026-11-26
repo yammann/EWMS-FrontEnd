@@ -38,7 +38,7 @@
           <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
             <p>{{ approving() ? 'تأكيد الموافقة على الطلب في مرحلته الحالية؟' : 'تأكيد رفض طلب الإجازة؟' }}</p>
             @if (!approving()) { <label class="form-field">سبب الرفض<textarea formControlName="reason" maxlength="500" rows="2"></textarea></label> }
-            <div class="actions"><button class="btn" type="submit" [disabled]="saving() || form.invalid">{{ saving() ? 'جارٍ الحفظ…' : 'تأكيد القرار' }}</button><button class="btn btn-ghost" type="button" [disabled]="saving()" (click)="selected.set(null)">تراجع</button></div>
+            <div class="actions"><button class="btn" type="submit" appAction="save" [busy]="saving()" busyLabel="جارٍ الحفظ…" [disabled]="form.invalid">تأكيد القرار</button><button class="btn btn-ghost" type="button" [disabled]="saving()" (click)="selected.set(null)">تراجع</button></div>
           </form>
         } @else {
           <div class="actions"><button class="btn" [disabled]="saving()" (click)="choose(v, true)">موافقة</button><button class="btn btn-danger" [disabled]="saving()" (click)="choose(v, false)">رفض</button>@if (canPrint()) { <a class="btn btn-ghost" [routerLink]="['/vacations/print', v.id]">طباعة النموذج</a> }</div>

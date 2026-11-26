@@ -9,7 +9,7 @@ import { SearchSelect, SelectOption } from './search-select';
  * @example <app-pager [page]="p.page()" [pageSize]="p.size()" [total]="p.total()" (pageChange)="p.go($event)" (sizeChange)="p.setSize($event)" />
  */
 @Component({
-  selector: 'app-pager', standalone: true, imports: [SearchSelect, SelectOption],
+  selector: 'app-pager', imports: [SearchSelect, SelectOption],
   template: `
     @if (visible()) {
       <nav class="pager" aria-label="تقسيم الصفحات">

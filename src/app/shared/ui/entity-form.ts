@@ -1,8 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Alert } from './alert';
-import { Icon } from './icon';
-import { ActionIcon } from './action-icon';
+import { FormActions } from './form-actions';
 
 /**
  * نموذج الاسم + الوصف لنوافذ إنشاء/تعديل كيانات الإدارة (فرع/قسم/مكتب) — بدل نسختين متطابقتين تقريباً في كل صفحة.
@@ -10,7 +9,7 @@ import { ActionIcon } from './action-icon';
  * أيقونة حقل الاسم: `<app-icon nameIcon name="…" />` (تظهر في الإنشاء فقط، كما كان).
  */
 @Component({
-  selector: 'app-entity-form', standalone: true, imports: [ReactiveFormsModule, Alert, Icon, ActionIcon],
+  selector: 'app-entity-form', imports: [ReactiveFormsModule, Alert, FormActions],
   template: `
     <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="form-stack">
       <app-alert [message]="error()" />
@@ -41,21 +40,9 @@ import { ActionIcon } from './action-icon';
 
       <ng-content />
 
-      <div class="modal-actions">
-        <button type="button" class="ghost" (click)="dismissed.emit()">إلغاء</button>
-        <button type="submit" [disabled]="form().invalid || saving() === mode()" [attr.aria-busy]="saving() === mode()">
-          @if (mode() === 'edit') {
-            <app-action-icon kind="save" [size]="16" [busy]="saving() === 'edit'" />
-            <span>{{ saving() === 'edit' ? 'جاري الحفظ...' : 'حفظ التعديل' }}</span>
-          } @else if (saving() === 'create') {
-            <span class="button-spinner" aria-hidden="true"></span>
-            <span>جاري الإنشاء...</span>
-          } @else {
-            <app-icon name="plus" [size]="16" [weight]="2" />
-            <span>{{ createLabel() }}</span>
-          }
-        </button>
-      </div>
+      <app-form-actions [busy]="saving() === mode()" [disabled]="form().invalid"
+        [label]="mode() === 'edit' ? 'حفظ التعديل' : createLabel()" [busyLabel]="mode() === 'edit' ? 'جارٍ الحفظ…' : 'جارٍ الإنشاء…'"
+        (dismissed)="dismissed.emit()" />
     </form>`
 })
 export class EntityForm {

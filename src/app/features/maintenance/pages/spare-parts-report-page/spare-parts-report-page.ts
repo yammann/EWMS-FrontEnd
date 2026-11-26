@@ -16,7 +16,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  * وأعلى الأجهزة تكلفة على مدى عمرها مع تنبيه «إصلاحه أغلى من استبداله» حسب حد نوع الجهاز.
  */
 @Component({
-  selector: 'app-spare-parts-report-page', standalone: true, imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
+  selector: 'app-spare-parts-report-page', imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, QtyPipe, MoneyPipe, RouterLink, StatTile],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', '../../styles/list-page.scss'],
   templateUrl: './spare-parts-report-page.html',
   styles: [`

@@ -57,7 +57,7 @@ export class StampService {
  * والورق من --stamp-paper. الحجم من CSS للعنصر (width).
  */
 @Component({
-  selector: 'app-stamp', standalone: true,
+  selector: 'app-stamp',
   template: `@if (svg(); as s) { <span class="art" [innerHTML]="s"></span> }`,
   host: { role: 'img', '[attr.aria-label]': 'label()' },
   styles: [`

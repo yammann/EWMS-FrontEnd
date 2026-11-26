@@ -36,7 +36,7 @@ const dayOf = (iso: string) => new Date(iso).setHours(0, 0, 0, 0);
  * كل عملية تُرجع القائمة كاملة فتحلّ محل الحالة المحلية؛ والتعليم والترتيب متفائلان.
  */
 @Component({
-  selector: 'app-todo-list-page', standalone: true,
+  selector: 'app-todo-list-page',
   imports: [SearchSelect, SelectOption, Alert, FormsModule, RouterLink, DatePipe, CdkDropList, CdkDrag, CdkDragHandle, Icon, StatTile, Pager, TodoListDialog, TodoItemDialog, TodoBulkDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../styles/todo.scss', '../../styles/todo-cards.scss'],
   templateUrl: './todo-list-page.html',

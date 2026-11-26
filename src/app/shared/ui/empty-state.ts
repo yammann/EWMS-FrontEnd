@@ -2,7 +2,7 @@ import { Component, booleanAttribute, input } from '@angular/core';
 
 /** حالة فارغة/«جارٍ التحميل» موحّدة. `panel` يضيف إطار اللوحة. المحتوى نص أو عناصر. */
 @Component({
-  selector: 'app-empty-state', standalone: true,
+  selector: 'app-empty-state',
   template: `<div class="empty-state" [class.panel]="panel()" role="status"><ng-content /></div>`,
   styles: [`:host { display: contents; }`]
 })

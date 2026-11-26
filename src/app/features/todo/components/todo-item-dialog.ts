@@ -11,7 +11,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** تعديل بند: العنوان والملاحظة والموعد والتكرار والأهمية واللون (المهمة المرتبطة تُعرض للاطلاع) */
 @Component({
-  selector: 'app-todo-item-dialog', standalone: true, imports: [SearchSelect, SelectOption, Icon, FormActions, Alert, FormsModule, Modal],
+  selector: 'app-todo-item-dialog', imports: [SearchSelect, SelectOption, Icon, FormActions, Alert, FormsModule, Modal],
   templateUrl: './todo-item-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

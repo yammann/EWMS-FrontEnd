@@ -6,7 +6,7 @@ import { Component, ElementRef, effect, input, output, untracked, viewChild } fr
  * عند ظهور رسالة جديدة يُمرَّر إليها الحاوي (نافذة طويلة) كي لا يضيع الخطأ فوق أو تحت ما يراه المستخدم.
  */
 @Component({
-  selector: 'app-alert', standalone: true,
+  selector: 'app-alert',
   template: `
     @if (message()) {
       <p #box class="alert alert-error" role="alert">

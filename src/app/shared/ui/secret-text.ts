@@ -4,7 +4,7 @@ import { Icon } from './icon';
 
 /** قيمة تقنية (IP، اسم مستخدم، إحداثيات) بخط ثابت مع زر نسخ — المحتوى الإضافي (مثل شارة "مكرر") يُمرَّر بعدها */
 @Component({
-  selector: 'app-copy-text', standalone: true, imports: [Icon],
+  selector: 'app-copy-text', imports: [Icon],
   template: `
     <span class="secret">
       <span class="mono">{{ value() }}</span>

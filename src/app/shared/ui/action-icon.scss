@@ -24,9 +24,14 @@ svg { width: 100%; height: 100%; overflow: visible; }
     :host-context(button:enabled:hover) { --action-cue: 1; }
   }
 
-  .lid, .bucket, .pencil, .sheet, .arrow, .plane, .shackle {
+  .lid, .bucket, .pencil, .sheet, .arrow, .plane, .shackle, .arrow-down, .lens, .enter, .turn, .cross {
     transition: transform 210ms var(--ease);
   }
+  .arrow-down { transform: translateY(calc(1.5px * var(--action-cue, 0))); }
+  .lens { transform-origin: 10px 10px; transform: rotate(calc(-12deg * var(--action-cue, 0))); }
+  .enter { transform: translateX(calc(2px * var(--action-cue, 0))); }
+  .turn { transform-origin: 12px 12px; transform: rotate(calc(40deg * var(--action-cue, 0))); }
+  .cross { transform-origin: 12px 12px; transform: rotate(calc(45deg * var(--action-cue, 0))); }
   .lid {
     transform-origin: 19px 7px;
     transform: translateY(calc(-1px * var(--action-cue, 0))) rotate(calc(32deg * var(--action-cue, 0)));
@@ -61,6 +66,12 @@ svg { width: 100%; height: 100%; overflow: visible; }
     .plane { animation: fly 540ms var(--ease) both; }
     .flight-trails { animation: trail 540ms ease-out both; }
     .shackle { animation: unlock 500ms var(--ease) both; }
+    .arrow-down { animation: drop 530ms var(--ease) both; }
+    /* البحث والتحديث ينتظران الخادم مدة غير معروفة: حركة متكررة ما دام الزر منشغلاً */
+    .lens { animation: scan 900ms ease-in-out infinite; }
+    .enter { animation: enter 520ms var(--ease) both; }
+    .turn { animation: turn 800ms linear infinite; }
+    .cross { animation: cross 460ms var(--ease) both; }
   }
   :host(.complete) {
     --action-cue: 0;
@@ -113,3 +124,17 @@ svg { width: 100%; height: 100%; overflow: visible; }
   to { opacity: 0; transform: rotate(200deg); }
 }
 @keyframes restart { from { opacity: 0; transform: rotate(74deg); } to { opacity: 1; transform: none; } }
+@keyframes drop {
+  0% { transform: none; } 30% { transform: translateY(-2px); }
+  72% { transform: translateY(3px); } 100% { transform: translateY(1px); }
+}
+@keyframes scan {
+  0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-1.5px, -1px); }
+  50% { transform: translate(1px, -1.5px); } 75% { transform: translate(1.5px, 1px); }
+}
+@keyframes enter {
+  0% { transform: none; } 30% { transform: translateX(-2px); }
+  72% { transform: translateX(3px); } 100% { transform: translateX(1px); }
+}
+@keyframes turn { to { transform: rotate(360deg); } }
+@keyframes cross { 0% { transform: none; } 60% { transform: rotate(110deg) scale(.9); } 100% { transform: rotate(90deg); } }

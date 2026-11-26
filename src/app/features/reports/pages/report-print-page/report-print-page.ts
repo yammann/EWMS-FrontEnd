@@ -16,7 +16,7 @@ import { columnTotal, formatCell, isNumeric, printColumns } from '../../utils/re
  * فتح الصفحة يُسجَّل «طباعة» في سجل السحب. الحفظ PDF من نافذة طباعة المتصفح (بلا إنترنت).
  */
 @Component({
-  selector: 'app-report-print', standalone: true, imports: [BackButton, Icon, Logo, DatePipe, UtcPipe],
+  selector: 'app-report-print', imports: [BackButton, Icon, Logo, DatePipe, UtcPipe],
   templateUrl: './report-print-page.html',
   styleUrl: './report-print-page.scss'
 })

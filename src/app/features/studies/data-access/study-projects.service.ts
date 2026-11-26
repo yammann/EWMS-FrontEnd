@@ -3,7 +3,7 @@ import { Observable, map } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { PagedResult } from '@core/models/paged-result.model';
 import { allPages } from '../utils/all-pages';
-import { query } from '../utils/query';
+import { query } from '@core/http/query';
 import {
   ProjectStage, StageTask, StageTaskInput, StageTaskProgressInput, StudyActivityLog,
   StudyProject, StudyProjectFilter, StudyProjectInput, StudyStageInput

@@ -2,6 +2,7 @@ import { Component, ElementRef, afterNextRender, computed, inject, input, output
 import { Modal } from '@shared/ui/modal';
 import { InkPoint, InkStroke, cleanUpload, inkOnScreen, luminance, strokePath, strokesToPng, toRgb } from '../utils/signature-ink';
 import { Icon } from '@shared/ui/icon';
+import { ActionButton } from '@shared/ui/action-button';
 
 type Method = 'draw' | 'upload';
 
@@ -20,7 +21,7 @@ const MAX_DATA_URL = 300_000;
  * تُخرج PNG شفافاً مقصوصاً على حدود التوقيع مع كلمة المرور (تأكيد التغيير يطلبه الخادم).
  */
 @Component({
-  selector: 'app-signature-pad', standalone: true, imports: [Icon, Modal],
+  selector: 'app-signature-pad', imports: [ActionButton, Icon, Modal],
   templateUrl: './signature-pad.html',
   styleUrl: './signature-pad.scss'
 })

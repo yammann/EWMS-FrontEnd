@@ -8,7 +8,7 @@ export type StatTone = 'green' | 'blue' | 'purple' | 'orange' | 'red';
  * `hint` سطر وصف أسفل الرقم، و`live` نقطة خضراء قبله.
  */
 @Component({
-  selector: 'app-stat-tile', standalone: true, imports: [Icon],
+  selector: 'app-stat-tile', imports: [Icon],
   template: `
     <article class="stat-card" [class.stat-alert]="alert()">
       <div class="stat-top">

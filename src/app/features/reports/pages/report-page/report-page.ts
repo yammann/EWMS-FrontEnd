@@ -12,13 +12,14 @@ import { ReportService } from '../../data-access/report.service';
 import { ReportDefinition, ReportFilter, ReportPreview, ReportValues } from '../../data-access/report.models';
 import { formatCell, initialValues, isNumeric, missingRequired, setFilterValue, visibleOptions } from '../../utils/report-format';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { ActionButton } from '@shared/ui/action-button';
 
 /**
  * صفحة تقرير: فلاتر يبنيها الخادم (خياراتها ضمن حدود المستخدم) ← معاينة أول الصفوف مع العدد الكلي ← Excel أو طباعة A4.
  * الفلاتر في عنوان الصفحة (?department=3…) فتبقى عند التحديث والرجوع من الطباعة. المعاينة لا تُسجَّل؛ Excel والطباعة يُسجَّلان.
  */
 @Component({
-  selector: 'app-report-page', standalone: true, imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Icon],
+  selector: 'app-report-page', imports: [ActionButton, SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Icon],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', './report-page.scss'],
   templateUrl: './report-page.html'
 })

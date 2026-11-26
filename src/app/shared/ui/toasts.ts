@@ -5,7 +5,7 @@ import { ToastService } from '@shared/ui/toast.service';
 
 /** حاوية التنبيهات — مرة واحدة في MainLayout */
 @Component({
-  selector: 'app-toasts', standalone: true, imports: [Icon, ActionIcon],
+  selector: 'app-toasts', imports: [Icon, ActionIcon],
   template: `
     <div class="toast-container" aria-live="polite">
       @for (toast of toasts(); track toast.id) {

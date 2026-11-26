@@ -16,9 +16,10 @@ import { EmptyState } from '@shared/ui/empty-state';
 import { PageHeader } from '@shared/ui/page-header';
 import { latestRequest, trackRequest } from '@shared/ui/track-request';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { ActionButton } from '@shared/ui/action-button';
 
 @Component({
-  selector: 'app-vacation-review', standalone: true, imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
+  selector: 'app-vacation-review', imports: [ActionButton, SearchSelect, SelectOption, PageHeader, EmptyState, Alert, CommonModule, ReactiveFormsModule, RouterLink, VacationContextPanel, VacationAttachments, Pager],
   styleUrl: '../../../../shared/styles/page-base.scss',
   templateUrl: './vacation-review-page.html'
 })

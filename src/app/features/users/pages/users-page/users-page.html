@@ -216,65 +216,12 @@
                     }
                   </div>
 
-                  <div class="form-field">
-                    <label class="form-label" for="create-role">الدور</label>
-                    <app-select id="create-role" formControlName="roleId">
-                      <option value="">اختر الدور</option>
-                      @for (role of roleList(); track role.id) {
-                        <option [value]="role.id">{{ role.name }}</option>
-                      }
-                    </app-select>
-                  </div>
-
-                  @if (placement().needsBranch) {
-                  <div class="form-field">
-                    <label class="form-label" for="create-branch">الفرع <small class="muted">(اختياري)</small></label>
-                    <app-select id="create-branch" formControlName="branchId" (change)="branchChanged()">
-                      <option value="">بدون فرع</option>
-                      @for (branch of branchList(); track branch.id) {
-                        <option [value]="branch.id">{{ branch.name }}</option>
-                      }
-                    </app-select>
-                  </div>
-                  }
-
-                  @if (placement().needsDepartment) {
-                  <div class="form-field">
-                    <label class="form-label" for="create-dept">القسم <small class="muted">(اختياري)</small></label>
-                    <app-select id="create-dept" formControlName="departmentId" (change)="departmentChanged()">
-                      <option value="">بدون قسم</option>
-                      @for (department of filteredDepartments(); track department.id) {
-                        <option [value]="department.id">{{ department.name }}</option>
-                      }
-                    </app-select>
-                  </div>
-                  }
-                  @if (placement().needsOffice) {
-                  <div class="form-field">
-                    <label class="form-label" for="create-office">المكتب <small class="muted">(اختياري)</small></label>
-                    <app-select id="create-office" formControlName="officeId">
-                      <option value="">بدون مكتب</option>
-                      @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
-                    </app-select>
-                    <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
-                  </div>
-                  }
+                  <ng-container *ngTemplateOutlet="placementFields; context: { $implicit: createForm, prefix: 'create' }" />
 
 
                 </div>
 
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
-                  <button type="submit" [disabled]="createForm.invalid || crud.saving()">
-                    @if (crud.saving()) {
-                      <span class="button-spinner"></span>
-                      <span>جاري الإنشاء...</span>
-                    } @else {
-                      <app-icon name="plus" [size]="16" />
-                      <span>إنشاء المستخدم</span>
-                    }
-                  </button>
-                </div>
+                <app-form-actions [busy]="crud.saving()" [disabled]="createForm.invalid" label="إنشاء المستخدم" busyLabel="جارٍ الإنشاء…" (dismissed)="crud.close()" />
               </form>
             }
 
@@ -333,49 +280,7 @@
                     }
                   </div>
 
-                  <div class="form-field">
-                    <label class="form-label" for="edit-role">الدور</label>
-                    <app-select id="edit-role" formControlName="roleId">
-                      <option value="">اختر الدور</option>
-                      @for (role of roleList(); track role.id) {
-                        <option [value]="role.id">{{ role.name }}</option>
-                      }
-                    </app-select>
-                  </div>
-
-                  @if (placement().needsBranch) {
-                  <div class="form-field">
-                    <label class="form-label" for="edit-branch">الفرع <small class="muted">(اختياري)</small></label>
-                    <app-select id="edit-branch" formControlName="branchId" (change)="branchChanged()">
-                      <option value="">بدون فرع</option>
-                      @for (branch of branchList(); track branch.id) {
-                        <option [value]="branch.id">{{ branch.name }}</option>
-                      }
-                    </app-select>
-                  </div>
-                  }
-
-                  @if (placement().needsDepartment) {
-                  <div class="form-field">
-                    <label class="form-label" for="edit-dept">القسم <small class="muted">(اختياري)</small></label>
-                    <app-select id="edit-dept" formControlName="departmentId" (change)="departmentChanged()">
-                      <option value="">بدون قسم</option>
-                      @for (department of filteredDepartments(); track department.id) {
-                        <option [value]="department.id">{{ department.name }}</option>
-                      }
-                    </app-select>
-                  </div>
-                  }
-                  @if (placement().needsOffice) {
-                  <div class="form-field">
-                    <label class="form-label" for="edit-office">المكتب <small class="muted">(اختياري)</small></label>
-                    <app-select id="edit-office" formControlName="officeId">
-                      <option value="">بدون مكتب</option>
-                      @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
-                    </app-select>
-                    <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
-                  </div>
-                  }
+                  <ng-container *ngTemplateOutlet="placementFields; context: { $implicit: editForm, prefix: 'edit' }" />
 
 
                 </div>
@@ -388,18 +293,7 @@
                   </span>
                 </label>
 
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
-                  <button type="submit" [disabled]="editForm.invalid || crud.saving()">
-                    @if (crud.saving()) {
-                      <span class="button-spinner"></span>
-                      <span>جاري الحفظ...</span>
-                    } @else {
-                      <app-icon name="checkmark" [size]="16" />
-                      <span>حفظ التعديل</span>
-                    }
-                  </button>
-                </div>
+                <app-form-actions [busy]="crud.saving()" [disabled]="editForm.invalid" label="حفظ التعديل" (dismissed)="crud.close()" />
               </form>
             }
           }
@@ -409,3 +303,50 @@
   }
 
 </section>
+
+<!-- الدور ومكان العمل: نفس الحقول في نافذتي الإنشاء والتعديل (form = النموذج، prefix = بادئة معرّفات الحقول) -->
+<ng-template #placementFields let-form let-prefix="prefix">
+  <div class="form-field">
+    <label class="form-label" [attr.for]="prefix + '-role'">الدور</label>
+    <app-select [id]="prefix + '-role'" [formControl]="form.controls['roleId']">
+      <option value="">اختر الدور</option>
+      @for (role of roleList(); track role.id) {
+        <option [value]="role.id">{{ role.name }}</option>
+      }
+    </app-select>
+  </div>
+
+  @if (placement().needsBranch) {
+  <div class="form-field">
+    <label class="form-label" [attr.for]="prefix + '-branch'">الفرع <small class="muted">(اختياري)</small></label>
+    <app-select [id]="prefix + '-branch'" [formControl]="form.controls['branchId']" (change)="branchChanged()">
+      <option value="">بدون فرع</option>
+      @for (branch of branchList(); track branch.id) {
+        <option [value]="branch.id">{{ branch.name }}</option>
+      }
+    </app-select>
+  </div>
+  }
+
+  @if (placement().needsDepartment) {
+  <div class="form-field">
+    <label class="form-label" [attr.for]="prefix + '-dept'">القسم <small class="muted">(اختياري)</small></label>
+    <app-select [id]="prefix + '-dept'" [formControl]="form.controls['departmentId']" (change)="departmentChanged()">
+      <option value="">بدون قسم</option>
+      @for (department of filteredDepartments(); track department.id) {
+        <option [value]="department.id">{{ department.name }}</option>
+      }
+    </app-select>
+  </div>
+  }
+  @if (placement().needsOffice) {
+  <div class="form-field">
+    <label class="form-label" [attr.for]="prefix + '-office'">المكتب <small class="muted">(اختياري)</small></label>
+    <app-select [id]="prefix + '-office'" [formControl]="form.controls['officeId']">
+      <option value="">بدون مكتب</option>
+      @for (office of filteredOffices(); track office.id) { <option [value]="office.id">{{ office.name }}</option> }
+    </app-select>
+    <small class="form-hint">اختر القسم أولاً لعرض مكاتبه.</small>
+  </div>
+  }
+</ng-template>

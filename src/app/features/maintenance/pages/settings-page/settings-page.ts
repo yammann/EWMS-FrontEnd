@@ -26,7 +26,7 @@ const KINDS = Object.keys(MAINTENANCE_LOOKUPS) as MaintenanceLookupKind[];
  * أنواع الأجهزة، الشركات المصنّعة، أنواع الأعطال، وحالات الطلب (بألوانها، وهي أعمدة لوحة الحالات).
  */
 @Component({
-  selector: 'app-maintenance-settings-page', standalone: true, imports: [SearchSelect, SelectOption, FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager, RowActions],
+  selector: 'app-maintenance-settings-page', imports: [SearchSelect, SelectOption, FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, Modal, StatusChip, Pager, RowActions],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   templateUrl: './settings-page.html',
   styles: [`

@@ -23,7 +23,7 @@ const GROUP_ICONS: Record<string, IconName> = {
  * كل تقرير يُفتح في صفحته: فلاتر ← معاينة ← Excel أو طباعة A4.
  */
 @Component({
-  selector: 'app-reports-page', standalone: true, imports: [PageHeader, Alert, EmptyState, RouterLink, Icon],
+  selector: 'app-reports-page', imports: [PageHeader, Alert, EmptyState, RouterLink, Icon],
   styleUrls: ['../../../../shared/styles/page-base.scss'],
   template: `
     <div class="page">

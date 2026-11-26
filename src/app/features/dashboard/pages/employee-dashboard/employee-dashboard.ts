@@ -16,7 +16,7 @@ import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة الموظف: ملخصه ثم فريقه (الإشعارات من أيقونة الجرس في الشريط العلوي) */
 @Component({
-  selector: 'app-employee-dashboard', standalone: true,
+  selector: 'app-employee-dashboard',
   imports: [DashboardFrame, EmptyState, Alert, CommonModule, RouterLink, StatTile],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './employee-dashboard.html'
@@ -41,7 +41,7 @@ export class EmployeeDashboardPage {
 
   constructor() {
     this.load();
-    this.notificationService.incoming$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+    this.notificationService.changes$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
   }
 
   load() {

@@ -1,59 +1,32 @@
-# EWMSClient
+# EWMS — الواجهة الأمامية
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+واجهة نظام EWMS (Angular 22، بلا zone.js، كل الصفحات تُحمَّل عند الطلب). البنية والقواعد واللبنات المشتركة في
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — اقرأه قبل إضافة صفحة أو ميزة.
 
-## Development server
+## التشغيل محلياً
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+يحتاج الباكاند (مستودع EWMS) على `https://localhost:7181`: خادم التطوير يمرّر إليه `/api` و`/hubs` (`proxy.conf.json`).
 
 ```bash
-ng generate component component-name
+npm ci        # تثبيت الحزم كما في package-lock.json
+npm start     # خادم التطوير على http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## الأوامر
 
-```bash
-ng generate --help
-```
+| الأمر | ما يفعله |
+|---|---|
+| `npm run verify` | **قبل أي commit**: lint ثم فحص دورات الاستيراد والتصديرات الميتة والألوان الخام ثم اختبارات الوحدة ثم البناء |
+| `npm test` | اختبارات الوحدة (Vitest) |
+| `npm run build` | البناء الإنتاجي في `dist/` (مع ميزانية حجم الحزمة الأولى) |
+| `npm run lint` | ESLint مع حدود الطبقات بين `core` و`shared` و`features` |
+| `npm run e2e` | Playwright — يحتاج الباكاند وخادم الواجهة و`E2E_ADMIN_PASSWORD` (انظر `playwright.config.ts`) |
+| `npm run metrics:duplicates` | تقرير الكود المكرر (jscpd) |
+| `npm run icons` | يولّد `public/icons.svg` من `scripts/icons/icon-paths.mjs` بعد إضافة أيقونة |
+| `npm run fonts:woff2` | يولّد خطوط WOFF2 من ملفات OTF |
 
-## Building
+## التوثيق
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — الطبقات، اللبنات المشتركة، الأمان (CSP)، الأداء، الاختبارات.
+- [docs/TEST-PLAN.ar.md](docs/TEST-PLAN.ar.md) — خطة الاختبار.
+- [docs/qa/](docs/qa/) — نتائج جولات الفحص.

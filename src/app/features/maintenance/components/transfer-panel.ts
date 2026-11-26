@@ -20,7 +20,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  * - إن وُجد طلب معلّق: شريط بتفاصيله؛ ومن يملك نقل طلبات القسم (canAssign) يقبل (يختار الموظف، المقترح مختار مسبقاً) أو يرفض بملاحظة.
  */
 @Component({
-  selector: 'app-transfer-panel', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, UtcPipe, DatePipe, Modal],
+  selector: 'app-transfer-panel', imports: [SearchSelect, SelectOption, FormActions, Alert, UtcPipe, DatePipe, Modal],
   templateUrl: './transfer-panel-transfer-panel.html',
   styleUrl: './transfer-panel-transfer-panel.scss'
 })
@@ -83,7 +83,7 @@ export class TransferPanel {
 
 /** زر «طلبات تحويل بانتظارك (N)» في صفحة طلبات الصيانة — لمن يملك نقل طلبات القسم */
 @Component({
-  selector: 'app-pending-transfers-button', standalone: true, imports: [UtcPipe, DatePipe, RouterLink, Modal],
+  selector: 'app-pending-transfers-button', imports: [UtcPipe, DatePipe, RouterLink, Modal],
   template: `
     @if (items().length) {
       <button type="button" class="btn btn-warn" (click)="open.set(true)">طلبات تحويل بانتظارك ({{ items().length }})</button>

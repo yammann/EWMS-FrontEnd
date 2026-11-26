@@ -1,5 +1,5 @@
-import { Injectable, NgZone, inject, signal } from '@angular/core';
-import { Subject, Subscription, interval, tap, catchError, EMPTY } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { Subject, Subscription, debounceTime, interval, tap, catchError, EMPTY } from 'rxjs';
 import type { HubConnection } from '@microsoft/signalr';
 import { AppPermission, AppPermissionName } from '@core/constants/access';
 import { ApiService } from '@core/services/api.service';
@@ -11,6 +11,8 @@ const HUB_URL = '/hubs/notifications';
 const FALLBACK_POLL_MS = 60_000;
 const TOAST_MS = 7_000;
 const MAX_TOASTS = 4;
+/** هدوء بعد آخر إشعار قبل أن تعيد الصفحات تحميل بياناتها كلها (changes$) */
+export const RELOAD_QUIET_MS = 1_000;
 
 export interface NotificationToast {
   notification: AppNotification;
@@ -20,7 +22,6 @@ export interface NotificationToast {
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private api = inject(ApiService);
-  private zone = inject(NgZone);
   private hub?: HubConnection;
   /** SignalR (~70KB) يُحمَّل عند أول بدء اتصال فقط — خارج الحزمة الأولى (صفحة الدخول لا تحتاجه) */
   private starting = false;
@@ -31,6 +32,12 @@ export class NotificationService {
   connected = signal(false);
   /** كل إشعار يصل لحظياً — تشترك به الصفحات لتحديث قوائمها بدون إعادة تحميل */
   incoming$ = new Subject<AppNotification>();
+  /**
+   * للصفحات التي تعيد تحميل بياناتها كلها مع أي إشعار (اللوحات، إحصائيات الإجازات): الإشعارات المتتابعة
+   * (دفعة يرسلها الخادم لعدة سجلات معاً) تُجمع في إشارة واحدة بعد هدوئها، فيُطلب التحميل مرة لا مرة لكل إشعار.
+   * الصفحات التي تصفّي بنوع الإشعار أو تحدّث سجلاً واحداً تبقى على incoming$.
+   */
+  changes$ = this.incoming$.pipe(debounceTime(RELOAD_QUIET_MS));
   /** نقر على إشعار سطح المكتب — الواجهة تقرر أين تنتقل */
   desktopClick$ = new Subject<AppNotification>();
 
@@ -73,11 +80,11 @@ export class NotificationService {
       .configureLogging(LogLevel.Warning)
       .build();
 
-    this.hub.on('notification', (n: AppNotification) => this.zone.run(() => this.receive(n)));
+    this.hub.on('notification', (n: AppNotification) => this.receive(n));
     // بعد انقطاع قد تكون فاتتنا إشعارات — نزامن العدد من الخادم
-    this.hub.onreconnected(() => this.zone.run(() => { this.connected.set(true); this.syncCount(); }));
-    this.hub.onreconnecting(() => this.zone.run(() => this.connected.set(false)));
-    this.hub.onclose(() => this.zone.run(() => this.connected.set(false)));
+    this.hub.onreconnected(() => { this.connected.set(true); this.syncCount(); });
+    this.hub.onreconnecting(() => this.connected.set(false));
+    this.hub.onclose(() => this.connected.set(false));
 
     this.connect();
     this.syncCount();
@@ -155,11 +162,11 @@ export class NotificationService {
   private showDesktop(n: AppNotification) {
     if (!this.desktopSupported() || Notification.permission !== 'granted' || !document.hidden) return;
     const desktop = new Notification(n.title, { body: n.message, tag: `ewms-${n.id}`, lang: 'ar', dir: 'rtl' });
-    desktop.onclick = () => this.zone.run(() => {
+    desktop.onclick = () => {
       window.focus();
       desktop.close();
       this.desktopClick$.next(n);
-    });
+    };
   }
 }
 

@@ -46,7 +46,7 @@
                 <td><div class="actions">
                   @if (canPrint()) { <a class="btn btn-ghost btn-sm" [routerLink]="['/vacations/print', v.id]">طباعة</a> }
                   @if (canCancel(v)) {
-                    <button class="btn btn-danger btn-sm" type="button" (click)="cancel(v)" [disabled]="cancellingId() !== null">{{ cancellingId() === v.id ? 'جارٍ الإلغاء…' : 'إلغاء الطلب' }}</button>
+                    <button class="btn btn-danger btn-sm" type="button" appAction="cancel" [iconSize]="16" [busy]="cancellingId() === v.id" busyLabel="جارٍ الإلغاء…" [disabled]="cancellingId() !== null" (click)="cancel(v)">إلغاء الطلب</button>
                   }
                 </div></td>
               </tr>

@@ -8,9 +8,7 @@
               [title]="tooManyForPrint() ? 'الطباعة حتى ' + d.maxPrintRows.toLocaleString('en-US') + ' صف — ضيّق الفلاتر' : 'نسخة A4 للطباعة أو الحفظ PDF'">
         <app-icon name="printer" [size]="16" /> طباعة
       </button>
-      <button class="btn" type="button" (click)="exportExcel()" [disabled]="!ready() || tooManyForExcel() || exporting()">
-        <app-icon name="table" [size]="16" /> {{ exporting() ? 'جارٍ التنزيل…' : 'تنزيل Excel' }}
-      </button>
+      <button class="btn" type="button" appAction="download" [iconSize]="16" [busy]="exporting()" busyLabel="جارٍ التنزيل…" [disabled]="!ready() || tooManyForExcel()" (click)="exportExcel()">تنزيل Excel</button>
     </app-page-header>
 
     <section class="panel filters-panel" aria-label="فلاتر التقرير">

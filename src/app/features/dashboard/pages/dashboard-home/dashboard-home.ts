@@ -10,7 +10,7 @@ import { EmployeeDashboardPage } from '../employee-dashboard/employee-dashboard'
 
 /** الصفحة الرئيسية: أوسع لوحة تسمح بها صلاحيات الدور (مؤسسة ← فرع ← قسم ← مكتب ← شخصية)، وإلا الملف الشخصي */
 @Component({
-  selector: 'app-dashboard-home', standalone: true,
+  selector: 'app-dashboard-home',
   imports: [OverviewDashboardPage, BranchDashboardPage, DepartmentDashboardPage, OfficeDashboardPage, EmployeeDashboardPage],
   template: `
     @switch (kind()) {

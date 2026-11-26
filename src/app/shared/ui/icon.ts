@@ -34,7 +34,7 @@ export function iconFor(value: string | null | undefined, fallback: IconName = '
  * [weight] سماكة الخط (1.8 افتراضياً؛ 2–2.2 للأحجام الصغيرة جداً).
  */
 @Component({
-  selector: 'app-icon', standalone: true,
+  selector: 'app-icon',
   template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" [attr.stroke-width]="weight()" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use [attr.href]="href()" /></svg>`,
   styles: [`:host { display: inline-grid; width: 18px; height: 18px; flex: none; vertical-align: -0.2em; } svg { width: 100%; height: 100%; }`],
   host: { '[style.width.px]': 'size()', '[style.height.px]': 'size()' }

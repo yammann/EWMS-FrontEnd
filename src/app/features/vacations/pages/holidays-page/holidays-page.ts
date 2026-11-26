@@ -26,7 +26,7 @@ type HolidayBody = { name: string; startDate: string; endDate: string | null };
  * كل عطلة بند واحد بفترة من–إلى (قرار المستخدم 2026-10-13): العيد من عدة أيام يُعدَّل ويُحذف كاملاً.
  */
 @Component({
-  selector: 'app-holidays-page', standalone: true,
+  selector: 'app-holidays-page',
   imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
   styleUrl: '../../../../shared/styles/page-base.scss',
   templateUrl: './holidays-page.html',

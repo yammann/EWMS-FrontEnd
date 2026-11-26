@@ -5,11 +5,11 @@ import { AuthService } from '@core/services/auth.service';
 import { Logo } from '@shared/ui/logo';
 import { Stamp } from '@shared/ui/stamp';
 import { Icon } from '@shared/ui/icon';
+import { ActionButton } from '@shared/ui/action-button';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
-  imports: [Icon, ReactiveFormsModule, Logo, Stamp],
+  imports: [ActionButton, Icon, ReactiveFormsModule, Logo, Stamp],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

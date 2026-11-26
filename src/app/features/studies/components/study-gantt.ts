@@ -24,7 +24,6 @@ const AUTO_COLLAPSE_TASKS = 200;
  */
 @Component({
   selector: 'app-study-gantt',
-  standalone: true,
   imports: [SearchSelect, SelectOption, RouterLink],
   template: `
     @if (!all().length) {

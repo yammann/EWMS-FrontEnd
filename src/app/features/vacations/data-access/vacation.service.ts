@@ -9,7 +9,6 @@ export class VacationService {
   pending() { return this.api.get<Vacation[]>('/Vacations/PendingForMe'); }
   // حسب الدور: SuperAdmin الكل، BranchManager فرعه، Manager قسمه، غيرهم إجازاته فقط
   all() { return this.api.get<Vacation[]>('/Vacations/GetAll'); }
-  getById(id: number) { return this.api.get<Vacation>(`/Vacations/Get/${id}`); }
   /** «سجل الموظف» قبل القرار — لمن يستطيع اتخاذ القرار على هذا الطلب */
   approvalContext(id: number) { return this.api.get<VacationApprovalContext>(`/Vacations/ApprovalContext/${id}`); }
   /** محتوى مرفق (للمعاينة/التنزيل) — لمن يرى الإجازة */

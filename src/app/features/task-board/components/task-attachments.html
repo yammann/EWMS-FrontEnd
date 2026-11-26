@@ -19,25 +19,10 @@
 @if (canAttach() && !readonly()) {
   <div class="drop" [class.over]="over()" (dragover)="$event.preventDefault(); over.set(true)" (dragleave)="over.set(false)" (drop)="dropped($event)">
     <input #picker type="file" multiple hidden [accept]="accept" (change)="picked($event)">
-    <button type="button" class="btn btn-ghost btn-sm" (click)="picker.click()" [disabled]="busy() || remaining() <= 0" [attr.aria-busy]="busy()">
-      <app-action-icon kind="upload" [busy]="busy()" />
-      {{ busy() ? progressText() || 'جارٍ الرفع…' : 'إرفاق ملف' }}</button>
+    <button type="button" class="btn btn-ghost btn-sm" appAction="upload" [busy]="busy()" [busyLabel]="progressText() || 'جارٍ الرفع…'" [disabled]="remaining() <= 0" (click)="picker.click()">إرفاق ملف</button>
     <small>{{ remaining() > 0 ? 'أو اسحب الملفات إلى هنا — PDF وصور وWord وExcel وPowerPoint حتى 10MB (متبقٍّ ' + remaining() + ' من ' + max + ')' : 'بلغت الحد الأقصى ' + max + ' ملفات' }}</small>
   </div>
 }
 @if (problem()) { <p class="alert alert-error problem" role="alert">{{ problem() }}</p> }
 
-@if (current(); as a) {
-  <app-modal [heading]="a.fileName" size="lg" (closed)="close()">
-    <div class="modal-body viewer">
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
-      @else if (!url()) { <p class="muted" role="status">جارٍ التحميل…</p> }
-      @else if (a.contentType === 'application/pdf') { <iframe [src]="safeUrl()" title="معاينة الملف"></iframe> }
-      @else { <img [src]="safeUrl()" [alt]="a.fileName"> }
-    </div>
-    <footer class="modal-actions">
-      <button type="button" class="ghost" (click)="close()">إغلاق</button>
-      <button type="button" (click)="download(a)" [disabled]="!url()">تنزيل</button>
-    </footer>
-  </app-modal>
-}
+<app-file-preview [file]="current()" [load]="blob" (closed)="current.set(null)" />

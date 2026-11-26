@@ -23,7 +23,6 @@ const TITLES: Record<DiwanAction, string> = {
 
 @Component({
   selector: 'app-study-diwan-panel',
-  standalone: true,
   imports: [SearchSelect, SelectOption, DatePipe, Alert, FormActions, Modal],
   templateUrl: './study-diwan-panel.html',
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/data-tools.scss', '../../../shared/styles/list-tools.scss'],

@@ -36,9 +36,6 @@
       </div>
       <label class="form-field"><span class="form-label">الوصف <small class="hint">(اختياري)</small></span><textarea formControlName="description" rows="2" maxlength="1000"></textarea></label>
     </div>
-    <footer class="modal-actions">
-      <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
-      <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'جارٍ الحفظ…' : (device() ? 'حفظ التعديلات' : 'إضافة الجهاز') }}</button>
-    </footer>
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid" [label]="device() ? 'حفظ التعديلات' : 'إضافة الجهاز'" (dismissed)="closed.emit()" />
   </form>
 </app-modal>

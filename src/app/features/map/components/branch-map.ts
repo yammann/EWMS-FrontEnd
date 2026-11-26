@@ -78,7 +78,7 @@ export function layerTotals(sites: readonly MergedSite[]): { key: string; title:
  * أثناء السكرول بينما تصغر وتخفت تدريجياً حتى تنغلق.
  */
 @Component({
-  selector: 'app-branch-map', standalone: true, imports: [SearchSelect, SelectOption, Icon, RouterLink, SyriaSvgMap, PinnedMap],
+  selector: 'app-branch-map', imports: [SearchSelect, SelectOption, Icon, RouterLink, SyriaSvgMap, PinnedMap],
   templateUrl: './branch-map.html',
   styleUrl: './branch-map.scss'
 })

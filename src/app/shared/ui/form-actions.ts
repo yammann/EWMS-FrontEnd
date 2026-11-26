@@ -1,11 +1,15 @@
 import { Component, input, output } from '@angular/core';
 import { ActionIcon, ActionKind } from './action-icon';
 
-/** شريط أزرار نافذة النموذج: «إلغاء» + زر إرسال (يعطَّل أثناء الانشغال ويتبدّل نصّه). الشكل من .modal-actions العام. */
+/**
+ * شريط أزرار نافذة النموذج: «إلغاء» + زر إرسال (يعطَّل أثناء الانشغال ويتبدّل نصّه). الشكل من .modal-actions العام.
+ * المحتوى الممرَّر (ملاحظة مثل «اختر الجهاز أولاً») يظهر قبل الزرين.
+ */
 @Component({
-  selector: 'app-form-actions', standalone: true, imports: [ActionIcon],
+  selector: 'app-form-actions', imports: [ActionIcon],
   template: `
     <footer class="modal-actions">
+      <ng-content />
       <button type="button" class="ghost" (click)="dismissed.emit()" [disabled]="busy()">{{ cancelLabel() }}</button>
       <button type="submit" [disabled]="busy() || disabled()" [attr.aria-busy]="busy()">
         @if (action(); as kind) { <app-action-icon [kind]="kind" [busy]="busy()" /> }

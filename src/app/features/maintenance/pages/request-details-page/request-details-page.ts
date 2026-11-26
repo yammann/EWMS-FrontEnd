@@ -27,7 +27,7 @@ const ACTIVITY_ICON: Record<number, IconName> = { 1: 'plus', 2: 'arrows', 3: 'us
  * طباعة إيصال الاستلام وورقة التسليم، وسجل كل ما جرى على الطلب.
  */
 @Component({
-  selector: 'app-maintenance-request-details', standalone: true,
+  selector: 'app-maintenance-request-details',
   imports: [Icon, EmptyState, Alert, UtcPipe, DatePipe, RouterLink, StatusChip, CopyText, AssignDialog, RequestFormDialog, DeviceRepairHistory, TransferPanel, RequestPartsPanel, LinkedTasks],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', './request-details-page.scss'],
   templateUrl: './request-details-page.html',

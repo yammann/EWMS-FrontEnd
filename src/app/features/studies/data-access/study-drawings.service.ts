@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
-import { query } from '../utils/query';
+import { query } from '@core/http/query';
 import {
   ArchitecturalVersionInput, BasisOption, DesignApproval, DesignApprovalInput, DrawingKind, StudyDrawing, StudyDrawingInput, StudyDrawingReviewInput
 } from './studies.models';

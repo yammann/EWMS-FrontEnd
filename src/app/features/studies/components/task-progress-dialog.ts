@@ -15,7 +15,6 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  */
 @Component({
   selector: 'app-study-task-progress-dialog',
-  standalone: true,
   imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `

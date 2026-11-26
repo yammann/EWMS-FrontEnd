@@ -1,12 +1,15 @@
-import { Component, OnDestroy, inject, input, output, signal } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { AssignedTaskService } from '../data-access/assigned-task.service';
 import { TASK_ATTACHMENTS, TaskAttachment, attachmentProblem } from '../data-access/assigned-task.models';
-import { Modal } from '@shared/ui/modal';
 import { ConfirmService } from '@shared/ui/confirm.service';
+import { saveBlob } from '@core/utils/download';
 import { fileSize } from '@core/utils/file-size';
+import { errorMessage } from '@shared/ui/error-message';
+import { FilePreview, isPreviewable } from '@shared/ui/file-preview';
 import { Icon, IconName } from '@shared/ui/icon';
 import { ActionIcon } from '@shared/ui/action-icon';
+import { ToastService } from '@shared/ui/toast.service';
+import { ActionButton } from '@shared/ui/action-button';
 
 /** أيقونة حسب نوع الملف */
 export function fileIcon(contentType: string): IconName {
@@ -17,19 +20,20 @@ export function fileIcon(contentType: string): IconName {
 }
 
 /**
- * مرفقات المهمة: قائمة بمعاينة (صورة/PDF داخل نافذة) وتنزيل (ملفات Office تُنزَّل)، وحذف، ورفع بالاختيار أو السحب والإفلات.
+ * مرفقات المهمة: قائمة بمعاينة (صورة/PDF داخل نافذة — `app-file-preview`) وتنزيل (ملفات Office تُنزَّل)، وحذف،
+ * ورفع بالاختيار أو السحب والإفلات.
  * الرفع من هنا يُرسل الملفات إلى الأب (upload) ليتولى الطلب، فيبقى المكوّن بلا اعتماد على المهمة نفسها.
  * قائمة «readonly» (مرفقات الأصل) بلا حذف ولا رفع.
  */
 @Component({
-  selector: 'app-task-attachments', standalone: true, imports: [Modal, Icon, ActionIcon],
+  selector: 'app-task-attachments', imports: [ActionButton, FilePreview, Icon, ActionIcon],
   templateUrl: './task-attachments.html',
   styleUrl: './task-attachments.scss'
 })
-export class TaskAttachments implements OnDestroy {
+export class TaskAttachments {
   private service = inject(AssignedTaskService);
-  private sanitizer = inject(DomSanitizer);
   private confirm = inject(ConfirmService);
+  private toast = inject(ToastService);
 
   attachments = input<TaskAttachment[]>([]);
   canAttach = input(false);
@@ -49,11 +53,9 @@ export class TaskAttachments implements OnDestroy {
   remaining = () => Math.max(0, this.max - this.attachments().length);
 
   current = signal<TaskAttachment | null>(null);
-  url = signal<string | null>(null);
-  safeUrl = signal<SafeResourceUrl | null>(null);
-  error = signal('');
+  blob = (id: number) => this.service.attachmentBlob(id);
 
-  canPreview = (a: TaskAttachment) => a.contentType === 'application/pdf' || a.contentType.startsWith('image/');
+  canPreview = (a: TaskAttachment) => isPreviewable(a.contentType);
 
   picked(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -81,44 +83,10 @@ export class TaskAttachments implements OnDestroy {
 
   /** صور وPDF تُعاين داخل نافذة، وغيرها (Office) يُنزَّل مباشرة */
   open(a: TaskAttachment) {
-    this.release();
-    this.error.set('');
-    if (!this.canPreview(a)) { this.fetch(a, true); return; }
-    this.current.set(a);
-    this.fetch(a, false);
-  }
-
-  private fetch(a: TaskAttachment, thenDownload: boolean) {
+    if (this.canPreview(a)) { this.current.set(a); return; }
     this.service.attachmentBlob(a.id).subscribe({
-      next: blob => {
-        if (thenDownload) { this.save(URL.createObjectURL(new Blob([blob], { type: a.contentType })), a.fileName, true); return; }
-        if (this.current()?.id !== a.id) return;
-        const url = URL.createObjectURL(new Blob([blob], { type: a.contentType }));
-        this.url.set(url);
-        this.safeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
-      },
-      error: e => { this.current.set(a); this.error.set(e.message); }
+      next: blob => saveBlob(new Blob([blob], { type: a.contentType }), a.fileName),
+      error: e => this.toast.error(errorMessage(e, 'تعذر تنزيل الملف'))
     });
   }
-
-  download(a: TaskAttachment) {
-    const url = this.url();
-    if (url) this.save(url, a.fileName, false);
-  }
-
-  private save(url: string, name: string, revoke: boolean) {
-    const link = document.createElement('a');
-    link.href = url; link.download = name; link.click();
-    if (revoke) setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  close() { this.current.set(null); this.release(); }
-
-  private release() {
-    const url = this.url();
-    if (url) URL.revokeObjectURL(url);
-    this.url.set(null); this.safeUrl.set(null);
-  }
-
-  ngOnDestroy() { this.release(); }
 }

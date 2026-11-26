@@ -25,7 +25,6 @@ interface DepartmentOption { id: number; name: string; }
  */
 @Component({
   selector: 'app-study-project-team-panel',
-  standalone: true,
   imports: [SearchSelect, SelectOption, DatePipe, UtcPipe, FormsModule, Alert, Icon, Modal],
   template: `
     <section class="panel">

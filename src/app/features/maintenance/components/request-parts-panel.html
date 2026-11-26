@@ -51,7 +51,7 @@
     </div>
     <footer class="modal-actions">
       <button type="button" class="ghost" (click)="issueOpen.set(false)" [disabled]="busy()">إلغاء</button>
-      <button type="button" (click)="issue()" [disabled]="!selected() || !!quantityError() || busy()">{{ busy() ? 'جارٍ الصرف…' : 'صرف' }}</button>
+      <button type="button" appAction="send" [busy]="busy()" busyLabel="جارٍ الصرف…" [disabled]="!selected() || !!quantityError()" (click)="issue()">صرف</button>
     </footer>
   </app-modal>
 }

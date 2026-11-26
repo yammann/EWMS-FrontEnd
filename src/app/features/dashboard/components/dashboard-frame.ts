@@ -8,7 +8,7 @@ import { BranchMapComponent } from '@features/map';
  * فتبقى أنماط اللوحة المحدّدة بالنطاق سارية لأن القوالب تُنشأ في سياق المكوّن الذي عرّفها.
  */
 @Component({
-  selector: 'app-dashboard-frame', standalone: true, imports: [NgTemplateOutlet, BranchMapComponent],
+  selector: 'app-dashboard-frame', imports: [NgTemplateOutlet, BranchMapComponent],
   template: `
     @if (showMap()) {
       <app-branch-map>

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { apiErrorInterceptor } from '@core/interceptors/api-error.interceptor';
-import { query } from '../utils/query';
+import { query } from '@core/http/query';
 import { StudyApprovalsService } from './study-approvals.service';
 import { StudyAttachmentsService } from './study-attachments.service';
 import { StudyDocumentsService } from './study-documents.service';
@@ -79,8 +79,6 @@ describe('Central studies API contract', () => {
     const service = TestBed.inject(StudyApprovalsService);
     service.pending().subscribe();
     http.expectOne('/api/StudyApprovals/Pending').flush([]);
-    service.byOwner(10, 3).subscribe();
-    http.expectOne('/api/StudyApprovals/ByOwner?ownerType=10&ownerId=3').flush([]);
 
     service.decide(12, { decision: 2, note: '   ' }).subscribe();
     const approve = http.expectOne('/api/StudyApprovals/Decide/12');

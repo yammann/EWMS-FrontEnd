@@ -15,7 +15,6 @@ import { StudyStatusChip } from './study-status-chip';
  */
 @Component({
   selector: 'app-study-project-drawings-panel',
-  standalone: true,
   imports: [RouterLink, Alert, StudyStatusChip, StudyDrawingFormDialog],
   template: `
     <section class="panel">

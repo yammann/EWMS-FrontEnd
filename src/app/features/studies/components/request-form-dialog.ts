@@ -31,7 +31,6 @@ const phone = (c: AbstractControl<string>) => !c.value.trim() || isValidPhone(c.
  */
 @Component({
   selector: 'app-study-request-form-dialog',
-  standalone: true,
   imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   styles: [`

@@ -15,8 +15,9 @@ import { RoleService } from '../../data-access/role.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { Modal } from '@shared/ui/modal';
-import { PermissionGroup, PermissionSection, buildPermissionSections, matchRoles, roleStats, withSelection } from '../../utils/permission-tree';
+import { PermissionSection, buildPermissionSections, matchRoles, roleStats, withSelection } from '../../utils/permission-tree';
 import { Icon } from '@shared/ui/icon';
+import { FormActions } from '@shared/ui/form-actions';
 
 type ModalType = 'create' | 'edit';
 
@@ -26,10 +27,9 @@ type ModalType = 'create' | 'edit';
  */
 @Component({
   selector: 'app-roles-page',
-  standalone: true,
-  imports: [Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
+  imports: [FormActions, Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './roles-page.html',
-  styleUrl: './roles-page.scss'
+  styleUrls: ['../../../../shared/styles/entity-cell.scss', './roles-page.scss']
 })
 export class RolesPage {
   pager = new Pagination(() => this.filteredRoles());
@@ -141,8 +141,6 @@ export class RolesPage {
    * ===================================================== */
   /** الأقسام الثابتة ← مجموعاتها ← صلاحياتها (ما لا ينتمي لمجموعة يظهر في قسم "أخرى") */
   permissionSections = computed<PermissionSection[]>(() => buildPermissionSections(this.permissions()));
-
-  permissionGroups = computed<PermissionGroup[]>(() => this.permissionSections().flatMap(s => s.groups));
 
   /** القسم المعروض تحت العناوين الثابتة */
   private activeSectionKey = signal('');

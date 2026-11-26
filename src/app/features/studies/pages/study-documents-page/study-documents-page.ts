@@ -79,7 +79,6 @@ function toRows(kind: StudyDocumentKind, result: PagedResult<unknown>): ListRow[
  */
 @Component({
   selector: 'app-study-documents-page',
-  standalone: true,
   imports: [SearchSelect, SelectOption, DatePipe, RouterLink, PageHeader, Alert, EmptyState, Pager, StudyStatusChip, StudyRequestFormDialog],
   templateUrl: './study-documents-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],

@@ -5,10 +5,11 @@ import { TODO_LIMITS, ToDoList } from '../data-access/todo.models';
 import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** إضافة عدة بنود دفعة واحدة: كل سطر بند (يناسب لصق نص منسوخ من رسالة أو محضر) */
 @Component({
-  selector: 'app-todo-bulk-dialog', standalone: true, imports: [Alert, FormsModule, Modal],
+  selector: 'app-todo-bulk-dialog', imports: [FormActions, Alert, FormsModule, Modal],
   template: `
     <app-modal heading="إضافة عدة بنود" subheading="كل سطر بند جديد" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
@@ -21,11 +22,8 @@ import { trackRequest } from '@shared/ui/track-request';
               · المتاح في القائمة {{ room() }}</small></label>
           @if (long().length) { <p class="alert alert-error" role="alert">{{ long().length }} سطر أطول من {{ limits.titleLength }} حرفاً — قصّرها.</p> }
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="saving() || !titles().length || tooMany() || long().length > 0 || titles().length > room()">
-            {{ saving() ? 'جارٍ الإضافة…' : 'إضافة ' + titles().length + ' بنداً' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="!titles().length || tooMany() || long().length > 0 || titles().length > room()"
+          [label]="'إضافة ' + titles().length + ' بنداً'" busyLabel="جارٍ الإضافة…" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`.form-hint.warn { color: var(--danger-600); }`]

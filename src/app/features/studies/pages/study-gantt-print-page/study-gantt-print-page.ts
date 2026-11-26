@@ -22,7 +22,7 @@ const AXIS_W = 840;
  * صفحة خارج الإطار العام؛ الخادم يفحص عرض المشاريع وحدّ الفرع.
  */
 @Component({
-  selector: 'app-study-gantt-print', standalone: true, imports: [Icon, BackButton, DatePipe, Logo, StudyGantt],
+  selector: 'app-study-gantt-print', imports: [Icon, BackButton, DatePipe, Logo, StudyGantt],
   templateUrl: './study-gantt-print-page.html',
   styleUrl: './study-gantt-print-page.scss'
 })

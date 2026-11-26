@@ -20,7 +20,7 @@ const decimal2 = (c: AbstractControl<number | null>) => c.value == null || twoDe
 
 /** إضافة قطعة أو تعديل بياناتها — الكمية والسعر لا يُدخلان هنا (إدخال/تسوية فقط) */
 @Component({
-  selector: 'app-spare-part-form-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, ReactiveFormsModule, Modal],
+  selector: 'app-spare-part-form-dialog', imports: [SearchSelect, SelectOption, FormActions, Alert, ReactiveFormsModule, Modal],
   styleUrl: '../../../shared/styles/data-tools.scss',
   templateUrl: './spare-part-dialogs-spare-part-form-dialog.html',
   styles: [`
@@ -88,7 +88,7 @@ export class SparePartFormDialog implements OnInit {
 
 /** إدخال (استلام كمية بسعرها وتاريخها ومصدرها) أو تسوية (جرد / تالف) */
 @Component({
-  selector: 'app-spare-part-stock-dialog', standalone: true, imports: [Alert, QtyPipe, MoneyPipe, ReactiveFormsModule, Modal],
+  selector: 'app-spare-part-stock-dialog', imports: [FormActions, Alert, QtyPipe, MoneyPipe, ReactiveFormsModule, Modal],
   templateUrl: './spare-part-dialogs-spare-part-stock-dialog.html',
   styles: [`.segmented { justify-self: start; }`]
 })
@@ -158,7 +158,7 @@ export class SparePartStockDialog implements OnInit {
 
 /** سجل حركات القطعة (لا يُحذف ولا يُعدَّل) */
 @Component({
-  selector: 'app-spare-part-movements', standalone: true, imports: [EmptyState, Alert, UtcPipe, QtyPipe, MoneyPipe, DatePipe, RouterLink, Modal, Pager],
+  selector: 'app-spare-part-movements', imports: [EmptyState, Alert, UtcPipe, QtyPipe, MoneyPipe, DatePipe, RouterLink, Modal, Pager],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './spare-part-dialogs-spare-part-movements.html',
   styles: [`

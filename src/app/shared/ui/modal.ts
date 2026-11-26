@@ -23,7 +23,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([t
  * }
  */
 @Component({
-  selector: 'app-modal', standalone: true, imports: [Icon],
+  selector: 'app-modal', imports: [Icon],
   template: `
     <div class="modal-backdrop" [class.confirm-backdrop]="panelClass() === 'confirm-dialog'" (click)="requestClose()">
       <div #panel [class]="panelClass()" [class.modal-lg]="size() === 'lg'" [attr.role]="role()" aria-modal="true"

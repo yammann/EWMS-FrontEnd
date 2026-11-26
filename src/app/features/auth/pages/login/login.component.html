@@ -64,14 +64,7 @@
           <small class="form-error">كلمة المرور مطلوبة.</small>
         }
 
-        <button type="submit" class="submit-btn" [disabled]="loading()">
-          @if (loading()) {
-            <span class="button-spinner"></span>
-            <span>جارٍ التحقق…</span>
-          } @else {
-            <span>متابعة</span>
-          }
-        </button>
+        <button type="submit" class="submit-btn" appAction="login" [busy]="loading()" busyLabel="جارٍ التحقق…">متابعة</button>
       </form>
 
       <footer class="login-footer">

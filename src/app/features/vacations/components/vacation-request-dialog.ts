@@ -21,7 +21,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  * تُحسب المدة بأيام العمل (بلا الجمعة والعطل الرسمية)، ولا تقديم بأثر رجعي. تُطلق submitted بالطلب المقدَّم.
  */
 @Component({
-  selector: 'app-vacation-request-dialog', standalone: true, imports: [SearchSelect, SelectOption, Modal, Alert, FormActions, ReactiveFormsModule, Icon, ActionIcon],
+  selector: 'app-vacation-request-dialog', imports: [SearchSelect, SelectOption, Modal, Alert, FormActions, ReactiveFormsModule, Icon, ActionIcon],
   templateUrl: './vacation-request-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }

@@ -14,7 +14,6 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
  */
 @Component({
   selector: 'app-study-project-card',
-  standalone: true,
   imports: [RouterLink, StudyStatusChip],
   template: `
     @let p = project();

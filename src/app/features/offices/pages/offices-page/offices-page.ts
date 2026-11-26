@@ -24,10 +24,9 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 /** المكاتب — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-offices-page',
-  standalone: true,
   imports: [SearchSelect, SelectOption, Icon, Alert, EntityForm, RowActions, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './offices-page.html',
-  styleUrl: './offices-page.scss'
+  styleUrls: ['../../../../shared/styles/entity-cell.scss', './offices-page.scss']
 })
 export class OfficesPage {
   private auth = inject(AuthService);

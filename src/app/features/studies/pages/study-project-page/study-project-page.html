@@ -13,14 +13,10 @@
       @if (project(); as p) {
         @if (p.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')"><app-action-icon kind="edit" /> تعديل</button> }
         @if (p.canRequestCompletion) {
-          <button class="btn" type="button" [disabled]="busy()" [attr.aria-busy]="pending.send()" (click)="requestCompletion()">
-            <app-action-icon kind="send" [busy]="pending.send()" /> طلب اعتماد الإنجاز
-          </button>
+          <button class="btn" type="button" appAction="send" [busy]="pending.send()" [disabled]="busy()" (click)="requestCompletion()">طلب اعتماد الإنجاز</button>
         }
         @if (p.canReactivate) {
-          <button class="btn" type="button" [disabled]="busy()" [attr.aria-busy]="pending.reactivate()" (click)="reactivateProject(p)">
-            <app-action-icon kind="reactivate" [busy]="pending.reactivate()" /> إعادة تفعيل المشروع
-          </button>
+          <button class="btn" type="button" appAction="reactivate" [busy]="pending.reactivate()" [disabled]="busy()" (click)="reactivateProject(p)">إعادة تفعيل المشروع</button>
         }
       }
     </div>

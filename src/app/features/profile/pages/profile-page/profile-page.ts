@@ -17,7 +17,7 @@ import { PasswordDialog } from '../../components/password-dialog';
  * «تغيير كلمة المرور» لكل مستخدم مسجّل (Auth/Password، 2026-10-13).
  */
 @Component({
-  selector: 'app-profile-page', standalone: true,
+  selector: 'app-profile-page',
   imports: [Icon, CommonModule, RouterLink, SignaturePanel, PasswordDialog],
   templateUrl: './profile-page.html', styleUrl: '../../../../shared/styles/page-base.scss'
 })

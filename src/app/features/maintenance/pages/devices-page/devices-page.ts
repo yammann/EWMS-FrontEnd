@@ -24,7 +24,7 @@ const PAGE_SIZE = 20;
  * (MaintenanceRequests/GetAll?deviceMaintenanceId= — محصور بنطاق طلبات الصيانة لمن يراها).
  */
 @Component({
-  selector: 'app-maintenance-devices-page', standalone: true,
+  selector: 'app-maintenance-devices-page',
   imports: [SearchSelect, SelectOption, RowActions, PageHeader, EmptyState, Alert, Pager, Modal, DeviceFormDialog, DeviceRepairHistory],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', '../../styles/list-page.scss'],
   templateUrl: './devices-page.html'

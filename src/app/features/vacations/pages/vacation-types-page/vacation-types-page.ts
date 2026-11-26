@@ -19,7 +19,7 @@ type TypeBody = { name: string; description: string; isPaid: boolean };
 
 /** أنواع الإجازات — النمط الموحّد لصفحات الإدارة (CrudPage): نافذة للإضافة والتعديل، تأكيد للحذف */
 @Component({
-  selector: 'app-vacation-types', standalone: true,
+  selector: 'app-vacation-types',
   imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, ReactiveFormsModule, Pager, Modal, FormActions, RowActions],
   styleUrl: '../../../../shared/styles/page-base.scss',
   templateUrl: './vacation-types-page.html'

@@ -44,6 +44,38 @@ describe('المستخدمون — القوائم المساعدة لا تُخف
     expect(page.roleList()).toEqual([{ id: 5, name: 'رئيس الفرع التقني' }]);
   });
 
+  it('renders the shared role and placement fields in each dialog, bound to that dialog\'s form', async () => {
+    const auth = TestBed.inject(AuthService);
+    auth.currentUser.update(u => u && { ...u, permissions: [...u.permissions, 'CreateUser'] });
+    const fixture = TestBed.createComponent(UsersPage);
+    const page = fixture.componentInstance;
+    await Promise.resolve();
+    http.expectOne('/api/Users/GetAll').flush([user(1, 5, 'رئيس الفرع التقني')]);
+    http.expectOne('/api/Department/GetAll').flush([{ id: 2, name: 'العمليات', description: '', branchId: 1, branchName: 'الفرع التقني' }]);
+    http.expectOne('/api/Offices/GetAll').flush([]);
+    http.expectOne('/api/Roles/GetAll').flush([{ id: 5, name: 'رئيس الفرع التقني', permissions: [] }, { id: 6, name: 'موظف', permissions: [] }]);
+    const root = fixture.nativeElement as HTMLElement;
+
+    page.crud.openEdit(page.users()[0]);
+    await fixture.whenStable();
+    http.match(() => true).forEach(r => r.flush([]));
+    await fixture.whenStable();
+    expect(root.querySelector('#create-role')).toBeNull();
+    expect(root.querySelector('#edit-role')?.textContent).toContain('رئيس الفرع التقني');
+    expect(root.querySelector('label[for="edit-role"]')).not.toBeNull();
+    // تغيير الدور في نافذة التعديل يغيّر نموذج التعديل وحده
+    page.editForm.controls.roleId.setValue(6 as never);
+    await fixture.whenStable();
+    expect(root.querySelector('#edit-role')?.textContent).toContain('موظف');
+    expect(page.createForm.controls.roleId.value).toBeFalsy();
+
+    page.crud.close();
+    page.crud.openCreate();
+    await fixture.whenStable();
+    expect(root.querySelector('#edit-role')).toBeNull();
+    expect(root.querySelector('#create-role')?.textContent).toContain('اختر الدور');
+  });
+
   it('shows the load error when the employees list itself fails', async () => {
     const page = TestBed.createComponent(UsersPage).componentInstance;
     await Promise.resolve();

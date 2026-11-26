@@ -23,7 +23,7 @@ export function linkRoute(type: TaskLinkType, id: number, canPrintVacation: bool
  * ولمن لا يحق له عرض السجل المرتبط يُظهر وجود رابط بلا بياناته.
  */
 @Component({
-  selector: 'app-task-links', standalone: true, imports: [SearchSelect, SelectOption, FormsModule],
+  selector: 'app-task-links', imports: [SearchSelect, SelectOption, FormsModule],
   templateUrl: './task-links-task-links.html',
   styleUrl: './task-links-task-links.scss'
 })
@@ -84,7 +84,7 @@ export class TaskLinks implements OnInit {
 
 /** المهام المرتبطة بسجل (تُعرض في صفحة الطلب/الموقع) — تظهر فقط لمن يحق له عرض السجل ولوحة المهام */
 @Component({
-  selector: 'app-linked-tasks', standalone: true,
+  selector: 'app-linked-tasks',
   template: `
     @if (tasks().length) {
       <section class="panel linked">

@@ -10,7 +10,7 @@ import { Icon, iconFor } from '@shared/ui/icon';
 
 /** نافذة إنشاء قائمة أو تعديلها: الاسم والوصف واللون والأيقونة (القيمة المحفوظة مفتاح من TODO_ICONS) */
 @Component({
-  selector: 'app-todo-list-dialog', standalone: true, imports: [Icon, FormActions, Alert, FormsModule, Modal],
+  selector: 'app-todo-list-dialog', imports: [Icon, FormActions, Alert, FormsModule, Modal],
   templateUrl: './todo-list-dialog.html',
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }

@@ -81,11 +81,11 @@
             @for (role of pager.items(); track role.id) {
               <tr [class.selected]="crud.dialog()?.item?.id === role.id">
                 <td>
-                  <div class="role-cell-name">
-                    <div class="role-avatar">
+                  <div class="entity-cell">
+                    <div class="entity-avatar">
                       {{ (role.name || 'د').charAt(0) }}
                     </div>
-                    <div class="role-details">
+                    <div class="entity-details">
                       <strong>{{ role.name || 'دور بدون اسم' }}</strong>
                     </div>
                   </div>
@@ -187,18 +187,7 @@
 
                 <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'create' }" />
 
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
-                  <button type="submit" [disabled]="createForm.invalid || crud.saving()">
-                    @if (crud.saving()) {
-                      <span class="button-spinner"></span>
-                      <span>جاري الإنشاء...</span>
-                    } @else {
-                      <app-icon name="plus" [size]="16" />
-                      <span>إنشاء الدور</span>
-                    }
-                  </button>
-                </div>
+                <app-form-actions [busy]="crud.saving()" [disabled]="createForm.invalid" label="إنشاء الدور" busyLabel="جارٍ الإنشاء…" (dismissed)="crud.close()" />
               </form>
             }
 
@@ -218,18 +207,7 @@
 
                 <ng-container *ngTemplateOutlet="permissionsTpl; context: { $implicit: 'edit' }" />
 
-                <div class="modal-actions">
-                  <button type="button" class="ghost" (click)="crud.close()">إلغاء</button>
-                  <button type="submit" [disabled]="editForm.invalid || crud.saving()">
-                    @if (crud.saving()) {
-                      <span class="button-spinner"></span>
-                      <span>جاري الحفظ...</span>
-                    } @else {
-                      <app-icon name="checkmark" [size]="16" />
-                      <span>حفظ التعديل</span>
-                    }
-                  </button>
-                </div>
+                <app-form-actions [busy]="crud.saving()" [disabled]="editForm.invalid" label="حفظ التعديل" (dismissed)="crud.close()" />
               </form>
             }
           }

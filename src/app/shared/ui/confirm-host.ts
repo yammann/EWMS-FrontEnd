@@ -6,7 +6,7 @@ import { ActionIcon } from './action-icon';
 
 /** نافذة التأكيد الموحّدة — مرة واحدة في MainLayout (تفتحها ConfirmService.ask) */
 @Component({
-  selector: 'app-confirm-host', standalone: true, imports: [Modal, Icon, ActionIcon],
+  selector: 'app-confirm-host', imports: [Modal, Icon, ActionIcon],
   template: `
     @if (confirm.current(); as request) {
       <app-modal role="alertdialog" panelClass="confirm-dialog" (closed)="confirm.answer(false)">

@@ -25,11 +25,11 @@ import { Modal } from '@shared/ui/modal';
 import { Icon } from '@shared/ui/icon';
 import { UserPlacement, buildUserFormData, hasAssignmentConflict, placementForRole } from '../../utils/user-form';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { FormActions } from '@shared/ui/form-actions';
 
 @Component({
   selector: 'app-users-page',
-  standalone: true,
-  imports: [SearchSelect, SelectOption, Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
+  imports: [FormActions, SearchSelect, SelectOption, Icon, Alert, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss'
 })

@@ -134,9 +134,7 @@
           <form class="comment-form" (ngSubmit)="addComment()">
             <label class="sr-only" for="task-comment">تعليق</label>
             <textarea id="task-comment" name="comment" rows="2" maxlength="2000" [(ngModel)]="comment" placeholder="اكتب تعليقاً أو تحديثاً…"></textarea>
-            <button type="submit" class="btn btn-sm" [disabled]="busy() || !comment.trim()" [attr.aria-busy]="sendingComment()">
-              <app-action-icon kind="send" [busy]="sendingComment()" /> {{ sendingComment() ? 'جارٍ الإرسال…' : 'إرسال' }}
-            </button>
+            <button type="submit" class="btn btn-sm" appAction="send" [busy]="sendingComment()" busyLabel="جارٍ الإرسال…" [disabled]="busy() || !comment.trim()">إرسال</button>
           </form>
         }
       </section>

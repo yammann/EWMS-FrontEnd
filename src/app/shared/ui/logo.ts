@@ -7,7 +7,7 @@ import { Component, input } from '@angular/core';
  * 2026-10-14)؛ يُطبع بلونه (print-color-adjust) في أوراق الطباعة.
  */
 @Component({
-  selector: 'app-logo', standalone: true,
+  selector: 'app-logo',
   template: `<span class="mark"></span>`,
   host: { role: 'img', '[attr.aria-label]': 'label()' },
   styles: [`

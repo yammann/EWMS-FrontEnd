@@ -14,7 +14,6 @@ import { DECISIONS, StudyApproval, StudyDecision } from '../data-access/studies.
  */
 @Component({
   selector: 'app-study-decision-dialog',
-  standalone: true,
   imports: [ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrl: '../../../shared/styles/data-tools.scss',
   template: `

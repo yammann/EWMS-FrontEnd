@@ -7,7 +7,7 @@ import { Icon } from '@shared/ui/icon';
  * يظهر فقط في المسارات التي تعلن `data.back` (أو عند تمرير `fallback`).
  */
 @Component({
-  selector: 'app-back-button', standalone: true, imports: [Icon],
+  selector: 'app-back-button', imports: [Icon],
   template: `
     @if (target(); as t) {
       <button type="button" class="back-btn" (click)="nav.back(t)" aria-label="رجوع"><app-icon name="back" /><span>رجوع</span></button>

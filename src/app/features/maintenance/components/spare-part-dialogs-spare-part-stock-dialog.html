@@ -22,9 +22,6 @@
       }
       @if (form.controls.quantity.invalid && form.controls.quantity.touched) { <small class="form-error">كمية موجبة بخانتين عشريتين على الأكثر</small> }
     </div>
-    <footer class="modal-actions">
-      <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
-      <button type="submit" [disabled]="!valid() || saving()">{{ saving() ? 'جارٍ الحفظ…' : (mode() === 'receive' ? 'إدخال' : 'حفظ التسوية') }}</button>
-    </footer>
+    <app-form-actions [busy]="saving()" [disabled]="!valid()" [label]="mode() === 'receive' ? 'إدخال' : 'حفظ التسوية'" (dismissed)="closed.emit()" />
   </form>
 </app-modal>

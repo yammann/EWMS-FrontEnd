@@ -36,7 +36,6 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
  */
 @Component({
   selector: 'app-study-drawing-page',
-  standalone: true,
   imports: [
     DatePipe, UtcPipe, RouterLink, Alert, EmptyState, Icon, StudyStatusChip, StudyAttachments, StudyDrawingFormDialog,
     StudyVersionFormDialog, StudyDesignApprovalFormDialog, StudyDrawingReviewDialog, StudyActivity

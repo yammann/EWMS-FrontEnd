@@ -3,7 +3,6 @@ import { Component, computed, input } from '@angular/core';
 /** شريط نسبة الإنجاز بنص مقروء (role=progressbar) — ألوان من الرموز فيتبع المظهر والوضع الداكن */
 @Component({
   selector: 'app-study-progress',
-  standalone: true,
   template: `
     <span class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="value()" [attr.aria-label]="label()">
       <span class="fill" [class.done]="value() >= 100" [style.width.%]="value()"></span>

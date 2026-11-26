@@ -23,7 +23,6 @@ const ACTION_TONES: Record<number, string> = { 4: 'ok', 5: 'bad', 8: 'bad', 6: '
  */
 @Component({
   selector: 'app-study-activity',
-  standalone: true,
   imports: [DatePipe, UtcPipe, Alert, Icon, Pager],
   template: `
     <section class="panel">

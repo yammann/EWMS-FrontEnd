@@ -16,7 +16,7 @@
             <span class="with-btn">
               <input #t1 [value]="clientQuery()" (input)="clientQuery.set(t1.value); matches.set([])" (keydown.enter)="$event.preventDefault(); findClient()"
                      maxlength="200" autocomplete="off" placeholder="مطابقة تامة — ثم «بحث»">
-              <button type="button" class="btn btn-sm" (click)="findClient()" [disabled]="!clientQuery().trim() || clientSearching()">{{ clientSearching() ? 'جارٍ البحث…' : 'بحث' }}</button>
+              <button type="button" class="btn btn-sm" appAction="search" [iconSize]="16" [busy]="clientSearching()" busyLabel="جارٍ البحث…" [disabled]="!clientQuery().trim()" (click)="findClient()">بحث</button>
             </span>
           </label>
           @if (matches().length > 1) {
@@ -72,7 +72,7 @@
                   </ul>
                 }
               </span>
-              <button type="button" class="btn btn-sm" (click)="findDevice()" [disabled]="!serialQuery().trim() || searching()">{{ searching() ? 'جارٍ البحث…' : 'بحث' }}</button>
+              <button type="button" class="btn btn-sm" appAction="search" [iconSize]="16" [busy]="searching()" busyLabel="جارٍ البحث…" [disabled]="!serialQuery().trim()" (click)="findDevice()">بحث</button>
             </span>
           </label>
           @if (notFound(); as serial) {
@@ -111,12 +111,11 @@
         </div>
       </fieldset>
     </div>
-    <footer class="modal-actions">
+    <app-form-actions [busy]="saving()" [disabled]="form.invalid || !device() || !(client() || external())"
+      [label]="request() ? 'حفظ التعديلات' : 'تسجيل الطلب'" (dismissed)="closed.emit()">
       @if (!(client() || external())) { <span class="footer-note">ابحث عن العميل أولاً</span> }
       @else if (!device()) { <span class="footer-note">اختر الجهاز أولاً</span> }
-      <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
-      <button type="submit" [disabled]="form.invalid || !device() || !(client() || external()) || saving()">{{ saving() ? 'جارٍ الحفظ…' : (request() ? 'حفظ التعديلات' : 'تسجيل الطلب') }}</button>
-    </footer>
+    </app-form-actions>
   </form>
 </app-modal>
 

@@ -17,9 +17,7 @@
           @if (response()?.canEditPlanningPart) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('planning')"><app-action-icon kind="edit" /> جزء التخطيط</button> }
         } @else if (d.canEdit) { <button class="btn btn-ghost" type="button" [disabled]="busy()" (click)="dialog.set('edit')"><app-action-icon kind="edit" /> تعديل</button> }
         @if (d.canSubmit) {
-          <button class="btn" type="button" [disabled]="busy()" [attr.aria-busy]="pending.submit()" (click)="submit()">
-            <app-action-icon [kind]="kind() === 'requests' ? 'save' : 'send'" [busy]="pending.submit()" /> {{ submitLabel() }}
-          </button>
+          <button class="btn" type="button" [appAction]="kind() === 'requests' ? 'save' : 'send'" [busy]="pending.submit()" [disabled]="busy()" (click)="submit()">{{ submitLabel() }}</button>
         }
         @if (next(); as n) { <button class="btn" type="button" [disabled]="busy()" (click)="dialog.set('next')">+ {{ n.label }}</button> }
       }
@@ -60,7 +58,7 @@
           <div><dt>تاريخ الطلب</dt><dd>{{ r.requestDate | date:'yyyy/MM/dd' }}</dd></div>
           <div><dt>الاستعجال</dt><dd>{{ r.urgencyName }}</dd></div>
           <div><dt>نوع العمل</dt><dd>{{ r.workTypeName }}</dd></div>
-          <div><dt>رقم الطلب من الديوان المركزي</dt><dd dir="auto">{{ r.requestNumber }}</dd></div>
+          <div><dt>رقم الطلب من الديوان المركزي</dt><dd dir="rtl">{{ r.requestNumber }}</dd></div>
           <div><dt>رقم أرشيف ديوان الوزارة</dt><dd>{{ r.ministryArchiveNumber || 'بدون' }}</dd></div>
           <div><dt>تاريخ أرشيف ديوان الوزارة</dt><dd>{{ r.ministryArchiveDate ? (r.ministryArchiveDate | date:'yyyy/MM/dd') : '—' }}</dd></div>
           <div><dt>رقم أرشيف الجهة المستفيدة</dt><dd>{{ r.beneficiaryArchiveNumber || 'بدون' }}</dd></div>

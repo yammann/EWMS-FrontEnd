@@ -13,6 +13,8 @@ import { DeviceFormDialog } from './device-form-dialog';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { FormActions } from '@shared/ui/form-actions';
+import { ActionButton } from '@shared/ui/action-button';
 
 export interface RequestLookups {
   deviceTypes: MaintenanceLookup[];
@@ -27,7 +29,7 @@ export interface RequestLookups {
  * (نافذة الجهاز: الرقم يُكتب مرتين بلا لصق) ثم يُقدَّم الطلب بمعرّفه — الطلب لا يحمل بيانات الجهاز بنفسه.
  */
 @Component({
-  selector: 'app-request-form-dialog', standalone: true, imports: [SearchSelect, SelectOption, Alert, ReactiveFormsModule, Modal, DeviceFormDialog],
+  selector: 'app-request-form-dialog', imports: [ActionButton, FormActions, SearchSelect, SelectOption, Alert, ReactiveFormsModule, Modal, DeviceFormDialog],
   styleUrls: ['../../../shared/styles/data-tools.scss', './request-form-dialog.scss'],
   templateUrl: './request-form-dialog.html',
   

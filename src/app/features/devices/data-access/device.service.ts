@@ -8,14 +8,10 @@ import {
   NearbySite, Site, SiteAccess
 } from './device.models';
 import { PagedResult } from '@core/models/paged-result.model';
+import { query as buildQuery } from '@core/http/query';
 
-function query(params: object): string {
-  const q = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== null && value !== undefined && value !== '' && value !== 0) q.set(key, String(value));
-  }
-  return q.size ? '?' + q : '';
-}
+/** 0 في فلاتر هذه الصفحات يعني «الكل» فيُسقط */
+const query = (params: object) => buildQuery(params, { dropZero: true });
 
 export { saveBlob } from '@core/utils/download';
 

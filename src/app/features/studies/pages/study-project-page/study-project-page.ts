@@ -30,6 +30,7 @@ import { StudyAccess } from '../../data-access/study-access';
 import { StudyDocumentsService } from '../../data-access/study-documents.service';
 import { StudyProjectsService } from '../../data-access/study-projects.service';
 import { StageTask, StudyOwnerType, StudyProject } from '../../data-access/studies.models';
+import { ActionButton } from '@shared/ui/action-button';
 
 type Tab = 'stages' | 'gantt' | 'team' | 'drawings' | 'more';
 type Dialog = 'edit' | 'cancel' | null;
@@ -45,8 +46,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
  */
 @Component({
   selector: 'app-study-project-page',
-  standalone: true,
-  imports: [
+  imports: [ActionButton, 
     DatePipe, UtcPipe, RouterLink, ActionIcon, Alert, DeleteActionContent, EmptyState, Icon, StudyChainView, StudyStatusChip, StudyProgress, StudyApprovalsPanel,
     StudyProjectFormDialog, StudyProjectStagesPanel, StudyProjectTeamPanel, StudyProjectDrawingsPanel, StudyGantt, StudyReasonDialog, StudyAttachments, StudyActivity
   ],

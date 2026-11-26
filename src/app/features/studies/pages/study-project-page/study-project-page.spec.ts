@@ -62,7 +62,7 @@ describe('StudyProjectPage action feedback', () => {
     await decision;
     harness.detectChanges();
     const deleteButton = actionButton('app-delete-action-content');
-    const reactivateButton = actionButton('app-action-icon[kind="reactivate"]');
+    const reactivateButton = actionButton('button[appAction="reactivate"]');
     expect(deleteButton.getAttribute('aria-busy')).toBe(String(action === 'delete'));
     expect(reactivateButton.getAttribute('aria-busy')).toBe(String(action === 'reactivate'));
     expect(toasts()).toEqual([]);

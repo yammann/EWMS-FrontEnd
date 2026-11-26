@@ -26,7 +26,6 @@ const STATUSES = [{ value: 1, label: 'جارٍ' }, { value: 2, label: 'معلّ�
  */
 @Component({
   selector: 'app-study-projects-page',
-  standalone: true,
   imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Pager, StudyProjectCard],
   templateUrl: './study-projects-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],

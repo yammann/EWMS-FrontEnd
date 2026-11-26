@@ -19,7 +19,6 @@ export interface CdaVersion { id: number; label: string; drawingName: string; }
  */
 @Component({
   selector: 'app-study-design-approval-form-dialog',
-  standalone: true,
   imports: [ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `

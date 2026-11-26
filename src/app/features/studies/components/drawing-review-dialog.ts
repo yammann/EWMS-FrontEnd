@@ -8,7 +8,6 @@ import { Modal } from '@shared/ui/modal';
  */
 @Component({
   selector: 'app-study-drawing-review-dialog',
-  standalone: true,
   imports: [Modal, Alert],
   styleUrl: '../../../shared/styles/data-tools.scss',
   template: `

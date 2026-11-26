@@ -15,7 +15,7 @@ import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة رئيس الفرع (إحصائيات عامة للفرع) — ويفتحها SuperAdmin لأي فرع عبر /dashboard/branch/:id */
 @Component({
-  selector: 'app-branch-dashboard', standalone: true,
+  selector: 'app-branch-dashboard',
   imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './branch-dashboard.html'
@@ -43,8 +43,8 @@ export class BranchDashboardPage {
       this.own.set(this.id === null);
       this.load();
     });
-    // تحديث تلقائي عند وصول إشعار — بدون إعادة تحميل الصفحة
-    inject(NotificationService).incoming$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+    // تحديث تلقائي بعد وصول إشعارات (دفعة متتابعة = تحميل واحد) — بدون إعادة تحميل الصفحة
+    inject(NotificationService).changes$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
   }
 
   load() {

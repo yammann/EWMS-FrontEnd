@@ -19,6 +19,7 @@ import { VacationAttachments } from '../../components/vacation-attachments';
 import { VacationRequestDialog } from '../../components/vacation-request-dialog';
 import { VacationService } from '../../data-access/vacation.service';
 import { VACATION_PAID_DAYS_PER_MONTH, Vacation } from '../../data-access/vacation.models';
+import { ActionButton } from '@shared/ui/action-button';
 
 const day = (iso: string) => iso.slice(0, 10);
 
@@ -27,8 +28,8 @@ const day = (iso: string) => iso.slice(0, 10);
  * مرفقات)، وزر «تقديم طلب إجازة» يفتح النموذج في نافذة عائمة. السجل بصلاحية ViewVacations والتقديم بـ CreateVacation.
  */
 @Component({
-  selector: 'app-my-vacations-page', standalone: true,
-  imports: [PageHeader, StatTile, Alert, EmptyState, Pager, Icon, DatePipe, RouterLink, VacationAttachments, VacationRequestDialog],
+  selector: 'app-my-vacations-page',
+  imports: [ActionButton, PageHeader, StatTile, Alert, EmptyState, Pager, Icon, DatePipe, RouterLink, VacationAttachments, VacationRequestDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   templateUrl: './my-vacations-page.html',
   styles: [`.period { white-space: nowrap; font-variant-numeric: tabular-nums; }`]

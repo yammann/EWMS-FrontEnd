@@ -17,7 +17,6 @@ const PAGE_SIZE = 8;
  */
 @Component({
   selector: 'app-site-studies-panel',
-  standalone: true,
   imports: [DatePipe, RouterLink, Alert, Pager, StudyProgress, StudyStatusChip],
   template: `
     <section class="panel">

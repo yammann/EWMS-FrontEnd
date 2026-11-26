@@ -17,7 +17,7 @@ import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة رئيس المكتب */
 @Component({
-  selector: 'app-office-dashboard', standalone: true,
+  selector: 'app-office-dashboard',
   imports: [DashboardFrame, EmptyState, Alert, CommonModule, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './office-dashboard.html'
@@ -51,7 +51,7 @@ export class OfficeDashboardPage {
       this.isOwn.set(this.id === null);
       this.load();
     });
-    inject(NotificationService).incoming$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+    inject(NotificationService).changes$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
   }
 
   load() {

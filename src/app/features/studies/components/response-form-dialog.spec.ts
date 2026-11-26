@@ -16,6 +16,9 @@ function open(response?: Partial<StudyResponse>) {
   return { fixture, http, dialog: fixture.componentInstance };
 }
 
+const cost = (id: number, description: string, quantity: number, unitPrice: number) =>
+  ({ id, sortOrder: id, description, unit: 'م²', quantity, unitPrice, total: quantity * unitPrice });
+
 describe('StudyResponseFormDialog', () => {
   afterEach(() => TestBed.inject(HttpTestingController).verify());
 
@@ -60,25 +63,27 @@ describe('StudyResponseFormDialog', () => {
   });
 
   it('requires re-entering old Syrian amounts when switching a response to dollars', () => {
+    const detail = { code: 'A-01', function: 'إدارة', area: 2 };
     const { fixture, http, dialog } = open({
-      id: 9, responseDate: '2026-11-18', recommendation: 1, buildings: [],
-      costsInUsd: false, usdToSypRate: null, initialCost: 1200,
-      costItems: [{ id: 5, sortOrder: 1, description: 'بند', unit: 'م²', quantity: 2, unitPrice: 200, total: 400 }]
+      id: 9, responseDate: '2026-11-18', recommendation: 1, costsInUsd: false, usdToSypRate: null, initialCost: 1200,
+      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 1, buildingsArea: 2, details: [detail] }],
+      costItems: [cost(5, 'إعادة تأهيل — A-01 — إدارة', 2, 200)]
     });
+    fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.table-cost-total').textContent).toContain('400 ل.س');
     dialog.save();
-    const legacy = http.expectOne('/api/StudyResponses/Update/9');
-    expect(legacy.request.body).toMatchObject({ costsInUsd: false, usdToSypRate: null, initialCost: 1200 });
-    legacy.flush({ id: 9 });
+    const sypSave = http.expectOne('/api/StudyResponses/Update/9');
+    expect(sypSave.request.body).toMatchObject({ costsInUsd: false, usdToSypRate: null, initialCost: 1200, costItems: [{ unitPrice: 200 }] });
+    sypSave.flush({ id: 9 });
 
     dialog.enableUsdPricing();
     expect(dialog.form.controls.initialCost.value).toBeNull();
-    expect(dialog.form.controls.costItems.at(0).controls.unitPrice.value).toBeNull();
+    expect(dialog.form.controls.pricedBuildings.at(0).controls.unitPrice.value).toBeNull();
     dialog.save();
     http.expectNone('/api/StudyResponses/Update/9');
   });
 
-  it('uses the same area for the building and its cost item', () => {
+  it('sends one cost item per building, in building order, with the building area as quantity', () => {
     const { fixture, http, dialog } = open();
     dialog.addBuilding();
     fixture.detectChanges();
@@ -87,61 +92,76 @@ describe('StudyResponseFormDialog', () => {
     http.expectNone('/api/StudyResponses/Create');
 
     const first = { code: 'A-01', function: 'إدارة', area: 10.15 };
-    const second = { code: 'A-02', function: 'مختبر', area: 5.2 };
+    const second = { code: 'B-01', function: 'مختبر', area: 5.2 };
+    const third = { code: 'A-02', function: 'مستودع', area: 4 };
     dialog.form.controls.pricedBuildings.at(0).setValue({ ...first, buildingType: 1, unitPrice: 20 });
-    dialog.addBuilding({ ...second, buildingType: 1, unitPrice: 10 });
+    dialog.addBuilding({ ...second, buildingType: 2, unitPrice: 10 });
+    dialog.addBuilding({ ...third, buildingType: 1, unitPrice: 5 });
     dialog.save();
     const request = http.expectOne('/api/StudyResponses/Create');
-    expect(request.request.body.buildings).toEqual([{ buildingType: 1, buildingCount: 2, buildingsArea: 15.35, details: [first, second] }]);
-    expect(request.request.body.costItems).toMatchObject([
-      { unit: 'م²', quantity: first.area, unitPrice: 20 },
-      { unit: 'م²', quantity: second.area, unitPrice: 10 }
+    // النوع أولاً (إعادة تأهيل ثم إنشاء جديد)، ثم ترتيب الإدخال داخل النوع
+    expect(request.request.body.buildings).toEqual([
+      { buildingType: 1, buildingCount: 2, buildingsArea: 14.15, details: [first, third] },
+      { buildingType: 2, buildingCount: 1, buildingsArea: 5.2, details: [second] }
+    ]);
+    expect(request.request.body.costItems).toEqual([
+      { description: 'إعادة تأهيل — A-01 — إدارة', unit: 'م²', quantity: first.area, unitPrice: 20 },
+      { description: 'إعادة تأهيل — A-02 — مستودع', unit: 'م²', quantity: third.area, unitPrice: 5 },
+      { description: 'إنشاء جديد — B-01 — مختبر', unit: 'م²', quantity: second.area, unitPrice: 10 }
     ]);
     request.flush({ id: 9 });
   });
 
-  it('reopens a single saved building with its price in the unified form', () => {
-    const detail = { code: 'A-01', function: 'إدارة', area: 10 };
-    const { dialog } = open({
-      id: 9, responseDate: '2026-11-18', recommendation: 1,
-      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 1, buildingsArea: 10, details: [detail] }],
-      costItems: [{ id: 5, sortOrder: 1, description: 'إعادة تأهيل — A-01 — إدارة', unit: 'م²', quantity: 10, unitPrice: 25, total: 250 }]
+  it('reopens saved buildings of both types in saved order, each with its price', () => {
+    const a = { code: 'A-01', function: 'إدارة', area: 10 };
+    const b = { code: 'B-01', function: 'مختبر', area: 4 };
+    const c = { code: 'B-02', function: 'مستودع', area: 6 };
+    const { fixture, dialog } = open({
+      id: 9, responseDate: '2026-11-18', recommendation: 1, costsInUsd: true,
+      buildings: [
+        { buildingType: 2, buildingTypeName: 'إنشاء جديد', buildingCount: 2, buildingsArea: 10, details: [b, c] },
+        { buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 1, buildingsArea: 10, details: [a] }
+      ],
+      costItems: [cost(1, 'إعادة تأهيل — A-01 — إدارة', 10, 25), cost(2, 'إنشاء جديد — B-01 — مختبر', 4, 30), cost(3, 'إنشاء جديد — B-02 — مستودع', 6, 12)]
     });
-    expect(dialog.legacyLayout()).toBe(false);
-    expect(dialog.form.controls.pricedBuildings.getRawValue()).toEqual([{ ...detail, buildingType: 1, unitPrice: 25 }]);
+    fixture.detectChanges();
+    expect(dialog.form.controls.pricedBuildings.getRawValue()).toEqual([
+      { ...a, buildingType: 1, unitPrice: 25 }, { ...b, buildingType: 2, unitPrice: 30 }, { ...c, buildingType: 2, unitPrice: 12 }
+    ]);
+    expect(dialog.incomplete()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.alert-warning')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.table-cost-total').textContent).toContain('442 دولار');
   });
 
-  it('preserves an unmatched legacy item until the user assigns it to a building', () => {
+  it('flags a saved response whose cost items do not match its buildings, and blocks saving until prices are entered', () => {
     const detail = { code: 'A-01', function: 'إدارة', area: 10 };
-    const { dialog } = open({
-      id: 9, responseDate: '2026-11-18', recommendation: 1,
-      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 1, buildingsArea: 10, details: [detail] }],
-      costItems: [{ id: 5, sortOrder: 1, description: 'أعمال ترميم', unit: 'متر مربع', quantity: 10, unitPrice: 25, total: 250 }]
-    });
-    dialog.mergeLegacyBuildings();
-    expect(dialog.legacyLayout()).toBe(true);
-    const cost = dialog.form.controls.costItems.at(0);
-    expect(cost.controls.description.value).toBe('أعمال ترميم');
-    dialog.assignLegacyCost(cost, 0);
-    dialog.mergeLegacyBuildings();
-    expect(dialog.legacyLayout()).toBe(false);
-    expect(dialog.form.controls.pricedBuildings.getRawValue()).toEqual([{ ...detail, buildingType: 1, unitPrice: 25 }]);
-  });
-
-  it('retains a saved summary with no details and allows opting into individual rows', () => {
     const { fixture, http, dialog } = open({
-      id: 9, responseDate: '2026-11-18', recommendation: 1, costItems: [],
-      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 2, buildingsArea: 25 }]
+      id: 9, responseDate: '2026-11-18', recommendation: 1, costsInUsd: true,
+      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 1, buildingsArea: 10, details: [detail] }],
+      costItems: [{ id: 5, sortOrder: 1, description: 'أعمال ترميم', unit: 'مقطوع', quantity: 1, unitPrice: 250, total: 250 }]
     });
-    expect(fixture.nativeElement.querySelector('.building-total').value).toBe('25');
+    fixture.detectChanges();
+    expect(dialog.incomplete()).toBe(true);
+    expect(fixture.nativeElement.querySelector('.alert-warning')?.textContent).toContain('أكمل الأسطر الناقصة');
+    expect(dialog.form.controls.pricedBuildings.getRawValue()).toEqual([{ ...detail, buildingType: 1, unitPrice: null }]);
+    dialog.save();
+    http.expectNone('/api/StudyResponses/Update/9');
+
+    dialog.form.controls.pricedBuildings.at(0).controls.unitPrice.setValue(25);
     dialog.save();
     const request = http.expectOne('/api/StudyResponses/Update/9');
-    expect(request.request.body.buildings).toEqual([{ buildingType: 1, buildingCount: 2, buildingsArea: 25, details: [] }]);
+    expect(request.request.body.costItems).toEqual([{ description: 'إعادة تأهيل — A-01 — إدارة', unit: 'م²', quantity: 10, unitPrice: 25 }]);
     request.flush({ id: 9 });
+  });
 
-    dialog.enterBuildingDetails();
+  it('flags buildings saved as a count without details', () => {
+    const { fixture, dialog } = open({
+      id: 9, responseDate: '2026-11-18', recommendation: 1, costsInUsd: true, costItems: [],
+      buildings: [{ buildingType: 1, buildingTypeName: 'إعادة تأهيل', buildingCount: 2, buildingsArea: 25 }]
+    });
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.building-detail')).toHaveLength(2);
-    expect(dialog.form.invalid).toBe(true);
+    expect(dialog.incomplete()).toBe(true);
+    expect(dialog.form.controls.pricedBuildings.length).toBe(0);
+    expect(fixture.nativeElement.querySelector('.alert-warning')).not.toBeNull();
   });
 });

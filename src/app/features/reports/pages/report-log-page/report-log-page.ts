@@ -15,7 +15,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  * صفحة التركيبات ولوحة المهام (المعاينة لا تُسجَّل). الحد في الخادم: سحوبات موظفي فرعي، والمؤسسة كلها لنظرتها.
  */
 @Component({
-  selector: 'app-report-log-page', standalone: true, imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Pager, DatePipe, UtcPipe],
+  selector: 'app-report-log-page', imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Pager, DatePipe, UtcPipe],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   template: `
     <div class="page">

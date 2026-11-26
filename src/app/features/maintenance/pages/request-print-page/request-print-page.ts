@@ -24,7 +24,7 @@ type Kind = 'receipt' | 'delivery';
  * الورقة بألوان ثابتة (ورق أبيض) بصرف النظر عن مظهر التطبيق.
  */
 @Component({
-  selector: 'app-maintenance-print', standalone: true, imports: [Icon, BackButton, UtcPipe, DatePipe, Logo],
+  selector: 'app-maintenance-print', imports: [Icon, BackButton, UtcPipe, DatePipe, Logo],
   templateUrl: './request-print-page.html',
   styleUrl: './request-print-page.scss'
 })

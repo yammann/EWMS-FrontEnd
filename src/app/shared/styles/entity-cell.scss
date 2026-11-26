@@ -1,0 +1,41 @@
+/*
+ * خلية الاسم في جداول الإدارة (الفروع، الأقسام، المكاتب، الأدوار): مربع بالحرف الأول + الاسم وسطر صغير تحته.
+ * <div class="entity-cell"><div class="entity-avatar">ف</div><div class="entity-details"><strong>…</strong><small>…</small></div></div>
+ * الفروق بين الصفحات متغيّرات تُضبط على الجدول: --entity-min (عرض الخلية الأدنى)، --entity-bg / --entity-fg (لون المربع)،
+ * --entity-name-max (أقصى عرض للاسم قبل القص).
+ */
+.entity-cell {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: var(--entity-min, 200px);
+}
+
+.entity-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--entity-bg, var(--brand-50));
+  color: var(--entity-fg, var(--brand-600));
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.entity-details { display: flex; flex-direction: column; min-width: 0; }
+.entity-details strong {
+  max-width: var(--entity-name-max, 260px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-800);
+  font-size: 13px;
+  font-weight: 800;
+}
+.entity-details small {
+  margin-top: 3px;
+  color: var(--ink-400);
+  font-size: 10px;
+}

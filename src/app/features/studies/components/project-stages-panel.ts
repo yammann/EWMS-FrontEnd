@@ -13,6 +13,7 @@ import { StudyStageFormDialog } from './stage-form-dialog';
 import { StudyStatusChip } from './study-status-chip';
 import { StudyTaskFormDialog } from './task-form-dialog';
 import { StudyTaskProgressDialog } from './task-progress-dialog';
+import { ActionButton } from '@shared/ui/action-button';
 
 const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-', '/') : '—';
 
@@ -24,8 +25,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
  */
 @Component({
   selector: 'app-study-project-stages-panel',
-  standalone: true,
-  imports: [ActionIcon, Alert, Icon, StudyProgress, StudyStatusChip, StudyStageFormDialog, StudyTaskFormDialog, StudyTaskProgressDialog],
+  imports: [ActionButton, ActionIcon, Alert, Icon, StudyProgress, StudyStatusChip, StudyStageFormDialog, StudyTaskFormDialog, StudyTaskProgressDialog],
   template: `
     <section class="panel">
       <div class="panel-heading">
@@ -56,9 +56,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
               @if (can().closeStage && s.status !== 3 && !busy()) { <button type="button" class="btn btn-sm" (click)="close(s)">إغلاق المرحلة</button> }
               @if (can().closeStage && s.status === 3 && !s.linkedDocument && last) {
                 @let reopening = pending().has('reopen-' + s.id);
-                <button type="button" class="btn btn-ghost btn-sm" [disabled]="reopening" [attr.aria-busy]="reopening" (click)="reopen(s)">
-                  <app-action-icon kind="reactivate" [size]="16" [busy]="reopening" /> إعادة فتح
-                </button>
+                <button type="button" class="btn btn-ghost btn-sm" appAction="reactivate" [iconSize]="16" [busy]="reopening" (click)="reopen(s)">إعادة فتح</button>
               }
               @if (s.canAddTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: null })">+ مهمة</button> }
               @if (can().editStage && s.status !== 3 && !s.linkedDocument) { <button type="button" class="btn btn-ghost btn-sm" (click)="stageDialog.set({ stage: s })"><app-action-icon kind="edit" [size]="15" /> تعديل</button> }
@@ -68,9 +66,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
               }
               @if (can().deleteStage && !s.linkedDocument && s.status !== 3) {
                 @let removing = pending().has('delete-stage-' + s.id);
-                <button type="button" class="icon-btn del" aria-label="حذف المرحلة" [disabled]="removing" [attr.aria-busy]="removing" (click)="removeStage(s)">
-                  <app-action-icon kind="delete" [size]="15" [busy]="removing" />
-                </button>
+                <button type="button" class="icon-btn del" aria-label="حذف المرحلة" appAction="delete" [iconSize]="15" [busy]="removing" (click)="removeStage(s)"></button>
               }
             </div>
 
@@ -93,9 +89,7 @@ const day = (v: string | null | undefined) => v ? v.slice(0, 10).replaceAll('-',
                             @if (t.canEdit && can().editTask) { <button type="button" class="btn btn-ghost btn-sm" (click)="taskDialog.set({ stage: s, task: t })"><app-action-icon kind="edit" [size]="15" /> تعديل</button> }
                             @if (t.canEdit && can().deleteTask) {
                               @let removing = pending().has('delete-task-' + t.id);
-                              <button type="button" class="icon-btn del" aria-label="حذف المهمة" [disabled]="removing" [attr.aria-busy]="removing" (click)="removeTask(t)">
-                                <app-action-icon kind="delete" [size]="15" [busy]="removing" />
-                              </button>
+                              <button type="button" class="icon-btn del" aria-label="حذف المهمة" appAction="delete" [iconSize]="15" [busy]="removing" (click)="removeTask(t)"></button>
                             }
                           </div>
                         </td>

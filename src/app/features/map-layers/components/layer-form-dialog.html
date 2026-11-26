@@ -126,9 +126,7 @@
                 }
               </div>
               <button type="button" class="icon-btn danger" [title]="r.id != null ? 'حذف الحقل (يُسأل عن قيمه)' : 'إزالة'" aria-label="حذف الحقل"
-                      [disabled]="workingKey() === r.key" (click)="removeField(r)">
-                @if (workingKey() === r.key) { <span class="button-spinner dark"></span> } @else { <app-icon name="xmark" [weight]="2.2" /> }
-              </button>
+                      appAction="delete" [iconSize]="16" [busy]="workingKey() === r.key" (click)="removeField(r)"></button>
             </li>
           }
         </ol>

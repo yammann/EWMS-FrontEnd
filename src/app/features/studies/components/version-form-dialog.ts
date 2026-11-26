@@ -17,7 +17,6 @@ import { optional } from '../utils/form-rows';
  */
 @Component({
   selector: 'app-study-version-form-dialog',
-  standalone: true,
   imports: [ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `

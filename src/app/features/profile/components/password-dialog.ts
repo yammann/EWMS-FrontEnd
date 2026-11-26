@@ -6,13 +6,14 @@ import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { Icon } from '@shared/ui/icon';
 import { trackRequest } from '@shared/ui/track-request';
+import { FormActions } from '@shared/ui/form-actions';
 
 /**
  * تغيير كلمة المرور ذاتياً (PUT Auth/Password، قرار المستخدم 2026-10-13): الحالية + الجديدة مرتين.
  * عند النجاح ينهي الخادم كل جلسات المستخدم، فتُنظَّف الجلسة هنا ويُنقل إلى الدخول مع رسالة تأكيد.
  */
 @Component({
-  selector: 'app-password-dialog', standalone: true, imports: [Modal, Alert, Icon],
+  selector: 'app-password-dialog', imports: [FormActions, Modal, Alert, Icon],
   template: `
     <app-modal heading="تغيير كلمة المرور" kicker="الأمان" [busy]="saving()" (closed)="closed.emit()">
       <form (submit)="$event.preventDefault(); submit()">
@@ -32,10 +33,7 @@ import { trackRequest } from '@shared/ui/track-request';
           @if (repeat() && repeat() !== next()) { <small class="form-error">التأكيد لا يطابق كلمة المرور الجديدة.</small> }
           <p class="form-hint">بعد التغيير تُغلق كل جلساتك (على هذا الجهاز وغيره) وتدخل بكلمة المرور الجديدة.</p>
         </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="closed.emit()" [disabled]="saving()">إلغاء</button>
-          <button type="submit" [disabled]="!canSubmit()">{{ saving() ? 'جارٍ الحفظ…' : 'تغيير كلمة المرور' }}</button>
-        </footer>
+        <app-form-actions [busy]="saving()" [disabled]="!canSubmit()" label="تغيير كلمة المرور" (dismissed)="closed.emit()" />
       </form>
     </app-modal>`,
   styles: [`

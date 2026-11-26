@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
-import { query } from '../utils/query';
+import { query } from '@core/http/query';
 import { StudyEmployee, StudyLookup, StudyLookupInput, StudyStageType, StudyStageTypeInput } from './studies.models';
 
 /** قوائم الدراسات البسيطة (اسم + فعّال) */

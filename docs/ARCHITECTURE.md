@@ -37,15 +37,21 @@ src/app/
 | رسالة خطأ / حالة فارغة | `<app-alert [message]>` / `<app-empty-state [panel]>` |
 | بطاقة رقم | `<app-stat-tile icon="users" …>` (اسم أيقونة إلزامي) |
 | أيقونة | **`<app-icon name="lock" [size] [weight]>`** (`shared/ui/icon.ts`): مجموعة موحّدة خطية 24×24 بأسلوب SF Symbols مرسومة للمشروع، تأخذ لون النص. **لا Emoji ولا SVG مضمّنة في القوالب** — رمز جديد = أيقونة تُضاف في `scripts/icons/icon-paths.mjs` ثم `npm run icons` (يولّد `public/icons.svg` و`shared/ui/icon-names.ts` برقم نسخة). الرسومات في ملف واحد خارج حزمة JavaScript، وكل أيقونة `<use>` لرمز منه. القيم المخزّنة كـ Emoji (أيقونة مهمة العمل، قائمة «مفكرتي»، «آخر الإجراءات») تُعرض بـ `iconFor(قيمة)`. (أيقونات Apple الأصلية لا يجيز ترخيصها الاستعمال في تطبيق ويب.) |
-| أزرار نافذة النموذج | `<app-form-actions [busy] [disabled] label busyLabel (dismissed)>` |
+| **زر عملية تنتظر الخادم** (تصدير، بحث، حذف، إرسال، دخول…) | **`<button appAction="download" [busy] busyLabel="جارٍ التصدير…" [disabled]>تصدير Excel</button>`** (`shared/ui/action-button.ts`): يبقى `<button>` أصلياً؛ أيقونة العملية (`ActionKind` في `action-icon.ts`: save, send, upload, download, delete, edit, reactivate, search, login, refresh, cancel) تتحرك أثناء الانتظار، والنص يتبدّل، والزر يتعطّل، و`aria-busy` يُعلن. `[disabled]` يُربط بالمكوّن ويُدمج مع الانشغال. **النمط الوحيد لمؤشر الانشغال**: لا نص «جارٍ…» يدوي في الزر، ولا مؤشر دوّار خاص (حُذف `.button-spinner` و`.spin`). الاستثناء الموثّق: «اختيار ملفات» في مرفقات الدراسات يبقى مفعّلاً أثناء الرفع (طابور يقبل المزيد) فيرسم الأيقونة بنفسه |
+| أزرار نافذة النموذج | `<app-form-actions [busy] [disabled] label busyLabel (dismissed)>` — لكل نموذج في نافذة (لا زر إرسال مكتوب يدوياً بمؤشر خاص)؛ ملاحظة قبل الزرين («اختر الجهاز أولاً») تُمرَّر كمحتوى. النص أثناء الانشغال «جارٍ …» بالكسرة والنقطة الثلاثية `…` |
+| معاينة مرفق (صورة/PDF) | `<app-file-preview [file] [load]="(id) => blob$" [save]? (closed)>` (`shared/ui/file-preview.ts`): الجلب برمز الدخول، رابط blob: يُحرَّر عند الإغلاق، PDF وحده في iframe. `isPreviewable(contentType)` يحدد ما يُعاين وما يُنزَّل |
+| معاملات العنوان (`?a=1&b=2`) | `query(params)` (`core/http/query.ts`): يُسقط الفارغ ويُبقي الصفر؛ `query(params, { dropZero: true })` حيث يعني 0 «الكل» في الفلاتر |
+| خلية الاسم في جداول الإدارة (مربع الحرف الأول + الاسم) | `shared/styles/entity-cell.scss` (`.entity-cell` `.entity-avatar` `.entity-details`)؛ الفروق متغيّرات على الجدول: `--entity-min` `--entity-bg` `--entity-fg` `--entity-name-max` |
+| تقويم شهري | `<app-month-calendar [events]>` (أحداث لها بداية ونهاية)؛ وتقويم مواعيد تسليم المهام `app-task-calendar` — كلاهما على `shared/styles/calendar-grid.scss` |
 | نافذة / تأكيد / تنبيه | `app-modal` / `ConfirmService` / `ToastService` |
 | تقسيم الصفحات | `Pagination<T>` + `<app-pager>` |
 | **صفحة إدارة (قائمة + إضافة/تعديل/حذف)** | **`CrudPage`** (`shared/ui/crud-page.ts`) — انظر «النمط الموحّد» أدناه |
 | أزرار الصف (تعديل/حذف + أزرار إضافية) | `<app-row-actions [canEdit] [canDelete] [deleting] (edit) (remove)>` والأزرار الإضافية كمحتوى |
 | تحميل قائمة/صفحة (بحث، فلاتر، ترقيم، إعادة تحميل عند إشعار) | `private latest = latestRequest();` ثم `this.latest(obs, busy, error, next)` — كل تحميل يلغي السابق، فلا يستبدل ردٌّ متأخر على شبكة بطيئة النتيجةَ الأحدث |
+| تحديث الصفحة عند وصول إشعار | إعادة تحميل كل البيانات مع أي إشعار (اللوحات، إحصائيات الإجازات): `NotificationService.changes$` — دفعة الإشعارات المتتابعة = تحميل واحد بعد هدوئها (`RELOAD_QUIET_MS`). تحديث سجل بعينه أو تصفية بنوع الإشعار: `incoming$` الفوري |
 | عملية مفردة (حفظ، حذف، إرسال) | `trackRequest(obs, busy, error, next)` — لا تُلغى؛ ورسالة الخطأ `errorMessage(e, بديل)` |
 | فحص حيّ أثناء الكتابة (`switchMap`) | `catchError` **داخل** الطلب الداخلي: خطأ يصل للتدفق الخارجي يُنهيه ويتوقف الفحص حتى إعادة فتح الصفحة |
-| قيمة `<select>` مربوطة بإشارة | `[appSelectValue]` (لا `[value]` على select: يُطبَّق قبل وصول الخيارات فيظهر خيار خاطئ) |
+| قائمة اختيار | `<app-select>` (`shared/ui/search-select.ts`) بدل `<select>`: بحث ولوحة مفاتيح، ويعمل مع `formControlName` و`[formControl]` و`ngModel` و`[value]` (يطبّق القيمة بعد وصول الخيارات). لا `<select>` أصلي في القوالب |
 | قوائم الهيكل (فروع/أقسام/مكاتب/أدوار) | `LookupsService` (تخزين 60 ث، يُبطَل بعد أي تعديل؛ `branchOptions()` لمن لا يملك ViewBranches) |
 | تنسيق تاريخ UTC / مبلغ / كمية | أنابيب `utc` `money` `qty` (`shared/pipes/format.pipes.ts`) أو `core/utils/format.ts` |
 | تنزيل ملف من الخادم | `api.getBlob` / `api.postBlob` ثم `saveBlob(blob, اسم)` (`core/utils/download.ts`)؛ رسالة الخطأ العربية تُقرأ من Blob في `apiErrorInterceptor` |
@@ -84,10 +90,10 @@ crud = new CrudPage<Item, Body>({
 سياسة كلمة المرور في `core/utils/password.ts` (مطابقة لـ `PasswordRules` في الباكاند): `passwordValidator` لحقول النماذج، و`passwordChecks` لقائمة الشروط.
 
 ### الأداء
-- كل صفحة `loadComponent`؛ التحميل المسبق في الخلفية للصفحات المسموحة فقط (`PermissionPreloadStrategy`، بعد 1.5 ث من التنقل؛ `data.noPreload` لصفحات الطباعة).
+- كل صفحة `loadComponent`، والإطار `MainLayout` كذلك (`app.routes.ts`): صفحة الدخول والطباعة لا تحمّله، والراوتر يجلبه مع الصفحة بالتوازي؛ التحميل المسبق في الخلفية للصفحات المسموحة فقط (`PermissionPreloadStrategy`، بعد 1.5 ث من التنقل؛ `data.noPreload` لصفحات الطباعة).
 - `@defer` للمكوّنات الثقيلة التي تُفتح عند الطلب (الدرج، نوافذ المهام، التقويم، لوحة التوقيع).
 - SignalR يُحمَّل بـ `import()` عند بدء الاتصال (خارج الحزمة الأولى).
-- ميزانية الحزمة الأولى: تحذير 430 kB / خطأ 480 kB. **2026-10-14: 412 kB** بعد نقل الأيقونات إلى `public/icons.svg`، والشعار إلى قناع CSS من `public/brand/logo.svg` (`shared/ui/logo.ts`)، وتأجيل قائمة المظهر ونوافذ الإشعارات المنبثقة بـ `@defer (on idle)` في `main-layout.html`. إطار Angular نفسه ≈ 355 kB منها. قِس قبل أي إضافة كبيرة: `ng build --stats-json` ثم حلّل `dist/EWMS.Client/stats.json`.
+- ميزانية الحزمة الأولى: تحذير 430 kB / خطأ 480 kB. **2026-10-14: 412 kB** بعد نقل الأيقونات إلى `public/icons.svg`، والشعار إلى قناع CSS من `public/brand/logo.svg` (`shared/ui/logo.ts`)، وتأجيل قائمة المظهر ونوافذ الإشعارات المنبثقة بـ `@defer (on idle)` في `main-layout.html`. إطار Angular نفسه ≈ 355 kB منها. **2026-11-25: 377.74 kB** (كانت 433.6 بعد Angular 22.3 فتجاوزت التحذير) بجعل `MainLayout` كسولاً — خرج منها الإطار (~45 kB) وما لا يستعمله غيره. قِس قبل أي إضافة كبيرة: `ng build --stats-json` ثم حلّل `dist/EWMS.Client/browser-stats.json` (metafile لـ esbuild: `outputs[main].inputs`).
 - الخطوط WOFF2 (`npm run fonts:woff2` يولّدها من OTF، تحقق جدولاً بجدول؛ OTF يبقى احتياطاً في `@font-face`): 168 → 85 kB.
 - **OnPush**: هو الافتراضي في Angular 22 لكل المكوّنات (لا يوجد `Eager` في المشروع). أي حالة تُعرض في القالب وتتغيّر بعد طلب/مؤقّت يجب أن تكون إشارة.
 - أنماط `shared/styles/*.scss` تبقى في المكوّنات (تُضمَّن في كل قطعة كسولة ~2 kB) عمداً: نقلها عاماً لا يسرّع أي صفحة ويجعل محدّدات مثل `dl` و`.panel` و`.actions` تسري على التطبيق كله.
@@ -101,7 +107,7 @@ crud = new CrudPage<Item, Body>({
 **استعمال شيء من ميزة أخرى:** صدّره من `index.ts` تلك الميزة ثم `import { X } from '@features/<ميزة>'`.
 
 ## الاختبارات
-- `npm test` — vitest (وحدة): خدمات، pagination، CrudPage، SelectValue، trackRequest، LookupsService، interceptor، المكوّنات المشتركة، **حارس ربط المخرجات** (`template-outputs.spec.ts`: ربط `(event)` على مكوّن لا يملك هذا المخرج يصير مستمع DOM صامتاً بلا خطأ بناء).
+- `npm test` — vitest (وحدة، 385 اختباراً في 70 ملفاً — 2026-11-25): خدمات، pagination، CrudPage، trackRequest، LookupsService، interceptor، `query`، `changes$`، المكوّنات المشتركة (منها `FilePreview` و`FormActions` و`ActionButton`)، **عقود الـ API** (الدراسات، الصيانة — مطابقة لمتحكّمات الباكاند — واللوحات)، والميزات التي كانت بلا اختبارات: الصيانة (نافذة الطلب، قطع الغيار، المهام الميدانية، المسارات)، اللوحات (اختيار اللوحة، لوحتي/لوحة وحدة، التحديث المجمّع)، الملف الشخصي (كلمة المرور، التوقيع وهندسة حبره)، الدخول، **حارس ربط المخرجات** (`template-outputs.spec.ts`: ربط `(event)` على مكوّن لا يملك هذا المخرج يصير مستمع DOM صامتاً بلا خطأ بناء).
 - `npm run lint` — ESLint (typescript-eslint + angular-eslint + حدود الطبقات).
 - **`npm run verify` — كل الفحوص بأمر واحد قبل أي commit:** lint ثم `check:cycles` (دورات الاستيراد) ثم `check:unused` (تصديرات ماتت بعد تعديل) ثم `check:colors` (ألوان خام خارج رموز التصميم؛ التعليق `raw-color-ok` لبيانات لون مقصودة) ثم الاختبارات ثم البناء.
 - اختبارات العقد داخل الواجهة: `permission-sections.spec.ts` (كل صلاحية في AppPermission تقع في مجموعة من صفحة الأدوار، لا اسم مجهول ولا تكرار).
@@ -112,4 +118,6 @@ crud = new CrudPage<Item, Body>({
 - الاختبارات التي تحتاج الباكاند الحي تُشغَّل يدوياً؛ الباقي بلا خادم.
 
 ## سكربتات (scripts/)
-فحوص: `check-cycles` و`check-unused` و`check-colors`. توليد: `build-icons` (الأيقونات) و`fonts-woff2` و`prepare-stamps` (الأختام). أدوات عامة لإعادة الهيكلة: `codemod-move` (نقل رموز بين الملفات مع تعديل الاستيرادات) و`codemod-aliases` (استيرادات نسبية → مسارات مستعارة) و`fix-unused-imports`. (حُذفت سكربتات `phase*` التي كانت لإعادة الهيكلة الأولى 2026-10: بقيت في تاريخ Git.) تحذير: heredoc الـ bash يلتهم الشرطات المائلة العكسية — اكتب السكربتات المعتمدة على regex بأداة الكتابة لا بـ `cat <<EOF`.
+فحوص: `check-cycles` و`check-unused` و`check-colors`. توليد: `build-icons` (الأيقونات) و`fonts-woff2` و`prepare-stamps` (الأختام). أدوات عامة لإعادة الهيكلة: `codemod-move` (نقل رموز بين الملفات مع تعديل الاستيرادات) و`codemod-aliases` (استيرادات نسبية → مسارات مستعارة) و`fix-unused-imports`. (حُذفت سكربتات `phase*` التي كانت لإعادة الهيكلة الأولى 2026-10: بقيت في تاريخ Git.) سكربتات الفحص تبني مساراتها بـ `fileURLToPath` (لا `URL.pathname` المرمَّز) لتعمل في مجلد اسمه عربي أو فيه مسافة.
+
+**محذوف ومحفوظ في Git:** نموذج الخريطة ثلاثية الأبعاد (`docs/prototypes/`، حُذف 2026-11-25 — آخر نسخة في الالتزام `a9fc84c`، والمكوّنات المدمجة في `929136b`): `git show a9fc84c:docs/prototypes/map-3d.html > map-3d.html`. تحذير: heredoc الـ bash يلتهم الشرطات المائلة العكسية — اكتب السكربتات المعتمدة على regex بأداة الكتابة لا بـ `cat <<EOF`.

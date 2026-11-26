@@ -3,7 +3,7 @@ import { Observable, catchError, map, of } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { PagedResult } from '@core/models/paged-result.model';
 import { allPages } from '../utils/all-pages';
-import { query } from '../utils/query';
+import { query } from '@core/http/query';
 import {
   STUDY_DOCUMENT_ROUTES, StudyActivityLog, StudyChain, StudyDiwanDecision, StudyDiwanReferenceInput, StudyDiwanReviewAction,
   StudyDocumentFilter, StudyDocumentKind, StudyDocumentKinds, StudyResponse, StudyResponsePlanningInput

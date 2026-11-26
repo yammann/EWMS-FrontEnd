@@ -16,7 +16,7 @@ import { PRINT_HEADER } from '@core/constants/print';
  * صفحة خارج الإطار العام، والورقة بألوان ثابتة (ورق أبيض) بصرف النظر عن مظهر التطبيق.
  */
 @Component({
-  selector: 'app-vacation-print', standalone: true, imports: [Icon, BackButton, DatePipe, Logo],
+  selector: 'app-vacation-print', imports: [Icon, BackButton, DatePipe, Logo],
   templateUrl: './vacation-print-page.html',
   styleUrl: './vacation-print-page.scss'
 })

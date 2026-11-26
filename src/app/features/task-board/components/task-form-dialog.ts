@@ -22,7 +22,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
 
 /** نافذة إنشاء مهمة / تعديلها / تفويض جزء من مهمة واردة لجهة أدنى */
 @Component({
-  selector: 'app-task-form-dialog', standalone: true, imports: [SearchSelect, SelectOption, Icon, Alert, LineList, ReactiveFormsModule, FormsModule, Modal],
+  selector: 'app-task-form-dialog', imports: [SearchSelect, SelectOption, Icon, Alert, LineList, ReactiveFormsModule, FormsModule, Modal],
   templateUrl: './task-form-dialog.html',
   styleUrl: './task-form-dialog.scss'
 })

@@ -12,7 +12,7 @@ export interface Coordinates { latitude: number; longitude: number; }
  * أو ابحث باسم المكان (مدينة/بلدة/قرية/حي) فتقفز الخريطة إليه، أو اكتب الإحداثيات يدوياً. يُستخدم في نموذج الموقع.
  */
 @Component({
-  selector: 'app-coordinate-picker', standalone: true, imports: [Icon, SyriaSvgMap, PlaceSearch],
+  selector: 'app-coordinate-picker', imports: [Icon, SyriaSvgMap, PlaceSearch],
   template: `
     <div class="picker">
       <app-place-search (selected)="onPlace($event)" />

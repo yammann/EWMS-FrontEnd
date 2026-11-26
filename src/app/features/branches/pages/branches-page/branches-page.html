@@ -52,9 +52,9 @@
             @for (branch of pager.items(); track branch.id) {
               <tr [class.selected]="crud.dialog()?.item?.id === branch.id">
                 <td>
-                  <div class="branch-cell-name">
-                    <div class="branch-avatar">{{ (branch.name || 'ف').charAt(0) }}</div>
-                    <div class="branch-details">
+                  <div class="entity-cell">
+                    <div class="entity-avatar">{{ (branch.name || 'ف').charAt(0) }}</div>
+                    <div class="entity-details">
                       <strong>{{ branch.name || 'فرع بدون اسم' }}</strong>
                       <small>#{{ branch.id }}</small>
                     </div>

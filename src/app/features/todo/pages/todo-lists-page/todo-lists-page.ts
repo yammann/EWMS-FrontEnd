@@ -25,7 +25,7 @@ type View = 'lists' | 'today';
  * السوبر ادمن يرى قوائم الجميع بأسماء أصحابها.
  */
 @Component({
-  selector: 'app-todo-lists-page', standalone: true, imports: [Alert, TodoListDialog, DatePipe, Icon, StatTile, Pager],
+  selector: 'app-todo-lists-page', imports: [Alert, TodoListDialog, DatePipe, Icon, StatTile, Pager],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../styles/todo.scss', '../../styles/todo-cards.scss', './todo-lists-page.scss'],
   templateUrl: './todo-lists-page.html',
   

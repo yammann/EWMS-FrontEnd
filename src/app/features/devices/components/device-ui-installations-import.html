@@ -42,7 +42,7 @@
     <button type="button" class="ghost" (click)="closed.emit()" [disabled]="busy()">{{ report() && !report()!.dryRun ? 'إغلاق' : 'إلغاء' }}</button>
     @if (report(); as r) {
       @if (r.dryRun) {
-        <button type="button" (click)="commit()" [disabled]="!r.valid || busy()">{{ busy() ? 'جارٍ الاستيراد…' : 'استيراد ' + r.valid + ' سطراً صالحاً' }}</button>
+        <button type="button" appAction="upload" [busy]="busy()" busyLabel="جارٍ الاستيراد…" [disabled]="!r.valid" (click)="commit()">استيراد {{ r.valid }} سطراً صالحاً</button>
       }
     }
   </footer>

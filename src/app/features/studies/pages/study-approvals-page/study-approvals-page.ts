@@ -21,7 +21,6 @@ import { ownerLink } from '../../utils/document-meta';
  */
 @Component({
   selector: 'app-study-approvals-page',
-  standalone: true,
   imports: [RouterLink, PageHeader, Alert, EmptyState, StudyDecisionDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/list-tools.scss'],
   template: `

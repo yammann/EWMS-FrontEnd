@@ -9,7 +9,6 @@ import { Modal } from '@shared/ui/modal';
  */
 @Component({
   selector: 'app-study-reason-dialog',
-  standalone: true,
   imports: [Modal, Alert, FormActions],
   styleUrl: '../../../shared/styles/data-tools.scss',
   template: `

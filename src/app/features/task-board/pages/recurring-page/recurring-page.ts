@@ -23,7 +23,7 @@ const TARGET_LABEL: Record<TaskTargetKind, string> = { Department: 'قسم', Off
 
 /** نافذة قالب: الاسم والعنوان والوصف والأولوية والمدة وبنود التحقق (بند في كل سطر) */
 @Component({
-  selector: 'app-template-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, LineList, Modal],
+  selector: 'app-template-dialog', imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, LineList, Modal],
   template: `
     <app-modal [heading]="template() ? 'تعديل القالب' : 'قالب جديد'" size="lg" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">
@@ -86,7 +86,7 @@ export class TemplateDialog implements OnInit {
 
 /** نافذة مهمة دورية: قالب + جهة + جدول */
 @Component({
-  selector: 'app-recurrence-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, Modal],
+  selector: 'app-recurrence-dialog', imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, Modal],
   templateUrl: './recurrence-dialog.html',
   styles: [`
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -161,7 +161,7 @@ export class RecurrenceDialog implements OnInit {
 
 /** القوالب والمهام الدورية لمن يملك صلاحية إسناد: قوالب خاصة به، وجدولة إنشاء مهام تلقائياً */
 @Component({
-  selector: 'app-recurring-tasks-page', standalone: true, imports: [PageHeader, Alert, DatePipe, TemplateDialog, RecurrenceDialog],
+  selector: 'app-recurring-tasks-page', imports: [PageHeader, Alert, DatePipe, TemplateDialog, RecurrenceDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss'],
   templateUrl: './recurring-tasks.html',
   styles: [`

@@ -13,7 +13,6 @@ export function cleanLines(values: readonly string[]): string[] {
  */
 @Component({
   selector: 'app-line-list',
-  standalone: true,
   template: `
     <div class="lines" role="list" [attr.aria-label]="label()">
       @for (value of rows(); track $index; let i = $index) {

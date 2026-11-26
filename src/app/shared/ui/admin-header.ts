@@ -1,12 +1,13 @@
 import { Component, input, output } from '@angular/core';
 import { Icon } from './icon';
+import { ActionButton } from './action-button';
 
 /**
  * رأس صفحات الإدارة (الفروع/الأقسام/المكاتب/المستخدمون/الأدوار): عنوان بنقطة، وصف، زر «تحديث» وزر «إنشاء» اختياري.
  * زر الإنشاء يظهر فقط حين يُمرَّر `createLabel` (مثلاً بحسب الصلاحية). الشكل من الفئات العامة.
  */
 @Component({
-  selector: 'app-admin-header', standalone: true, imports: [Icon],
+  selector: 'app-admin-header', imports: [ActionButton, Icon],
   template: `
     <header class="page-header">
       <div class="page-title">
@@ -15,10 +16,7 @@ import { Icon } from './icon';
         <p>{{ subtitle() }}</p>
       </div>
       <div class="header-actions">
-        <button type="button" class="refresh-btn" (click)="refresh.emit()" [disabled]="loading()">
-          <app-icon name="refresh" class="icon" [class.spin]="loading()" [weight]="2" />
-          <span>{{ loading() ? 'جاري التحديث...' : 'تحديث' }}</span>
-        </button>
+        <button type="button" class="refresh-btn" appAction="refresh" [busy]="loading()" busyLabel="جارٍ التحديث…" (click)="refresh.emit()">تحديث</button>
         @if (createLabel()) {
           <button type="button" class="new-btn" (click)="create.emit()">
             <app-icon name="plus" [size]="16" [weight]="2" />

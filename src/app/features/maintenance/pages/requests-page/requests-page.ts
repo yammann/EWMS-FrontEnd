@@ -35,7 +35,7 @@ const BOARD_LIMIT = 5;
  * يتغيّر فيها حال الطلب بالسحب والإفلات (لمن يملك تعديل الطلب).
  */
 @Component({
-  selector: 'app-maintenance-requests-page', standalone: true,
+  selector: 'app-maintenance-requests-page',
   imports: [SearchSelect, SelectOption, PageHeader, EmptyState, Alert, UtcPipe, DatePipe, RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatusChip, Pager, RequestFormDialog, PendingTransfersButton],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', '../../styles/list-page.scss'],
   templateUrl: './requests-page.html'

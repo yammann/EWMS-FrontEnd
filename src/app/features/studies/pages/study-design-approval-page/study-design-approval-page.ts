@@ -25,7 +25,6 @@ import { DesignApproval } from '../../data-access/studies.models';
  */
 @Component({
   selector: 'app-study-design-approval-page',
-  standalone: true,
   imports: [DatePipe, UtcPipe, RouterLink, Alert, EmptyState, Icon, StudyStatusChip, StudyApprovalsPanel, StudyDesignApprovalFormDialog],
   templateUrl: './study-design-approval-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/list-tools.scss'],

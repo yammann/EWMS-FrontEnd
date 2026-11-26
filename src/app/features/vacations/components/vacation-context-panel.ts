@@ -10,7 +10,7 @@ import { latestRequest } from '@shared/ui/track-request';
  * آخر إجازة، الشهر الجاري، الدفع لو اعتُمد الآن، زملاء القسم في نفس الفترة (بالأسماء)، طلباته المعلّقة الأخرى.
  */
 @Component({
-  selector: 'app-vacation-context-panel', standalone: true, imports: [DatePipe],
+  selector: 'app-vacation-context-panel', imports: [DatePipe],
   templateUrl: './vacation-context-panel.html',
   styleUrl: './vacation-context-panel.scss'
 })

@@ -5,7 +5,7 @@ import { environment } from '@env/environment';
 import { ApiService } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { StreamDownloadResult, streamDownload } from '@core/utils/stream-download';
-import { query } from '../utils/query';
+import { query } from '@core/http/query';
 import { StudyAttachment, StudyOwnerType } from './studies.models';
 
 /**

@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth.guard';
-import { MainLayout } from '@features/layout';
 import { AUTH_ROUTES } from '@features/auth/auth.routes';
 import { BRANCHES_ROUTES } from '@features/branches/branches.routes';
 import { DASHBOARD_ROUTES } from '@features/dashboard/dashboard.routes';
@@ -21,7 +20,7 @@ import { VACATIONS_ROUTES, VACATION_PRINT_ROUTES } from '@features/vacations/vac
 
 /**
  * تعريف المسارات موزّع على الميزات (<feature>.routes.ts)؛ كل صفحة تُحمَّل عند فتحها فقط (loadComponent)،
- * وباقي الصفحات تُحمَّل مسبقاً في الخلفية بعد أول عرض (PreloadAllModules في app.config).
+ * ثم تُحمَّل في الخلفية الصفحات المسموحة للمستخدم وحدها (PermissionPreloadStrategy في app.config).
  * الـ guards هنا للواجهة فقط؛ الباكاند يتحقق من كل صلاحية ونطاق بنفسه.
  */
 export const routes: Routes = [
@@ -33,7 +32,8 @@ export const routes: Routes = [
   ...STUDY_PRINT_PAGE_ROUTES,
   {
     path: '',
-    component: MainLayout,
+    // الإطار (القائمة الجانبية والشريط العلوي) كسول أيضاً: لا يلزم صفحة الدخول ولا الطباعة، ويُجلب مع صفحته بالتوازي
+    loadComponent: () => import('@features/layout').then(m => m.MainLayout),
     canActivate: [authGuard],
     canActivateChild: [authGuard],
     children: [

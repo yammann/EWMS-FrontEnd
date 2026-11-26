@@ -46,7 +46,6 @@ const KIND_KEYS = Object.keys(KINDS) as SettingsKind[];
  */
 @Component({
   selector: 'app-study-settings-page',
-  standalone: true,
   imports: [SearchSelect, SelectOption, ReactiveFormsModule, PageHeader, Alert, EmptyState, Modal, FormActions, Pager, RowActions],
   templateUrl: './study-settings-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],

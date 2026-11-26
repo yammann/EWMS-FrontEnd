@@ -12,14 +12,15 @@ import { MapEntry, MapLayerDefinition, SiteEntries, formatFieldValue } from '../
 import { MapLayersService } from '../data-access/map-layers.service';
 import { EntryFiles } from './entry-files';
 import { EntryFormDialog } from './entry-form-dialog';
+import { ActionButton } from '@shared/ui/action-button';
 
 /**
  * «معلومات الفروع» في صفحة الموقع: سجلات الطبقات التي أراها على هذا الموقع (قسمي، أو فرعي كله مع ViewBranchMapEntries،
  * أو الكل لنظرة المؤسسة) مجمّعة حسب الطبقة، مع الإضافة والتعديل والحذف حسب الصلاحيات.
  */
 @Component({
-  selector: 'app-site-entries-panel', standalone: true,
-  imports: [EntryFormDialog, EntryFiles, EmptyState, Alert, RouterLink],
+  selector: 'app-site-entries-panel',
+  imports: [ActionButton, EntryFormDialog, EntryFiles, EmptyState, Alert, RouterLink],
   templateUrl: './site-entries-panel.html',
   styleUrl: './site-entries-panel.scss'
 })

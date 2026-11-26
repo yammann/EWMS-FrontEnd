@@ -19,7 +19,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  * النطاق من الباكاند: رئيس الفرع ← فرعه، رئيس القسم ← قسمه، رئيس المكتب ← مكتبه، SuperAdmin ← الكل أو فرع يختاره.
  */
 @Component({
-  selector: 'app-vacation-stats', standalone: true,
+  selector: 'app-vacation-stats',
   imports: [SearchSelect, SelectOption, Alert, RouterLink, StatTile, VacationRows, ActionsTable, CountBars],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './vacation-stats-page.html'
@@ -42,7 +42,7 @@ export class VacationStatsPage {
   constructor() {
     this.load();
     if (this.isAdmin()) this.lookups.branchOptions().subscribe({ next: b => this.branches.set(b), error: () => {} });
-    inject(NotificationService).incoming$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+    inject(NotificationService).changes$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
   }
 
   selectBranch(id: number) { this.branchId.set(id); this.load(); }

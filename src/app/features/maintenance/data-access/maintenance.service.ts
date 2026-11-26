@@ -4,15 +4,11 @@ import { AuthService } from '@core/services/auth.service';
 import { AppPermission } from '@core/constants/access';
 import { MAINTENANCE_LOOKUPS, MaintenanceActivity, MaintenanceClient, MaintenanceTransfer, MyMaintenanceRequest, MaintenanceDevice, MaintenanceDeviceFilter, MaintenanceDeviceInput, MaintenanceLookup, MaintenanceLookupKind, MaintenancePrint, MaintenanceRequest, MaintenanceRequestFilter, MaintenanceRequestInput, MaintenanceStats, MaintenanceTask, MaintenanceTaskInput, TechnicianOption } from './maintenance.models';
 import { PagedResult } from '@core/models/paged-result.model';
+import { query as buildQuery } from '@core/http/query';
 import { NamedRef, RequestParts, SparePart, SparePartFilter, SparePartInput, SparePartMovement, SparePartReport } from './spare-part.models';
 
-function query(params: object): string {
-  const q = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== null && value !== undefined && value !== '' && value !== 0) q.set(key, String(value));
-  }
-  return q.size ? '?' + q : '';
-}
+/** 0 في فلاتر هذه الصفحات يعني «الكل» فيُسقط */
+const query = (params: object) => buildQuery(params, { dropZero: true });
 
 /**
  * الصيانة: طلبات الصيانة (أجهزة العملاء)، مهام الصيانة (أعمال ميدانية)، والجداول المساعدة.

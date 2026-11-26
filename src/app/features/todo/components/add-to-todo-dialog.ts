@@ -10,7 +10,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** إضافة مهمة من لوحة المهام إلى إحدى قوائم مفكرتي كبند مرتبط بها (تُظهر حالتها وتفتحها) */
 @Component({
-  selector: 'app-add-to-todo-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, Modal],
+  selector: 'app-add-to-todo-dialog', imports: [SearchSelect, SelectOption, FormActions, Alert, FormsModule, Modal],
   template: `
     <app-modal heading="أضف إلى مفكرتي" [subheading]="taskTitle()" [busy]="saving()" (closed)="closed.emit()">
       <form (ngSubmit)="save()">

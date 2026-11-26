@@ -30,7 +30,7 @@ const MARK_TEXT: Record<Mark, string> = { start: 'تبدأ اليوم', end: 'ت
  * الأحداث بلا تاريخ لا تظهر (يُذكَر عددها). لا يعرف شيئاً عن نوع السجل: الصفحة تحوّل سجلاتها إلى CalendarEvent.
  */
 @Component({
-  selector: 'app-month-calendar', standalone: true,
+  selector: 'app-month-calendar',
   template: `
     <section class="cal" [attr.aria-label]="label()">
       <header class="cal-head">

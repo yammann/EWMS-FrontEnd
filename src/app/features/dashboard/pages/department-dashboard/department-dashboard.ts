@@ -15,7 +15,7 @@ import { latestRequest } from '@shared/ui/track-request';
 
 /** لوحة رئيس القسم — ويفتحها رئيس الفرع (أقسام فرعه) و SuperAdmin عبر /dashboard/department/:id */
 @Component({
-  selector: 'app-department-dashboard', standalone: true,
+  selector: 'app-department-dashboard',
   imports: [DashboardFrame, EmptyState, Alert, RouterLink, StatTile, ActivityList],
   styleUrl: '../../../../shared/styles/dashboard-layout.scss',
   templateUrl: './department-dashboard.html'
@@ -48,7 +48,7 @@ export class DepartmentDashboardPage {
       this.isOwn.set(this.id === null);
       this.load();
     });
-    inject(NotificationService).incoming$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+    inject(NotificationService).changes$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
   }
 
   load() {

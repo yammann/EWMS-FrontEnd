@@ -3,7 +3,7 @@
     <span class="label">المرفقات ({{ attachments().length }})</span>
     <div class="chips">
       @for (a of attachments(); track a.id) {
-        <button type="button" class="chip" (click)="open(a)" [title]="'عرض ' + a.fileName">
+        <button type="button" class="chip" (click)="current.set(a)" [title]="'عرض ' + a.fileName">
           <app-icon [name]="a.contentType === 'application/pdf' ? 'docText' : 'photo'" [size]="16" />
           <span class="name">{{ a.fileName }}</span><span class="size">{{ size(a.size) }}</span>
         </button>
@@ -12,17 +12,4 @@
   </div>
 }
 
-@if (current(); as a) {
-  <app-modal [heading]="a.fileName" size="lg" (closed)="close()">
-    <div class="modal-body viewer">
-      @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
-      @else if (!url()) { <p class="muted" role="status">جارٍ التحميل…</p> }
-      @else if (a.contentType === 'application/pdf') { <iframe [src]="safeUrl()" title="معاينة الملف"></iframe> }
-      @else { <img [src]="safeUrl()" [alt]="a.fileName"> }
-    </div>
-    <footer class="modal-actions">
-      <button type="button" class="ghost" (click)="close()">إغلاق</button>
-      <button type="button" (click)="download(a)" [disabled]="!url()">تنزيل</button>
-    </footer>
-  </app-modal>
-}
+<app-file-preview [file]="current()" [load]="blob" (closed)="current.set(null)" />

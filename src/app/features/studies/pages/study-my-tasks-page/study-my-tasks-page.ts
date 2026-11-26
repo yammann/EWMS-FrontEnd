@@ -35,7 +35,6 @@ interface Column { status: StudyTaskStatus; label: string; hint: string; }
  */
 @Component({
   selector: 'app-study-my-tasks-page',
-  standalone: true,
   imports: [
     RouterLink, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder,
     PageHeader, Alert, EmptyState, StatTile, MonthCalendar, StudyProgress, StudyTaskProgressDialog

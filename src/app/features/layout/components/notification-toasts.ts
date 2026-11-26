@@ -9,7 +9,7 @@ import { Icon } from '@shared/ui/icon';
 
 // نوافذ منبثقة للإشعارات اللحظية (مثل إشعارات التطبيقات) — تختفي تلقائياً بعد ثوانٍ
 @Component({
-  selector: 'app-notification-toasts', standalone: true, imports: [Icon, CommonModule],
+  selector: 'app-notification-toasts', imports: [Icon, CommonModule],
   template: `
     <section class="toast-stack" aria-live="polite" aria-label="الإشعارات الجديدة">
       @for (t of service.toasts(); track t.notification.id) {

@@ -20,10 +20,9 @@ import { Icon } from '@shared/ui/icon';
 /** الفروع — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-branches-page',
-  standalone: true,
   imports: [Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager],
   templateUrl: './branches-page.html',
-  styleUrl: './branches-page.scss'
+  styleUrls: ['../../../../shared/styles/entity-cell.scss', './branches-page.scss']
 })
 export class BranchesPage {
   private branchService = inject(BranchService);

@@ -29,7 +29,7 @@ const NO_VALUE = Symbol('no-value');
  * داخل <optgroup [label]> أو حلقات @for/@if. لا يُرسم في الصفحة؛ <app-select> يقرأ قيمته ونصّه.
  */
 // eslint-disable-next-line @angular-eslint/directive-selector -- عمداً: <option> داخل <app-select> كما في <select>
-@Directive({ selector: 'option', standalone: true })
+@Directive({ selector: 'option' })
 export class SelectOption {
   private readonly el = inject<ElementRef<HTMLOptionElement>>(ElementRef).nativeElement;
   /** مثل value في <option>: تُحوَّل إلى نص (كما يفعل المتصفح) */
@@ -80,7 +80,6 @@ let seq = 0;
  */
 @Component({
   selector: 'app-select',
-  standalone: true,
   imports: [CdkConnectedOverlay, CdkOverlayOrigin],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SearchSelect), multi: true }],
   host: {

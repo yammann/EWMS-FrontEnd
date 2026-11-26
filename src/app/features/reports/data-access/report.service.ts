@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { query } from '@core/http/query';
 import { ApiService } from '@core/services/api.service';
 import { PagedResult } from '@core/models/paged-result.model';
 import { ReportDefinition, ReportInfo, ReportLogEntry, ReportLogFilter, ReportOption, ReportPreview, ReportPrint, ReportValues } from './report.models';
@@ -15,9 +16,7 @@ export class ReportService {
   print(key: string, filters: ReportValues) { return this.api.post<ReportPrint>(`/Reports/Print/${encodeURIComponent(key)}`, { filters }); }
 
   log(filter: ReportLogFilter) {
-    const q = new URLSearchParams();
-    for (const [key, value] of Object.entries(filter)) if (value !== undefined && value !== null && value !== '') q.set(key, String(value));
-    return this.api.get<PagedResult<ReportLogEntry>>(`/Reports/Log?${q}`);
+    return this.api.get<PagedResult<ReportLogEntry>>(`/Reports/Log${query(filter)}`);
   }
   logOptions() { return this.api.get<ReportOption[]>('/Reports/LogOptions'); }
 }

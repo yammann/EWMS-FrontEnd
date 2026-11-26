@@ -39,7 +39,6 @@ export function daysSince(value: string, today = new Date()): number {
  */
 @Component({
   selector: 'app-study-diwan-page',
-  standalone: true,
   imports: [SearchSelect, SelectOption, DatePipe, RouterLink, PageHeader, Alert, EmptyState, Pager],
   templateUrl: './study-diwan-page.html',
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],

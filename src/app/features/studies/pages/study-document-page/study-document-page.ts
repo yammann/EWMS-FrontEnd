@@ -37,6 +37,7 @@ import {
 import { AnyStudyDocument, DOCUMENT_META, documentNumber } from '../../utils/document-meta';
 import { responseMoney, syrianEquivalent } from '../../utils/response-pricing';
 import { RouteDoc, routeNote } from '../../utils/route-note';
+import { ActionButton } from '@shared/ui/action-button';
 
 /** نافذة مفتوحة: تعديل المستند نفسه أو إصدار التالي في السلسلة */
 type Dialog = 'edit' | 'planning' | 'next' | 'cancel' | 'project' | null;
@@ -48,8 +49,7 @@ type Dialog = 'edit' | 'planning' | 'next' | 'cancel' | 'project' | null;
  */
 @Component({
   selector: 'app-study-document-page',
-  standalone: true,
-  imports: [
+  imports: [ActionButton, 
     DatePipe, UtcPipe, RouterLink, ActionIcon, Alert, DeleteActionContent, EmptyState, Icon, StudyChainView, StudyStatusChip, StudyApprovalsPanel, StudyReasonDialog,
     StudyRequestFormDialog, StudyAssignmentFormDialog, StudyResponseFormDialog, StudyStartOrderFormDialog,
     StudyAttachments, StudyActivity, StudyResponsePlanningDialog, StudyProjectFormDialog, StudyDiwanPanel

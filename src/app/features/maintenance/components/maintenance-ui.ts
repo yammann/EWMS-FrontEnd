@@ -8,7 +8,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 
 /** شارة حالة الطلب بلونها المعرَّف في جدول الحالات (يعمل في الوضعين الفاتح والداكن) */
 @Component({
-  selector: 'app-status-chip', standalone: true,
+  selector: 'app-status-chip',
   template: `<span class="chip" [style.--c]="color() || 'var(--ink-400)'"><i aria-hidden="true"></i>{{ name() }}</span>`,
   styles: [`
     .chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700; white-space: nowrap;
@@ -28,7 +28,7 @@ export class StatusChip {
  * النافذة تختار الموظف فقط — الحفظ عند الصفحة المستدعية عبر (assign).
  */
 @Component({
-  selector: 'app-assign-dialog', standalone: true, imports: [SearchSelect, SelectOption, FormActions, Alert, Modal],
+  selector: 'app-assign-dialog', imports: [SearchSelect, SelectOption, FormActions, Alert, Modal],
   template: `
     <app-modal heading="تغيير الموظف المسؤول" [subheading]="subject()" [busy]="busy()" (closed)="closed.emit()">
       <form (submit)="$event.preventDefault(); submit()">

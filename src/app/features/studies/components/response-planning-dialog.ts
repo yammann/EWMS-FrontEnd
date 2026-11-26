@@ -24,7 +24,6 @@ type StaffRow = FormGroup<{ disciplineId: FormControl<number>; staffCount: FormC
  */
 @Component({
   selector: 'app-study-response-planning-dialog',
-  standalone: true,
   imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions, Icon],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   template: `

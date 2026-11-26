@@ -29,7 +29,6 @@ interface NavSection { id: 'main' | 'tasks' | 'vacations' | 'studies' | 'mainten
 
 @Component({
   selector: 'app-main-layout',
-  standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationToasts, Toasts, ConfirmHost, Logo, Icon, AppearanceMenu, BackButton, SidebarClock],
   templateUrl: './main-layout.html',
   styleUrls: ['./main-layout.scss', './main-layout-head.scss', './main-layout-rail.scss', './main-layout-motion.scss', './main-layout-compact.scss'],

@@ -18,7 +18,7 @@ const FULL_SIZE = 100;
  * مشترك بين صفحة طلب الصيانة (يستثني الطلب المفتوح، آخر 10 + «عرض الكل») ونافذة سجل الجهاز في صفحة الأجهزة.
  */
 @Component({
-  selector: 'app-device-repair-history', standalone: true, imports: [UtcPipe, DatePipe, RouterLink, StatusChip],
+  selector: 'app-device-repair-history', imports: [UtcPipe, DatePipe, RouterLink, StatusChip],
   templateUrl: './device-repair-history.html',
   styles: [`
     .summary { margin: 0 0 10px; font-size: 13px; color: var(--ink-600); }

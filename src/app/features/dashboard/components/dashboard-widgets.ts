@@ -9,7 +9,7 @@ import { Icon, iconFor } from '@shared/ui/icon';
 
 /** جدول "آخر الإجراءات" على طلبات الإجازة */
 @Component({
-  selector: 'app-actions-table', standalone: true, imports: [CommonModule],
+  selector: 'app-actions-table', imports: [CommonModule],
   template: `
     @if (actions().length) {
       <div class="table-wrap"><table class="compact">
@@ -50,7 +50,7 @@ export class ActionsTable {
 
 /** جدول إجازات مختصر (بانتظار القرار / في إجازة الآن وقريباً / آخر طلباتي) */
 @Component({
-  selector: 'app-vacation-rows', standalone: true, imports: [CommonModule],
+  selector: 'app-vacation-rows', imports: [CommonModule],
   templateUrl: './dashboard-widgets-vacation-rows.html',
   styleUrl: '../styles/dashboard-table.scss'
 })
@@ -73,7 +73,7 @@ export class VacationRows {
  * تُستخدم للموظفين حسب الدور (عدد) وللإجازات حسب النوع (أيام).
  */
 @Component({
-  selector: 'app-count-bars', standalone: true,
+  selector: 'app-count-bars',
   template: `
     @if (items().length) {
       <ul class="bars" role="list">
@@ -115,7 +115,7 @@ export class CountBars {
 
 /** آخر الإجراءات العامة (انضمام الموظفين) */
 @Component({
-  selector: 'app-activity-list', standalone: true, imports: [CommonModule, Icon],
+  selector: 'app-activity-list', imports: [CommonModule, Icon],
   template: `
     @if (items().length) {
       <ol class="activity">

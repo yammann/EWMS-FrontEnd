@@ -9,7 +9,7 @@ import { governorateName } from '@core/constants/governorates';
  * الملف يُحمَّل عند أول بحث فقط.
  */
 @Component({
-  selector: 'app-place-search', standalone: true,
+  selector: 'app-place-search',
   templateUrl: './place-search.html',
   styleUrl: './place-search.scss'
 })

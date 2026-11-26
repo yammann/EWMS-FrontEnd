@@ -25,7 +25,7 @@ const ZOOM_MS = 550;
  * - pickable: في وضع المحافظة، النقر يحدد إحداثيات (منتقي الإحداثيات في النماذج).
  */
 @Component({
-  selector: 'app-syria-svg-map', standalone: true, imports: [Stamp],
+  selector: 'app-syria-svg-map', imports: [Stamp],
   host: { '[class.bare]': '!framed()' },
   templateUrl: './syria-svg-map.html',
   styleUrl: './syria-svg-map.scss'

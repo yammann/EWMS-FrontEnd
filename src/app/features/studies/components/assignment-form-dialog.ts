@@ -31,7 +31,6 @@ const deadlineAfterReferral = (g: AbstractControl): ValidationErrors | null => {
  */
 @Component({
   selector: 'app-study-assignment-form-dialog',
-  standalone: true,
   imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   templateUrl: './assignment-form-dialog.html'

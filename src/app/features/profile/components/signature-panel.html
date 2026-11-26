@@ -20,7 +20,7 @@
         <label class="form-field remove-pass"><span class="form-label">كلمة المرور لتأكيد الحذف</span>
           <input #t1 type="password" autocomplete="current-password" [value]="password()" (input)="password.set(t1.value)"
                  (keydown.enter)="remove()"></label>
-        <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="!password() || saving()">{{ saving() ? 'جارٍ الحذف…' : 'حذف التوقيع' }}</button>
+        <button type="button" class="btn btn-danger" appAction="delete" [busy]="saving()" busyLabel="جارٍ الحذف…" [disabled]="!password()" (click)="remove()">حذف التوقيع</button>
         <button type="button" class="btn btn-ghost" (click)="removing.set(false); password.set('')" [disabled]="saving()">إلغاء</button>
       } @else {
         <button type="button" class="btn" (click)="open()" [disabled]="loading()">{{ current() ? 'تغيير التوقيع' : 'إضافة توقيع' }}</button>

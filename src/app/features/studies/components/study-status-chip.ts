@@ -12,7 +12,6 @@ const TONES: Record<ChipKind, Record<number, string>> = { document: DOCUMENT_TON
 /** شارة حالة مستند دراسة أو قرار توقيع: لون ونقطة ونص (الاسم العربي من الخادم) — لا تعتمد على اللون وحده */
 @Component({
   selector: 'app-study-status-chip',
-  standalone: true,
   template: `<span class="status-badge tone-{{ tone() }}"><span class="status-badge-dot" aria-hidden="true"></span>{{ name() }}</span>`,
   styles: [`
     :host { display: inline-flex; }

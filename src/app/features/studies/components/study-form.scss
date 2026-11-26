@@ -26,12 +26,9 @@
 .rows-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .total { font-variant-numeric: tabular-nums; font-size: 14px; }
 
-.cost-row { grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto; }
 .item-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr) auto; }
 .staff-row, .engineer-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) auto; }
-.building { gap: 12px; }
-.line-total { display: block; padding: 10px 0; font-size: 13px; }
 @media (max-width: 760px) {
-  .cost-row, .item-row, .staff-row, .engineer-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .cost-row > :first-child, .item-row > :first-child { grid-column: 1 / -1; }
+  .item-row, .staff-row, .engineer-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .item-row > :first-child { grid-column: 1 / -1; }
 }

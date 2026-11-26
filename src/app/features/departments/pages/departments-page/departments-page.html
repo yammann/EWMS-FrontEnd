@@ -64,9 +64,9 @@
             @for (department of pager.items(); track department.id) {
               <tr [class.selected]="crud.dialog()?.item?.id === department.id">
                 <td>
-                  <div class="department-cell-name">
-                    <div class="department-avatar">{{ (department.name || 'ق').charAt(0) }}</div>
-                    <div class="department-details">
+                  <div class="entity-cell">
+                    <div class="entity-avatar">{{ (department.name || 'ق').charAt(0) }}</div>
+                    <div class="entity-details">
                       <strong>{{ department.name || 'قسم بدون اسم' }}</strong>
                       <small>#{{ department.id }}</small>
                     </div>

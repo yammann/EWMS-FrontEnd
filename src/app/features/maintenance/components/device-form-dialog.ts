@@ -6,6 +6,7 @@ import { Modal } from '@shared/ui/modal';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { FormActions } from '@shared/ui/form-actions';
 
 /** مقارنة الرقمين بعد حذف الفراغات وبلا تمييز لحالة الأحرف (الباكاند يعامل الرقم كذلك) */
 const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim().toUpperCase();
@@ -16,7 +17,7 @@ const sameSerial = (a: string, b: string) => a.trim().toUpperCase() === b.trim()
  * عند التعديل يُطلب التأكيد فقط إن تغيّر الرقم.
  */
 @Component({
-  selector: 'app-device-form-dialog', standalone: true, imports: [SearchSelect, SelectOption, Alert, ReactiveFormsModule, Modal],
+  selector: 'app-device-form-dialog', imports: [FormActions, SearchSelect, SelectOption, Alert, ReactiveFormsModule, Modal],
   styleUrl: '../../../shared/styles/data-tools.scss',
   templateUrl: './device-form-dialog.html',
   styles: [`

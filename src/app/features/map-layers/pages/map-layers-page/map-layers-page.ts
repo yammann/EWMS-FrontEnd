@@ -18,7 +18,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  * (من صفحة الموقع) وتظهر نقاطها على خريطته بلون الطبقة. القائمة = طبقات فرعي، أو أي فرع لنظرة المؤسسة.
  */
 @Component({
-  selector: 'app-map-layers-page', standalone: true,
+  selector: 'app-map-layers-page',
   imports: [SearchSelect, SelectOption, PageHeader, Alert, EmptyState, Pager, RowActions, LayerFormDialog],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', './map-layers-page.scss'],
   templateUrl: './map-layers-page.html'

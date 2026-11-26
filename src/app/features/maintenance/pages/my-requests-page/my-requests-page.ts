@@ -19,7 +19,7 @@ import { latestRequest } from '@shared/ui/track-request';
  * إشعار تغيّر الحالة يفتح الصفحة على الطلب (?request=ID) ويُبرزه.
  */
 @Component({
-  selector: 'app-my-maintenance-requests', standalone: true, imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, StatusChip, Pager],
+  selector: 'app-my-maintenance-requests', imports: [PageHeader, EmptyState, Alert, UtcPipe, DatePipe, StatusChip, Pager],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/list-tools.scss'],
   templateUrl: './my-requests-page.html',
   styles: [`tr.highlight td { background: var(--brand-50); }`]

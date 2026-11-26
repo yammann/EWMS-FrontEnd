@@ -5,6 +5,7 @@ import { SignaturePad } from './signature-pad';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { Icon } from '@shared/ui/icon';
+import { ActionButton } from '@shared/ui/action-button';
 
 /**
  * توقيعي الإلكتروني (ManageMySignature): بطاقة بالتوقيع الحالي، و«تغيير التوقيع» يفتح لوحة الرسم/الرفع في نافذة.
@@ -12,7 +13,7 @@ import { Icon } from '@shared/ui/icon';
  * الحفظ والحذف يطلبان كلمة المرور (قرار المستخدم 2026-10-04).
  */
 @Component({
-  selector: 'app-signature-panel', standalone: true, imports: [Icon, Alert, SignaturePad],
+  selector: 'app-signature-panel', imports: [ActionButton, Icon, Alert, SignaturePad],
   templateUrl: './signature-panel.html',
   styleUrl: './signature-panel.scss'
 })

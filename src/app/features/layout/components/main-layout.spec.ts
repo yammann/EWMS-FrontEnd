@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
 import { AuthService } from '@core/services/auth.service';
 import { MainLayout } from './main-layout';
 
-@Component({ template: '', standalone: true }) class Blank {}
+@Component({ template: '' }) class Blank {}
 
 describe('MainLayout — القائمة على الشاشات الصغيرة', () => {
   beforeEach(() => {

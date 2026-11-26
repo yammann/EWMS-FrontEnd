@@ -5,7 +5,7 @@ import { Component, input } from '@angular/core';
  * الشكل من الفئات العامة `.page-header` (src/styles/_base.scss). زر الرجوع في الشريط العلوي للتخطيط، لا هنا.
  */
 @Component({
-  selector: 'app-page-header', standalone: true,
+  selector: 'app-page-header',
   template: `
     <header class="page-header">
       <div>

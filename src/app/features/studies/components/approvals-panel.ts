@@ -14,7 +14,6 @@ import { StudyStatusChip } from './study-status-chip';
  */
 @Component({
   selector: 'app-study-approvals-panel',
-  standalone: true,
   imports: [DatePipe, UtcPipe, Icon, StudyStatusChip, StudyDecisionDialog],
   template: `
     <section class="panel">

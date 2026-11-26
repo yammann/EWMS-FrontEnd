@@ -12,7 +12,7 @@ import { PageHeader } from './page-header';
 import { StatTile } from './stat-tile';
 import { iconFor } from './icon';
 
-@Component({ template: '', standalone: true }) class Blank {}
+@Component({ template: '' }) class Blank {}
 
 describe('shared components', () => {
   it('Alert renders only when there is a message', async () => {
@@ -25,7 +25,7 @@ describe('shared components', () => {
   });
 
   it('EmptyState projects content and adds the panel frame on request', async () => {
-    @Component({ imports: [EmptyState], template: '<app-empty-state panel>لا توجد بيانات</app-empty-state>', standalone: true }) class Host {}
+    @Component({ imports: [EmptyState], template: '<app-empty-state panel>لا توجد بيانات</app-empty-state>' }) class Host {}
     const f = TestBed.createComponent(Host);
     await f.whenStable();
     const el = f.nativeElement.querySelector('.empty-state');
@@ -34,7 +34,7 @@ describe('shared components', () => {
   });
 
   it('PageHeader shows eyebrow/heading/subtitle and projected actions', async () => {
-    @Component({ imports: [PageHeader], template: '<app-page-header eyebrow="الإدارة" heading="الفروع" subtitle="وصف"><button>جديد</button></app-page-header>', standalone: true }) class Host {}
+    @Component({ imports: [PageHeader], template: '<app-page-header eyebrow="الإدارة" heading="الفروع" subtitle="وصف"><button>جديد</button></app-page-header>' }) class Host {}
     const f = TestBed.createComponent(Host);
     await f.whenStable();
     const root: HTMLElement = f.nativeElement;
@@ -47,7 +47,7 @@ describe('shared components', () => {
   it('FormActions disables submit while busy and emits dismissed', async () => {
     const dismissed = vi.fn();
     @Component({
-      imports: [FormActions], standalone: true,
+      imports: [FormActions],
       template: '<app-form-actions [busy]="busy()" [disabled]="invalid()" label="حفظ" busyLabel="جارٍ…" (dismissed)="dismissed()" />'
     }) class Host { busy = signal(false); invalid = signal(true); dismissed = dismissed; }
     const f = TestBed.createComponent(Host);
@@ -69,6 +69,18 @@ describe('shared components', () => {
     expect(submit().querySelector('app-action-icon.complete')).toBeNull();
     (f.nativeElement.querySelector('button.ghost') as HTMLButtonElement).click();
     expect(dismissed).toHaveBeenCalledTimes(1);
+  });
+
+  it('FormActions shows projected notes inside the footer, before the buttons', async () => {
+    @Component({
+      imports: [FormActions],
+      template: '<app-form-actions label="تسجيل الطلب"><span class="note">اختر الجهاز أولاً</span></app-form-actions>'
+    }) class Host {}
+    const f = TestBed.createComponent(Host);
+    await f.whenStable();
+    const footer = f.nativeElement.querySelector('footer.modal-actions') as HTMLElement;
+    expect(footer.firstElementChild?.classList.contains('note')).toBe(true);
+    expect(footer.querySelector('button[type=submit]')?.textContent).toContain('تسجيل الطلب');
   });
 
   it('StatTile shows label, value, optional hint and its SVG icon', async () => {

@@ -17,10 +17,11 @@ import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
 import { Icon, IconName } from '@shared/ui/icon';
 import { ActionIcon } from '@shared/ui/action-icon';
+import { ActionButton } from '@shared/ui/action-button';
 
 /** لوحة جانبية بتفاصيل المهمة: الحالة، الوصف، قائمة التحقق، المرفقات، المهام الفرعية، السجل والتعليقات */
 @Component({
-  selector: 'app-task-detail-drawer', standalone: true, imports: [Icon, ActionIcon, Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
+  selector: 'app-task-detail-drawer', imports: [ActionButton, Icon, ActionIcon, Alert, CommonModule, FormsModule, TaskAttachments, TaskNoteDialog, TaskLinks, AddToTodoDialog],
   templateUrl: './task-detail-drawer.html',
   styleUrl: './task-detail-drawer.scss'
 })

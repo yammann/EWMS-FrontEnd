@@ -29,7 +29,7 @@ import { Icon } from '@shared/ui/icon';
  * والتركيبات وأنواع الأجهزة بصلاحيات الأجهزة، ومشاريع الدراسات بـ ViewStudyProjects، ومعلومات الفروع بسجلات الطبقات.
  */
 @Component({
-  selector: 'app-site-details-page', standalone: true, imports: [Icon, EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, PinnedMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, SiteStudiesPanel, Pager],
+  selector: 'app-site-details-page', imports: [Icon, EmptyState, Alert, RouterLink, StatTile, SyriaSvgMap, PinnedMap, CopyText, DevicePassword, InstallStatus, DeviceHistory, LinkedTasks, SiteEntriesPanel, SiteStudiesPanel, Pager],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', './site-details-page.scss'],
   templateUrl: './site-details-page.html',
   

@@ -1,12 +1,11 @@
 import { Component, input } from '@angular/core';
 import { ICON_SPRITE } from './icon-names';
 
-export type ActionKind = 'delete' | 'edit' | 'save' | 'send' | 'upload' | 'reactivate';
+export type ActionKind = 'delete' | 'edit' | 'save' | 'send' | 'upload' | 'reactivate' | 'download' | 'search' | 'login' | 'refresh' | 'cancel';
 
 /** Decorative feedback inside a native button. The caller owns pending and successful outcomes. */
 @Component({
   selector: 'app-action-icon',
-  standalone: true,
   templateUrl: './action-icon.html',
   styleUrl: './action-icon.scss',
   host: {

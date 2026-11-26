@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SearchSelect, SelectOption, normalizeSearch } from './search-select';
 
 @Component({
-  standalone: true, imports: [SearchSelect, SelectOption, ReactiveFormsModule],
+  imports: [SearchSelect, SelectOption, ReactiveFormsModule],
   template: `
     <app-select id="role" [formControl]="ctrl" (change)="changes.push($event)">
       <option value="">اختر الدور</option>

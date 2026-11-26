@@ -1,10 +1,10 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Modal } from '@shared/ui/modal';
 
 /** نافذة صغيرة تطلب نصاً إجبارياً (سبب إعادة المهمة من المراجعة إلى التنفيذ) */
 @Component({
-  selector: 'app-task-note-dialog', standalone: true, imports: [FormsModule, Modal],
+  selector: 'app-task-note-dialog', imports: [FormsModule, Modal],
   template: `
     <app-modal [heading]="heading()" [subheading]="subheading()" [busy]="busy()" (closed)="closed.emit()">
       <div class="modal-body form-stack">
@@ -30,7 +30,6 @@ export class TaskNoteDialog {
   confirm = output<string>();
   closed = output<void>();
   text = '';
-  protected sent = signal(false);
 
   submit() {
     const value = this.text.trim();

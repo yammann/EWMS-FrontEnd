@@ -37,8 +37,6 @@ export class AuthService {
   login(request: LoginRequest) {
     return this.api.post<AuthResponse>('/Auth/login', request).pipe(
       tap(response => {
-        // صلاحيات توثيق الأجهزة تخص المستخدم — تُعاد قراءتها للمستخدم الجديد
-
         const user: AuthUser = {
           email: response.email,
           fullName: response.fullName,

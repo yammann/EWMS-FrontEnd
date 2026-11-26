@@ -1,7 +1,6 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnDestroy, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { fileSize } from '@core/utils/file-size';
 import { canStreamToDisk } from '@core/utils/stream-download';
 import { UtcPipe } from '@shared/pipes/format.pipes';
@@ -10,13 +9,14 @@ import { Alert } from '@shared/ui/alert';
 import { ConfirmService } from '@shared/ui/confirm.service';
 import { errorMessage } from '@shared/ui/error-message';
 import { Icon, IconName } from '@shared/ui/icon';
-import { Modal } from '@shared/ui/modal';
+import { FilePreview } from '@shared/ui/file-preview';
 import { ToastService } from '@shared/ui/toast.service';
 import { latestRequest } from '@shared/ui/track-request';
 import { StudyAttachmentsService } from '../data-access/study-attachments.service';
 import { StudyLookupsService } from '../data-access/study-lookups.service';
 import { StudyAttachment, StudyLookup, StudyOwnerType } from '../data-access/studies.models';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { ActionButton } from '@shared/ui/action-button';
 
 /** الحد الأقصى لعدد المرفقات في السجل الواحد (يفرضه الخادم أيضاً) */
 const MAX_FILES = 100;
@@ -49,8 +49,7 @@ function iconOf(a: StudyAttachment): IconName {
  */
 @Component({
   selector: 'app-study-attachments',
-  standalone: true,
-  imports: [SearchSelect, SelectOption, DatePipe, UtcPipe, ActionIcon, Alert, Icon, Modal],
+  imports: [ActionButton, SearchSelect, SelectOption, DatePipe, UtcPipe, ActionIcon, Alert, Icon, FilePreview],
   template: `
     <section class="panel">
       <div class="panel-heading"><div>
@@ -128,12 +127,10 @@ function iconOf(a: StudyAttachment): IconName {
                       <small class="pct">{{ downloading()[a.id] === null ? '…' : downloading()[a.id] + '%' }}</small>
                       <button type="button" class="btn btn-ghost btn-sm" (click)="cancelDownload(a.id)">إلغاء</button>
                     } @else {
-                      @if (a.previewable) { <button type="button" class="btn btn-ghost btn-sm" (click)="preview(a)">معاينة</button> }
+                      @if (a.previewable) { <button type="button" class="btn btn-ghost btn-sm" (click)="viewing.set(a)">معاينة</button> }
                       <button type="button" class="btn btn-ghost btn-sm" (click)="download(a)">تنزيل</button>
                       @if (a.canDelete && canWrite()) {
-                        <button type="button" class="btn btn-ghost btn-sm del" (click)="remove(a)" [disabled]="removing().has(a.id)" [attr.aria-busy]="removing().has(a.id)" [attr.aria-label]="'حذف ' + a.fileName">
-                          <app-action-icon kind="delete" [size]="15" [busy]="removing().has(a.id)" />
-                        </button>
+                        <button type="button" class="btn btn-ghost btn-sm del" appAction="delete" [iconSize]="15" [busy]="removing().has(a.id)" [attr.aria-label]="'حذف ' + a.fileName" (click)="remove(a)"></button>
                       }
                     }
                   </div>
@@ -146,20 +143,7 @@ function iconOf(a: StudyAttachment): IconName {
       }
     </section>
 
-    @if (viewing(); as v) {
-      <app-modal [heading]="v.fileName" size="lg" (closed)="closePreview()">
-        <div class="modal-body viewer">
-          @if (previewError()) { <p class="alert alert-error" role="alert">{{ previewError() }}</p> }
-          @else if (!safeUrl()) { <p class="muted" role="status">جارٍ التحميل…</p> }
-          @else if (v.contentType === 'application/pdf') { <iframe [src]="safeUrl()" title="معاينة الملف"></iframe> }
-          @else { <img [src]="safeUrl()" [alt]="v.fileName" /> }
-        </div>
-        <footer class="modal-actions">
-          <button type="button" class="ghost" (click)="closePreview()">إغلاق</button>
-          <button type="button" (click)="download(v)">تنزيل</button>
-        </footer>
-      </app-modal>
-    }
+    <app-file-preview [file]="viewing()" [load]="previewBlob" [save]="downloadViewing" (closed)="viewing.set(null)" />
   `,
   styles: [`
     .count { font-weight: 400; color: var(--ink-500); }
@@ -185,9 +169,6 @@ function iconOf(a: StudyAttachment): IconName {
     .cell-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap; }
     .del { color: var(--danger-700); }
     .when { display: block; color: var(--ink-500); font-size: 12px; }
-    .viewer { display: grid; place-items: center; min-height: 320px; }
-    .viewer iframe { width: 100%; height: 70vh; border: 0; border-radius: var(--radius-md); background: var(--surface); }
-    .viewer img { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); }
     @media (max-width: 640px) { .queue li { grid-template-columns: minmax(0, 1fr) auto; } .queue .bar { grid-column: 1 / -1; order: 3; } }
   `]
 })
@@ -196,7 +177,6 @@ export class StudyAttachments implements OnDestroy {
   private lookups = inject(StudyLookupsService);
   private confirm = inject(ConfirmService);
   private toast = inject(ToastService);
-  private sanitizer = inject(DomSanitizer);
   private latest = latestRequest();
 
   ownerType = input.required<StudyOwnerType>();
@@ -230,15 +210,16 @@ export class StudyAttachments implements OnDestroy {
   /** تنزيلات جارية: معرّف المرفق → نسبة التقدّم (null = حجم غير معروف) */
   downloading = signal<Record<number, number | null>>({});
   removing = signal<ReadonlySet<number>>(new Set());
+  /** المرفق المعروض في نافذة المعاينة (`app-file-preview`) */
   viewing = signal<StudyAttachment | null>(null);
-  safeUrl = signal<SafeResourceUrl | null>(null);
-  previewError = signal('');
+  previewBlob = (id: number) => this.service.previewBlob(id);
+  /** «تنزيل» من نافذة المعاينة: نفس التنزيل تدفقاً إلى القرص مع التقدّم */
+  downloadViewing = () => { const v = this.viewing(); if (v) void this.download(v); };
 
   private seq = 0;
   private running = false;
   private cancels = new Map<number, () => void>();
   private downloads = new Map<number, AbortController>();
-  private previewUrl: string | null = null;
   private destroyed = false;
 
   constructor() {
@@ -350,28 +331,7 @@ export class StudyAttachments implements OnDestroy {
     this.queue.update(q => q.filter(i => i.key !== item.key));
   }
 
-  // ─────────── المعاينة والتنزيل ───────────
-  preview(a: StudyAttachment) {
-    this.releasePreview();
-    this.previewError.set('');
-    this.viewing.set(a);
-    this.service.previewBlob(a.id).subscribe({
-      next: blob => {
-        if (this.viewing()?.id !== a.id) return;
-        this.previewUrl = URL.createObjectURL(new Blob([blob], { type: a.contentType }));
-        this.safeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.previewUrl));
-      },
-      error: e => this.previewError.set(errorMessage(e, 'تعذر فتح الملف'))
-    });
-  }
-
-  closePreview() { this.viewing.set(null); this.releasePreview(); }
-
-  private releasePreview() {
-    if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
-    this.previewUrl = null; this.safeUrl.set(null);
-  }
-
+  // ─────────── التنزيل ───────────
   async download(a: StudyAttachment) {
     if (this.downloads.has(a.id)) return;
     const abort = new AbortController();
@@ -412,7 +372,6 @@ export class StudyAttachments implements OnDestroy {
 
   ngOnDestroy() {
     this.destroyed = true;
-    this.releasePreview();
     this.downloads.forEach(c => c.abort());
     this.cancels.forEach(cancel => cancel());
   }

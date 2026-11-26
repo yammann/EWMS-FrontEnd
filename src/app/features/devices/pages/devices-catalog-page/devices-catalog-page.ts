@@ -16,7 +16,7 @@ import { DEVICE_CATEGORIES, Device } from '../../data-access/device.models';
 
 /** أنواع الأجهزة (قابلة للتكرار) — كل تركيب في موقع له IP ومعلومات خاصة به من صفحة التركيبات. النمط الموحّد (CrudPage). */
 @Component({
-  selector: 'app-devices-catalog-page', standalone: true,
+  selector: 'app-devices-catalog-page',
   imports: [FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, Modal, DeviceHistory, Pager, RowActions],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss'],
   templateUrl: './devices-catalog-page.html',

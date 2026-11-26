@@ -39,7 +39,6 @@ const deadlineAfterStart = (g: AbstractControl): ValidationErrors | null => {
  */
 @Component({
   selector: 'app-study-start-order-form-dialog',
-  standalone: true,
   imports: [SearchSelect, SelectOption, ReactiveFormsModule, Modal, Alert, FormActions, Icon],
   styleUrls: ['../../../shared/styles/data-tools.scss', './study-form.scss'],
   templateUrl: './start-order-form-dialog.html'

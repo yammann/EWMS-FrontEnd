@@ -25,10 +25,9 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
 /** الأقسام — النمط الموحّد لصفحات الإدارة (CrudPage) */
 @Component({
   selector: 'app-departments-page',
-  standalone: true,
   imports: [SearchSelect, SelectOption, Icon, Alert, EntityForm, RowActions, StatTile, AdminHeader, CommonModule, ReactiveFormsModule, Modal, Pager, ListSearch],
   templateUrl: './departments-page.html',
-  styleUrl: './departments-page.scss'
+  styleUrls: ['../../../../shared/styles/entity-cell.scss', './departments-page.scss']
 })
 export class DepartmentsPage {
   private departmentService = inject(DepartmentService);

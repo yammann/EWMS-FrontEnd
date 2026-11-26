@@ -13,7 +13,7 @@ const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان',
 
 /** أعمدة أفقية لعدد الطلبات — بلون الحالة إن وُجد، وإلا بلون الهوية */
 @Component({
-  selector: 'app-maint-bars', standalone: true,
+  selector: 'app-maint-bars',
   template: `
     @if (items().length) {
       <ul class="bars" role="list">
@@ -43,7 +43,7 @@ export class MaintBars {
  * الطلبات حسب الحالة والفني ونوع العطل والجهاز والشركة، حركة آخر 6 أشهر، ومهام الصيانة حسب الموظف.
  */
 @Component({
-  selector: 'app-maintenance-stats-page', standalone: true, imports: [PageHeader, EmptyState, Alert, StatTile, MaintBars],
+  selector: 'app-maintenance-stats-page', imports: [PageHeader, EmptyState, Alert, StatTile, MaintBars],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss'],
   templateUrl: './stats-page.html',
   styles: [`

@@ -21,6 +21,7 @@ import { TaskFormDialog, TaskFormMode } from '../../components/task-form-dialog'
 import { ToastService } from '@shared/ui/toast.service';
 import { Icon } from '@shared/ui/icon';
 import { SearchSelect, SelectOption } from '@shared/ui/search-select';
+import { ActionButton } from '@shared/ui/action-button';
 
 interface Column { status: TaskStatus; label: string; hint: string; }
 
@@ -30,8 +31,8 @@ interface Column { status: TaskStatus; label: string; hint: string; }
  * «تم التنفيذ» تحتاج تأكيداً، وإعادة مهمة من المراجعة إلى التنفيذ بيد المُسنِد تحتاج سبباً.
  */
 @Component({
-  selector: 'app-task-board', standalone: true,
-  imports: [SearchSelect, SelectOption, Icon, CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog, TaskNoteDialog, TaskCalendar, RouterLink],
+  selector: 'app-task-board',
+  imports: [ActionButton, SearchSelect, SelectOption, Icon, CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragPlaceholder, StatTile, TaskDetailDrawer, TaskFormDialog, TaskNoteDialog, TaskCalendar, RouterLink],
   templateUrl: './task-board-page.html',
   styleUrl: './task-board-page.scss'
 })

@@ -6,7 +6,7 @@ import { ActionIcon } from './action-icon';
  * أزرار إضافية خاصة بالصفحة (مثل «السجل» أو «نسخ») تُمرَّر كمحتوى وتظهر قبلهما.
  */
 @Component({
-  selector: 'app-row-actions', standalone: true, imports: [ActionIcon],
+  selector: 'app-row-actions', imports: [ActionIcon],
   template: `
     <div class="row-actions">
       <ng-content />

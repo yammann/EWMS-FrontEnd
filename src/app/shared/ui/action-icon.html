@@ -40,6 +40,24 @@
         <use class="lock-base" [attr.href]="sprite + 'lock'" />
         <g class="shackle"><use class="lock-top" [attr.href]="sprite + 'lock'" /></g>
       }
+      @case ('download') {
+        <path class="arrow-down" d="M12 4v11m-5-5 5 5 5-5" />
+        <path class="tray" d="M4 15v3.5A2 2 0 0 0 6 20.5h12a2 2 0 0 0 2-2V15" />
+      }
+      @case ('search') {
+        <g class="lens"><use [attr.href]="sprite + 'search'" /></g>
+      }
+      @case ('login') {
+        <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" />
+        <path class="enter" d="M3 12h11m-4-4 4 4-4 4" />
+      }
+      @case ('refresh') {
+        <g class="turn"><use [attr.href]="sprite + 'refresh'" /></g>
+      }
+      @case ('cancel') {
+        <circle cx="12" cy="12" r="9" />
+        <g class="cross"><path d="m9 9 6 6m0-6-6 6" /></g>
+      }
     }
   }
 </svg>

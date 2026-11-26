@@ -15,7 +15,6 @@ const minuteDigits = new Intl.NumberFormat(LOCALE, { minimumIntegerDigits: 2, us
  */
 @Component({
   selector: 'app-sidebar-clock',
-  standalone: true,
   templateUrl: './sidebar-clock.html',
   styleUrl: './sidebar-clock.scss',
   host: { '[class.rail]': 'rail()', '[class.new-minute]': 'seconds() === 0', '[style.--sec]': 'secFraction()' }

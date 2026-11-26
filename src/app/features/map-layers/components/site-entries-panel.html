@@ -43,9 +43,10 @@
                 @if (e.updatedAt) { · عدّله {{ e.updatedByName || '—' }} في {{ e.updatedAt.slice(0, 10) }} }
               </span>
               <span class="actions">
-                @if (e.canEdit) { <button class="btn btn-ghost btn-sm" type="button" (click)="dialog.set({ entry: e })">تعديل</button> }
+                @if (e.canEdit) { <button class="btn btn-ghost btn-sm" type="button" appAction="edit" [iconSize]="16" (click)="dialog.set({ entry: e })">تعديل</button> }
                 @if (e.canDelete) {
-                  <button class="btn btn-ghost btn-sm danger" type="button" [disabled]="deletingId() === e.id" (click)="remove(e)">{{ deletingId() === e.id ? 'جارٍ الحذف…' : 'حذف' }}</button>
+                  <button class="btn btn-ghost btn-sm danger" type="button" appAction="delete" [iconSize]="16" [busy]="deletingId() === e.id" busyLabel="جارٍ الحذف…"
+                          [disabled]="deletingId() !== null" (click)="remove(e)">حذف</button>
                 }
               </span>
             </footer>

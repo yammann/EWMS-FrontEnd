@@ -27,7 +27,6 @@ const docStatusName = (s: number | null) => DOCUMENT_STATUSES.find(x => x.value 
  */
 @Component({
   selector: 'app-study-chain',
-  standalone: true,
   imports: [RouterLink, Icon],
   template: `
     <ol class="chain" aria-label="سلسلة الدراسة">

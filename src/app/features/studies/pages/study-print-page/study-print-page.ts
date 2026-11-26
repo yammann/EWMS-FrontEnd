@@ -24,7 +24,7 @@ const text = (value: string | number | null | undefined) => value == null ? '' :
  * وقت القرار (مربع فارغ لمن لم يقرّر). صفحة خارج الإطار العام؛ الخادم يفحص PrintStudyDocuments وعرض المستند وحدّ الفرع.
  */
 @Component({
-  selector: 'app-study-print', standalone: true, imports: [Icon, BackButton, DatePipe, Logo],
+  selector: 'app-study-print', imports: [Icon, BackButton, DatePipe, Logo],
   templateUrl: './study-print-page.html',
   styleUrl: './study-print-page.scss'
 })

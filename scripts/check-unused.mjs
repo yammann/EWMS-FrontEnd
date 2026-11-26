@@ -3,8 +3,10 @@
 // يُذكر تحذيراً ولا يفشل الفحص. ملفات index.ts (الواجهات العامة للميزات) خارج الفحص.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = new URL('../src', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
+// fileURLToPath لا pathname: الأخير يبقي الحروف مرمّزة (%D9…) فيفشل في مسار عربي أو فيه مسافة
+const root = fileURLToPath(new URL('../src', import.meta.url));
 const walk = dir => readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
 const files = walk(root).filter(f => /\.(ts|html|scss|json)$/.test(f)).map(f => [f, readFileSync(f, 'utf8')]);
 const isSpec = f => f.endsWith('.spec.ts');

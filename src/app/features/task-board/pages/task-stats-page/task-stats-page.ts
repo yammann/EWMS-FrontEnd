@@ -16,7 +16,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
  * وجدول لكل جهة (قسم/مكتب/موظف) وحركة الأشهر. الفترة تُحسب على تاريخ إنشاء المهمة.
  */
 @Component({
-  selector: 'app-task-stats-page', standalone: true, imports: [PageHeader, EmptyState, Alert, FormsModule, StatTile],
+  selector: 'app-task-stats-page', imports: [PageHeader, EmptyState, Alert, FormsModule, StatTile],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss', '../../../../shared/styles/list-tools.scss', './task-stats-page.scss'],
   templateUrl: './task-stats-page.html',
   

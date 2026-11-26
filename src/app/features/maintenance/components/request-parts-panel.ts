@@ -10,13 +10,14 @@ import { Modal } from '@shared/ui/modal';
 import { UtcPipe, MoneyPipe, QtyPipe } from '@shared/pipes/format.pipes';
 import { Alert } from '@shared/ui/alert';
 import { trackRequest } from '@shared/ui/track-request';
+import { ActionButton } from '@shared/ui/action-button';
 
 /**
  * قطع الغيار المصروفة على طلب الصيانة: الصرف من مخزون قسم الطلب (المتوافقة مع الجهاز أولاً)، والإرجاع للمخزون،
  * وتكلفة الجهاز على مدى عمره مع تنبيه حد الاستبدال. بعد إغلاق الطلب تُقفل القطع.
  */
 @Component({
-  selector: 'app-request-parts-panel', standalone: true, imports: [Alert, QtyPipe, MoneyPipe, UtcPipe, DatePipe, Modal],
+  selector: 'app-request-parts-panel', imports: [ActionButton, Alert, QtyPipe, MoneyPipe, UtcPipe, DatePipe, Modal],
   styleUrls: ['../../../shared/styles/page-base.scss', '../../../shared/styles/list-tools.scss'],
   templateUrl: './request-parts-panel.html',
   styles: [`

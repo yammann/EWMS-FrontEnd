@@ -27,7 +27,7 @@ import { SearchSelect, SelectOption } from '@shared/ui/search-select';
  * تلقائياً من النقطة. الصلاحيات ViewSites/CreateSite/EditSite/DeleteSite؛ وعمود التركيبات لمن يرى الأجهزة (ضمن حدّه).
  */
 @Component({
-  selector: 'app-sites-page', standalone: true, imports: [SearchSelect, SelectOption, Icon, FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager, RowActions],
+  selector: 'app-sites-page', imports: [SearchSelect, SelectOption, Icon, FormActions, PageHeader, EmptyState, Alert, ReactiveFormsModule, RouterLink, CoordinatePicker, Modal, DeviceHistory, Pager, RowActions],
   styleUrls: ['../../../../shared/styles/page-base.scss', '../../../../shared/styles/data-tools.scss'],
   templateUrl: './sites-page.html',
   styles: [`td small { display: block; color: var(--ink-500); }

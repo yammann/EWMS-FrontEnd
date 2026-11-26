@@ -28,7 +28,7 @@ interface Upload { key: number; fieldId: number; name: string; percent: number; 
  * حقل الملفات: كل ملف يُرفع وحده (بشريط تقدّم) ويبقى معلّقاً حتى «حفظ»؛ الإلغاء يحذف ما رُفع في هذه النافذة.
  */
 @Component({
-  selector: 'app-entry-form-dialog', standalone: true,
+  selector: 'app-entry-form-dialog',
   imports: [SearchSelect, SelectOption, Icon, Modal, FormActions, Alert],
   templateUrl: './entry-form-dialog.html',
   styleUrls: ['../../../shared/styles/data-tools.scss', './entry-form-dialog.scss']
